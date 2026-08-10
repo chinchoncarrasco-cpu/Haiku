@@ -170,14 +170,61 @@
 
                     <tbody>
 
-                        <tr>
-                            <td><strong>CAB 1</strong><br><small>2 personas</small></td>
-                            <td><span class="estado ingreso">SALE / INGRESA</span></td>
-                            <td>Daniela</td>
-                            <td>16:30</td>
-                            <td>🛁 19:00</td>
-                            <td><input type="checkbox"> Lista</td>
-                        </tr>
+                       <tr data-cabana="1">
+
+    <td>
+        <strong>CAB 1</strong>
+        <br>
+        <small>2 personas</small>
+    </td>
+
+    <td>
+        <select class="campo-cabana" data-campo="estado">
+            <option value="ingreso">SALE / INGRESA</option>
+            <option value="libre">SALE / LIBRE</option>
+            <option value="continua">CONTINÚA</option>
+            <option value="bloqueada">BLOQUEADA</option>
+        </select>
+    </td>
+
+    <td>
+        <input
+            type="text"
+            class="campo-cabana"
+            data-campo="aseo"
+            placeholder="Encargado"
+        >
+    </td>
+
+    <td>
+        <input
+            type="time"
+            class="campo-cabana"
+            data-campo="ingreso"
+        >
+    </td>
+
+    <td>
+        <input
+            type="text"
+            class="campo-cabana"
+            data-campo="servicio"
+            placeholder="Ej: Tinaja 19:00"
+        >
+    </td>
+
+    <td>
+        <label class="check-final">
+            <input
+                type="checkbox"
+                class="campo-cabana"
+                data-campo="lista"
+            >
+            Lista
+        </label>
+    </td>
+
+</tr>
 
                         <tr>
                             <td><strong>CAB 2</strong><br><small>2 personas</small></td>
@@ -358,10 +405,10 @@
 
 
     <!-- JAVASCRIPT -->
-    <script src="js/cabanas.js"></script>
     <script src="js/calendario.js"></script>
     <script src="js/checklist.js"></script>
     <script src="js/app.js"></script>
+    <script src="js/cabanas.js"></script>
 
 </body>
 

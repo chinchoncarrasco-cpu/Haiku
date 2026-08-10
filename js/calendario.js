@@ -184,6 +184,7 @@ function seleccionarDia(año, mes, dia, fechaISO) {
     fechaSeleccionada = fechaISO;
 
     cargarDatosDia(fechaSeleccionada);
+    cargarCabanasDia(fechaSeleccionada);
 
     const fechaElegida = new Date(
         año,

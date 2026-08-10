@@ -674,6 +674,55 @@ input[type="checkbox"] {
     color: white;
 }
 
+/* ========================================
+   CAMPOS EDITABLES - CABAÑAS
+======================================== */
+
+.campo-cabana {
+    width: 100%;
+
+    padding: 8px 9px;
+
+    border: 1px solid var(--borde);
+    border-radius: 7px;
+
+    background: white;
+
+    color: var(--texto);
+
+    font-family: inherit;
+    font-size: 12px;
+
+    outline: none;
+}
+
+.campo-cabana:focus {
+    border-color: var(--verde);
+}
+
+select.campo-cabana {
+    cursor: pointer;
+}
+
+input[type="time"].campo-cabana {
+    min-width: 105px;
+}
+
+.check-final {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+.check-final .campo-cabana {
+    width: 17px;
+}
+
 @media (max-width: 1100px) {
 
     .resumen {
