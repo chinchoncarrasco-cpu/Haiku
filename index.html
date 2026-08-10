@@ -2457,6 +2457,143 @@
 
     </section>
 
+    <!-- =========================
+     REVISIÓN INDIVIDUAL
+========================== -->
+
+<section id="revision-individual" class="revision-individual">
+
+    <button
+        type="button"
+        id="volver-cabanas"
+        class="boton-volver-revision"
+    >
+        ← Volver a Cabañas
+    </button>
+
+
+    <!-- CABECERA DE LA REVISIÓN -->
+
+    <div class="revision-cabecera">
+
+        <div>
+            <p class="subtitulo">REVISIÓN DE CABAÑA</p>
+
+            <h2 id="revision-titulo">
+                CAB 1
+            </h2>
+
+            <p
+                id="revision-fecha"
+                class="revision-fecha"
+            ></p>
+
+            <div
+                id="revision-info-operativa"
+                class="revision-info-operativa"
+            >
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- CHECKLIST -->
+
+    <section class="panel revision-panel">
+
+        <div class="panel-titulo">
+
+            <div>
+                <h3>Checklist de revisión</h3>
+
+                <p>
+                    Revisión de inventario, equipamiento y estado de la cabaña.
+                </p>
+            </div>
+
+        </div>
+
+        <div id="revision-checklist" class="revision-checklist">
+
+            <!--
+                Aquí colocaremos después
+                el checklist REAL de cada cabaña.
+            -->
+
+        </div>
+
+    </section>
+
+
+    <!-- DETALLES -->
+
+    <section class="panel revision-detalles-panel">
+
+        <div class="panel-titulo">
+
+            <div>
+                <h3>Detalles</h3>
+
+                <p>
+                    Observaciones encontradas durante la revisión.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="revision-detalles-contenido">
+
+            <div class="revision-textarea-contenedor">
+
+                <textarea
+                    id="revision-detalles"
+                    placeholder="Ej: Cocina:&#10;- Repasar tetera por fuera&#10;- Rellenar azucarero&#10;&#10;Terraza:&#10;- Regar jardineras"
+                ></textarea>
+
+                <button
+                    type="button"
+                    id="copiar-detalles"
+                    class="boton-copiar-detalles"
+                    title="Copiar detalles"
+                >
+                    📋
+                </button>
+
+            </div>
+
+
+            <div class="revision-estado">
+
+                <label for="revision-estado">
+                    Estado de revisión
+                </label>
+
+                <select id="revision-estado">
+
+                    <option value="pendiente">
+                        Pendiente
+                    </option>
+
+                    <option value="con-detalles">
+                        Con detalles
+                    </option>
+
+                    <option value="lista">
+                        Lista
+                    </option>
+
+                </select>
+
+            </div>
+
+        </div>
+
+    </section>
+
+</section>
+
 </section>
 
 </main>

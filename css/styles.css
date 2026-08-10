@@ -974,6 +974,159 @@ input[type="time"].campo-cabana {
 }
 
 /* ========================================
+   REVISIÓN INDIVIDUAL DE CABAÑA
+======================================== */
+
+.revision-individual {
+    display: none;
+}
+
+.revision-individual.activa {
+    display: block;
+}
+
+
+/* Botón volver */
+
+.boton-volver-revision {
+    border: none;
+    background: transparent;
+
+    padding: 0;
+    margin-bottom: 20px;
+
+    font-family: inherit;
+    font-size: 12px;
+
+    color: #56615c;
+
+    cursor: pointer;
+}
+
+.boton-volver-revision:hover {
+    color: #176b43;
+}
+
+
+/* Cabecera */
+
+.revision-cabecera {
+    margin-bottom: 24px;
+}
+
+.revision-info-operativa {
+    margin-top: 8px;
+
+    font-size: 12px;
+    color: #66716c;
+}
+
+
+/* Panel checklist */
+
+.revision-panel {
+    margin-bottom: 24px;
+}
+
+.revision-checklist {
+    padding: 24px;
+}
+
+
+/* Detalles */
+
+.revision-detalles-panel {
+    margin-bottom: 30px;
+}
+
+.revision-detalles-contenido {
+    padding: 24px;
+}
+
+.revision-textarea-contenedor {
+    position: relative;
+}
+
+#revision-detalles {
+    width: 100%;
+    min-height: 220px;
+
+    resize: vertical;
+
+    box-sizing: border-box;
+
+    padding: 18px 55px 18px 18px;
+
+    border: 1px solid #d9dfdc;
+    border-radius: 10px;
+
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.6;
+
+    outline: none;
+}
+
+#revision-detalles:focus {
+    border-color: #8ca99a;
+}
+
+
+/* Botón copiar */
+
+.boton-copiar-detalles {
+    position: absolute;
+
+    top: 12px;
+    right: 12px;
+
+    width: 34px;
+    height: 34px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border: none;
+    border-radius: 8px;
+
+    background: #f0f3f1;
+
+    cursor: pointer;
+}
+
+.boton-copiar-detalles:hover {
+    background: #e4eae7;
+}
+
+
+/* Estado */
+
+.revision-estado {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+
+    margin-top: 18px;
+}
+
+.revision-estado label {
+    font-size: 12px;
+    font-weight: 600;
+}
+
+.revision-estado select {
+    padding: 9px 12px;
+
+    border: 1px solid #d9dfdc;
+    border-radius: 8px;
+
+    background: white;
+
+    font-family: inherit;
+}
+
+/* ========================================
    CELULAR
 ======================================== */
 
@@ -1053,6 +1206,82 @@ input[type="time"].campo-cabana {
 
 }
 
+/* ========================================
+   CHECKLIST DE REVISIÓN - COLUMNAS
+======================================== */
+
+.revision-checklist {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 32px;
+    align-items: start;
+}
+
+
+/* Cada área */
+
+.checklist-area {
+    min-width: 0;
+}
+
+
+/* Título: Cocina, Baño, Living, Terraza */
+
+.checklist-area h4 {
+    margin: 0 0 14px;
+    font-size: 14px;
+    font-weight: 600;
+}
+
+
+/* Subáreas de Cocina */
+
+.checklist-area h5 {
+    margin: 14px 0 8px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+
+/* Lista vertical */
+
+.checklist-items {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+
+/* Cada checkbox + texto */
+
+.checklist-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    line-height: 1.25;
+    cursor: pointer;
+}
+
+
+/* Checkbox */
+
+.checklist-item input[type="checkbox"] {
+    margin: 0;
+    flex-shrink: 0;
+    width: 15px;
+    height: 15px;
+}
+
+
+/* ========================================
+   ESPACIADO INTERNO DEL CHECKLIST
+======================================== */
+
+.revision-panel .revision-checklist {
+    padding: 26px;
+}
+
 
 /* ========================================
    CELULAR PEQUEÑO
@@ -1075,4 +1304,15 @@ input[type="time"].campo-cabana {
 
 .seccion-app.activa {
     display: block;
+}
+
+/* ========================================
+   FECHA DE REVISIÓN DE CABAÑA
+======================================== */
+
+.revision-fecha {
+    margin: 4px 0 6px;
+    font-size: 12px;
+    color: #6f7772;
+    text-transform: capitalize;
 }

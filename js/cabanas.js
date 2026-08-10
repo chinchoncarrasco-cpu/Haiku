@@ -294,3 +294,200 @@ function actualizarTarjetasRevision(fecha) {
 
     });
 }
+
+// ========================================
+// ABRIR REVISIÓN INDIVIDUAL
+// ========================================
+
+const listaRevisionCabanas =
+    document.querySelector(".lista-revision-cabanas");
+
+const revisionIndividual =
+    document.getElementById("revision-individual");
+
+const botonVolverCabanas =
+    document.getElementById("volver-cabanas");
+
+const revisionTitulo =
+    document.getElementById("revision-titulo");
+
+const revisionFecha =
+    document.getElementById("revision-fecha");
+
+const revisionInfoOperativa =
+    document.getElementById("revision-info-operativa");
+
+
+document
+    .querySelectorAll(".cabana-revision")
+    .forEach(boton => {
+
+        boton.addEventListener("click", () => {
+
+            const numeroCabana =
+                boton.dataset.revisionCabana;
+
+            abrirRevisionCabana(numeroCabana);
+
+        });
+
+    });
+
+
+function abrirRevisionCabana(numeroCabana) {
+
+    if (!fechaSeleccionada) {
+        return;
+    }
+
+    const datos =
+        obtenerDatosDia(fechaSeleccionada);
+
+    const datosCabana =
+        datos.cabanas[numeroCabana] || {};
+
+
+    // Título
+
+    revisionTitulo.textContent =
+        `CAB ${numeroCabana}`;
+
+    // ========================================
+    // FECHA DE LA REVISIÓN
+    // ========================================
+
+    const fechaRevision =
+        new Date(`${fechaSeleccionada}T12:00:00`);
+
+    revisionFecha.textContent =
+        fechaRevision.toLocaleDateString(
+        "es-CL",
+        {
+            weekday: "long",
+            day: "numeric",
+            month: "long",
+            year: "numeric"
+        }
+    );
+
+
+    // Ocupación
+
+    const adultos =
+        Number(datosCabana.adultos) || 0;
+
+    const ninos =
+        Number(datosCabana.ninos) || 0;
+
+    const mascotas =
+        Number(datosCabana.mascotas) || 0;
+
+
+    const ocupacion = [];
+
+    if (adultos > 0) {
+        ocupacion.push(`${adultos} ADL`);
+    }
+
+    if (ninos > 0) {
+        ocupacion.push(`${ninos} KID`);
+    }
+
+    if (mascotas > 0) {
+        ocupacion.push(`${mascotas} PET`);
+    }
+
+
+    // Estado
+
+    const nombresEstado = {
+        "libre-libre": "LIBRE / LIBRE",
+        "libre-ingresa": "LIBRE / INGRESA",
+        "sale-libre": "SALE / LIBRE",
+        "sale-ingresa": "SALE / INGRESA",
+        "continua": "CONTINÚA",
+        "bloqueada": "BLOQUEADA"
+    };
+
+
+    const info = [];
+
+    if (ocupacion.length > 0) {
+        info.push(ocupacion.join(" · "));
+    }
+
+    if (datosCabana.estado) {
+
+        info.push(
+            nombresEstado[datosCabana.estado] ||
+            datosCabana.estado
+        );
+
+    }
+
+    if (datosCabana.checkout) {
+        info.push(`OUT ${datosCabana.checkout}`);
+    }
+
+    if (datosCabana.aseo) {
+        info.push(`🧹 ${datosCabana.aseo}`);
+    }
+
+
+    revisionInfoOperativa.textContent =
+        info.join("   ·   ");
+
+    // Mostrar checklist correspondiente
+
+    mostrarChecklistCabana(numeroCabana);    
+
+    // Ocultar listado
+
+    listaRevisionCabanas.style.display =
+        "none";
+
+
+    // Mostrar revisión
+
+    revisionIndividual.classList.add(
+        "activa"
+    );
+
+}
+
+// ========================================
+// VOLVER AL LISTADO DE CABAÑAS
+// ========================================
+
+function volverListadoCabanas() {
+
+    revisionIndividual.classList.remove("activa");
+
+    listaRevisionCabanas.style.display = "";
+
+}
+
+
+botonVolverCabanas.addEventListener("click", () => {
+
+    volverListadoCabanas();
+
+});
+
+// ========================================
+// VOLVER DESDE EL MENÚ LATERAL
+// ========================================
+
+const botonMenuCabanas =
+    document.querySelector('.menu-item[data-seccion="cabanas"]');
+
+
+if (botonMenuCabanas) {
+
+    botonMenuCabanas.addEventListener("click", () => {
+
+        volverListadoCabanas();
+
+    });
+
+}
