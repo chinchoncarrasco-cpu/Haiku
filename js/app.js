@@ -91,6 +91,8 @@ function cargarDatosDia(fecha) {
 
     notasDia.value = datos.notas || "";
 
+    cargarCabanasDia(fecha);
+
 }
 
 

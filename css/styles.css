@@ -723,6 +723,66 @@ input[type="time"].campo-cabana {
     width: 17px;
 }
 
+/* ========================================
+   INFORMACIÓN DE HUÉSPEDES - CABAÑA
+======================================== */
+
+.info-cabana {
+    min-width: 190px;
+}
+
+.info-cabana > strong {
+    display: block;
+    margin-bottom: 7px;
+}
+
+.ocupacion-cabana {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 7px;
+}
+
+.ocupacion-cabana label {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    font-size: 10px;
+    color: #69716d;
+}
+
+.ocupacion-cabana input {
+    width: 35px;
+    padding: 4px;
+    border: 1px solid #dfe4e1;
+    border-radius: 5px;
+    font: inherit;
+    font-size: 11px;
+    background: #fff;
+}
+
+.checkout-cabana {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 10px;
+}
+
+.checkout-cabana span {
+    font-weight: 600;
+    color: #69716d;
+}
+
+.checkout-cabana input {
+    width: 90px;
+    padding: 4px 6px;
+    border: 1px solid #dfe4e1;
+    border-radius: 5px;
+    background: #fff;
+    font: inherit;
+    font-size: 11px;
+}
+
 @media (max-width: 1100px) {
 
     .resumen {

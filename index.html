@@ -172,19 +172,88 @@
 
                        <tr data-cabana="1">
 
-    <td>
-        <strong>CAB 1</strong>
-        <br>
-        <small>2 personas</small>
-    </td>
+    <td class="info-cabana">
+
+    <strong>CAB 1</strong>
+
+    <div class="ocupacion-cabana">
+
+        <label>
+            <input
+                type="number"
+                id="cab1-adultos"
+                class="campo-cabana"
+                data-campo="adultos"
+                min="0"
+            >
+            ADL
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab1-ninos"
+                class="campo-cabana"
+                data-campo="ninos"
+                min="0"
+            >
+            KID
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab1-mascotas"
+                class="campo-cabana"
+                data-campo="mascotas"
+                min="0"
+            >
+            PET
+        </label>
+
+    </div>
+
+    <label class="checkout-cabana">
+    OUT
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="checkout"
+    >
+        </label>
+
+</td>
 
     <td>
         <select class="campo-cabana" data-campo="estado">
-            <option value="ingreso">SALE / INGRESA</option>
-            <option value="libre">SALE / LIBRE</option>
-            <option value="continua">CONTINÚA</option>
-            <option value="bloqueada">BLOQUEADA</option>
-        </select>
+
+    <option value="">Seleccionar...</option>
+
+    <option value="libre-libre">
+        LIBRE / LIBRE
+    </option>
+
+    <option value="libre-ingresa">
+        LIBRE / INGRESA
+    </option>
+
+    <option value="sale-libre">
+        SALE / LIBRE
+    </option>
+
+    <option value="sale-ingresa">
+        SALE / INGRESA
+    </option>
+
+    <option value="continua">
+        CONTINÚA
+    </option>
+
+    <option value="bloqueada">
+        BLOQUEADA
+    </option>
+
+</select>
     </td>
 
     <td>
