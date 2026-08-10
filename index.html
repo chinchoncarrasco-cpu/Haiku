@@ -256,14 +256,36 @@
 </select>
     </td>
 
-    <td>
+    <td class="celda-aseo">
+
+    <div class="aseo-principal">
+
         <input
             type="text"
-            class="campo-cabana"
+            class="campo-cabana campo-encargado-aseo"
             data-campo="aseo"
-            placeholder="Encargado"
+            placeholder="Ej: Full - Rodolfo"
         >
-    </td>
+
+    </div>
+
+    <div class="aseo-horarios">
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoIn"
+    >
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoOut"
+    >
+
+</div>
+
+</td>
 
     <td>
         <input
@@ -282,108 +304,1632 @@
         >
     </td>
 
-    <td>
-        <label class="check-final">
-            <input
-                type="checkbox"
-                class="campo-cabana"
-                data-campo="lista"
-            >
-            Lista
-        </label>
-    </td>
+    <td class="celda-estado-final">
+
+    <div class="estado-final-contenido">
+
+        <input
+            type="checkbox"
+            class="campo-cabana check-final"
+            data-campo="finalizado"
+        >
+
+        <select
+            class="campo-cabana estado-final-select"
+            data-campo="estadoFinal"
+        >
+            <option value="">Pendiente</option>
+            <option value="LISTA">Lista</option>
+            <option value="REVISADA">Revisada</option>
+            <option value="CON DETALLES">Con detalles</option>
+        </select>
+
+    </div>
+
+</td>
 
 </tr>
 
-                        <tr>
-                            <td><strong>CAB 2</strong><br><small>2 personas</small></td>
-                            <td><span class="estado libre">SALE / LIBRE</span></td>
-                            <td>Rodolfo</td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td><input type="checkbox"> Revisada</td>
-                        </tr>
+<tr data-cabana="2">
 
-                        <tr>
-                            <td><strong>CAB 3</strong><br><small>3 personas</small></td>
-                            <td><span class="estado ingreso">SALE / INGRESA</span></td>
-                            <td>Bárbara</td>
-                            <td>15:00</td>
-                            <td>💆 17:00</td>
-                            <td><input type="checkbox"> Lista</td>
-                        </tr>
+    <td class="info-cabana">
 
-                        <tr>
-                            <td><strong>CAB 4</strong><br><small>2 personas</small></td>
-                            <td><span class="estado bloqueada">BLOQUEADA</span></td>
-                            <td>Carmen</td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td><input type="checkbox"> Revisada</td>
-                        </tr>
+    <strong>CAB 2</strong>
 
-                        <tr>
-                            <td><strong>CAB 5</strong><br><small>2 personas</small></td>
-                            <td><span class="estado libre">SALE / LIBRE</span></td>
-                            <td>Rodolfo</td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td><input type="checkbox"> Revisada</td>
-                        </tr>
+    <div class="ocupacion-cabana">
 
-                        <tr>
-                            <td><strong>CAB 6</strong><br><small>2 personas</small></td>
-                            <td><span class="estado continua">CONTINÚA</span></td>
-                            <td>Carmen</td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td><input type="checkbox"> Express</td>
-                        </tr>
+        <label>
+            <input
+                type="number"
+                id="cab2-adultos"
+                class="campo-cabana"
+                data-campo="adultos"
+                min="0"
+            >
+            ADL
+        </label>
 
-                        <tr>
-                            <td><strong>CAB 7</strong><br><small>2 personas</small></td>
-                            <td><span class="estado continua">CONTINÚA</span></td>
-                            <td>Bárbara / Daniela</td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td><input type="checkbox"> Express</td>
-                        </tr>
+        <label>
+            <input
+                type="number"
+                id="cab2-ninos"
+                class="campo-cabana"
+                data-campo="ninos"
+                min="0"
+            >
+            KID
+        </label>
 
-                        <tr>
-                            <td><strong>CAB 8</strong><br><small>2 personas</small></td>
-                            <td><span class="estado libre">SALE / LIBRE</span></td>
-                            <td>Daniela</td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td><input type="checkbox"> Revisada</td>
-                        </tr>
+        <label>
+            <input
+                type="number"
+                id="cab2-mascotas"
+                class="campo-cabana"
+                data-campo="mascotas"
+                min="0"
+            >
+            PET
+        </label>
 
-                        <tr>
-                            <td><strong>CAB 9</strong><br><small>4 personas</small></td>
-                            <td><span class="estado libre">SALE / LIBRE</span></td>
-                            <td>Bárbara</td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td><input type="checkbox"> Revisada</td>
-                        </tr>
+    </div>
 
-                        <tr>
-                            <td><strong>CAB 10</strong><br><small>2 personas</small></td>
-                            <td><span class="estado libre">SALE / LIBRE</span></td>
-                            <td>Rodolfo</td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td><input type="checkbox"> Revisada</td>
-                        </tr>
+    <label class="checkout-cabana">
+    OUT
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="checkout"
+    >
+        </label>
 
-                        <tr>
-                            <td><strong>CAB 11</strong><br><small>4 personas</small></td>
-                            <td><span class="estado libre">SALE / LIBRE</span></td>
-                            <td>Carmen</td>
-                            <td>—</td>
-                            <td>—</td>
-                            <td><input type="checkbox"> Revisada</td>
-                        </tr>
+</td>
+
+    <td>
+        <select class="campo-cabana" data-campo="estado">
+
+    <option value="">Seleccionar...</option>
+
+    <option value="libre-libre">
+        LIBRE / LIBRE
+    </option>
+
+    <option value="libre-ingresa">
+        LIBRE / INGRESA
+    </option>
+
+    <option value="sale-libre">
+        SALE / LIBRE
+    </option>
+
+    <option value="sale-ingresa">
+        SALE / INGRESA
+    </option>
+
+    <option value="continua">
+        CONTINÚA
+    </option>
+
+    <option value="bloqueada">
+        BLOQUEADA
+    </option>
+
+</select>
+    </td>
+
+    <td class="celda-aseo">
+
+    <div class="aseo-principal">
+
+        <input
+            type="text"
+            class="campo-cabana campo-encargado-aseo"
+            data-campo="aseo"
+            placeholder="Ej: Full - Rodolfo"
+        >
+
+    </div>
+
+    <div class="aseo-horarios">
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoIn"
+    >
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoOut"
+    >
+
+</div>
+
+</td>
+
+    <td>
+        <input
+            type="time"
+            class="campo-cabana"
+            data-campo="ingreso"
+        >
+    </td>
+
+    <td>
+        <input
+            type="text"
+            class="campo-cabana"
+            data-campo="servicio"
+            placeholder="Ej: Tinaja 19:00"
+        >
+    </td>
+
+    <td class="celda-estado-final">
+
+    <div class="estado-final-contenido">
+
+        <input
+            type="checkbox"
+            class="campo-cabana check-final"
+            data-campo="finalizado"
+        >
+
+        <select
+            class="campo-cabana estado-final-select"
+            data-campo="estadoFinal"
+        >
+            <option value="">Pendiente</option>
+            <option value="LISTA">Lista</option>
+            <option value="REVISADA">Revisada</option>
+            <option value="CON DETALLES">Con detalles</option>
+        </select>
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr data-cabana="3">
+
+    <td class="info-cabana">
+
+    <strong>CAB 3</strong>
+
+    <div class="ocupacion-cabana">
+
+        <label>
+            <input
+                type="number"
+                id="cab3-adultos"
+                class="campo-cabana"
+                data-campo="adultos"
+                min="0"
+            >
+            ADL
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab3-ninos"
+                class="campo-cabana"
+                data-campo="ninos"
+                min="0"
+            >
+            KID
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab3-mascotas"
+                class="campo-cabana"
+                data-campo="mascotas"
+                min="0"
+            >
+            PET
+        </label>
+
+    </div>
+
+    <label class="checkout-cabana">
+    OUT
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="checkout"
+    >
+        </label>
+
+</td>
+
+    <td>
+        <select class="campo-cabana" data-campo="estado">
+
+    <option value="">Seleccionar...</option>
+
+    <option value="libre-libre">
+        LIBRE / LIBRE
+    </option>
+
+    <option value="libre-ingresa">
+        LIBRE / INGRESA
+    </option>
+
+    <option value="sale-libre">
+        SALE / LIBRE
+    </option>
+
+    <option value="sale-ingresa">
+        SALE / INGRESA
+    </option>
+
+    <option value="continua">
+        CONTINÚA
+    </option>
+
+    <option value="bloqueada">
+        BLOQUEADA
+    </option>
+
+</select>
+    </td>
+
+    <td class="celda-aseo">
+
+    <div class="aseo-principal">
+
+        <input
+            type="text"
+            class="campo-cabana campo-encargado-aseo"
+            data-campo="aseo"
+            placeholder="Ej: Full - Rodolfo"
+        >
+
+    </div>
+
+    <div class="aseo-horarios">
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoIn"
+    >
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoOut"
+    >
+
+</div>
+
+</td>
+
+    <td>
+        <input
+            type="time"
+            class="campo-cabana"
+            data-campo="ingreso"
+        >
+    </td>
+
+    <td>
+        <input
+            type="text"
+            class="campo-cabana"
+            data-campo="servicio"
+            placeholder="Ej: Tinaja 19:00"
+        >
+    </td>
+
+    <td class="celda-estado-final">
+
+    <div class="estado-final-contenido">
+
+        <input
+            type="checkbox"
+            class="campo-cabana check-final"
+            data-campo="finalizado"
+        >
+
+        <select
+            class="campo-cabana estado-final-select"
+            data-campo="estadoFinal"
+        >
+            <option value="">Pendiente</option>
+            <option value="LISTA">Lista</option>
+            <option value="REVISADA">Revisada</option>
+            <option value="CON DETALLES">Con detalles</option>
+        </select>
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr data-cabana="4">
+
+    <td class="info-cabana">
+
+    <strong>CAB 4</strong>
+
+    <div class="ocupacion-cabana">
+
+        <label>
+            <input
+                type="number"
+                id="cab4-adultos"
+                class="campo-cabana"
+                data-campo="adultos"
+                min="0"
+            >
+            ADL
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab4-ninos"
+                class="campo-cabana"
+                data-campo="ninos"
+                min="0"
+            >
+            KID
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab4-mascotas"
+                class="campo-cabana"
+                data-campo="mascotas"
+                min="0"
+            >
+            PET
+        </label>
+
+    </div>
+
+    <label class="checkout-cabana">
+    OUT
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="checkout"
+    >
+        </label>
+
+</td>
+
+    <td>
+        <select class="campo-cabana" data-campo="estado">
+
+    <option value="">Seleccionar...</option>
+
+    <option value="libre-libre">
+        LIBRE / LIBRE
+    </option>
+
+    <option value="libre-ingresa">
+        LIBRE / INGRESA
+    </option>
+
+    <option value="sale-libre">
+        SALE / LIBRE
+    </option>
+
+    <option value="sale-ingresa">
+        SALE / INGRESA
+    </option>
+
+    <option value="continua">
+        CONTINÚA
+    </option>
+
+    <option value="bloqueada">
+        BLOQUEADA
+    </option>
+
+</select>
+    </td>
+
+    <td class="celda-aseo">
+
+    <div class="aseo-principal">
+
+        <input
+            type="text"
+            class="campo-cabana campo-encargado-aseo"
+            data-campo="aseo"
+            placeholder="Ej: Full - Rodolfo"
+        >
+
+    </div>
+
+    <div class="aseo-horarios">
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoIn"
+    >
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoOut"
+    >
+
+</div>
+
+</td>
+
+    <td>
+        <input
+            type="time"
+            class="campo-cabana"
+            data-campo="ingreso"
+        >
+    </td>
+
+    <td>
+        <input
+            type="text"
+            class="campo-cabana"
+            data-campo="servicio"
+            placeholder="Ej: Tinaja 19:00"
+        >
+    </td>
+
+    <td class="celda-estado-final">
+
+    <div class="estado-final-contenido">
+
+        <input
+            type="checkbox"
+            class="campo-cabana check-final"
+            data-campo="finalizado"
+        >
+
+        <select
+            class="campo-cabana estado-final-select"
+            data-campo="estadoFinal"
+        >
+            <option value="">Pendiente</option>
+            <option value="LISTA">Lista</option>
+            <option value="REVISADA">Revisada</option>
+            <option value="CON DETALLES">Con detalles</option>
+        </select>
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr data-cabana="5">
+
+    <td class="info-cabana">
+
+    <strong>CAB 5</strong>
+
+    <div class="ocupacion-cabana">
+
+        <label>
+            <input
+                type="number"
+                id="cab5-adultos"
+                class="campo-cabana"
+                data-campo="adultos"
+                min="0"
+            >
+            ADL
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab5-ninos"
+                class="campo-cabana"
+                data-campo="ninos"
+                min="0"
+            >
+            KID
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab5-mascotas"
+                class="campo-cabana"
+                data-campo="mascotas"
+                min="0"
+            >
+            PET
+        </label>
+
+    </div>
+
+    <label class="checkout-cabana">
+    OUT
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="checkout"
+    >
+        </label>
+
+</td>
+
+    <td>
+        <select class="campo-cabana" data-campo="estado">
+
+    <option value="">Seleccionar...</option>
+
+    <option value="libre-libre">
+        LIBRE / LIBRE
+    </option>
+
+    <option value="libre-ingresa">
+        LIBRE / INGRESA
+    </option>
+
+    <option value="sale-libre">
+        SALE / LIBRE
+    </option>
+
+    <option value="sale-ingresa">
+        SALE / INGRESA
+    </option>
+
+    <option value="continua">
+        CONTINÚA
+    </option>
+
+    <option value="bloqueada">
+        BLOQUEADA
+    </option>
+
+</select>
+    </td>
+
+    <td class="celda-aseo">
+
+    <div class="aseo-principal">
+
+        <input
+            type="text"
+            class="campo-cabana campo-encargado-aseo"
+            data-campo="aseo"
+            placeholder="Ej: Full - Rodolfo"
+        >
+
+    </div>
+
+    <div class="aseo-horarios">
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoIn"
+    >
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoOut"
+    >
+
+</div>
+
+</td>
+
+    <td>
+        <input
+            type="time"
+            class="campo-cabana"
+            data-campo="ingreso"
+        >
+    </td>
+
+    <td>
+        <input
+            type="text"
+            class="campo-cabana"
+            data-campo="servicio"
+            placeholder="Ej: Tinaja 19:00"
+        >
+    </td>
+
+    <td class="celda-estado-final">
+
+    <div class="estado-final-contenido">
+
+        <input
+            type="checkbox"
+            class="campo-cabana check-final"
+            data-campo="finalizado"
+        >
+
+        <select
+            class="campo-cabana estado-final-select"
+            data-campo="estadoFinal"
+        >
+            <option value="">Pendiente</option>
+            <option value="LISTA">Lista</option>
+            <option value="REVISADA">Revisada</option>
+            <option value="CON DETALLES">Con detalles</option>
+        </select>
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr data-cabana="6">
+
+    <td class="info-cabana">
+
+    <strong>CAB 6</strong>
+
+    <div class="ocupacion-cabana">
+
+        <label>
+            <input
+                type="number"
+                id="cab6-adultos"
+                class="campo-cabana"
+                data-campo="adultos"
+                min="0"
+            >
+            ADL
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab6-ninos"
+                class="campo-cabana"
+                data-campo="ninos"
+                min="0"
+            >
+            KID
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab6-mascotas"
+                class="campo-cabana"
+                data-campo="mascotas"
+                min="0"
+            >
+            PET
+        </label>
+
+    </div>
+
+    <label class="checkout-cabana">
+    OUT
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="checkout"
+    >
+        </label>
+
+</td>
+
+    <td>
+        <select class="campo-cabana" data-campo="estado">
+
+    <option value="">Seleccionar...</option>
+
+    <option value="libre-libre">
+        LIBRE / LIBRE
+    </option>
+
+    <option value="libre-ingresa">
+        LIBRE / INGRESA
+    </option>
+
+    <option value="sale-libre">
+        SALE / LIBRE
+    </option>
+
+    <option value="sale-ingresa">
+        SALE / INGRESA
+    </option>
+
+    <option value="continua">
+        CONTINÚA
+    </option>
+
+    <option value="bloqueada">
+        BLOQUEADA
+    </option>
+
+</select>
+    </td>
+
+    <td class="celda-aseo">
+
+    <div class="aseo-principal">
+
+        <input
+            type="text"
+            class="campo-cabana campo-encargado-aseo"
+            data-campo="aseo"
+            placeholder="Ej: Full - Rodolfo"
+        >
+
+    </div>
+
+    <div class="aseo-horarios">
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoIn"
+    >
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoOut"
+    >
+
+</div>
+
+</td>
+
+    <td>
+        <input
+            type="time"
+            class="campo-cabana"
+            data-campo="ingreso"
+        >
+    </td>
+
+    <td>
+        <input
+            type="text"
+            class="campo-cabana"
+            data-campo="servicio"
+            placeholder="Ej: Tinaja 19:00"
+        >
+    </td>
+
+    <td class="celda-estado-final">
+
+    <div class="estado-final-contenido">
+
+        <input
+            type="checkbox"
+            class="campo-cabana check-final"
+            data-campo="finalizado"
+        >
+
+        <select
+            class="campo-cabana estado-final-select"
+            data-campo="estadoFinal"
+        >
+            <option value="">Pendiente</option>
+            <option value="LISTA">Lista</option>
+            <option value="REVISADA">Revisada</option>
+            <option value="CON DETALLES">Con detalles</option>
+        </select>
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr data-cabana="7">
+
+    <td class="info-cabana">
+
+    <strong>CAB 7</strong>
+
+    <div class="ocupacion-cabana">
+
+        <label>
+            <input
+                type="number"
+                id="cab7-adultos"
+                class="campo-cabana"
+                data-campo="adultos"
+                min="0"
+            >
+            ADL
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab7-ninos"
+                class="campo-cabana"
+                data-campo="ninos"
+                min="0"
+            >
+            KID
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab7-mascotas"
+                class="campo-cabana"
+                data-campo="mascotas"
+                min="0"
+            >
+            PET
+        </label>
+
+    </div>
+
+    <label class="checkout-cabana">
+    OUT
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="checkout"
+    >
+        </label>
+
+</td>
+
+    <td>
+        <select class="campo-cabana" data-campo="estado">
+
+    <option value="">Seleccionar...</option>
+
+    <option value="libre-libre">
+        LIBRE / LIBRE
+    </option>
+
+    <option value="libre-ingresa">
+        LIBRE / INGRESA
+    </option>
+
+    <option value="sale-libre">
+        SALE / LIBRE
+    </option>
+
+    <option value="sale-ingresa">
+        SALE / INGRESA
+    </option>
+
+    <option value="continua">
+        CONTINÚA
+    </option>
+
+    <option value="bloqueada">
+        BLOQUEADA
+    </option>
+
+</select>
+    </td>
+
+    <td class="celda-aseo">
+
+    <div class="aseo-principal">
+
+        <input
+            type="text"
+            class="campo-cabana campo-encargado-aseo"
+            data-campo="aseo"
+            placeholder="Ej: Full - Rodolfo"
+        >
+
+    </div>
+
+    <div class="aseo-horarios">
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoIn"
+    >
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoOut"
+    >
+
+</div>
+
+</td>
+
+    <td>
+        <input
+            type="time"
+            class="campo-cabana"
+            data-campo="ingreso"
+        >
+    </td>
+
+    <td>
+        <input
+            type="text"
+            class="campo-cabana"
+            data-campo="servicio"
+            placeholder="Ej: Tinaja 19:00"
+        >
+    </td>
+
+    <td class="celda-estado-final">
+
+    <div class="estado-final-contenido">
+
+        <input
+            type="checkbox"
+            class="campo-cabana check-final"
+            data-campo="finalizado"
+        >
+
+        <select
+            class="campo-cabana estado-final-select"
+            data-campo="estadoFinal"
+        >
+            <option value="">Pendiente</option>
+            <option value="LISTA">Lista</option>
+            <option value="REVISADA">Revisada</option>
+            <option value="CON DETALLES">Con detalles</option>
+        </select>
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr data-cabana="8">
+
+    <td class="info-cabana">
+
+    <strong>CAB 8</strong>
+
+    <div class="ocupacion-cabana">
+
+        <label>
+            <input
+                type="number"
+                id="cab8-adultos"
+                class="campo-cabana"
+                data-campo="adultos"
+                min="0"
+            >
+            ADL
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab8-ninos"
+                class="campo-cabana"
+                data-campo="ninos"
+                min="0"
+            >
+            KID
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab8-mascotas"
+                class="campo-cabana"
+                data-campo="mascotas"
+                min="0"
+            >
+            PET
+        </label>
+
+    </div>
+
+    <label class="checkout-cabana">
+    OUT
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="checkout"
+    >
+        </label>
+
+</td>
+
+    <td>
+        <select class="campo-cabana" data-campo="estado">
+
+    <option value="">Seleccionar...</option>
+
+    <option value="libre-libre">
+        LIBRE / LIBRE
+    </option>
+
+    <option value="libre-ingresa">
+        LIBRE / INGRESA
+    </option>
+
+    <option value="sale-libre">
+        SALE / LIBRE
+    </option>
+
+    <option value="sale-ingresa">
+        SALE / INGRESA
+    </option>
+
+    <option value="continua">
+        CONTINÚA
+    </option>
+
+    <option value="bloqueada">
+        BLOQUEADA
+    </option>
+
+</select>
+    </td>
+
+    <td class="celda-aseo">
+
+    <div class="aseo-principal">
+
+        <input
+            type="text"
+            class="campo-cabana campo-encargado-aseo"
+            data-campo="aseo"
+            placeholder="Ej: Full - Rodolfo"
+        >
+
+    </div>
+
+    <div class="aseo-horarios">
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoIn"
+    >
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoOut"
+    >
+
+</div>
+
+</td>
+
+    <td>
+        <input
+            type="time"
+            class="campo-cabana"
+            data-campo="ingreso"
+        >
+    </td>
+
+    <td>
+        <input
+            type="text"
+            class="campo-cabana"
+            data-campo="servicio"
+            placeholder="Ej: Tinaja 19:00"
+        >
+    </td>
+
+    <td class="celda-estado-final">
+
+    <div class="estado-final-contenido">
+
+        <input
+            type="checkbox"
+            class="campo-cabana check-final"
+            data-campo="finalizado"
+        >
+
+        <select
+            class="campo-cabana estado-final-select"
+            data-campo="estadoFinal"
+        >
+            <option value="">Pendiente</option>
+            <option value="LISTA">Lista</option>
+            <option value="REVISADA">Revisada</option>
+            <option value="CON DETALLES">Con detalles</option>
+        </select>
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr data-cabana="9">
+
+    <td class="info-cabana">
+
+    <strong>CAB 9</strong>
+
+    <div class="ocupacion-cabana">
+
+        <label>
+            <input
+                type="number"
+                id="cab9-adultos"
+                class="campo-cabana"
+                data-campo="adultos"
+                min="0"
+            >
+            ADL
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab9-ninos"
+                class="campo-cabana"
+                data-campo="ninos"
+                min="0"
+            >
+            KID
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab9-mascotas"
+                class="campo-cabana"
+                data-campo="mascotas"
+                min="0"
+            >
+            PET
+        </label>
+
+    </div>
+
+    <label class="checkout-cabana">
+    OUT
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="checkout"
+    >
+        </label>
+
+</td>
+
+    <td>
+        <select class="campo-cabana" data-campo="estado">
+
+    <option value="">Seleccionar...</option>
+
+    <option value="libre-libre">
+        LIBRE / LIBRE
+    </option>
+
+    <option value="libre-ingresa">
+        LIBRE / INGRESA
+    </option>
+
+    <option value="sale-libre">
+        SALE / LIBRE
+    </option>
+
+    <option value="sale-ingresa">
+        SALE / INGRESA
+    </option>
+
+    <option value="continua">
+        CONTINÚA
+    </option>
+
+    <option value="bloqueada">
+        BLOQUEADA
+    </option>
+
+</select>
+    </td>
+
+    <td class="celda-aseo">
+
+    <div class="aseo-principal">
+
+        <input
+            type="text"
+            class="campo-cabana campo-encargado-aseo"
+            data-campo="aseo"
+            placeholder="Ej: Full - Rodolfo"
+        >
+
+    </div>
+
+    <div class="aseo-horarios">
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoIn"
+    >
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoOut"
+    >
+
+</div>
+
+</td>
+
+    <td>
+        <input
+            type="time"
+            class="campo-cabana"
+            data-campo="ingreso"
+        >
+    </td>
+
+    <td>
+        <input
+            type="text"
+            class="campo-cabana"
+            data-campo="servicio"
+            placeholder="Ej: Tinaja 19:00"
+        >
+    </td>
+
+    <td class="celda-estado-final">
+
+    <div class="estado-final-contenido">
+
+        <input
+            type="checkbox"
+            class="campo-cabana check-final"
+            data-campo="finalizado"
+        >
+
+        <select
+            class="campo-cabana estado-final-select"
+            data-campo="estadoFinal"
+        >
+            <option value="">Pendiente</option>
+            <option value="LISTA">Lista</option>
+            <option value="REVISADA">Revisada</option>
+            <option value="CON DETALLES">Con detalles</option>
+        </select>
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr data-cabana="10">
+
+    <td class="info-cabana">
+
+    <strong>CAB 10</strong>
+
+    <div class="ocupacion-cabana">
+
+        <label>
+            <input
+                type="number"
+                id="cab10-adultos"
+                class="campo-cabana"
+                data-campo="adultos"
+                min="0"
+            >
+            ADL
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab10-ninos"
+                class="campo-cabana"
+                data-campo="ninos"
+                min="0"
+            >
+            KID
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab10-mascotas"
+                class="campo-cabana"
+                data-campo="mascotas"
+                min="0"
+            >
+            PET
+        </label>
+
+    </div>
+
+    <label class="checkout-cabana">
+    OUT
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="checkout"
+    >
+        </label>
+
+</td>
+
+    <td>
+        <select class="campo-cabana" data-campo="estado">
+
+    <option value="">Seleccionar...</option>
+
+    <option value="libre-libre">
+        LIBRE / LIBRE
+    </option>
+
+    <option value="libre-ingresa">
+        LIBRE / INGRESA
+    </option>
+
+    <option value="sale-libre">
+        SALE / LIBRE
+    </option>
+
+    <option value="sale-ingresa">
+        SALE / INGRESA
+    </option>
+
+    <option value="continua">
+        CONTINÚA
+    </option>
+
+    <option value="bloqueada">
+        BLOQUEADA
+    </option>
+
+</select>
+    </td>
+
+    <td class="celda-aseo">
+
+    <div class="aseo-principal">
+
+        <input
+            type="text"
+            class="campo-cabana campo-encargado-aseo"
+            data-campo="aseo"
+            placeholder="Ej: Full - Rodolfo"
+        >
+
+    </div>
+
+    <div class="aseo-horarios">
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoIn"
+    >
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoOut"
+    >
+
+</div>
+
+</td>
+
+    <td>
+        <input
+            type="time"
+            class="campo-cabana"
+            data-campo="ingreso"
+        >
+    </td>
+
+    <td>
+        <input
+            type="text"
+            class="campo-cabana"
+            data-campo="servicio"
+            placeholder="Ej: Tinaja 19:00"
+        >
+    </td>
+
+    <td class="celda-estado-final">
+
+    <div class="estado-final-contenido">
+
+        <input
+            type="checkbox"
+            class="campo-cabana check-final"
+            data-campo="finalizado"
+        >
+
+        <select
+            class="campo-cabana estado-final-select"
+            data-campo="estadoFinal"
+        >
+            <option value="">Pendiente</option>
+            <option value="LISTA">Lista</option>
+            <option value="REVISADA">Revisada</option>
+            <option value="CON DETALLES">Con detalles</option>
+        </select>
+
+    </div>
+
+</td>
+
+</tr>
+
+<tr data-cabana="11">
+
+    <td class="info-cabana">
+
+    <strong>CAB 11</strong>
+
+    <div class="ocupacion-cabana">
+
+        <label>
+            <input
+                type="number"
+                id="cab11-adultos"
+                class="campo-cabana"
+                data-campo="adultos"
+                min="0"
+            >
+            ADL
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab11-ninos"
+                class="campo-cabana"
+                data-campo="ninos"
+                min="0"
+            >
+            KID
+        </label>
+
+        <label>
+            <input
+                type="number"
+                id="cab11-mascotas"
+                class="campo-cabana"
+                data-campo="mascotas"
+                min="0"
+            >
+            PET
+        </label>
+
+    </div>
+
+    <label class="checkout-cabana">
+    OUT
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="checkout"
+    >
+        </label>
+
+</td>
+
+    <td>
+        <select class="campo-cabana" data-campo="estado">
+
+    <option value="">Seleccionar...</option>
+
+    <option value="libre-libre">
+        LIBRE / LIBRE
+    </option>
+
+    <option value="libre-ingresa">
+        LIBRE / INGRESA
+    </option>
+
+    <option value="sale-libre">
+        SALE / LIBRE
+    </option>
+
+    <option value="sale-ingresa">
+        SALE / INGRESA
+    </option>
+
+    <option value="continua">
+        CONTINÚA
+    </option>
+
+    <option value="bloqueada">
+        BLOQUEADA
+    </option>
+
+</select>
+    </td>
+
+    <td class="celda-aseo">
+
+    <div class="aseo-principal">
+
+        <input
+            type="text"
+            class="campo-cabana campo-encargado-aseo"
+            data-campo="aseo"
+            placeholder="Ej: Full - Rodolfo"
+        >
+
+    </div>
+
+    <div class="aseo-horarios">
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoIn"
+    >
+
+    <input
+        type="time"
+        class="campo-cabana"
+        data-campo="aseoOut"
+    >
+
+</div>
+
+</td>
+
+    <td>
+        <input
+            type="time"
+            class="campo-cabana"
+            data-campo="ingreso"
+        >
+    </td>
+
+    <td>
+        <input
+            type="text"
+            class="campo-cabana"
+            data-campo="servicio"
+            placeholder="Ej: Tinaja 19:00"
+        >
+    </td>
+
+    <td class="celda-estado-final">
+
+    <div class="estado-final-contenido">
+
+        <input
+            type="checkbox"
+            class="campo-cabana check-final"
+            data-campo="finalizado"
+        >
+
+        <select
+            class="campo-cabana estado-final-select"
+            data-campo="estadoFinal"
+        >
+            <option value="">Pendiente</option>
+            <option value="LISTA">Lista</option>
+            <option value="REVISADA">Revisada</option>
+            <option value="CON DETALLES">Con detalles</option>
+        </select>
+
+    </div>
+
+</td>
+
+</tr>
+
 
                     </tbody>
 

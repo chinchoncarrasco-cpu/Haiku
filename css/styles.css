@@ -783,6 +783,66 @@ input[type="time"].campo-cabana {
     font-size: 11px;
 }
 
+/* ========================================
+   CELDA ASEO
+======================================== */
+
+.celda-aseo {
+    min-width: 230px;
+}
+
+.aseo-principal {
+    margin-bottom: 7px;
+}
+
+.campo-encargado-aseo {
+    width: 100%;
+    max-width: 190px;
+}
+
+.aseo-horarios {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.aseo-horarios span {
+    font-size: 10px;
+    color: #69736e;
+    text-transform: uppercase;
+}
+
+.aseo-horarios input[type="time"] {
+    width: 82px;
+    padding: 6px 7px;
+    font-size: 12px;
+}
+
+/* ========================================
+   ESTADO FINAL
+======================================== */
+
+.celda-estado-final {
+    vertical-align: middle;
+    white-space: nowrap;
+}
+
+.estado-final-contenido {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.check-final {
+    margin: 0;
+    flex-shrink: 0;
+}
+
+.estado-final-select {
+    width: 125px;
+    min-width: 125px;
+}
+
 @media (max-width: 1100px) {
 
     .resumen {
