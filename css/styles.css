@@ -661,6 +661,19 @@ input[type="checkbox"] {
     color: var(--texto-suave);
 }
 
+/* ========================================
+   DÍA SELECCIONADO
+======================================== */
+
+.dia-calendario.seleccionado {
+    background: var(--verde-suave);
+}
+
+.dia-calendario.seleccionado .numero-dia {
+    background: var(--verde);
+    color: white;
+}
+
 @media (max-width: 1100px) {
 
     .resumen {

@@ -125,14 +125,16 @@ function generarCalendario() {
 
         // CLICK EN UN DÍA
 
-        elementoDia.addEventListener("click", () => {
+elementoDia.addEventListener("click", () => {
 
-            console.log(
-                "Día seleccionado:",
-                elementoDia.dataset.fecha
-            );
+    seleccionarDia(
+        año,
+        mes,
+        dia,
+        elementoDia.dataset.fecha
+    );
 
-        });
+});
 
 
         calendarioGrid.appendChild(elementoDia);
@@ -169,3 +171,84 @@ botonSiguiente.addEventListener("click", () => {
 
 // Generar calendario al cargar
 generarCalendario();
+
+// ========================================
+// SELECCIONAR DÍA OPERATIVO
+// ========================================
+
+let fechaSeleccionada =
+    `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
+
+function seleccionarDia(año, mes, dia, fechaISO) {
+
+    fechaSeleccionada = fechaISO;
+
+    cargarDatosDia(fechaSeleccionada);
+
+    const fechaElegida = new Date(
+        año,
+        mes,
+        dia
+    );
+
+    // Formatear fecha
+    let textoFecha = new Intl.DateTimeFormat("es-CL", {
+        weekday: "long",
+        day: "numeric",
+        month: "long",
+        year: "numeric"
+    }).format(fechaElegida);
+
+    textoFecha =
+        textoFecha.charAt(0).toUpperCase() +
+        textoFecha.slice(1);
+
+
+    // Cambiar fecha del Resumen
+    fechaActual.textContent = textoFecha;
+
+
+    // Quitar selección anterior
+    document
+        .querySelectorAll(".dia-calendario.seleccionado")
+        .forEach(elemento => {
+            elemento.classList.remove("seleccionado");
+        });
+
+
+    // Marcar día seleccionado
+    const diaSeleccionado = document.querySelector(
+        `.dia-calendario[data-fecha="${fechaISO}"]`
+    );
+
+    if (diaSeleccionado) {
+        diaSeleccionado.classList.add("seleccionado");
+    }
+
+
+    // Abrir Resumen
+    document
+        .querySelectorAll(".seccion-app")
+        .forEach(seccion => {
+            seccion.classList.remove("activa");
+        });
+
+    document
+        .getElementById("seccion-resumen")
+        .classList.add("activa");
+
+
+    // Cambiar botón activo
+    document
+        .querySelectorAll(".menu-item")
+        .forEach(boton => {
+            boton.classList.remove("activo");
+        });
+
+    const botonResumen = document.querySelector(
+        '.menu-item[data-seccion="resumen"]'
+    );
+
+    botonResumen.classList.add("activo");
+
+}
