@@ -894,6 +894,85 @@ input[type="time"].campo-cabana {
     color: #69736e;
 }
 
+/* Información dentro de cada tarjeta */
+
+.cabana-revision-info {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 5px;
+}
+
+.cabana-revision-info > strong {
+    font-size: 15px;
+    color: #17221d;
+}
+
+.cabana-huespedes {
+    font-size: 11px;
+    color: #69736e;
+}
+
+.cabana-datos-operativos {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-top: 4px;
+}
+
+.cabana-estado {
+    padding: 4px 8px;
+    border-radius: 999px;
+
+    background: #edf1ef;
+
+    font-size: 10px;
+    font-weight: 500;
+    letter-spacing: 0.04em;
+}
+
+.cabana-out {
+    font-size: 11px;
+    color: #525c57;
+}
+
+.cabana-aseo {
+    font-size: 11px;
+    color: #525c57;
+}
+
+.cabana-aseo:not(:empty)::before {
+    content: "🧹 ";
+}
+
+.cabana-abrir {
+    flex-shrink: 0;
+    margin-left: 20px;
+}
+
+.cabana-estado[data-estado="libre-ingresa"],
+.cabana-estado[data-estado="sale-ingresa"] {
+    background: #e2f3e9;
+    color: #176b43;
+}
+
+.cabana-estado[data-estado="continua"] {
+    background: #e5f2fa;
+    color: #1671a5;
+}
+
+.cabana-estado[data-estado="bloqueada"] {
+    background: #fde8e8;
+    color: #c73d3d;
+}
+
+.cabana-estado[data-estado="libre-libre"],
+.cabana-estado[data-estado="sale-libre"] {
+    background: #edf1ef;
+    color: #4f5b55;
+}
+
 /* ========================================
    CELULAR
 ======================================== */

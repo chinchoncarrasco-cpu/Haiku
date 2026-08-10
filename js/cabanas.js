@@ -113,6 +113,7 @@ function cargarCabanasDia(fecha) {
     });
 
     actualizarResumenDia(fecha);
+    actualizarTarjetasRevision(fecha);
 
 }
 
@@ -181,4 +182,115 @@ function actualizarResumenDia(fecha) {
 
     document.getElementById("contador-servicios").textContent =
         servicios;
+}
+
+// ========================================
+// TARJETAS DE REVISIÓN DE CABAÑAS
+// ========================================
+
+function actualizarTarjetasRevision(fecha) {
+
+    if (!fecha) {
+        return;
+    }
+
+    const datos = obtenerDatosDia(fecha);
+
+    const tarjetas =
+        document.querySelectorAll(".cabana-revision");
+
+    tarjetas.forEach(tarjeta => {
+
+        const numeroCabana =
+            tarjeta.dataset.revisionCabana;
+
+        const datosCabana =
+            datos.cabanas[numeroCabana] || {};
+
+
+        // ----------------------------
+        // HUÉSPEDES
+        // ----------------------------
+
+        const huespedes =
+            tarjeta.querySelector(".cabana-huespedes");
+
+        if (huespedes) {
+
+            const partes = [];
+
+            if (datosCabana.adultos) {
+                partes.push(`${datosCabana.adultos} ADL`);
+            }
+
+            if (datosCabana.ninos) {
+                partes.push(`${datosCabana.ninos} KID`);
+            }
+
+            if (datosCabana.mascotas) {
+                partes.push(`${datosCabana.mascotas} PET`);
+            }
+
+            huespedes.textContent =
+                partes.length > 0
+                    ? partes.join(" · ")
+                    : "Sin huéspedes registrados";
+        }
+
+
+        // ----------------------------
+        // ESTADO
+        // ----------------------------
+
+        const estado =
+            tarjeta.querySelector(".cabana-estado");
+
+        if (estado) {
+
+    const nombresEstado = {
+        "libre-libre": "LIBRE / LIBRE",
+        "libre-ingresa": "LIBRE / INGRESA",
+        "sale-libre": "SALE / LIBRE",
+        "sale-ingresa": "SALE / INGRESA",
+        "continua": "CONTINÚA",
+        "bloqueada": "BLOQUEADA"
+    };
+
+    estado.textContent =
+        nombresEstado[datosCabana.estado] ||
+        "Sin estado";
+
+    estado.dataset.estado =
+        datosCabana.estado || "";
+}
+
+
+        // ----------------------------
+        // CHECK OUT
+        // ----------------------------
+
+        const checkout =
+            tarjeta.querySelector(".cabana-out");
+
+        if (checkout) {
+            checkout.textContent =
+                datosCabana.checkout
+                    ? `OUT ${datosCabana.checkout}`
+                    : "";
+        }
+
+
+        // ----------------------------
+        // ASEO
+        // ----------------------------
+
+        const aseo =
+            tarjeta.querySelector(".cabana-aseo");
+
+        if (aseo) {
+            aseo.textContent =
+                datosCabana.aseo || "";
+        }
+
+    });
 }
