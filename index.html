@@ -32,7 +32,7 @@
             📅 Calendario
         </button>
 
-        <button class="menu-item">
+        <button class="menu-item" data-seccion="cabanas">
             🏡 Cabañas
         </button>
 
@@ -86,53 +86,53 @@
         </header>
 
 
-        <!-- =========================
-             TARJETAS RESUMEN
-        ========================== -->
+<!-- =========================
+     TARJETAS RESUMEN
+========================== -->
 
-        <section class="resumen">
+<section class="resumen">
 
-            <div class="tarjeta">
-                <span>🟢</span>
-                <div>
-                    <p>Ingresan</p>
-                    <strong>3</strong>
-                </div>
-            </div>
+    <div class="tarjeta">
+        <span>🟢</span>
+        <div>
+            <p>Ingresan</p>
+            <strong id="contador-ingresan">3</strong>
+        </div>
+    </div>
 
-            <div class="tarjeta">
-                <span>🔴</span>
-                <div>
-                    <p>Salen</p>
-                    <strong>6</strong>
-                </div>
-            </div>
+    <div class="tarjeta">
+        <span>🔴</span>
+        <div>
+            <p>Salen</p>
+            <strong id="contador-salen">6</strong>
+        </div>
+    </div>
 
-            <div class="tarjeta">
-                <span>🔵</span>
-                <div>
-                    <p>Continúan</p>
-                    <strong>2</strong>
-                </div>
-            </div>
+    <div class="tarjeta">
+        <span>🔵</span>
+        <div>
+            <p>Continúan</p>
+            <strong id="contador-continuan">2</strong>
+        </div>
+    </div>
 
-            <div class="tarjeta">
-                <span>🛁</span>
-                <div>
-                    <p>Servicios</p>
-                    <strong>3</strong>
-                </div>
-            </div>
+    <div class="tarjeta">
+        <span>🛁</span>
+        <div>
+            <p>Servicios</p>
+            <strong id="contador-servicios">3</strong>
+        </div>
+    </div>
 
-            <div class="tarjeta alerta">
-                <span>💳</span>
-                <div>
-                    <p>Pagos pendientes</p>
-                    <strong>1</strong>
-                </div>
-            </div>
+    <div class="tarjeta alerta">
+        <span>💳</span>
+        <div>
+           <p>Pagos pendientes</p>
+           <strong id="contador-pagos">0</strong>
+        </div>
+    </div>
 
-        </section>
+</section>
 
 
         <!-- =========================
@@ -2015,6 +2015,102 @@
         </section>
 
     </section>
+
+    <!-- =========================
+     SECCIÓN CABAÑAS
+    ========================== -->
+
+<section id="seccion-cabanas" class="seccion-app">
+
+    <header class="cabecera">
+
+        <div>
+            <p class="subtitulo">REVISIÓN OPERATIVA</p>
+            <h2>Cabañas</h2>
+            <p class="texto-secundario">
+                Revisión, inventario y detalles de cada cabaña.
+            </p>
+        </div>
+
+    </header>
+
+
+    <section class="panel">
+
+        <div class="panel-titulo">
+
+            <div>
+                <h3>Revisión de cabañas</h3>
+                <p>
+                    Selecciona una cabaña para realizar o consultar su revisión.
+                </p>
+            </div>
+
+        </div>
+
+
+        <div class="lista-revision-cabanas">
+
+            <button class="cabana-revision" data-revision-cabana="1">
+                <strong>CAB 1</strong>
+                <span>Ver revisión →</span>
+            </button>
+
+            <button class="cabana-revision" data-revision-cabana="2">
+                <strong>CAB 2</strong>
+                <span>Ver revisión →</span>
+            </button>
+
+            <button class="cabana-revision" data-revision-cabana="3">
+                <strong>CAB 3</strong>
+                <span>Ver revisión →</span>
+            </button>
+
+            <button class="cabana-revision" data-revision-cabana="4">
+                <strong>CAB 4</strong>
+                <span>Ver revisión →</span>
+            </button>
+
+            <button class="cabana-revision" data-revision-cabana="5">
+                <strong>CAB 5</strong>
+                <span>Ver revisión →</span>
+            </button>
+
+            <button class="cabana-revision" data-revision-cabana="6">
+                <strong>CAB 6</strong>
+                <span>Ver revisión →</span>
+            </button>
+
+            <button class="cabana-revision" data-revision-cabana="7">
+                <strong>CAB 7</strong>
+                <span>Ver revisión →</span>
+            </button>
+
+            <button class="cabana-revision" data-revision-cabana="8">
+                <strong>CAB 8</strong>
+                <span>Ver revisión →</span>
+            </button>
+
+            <button class="cabana-revision" data-revision-cabana="9">
+                <strong>CAB 9</strong>
+                <span>Ver revisión →</span>
+            </button>
+
+            <button class="cabana-revision" data-revision-cabana="10">
+                <strong>CAB 10</strong>
+                <span>Ver revisión →</span>
+            </button>
+
+            <button class="cabana-revision" data-revision-cabana="11">
+                <strong>CAB 11</strong>
+                <span>Ver revisión →</span>
+            </button>
+
+        </div>
+
+    </section>
+
+</section>
 
 </main>
 

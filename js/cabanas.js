@@ -43,9 +43,11 @@ function guardarCampoCabana(elemento) {
             : elemento.value;
 
 
-    datos.cabanas[numeroCabana][campo] = valor;
+datos.cabanas[numeroCabana][campo] = valor;
 
-    guardarDatos();
+guardarDatos();
+
+actualizarResumenDia(fechaSeleccionada);
 }
 
 
@@ -110,6 +112,73 @@ function cargarCabanasDia(fecha) {
 
     });
 
+    actualizarResumenDia(fecha);
+
 }
 
 cargarCabanasDia(fechaSeleccionada);
+
+// ========================================
+// ACTUALIZAR TARJETAS DEL RESUMEN
+// ========================================
+
+function actualizarResumenDia(fecha) {
+
+    if (!fecha) {
+        return;
+    }
+
+    const datos = obtenerDatosDia(fecha);
+
+    let ingresan = 0;
+    let salen = 0;
+    let continuan = 0;
+    let servicios = 0;
+
+    Object.values(datos.cabanas).forEach(cabana => {
+
+        const estado = cabana.estado || "";
+
+        // INGRESAN
+        if (
+            estado === "libre-ingresa" ||
+            estado === "sale-ingresa"
+        ) {
+            ingresan++;
+        }
+
+        // SALEN
+        if (
+            estado === "sale-libre" ||
+            estado === "sale-ingresa"
+        ) {
+            salen++;
+        }
+
+        // CONTINÚAN
+        if (estado === "continua") {
+            continuan++;
+        }
+
+        // SERVICIOS
+        if (
+            cabana.servicio &&
+            cabana.servicio.trim() !== ""
+        ) {
+            servicios++;
+        }
+
+    });
+
+    document.getElementById("contador-ingresan").textContent =
+        ingresan;
+
+    document.getElementById("contador-salen").textContent =
+        salen;
+
+    document.getElementById("contador-continuan").textContent =
+        continuan;
+
+    document.getElementById("contador-servicios").textContent =
+        servicios;
+}
