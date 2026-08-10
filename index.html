@@ -17,28 +17,56 @@
     ========================== -->
     <aside class="sidebar">
 
-        <div class="logo">
-            <h1>HAIKU</h1>
-            <p>Panel de Turno</p>
-        </div>
+    <div class="logo">
+        <h1>HAIKU</h1>
+        <p>Panel de Turno</p>
+    </div>
 
-        <nav class="menu">
-            <button class="menu-item activo">🏠 Resumen</button>
-            <button class="menu-item">📅 Calendario</button>
-            <button class="menu-item">🏡 Cabañas</button>
-            <button class="menu-item">🧹 Aseo</button>
-            <button class="menu-item">🛁 Servicios</button>
-            <button class="menu-item">💳 Pagos</button>
-            <button class="menu-item">📋 Cierre de turno</button>
-        </nav>
+    <nav class="menu">
 
-    </aside>
+        <button class="menu-item activo" data-seccion="resumen">
+            🏠 Resumen
+        </button>
+
+        <button class="menu-item" data-seccion="calendario">
+            📅 Calendario
+        </button>
+
+        <button class="menu-item">
+            🏡 Cabañas
+        </button>
+
+        <button class="menu-item">
+            🧹 Aseo
+        </button>
+
+        <button class="menu-item">
+            🛁 Servicios
+        </button>
+
+        <button class="menu-item">
+            💳 Pagos
+        </button>
+
+        <button class="menu-item">
+            📋 Cierre de turno
+        </button>
+
+    </nav>
+
+</aside>
 
 
     <!-- =========================
          CONTENIDO PRINCIPAL
     ========================== -->
     <main class="contenido">
+        
+<!-- =========================
+     SECCIÓN RESUMEN
+========================== -->
+
+<section id="seccion-resumen" class="seccion-app activa">
 
         <!-- CABECERA -->
 
@@ -267,9 +295,65 @@
                 placeholder="Ej: CAB 3 solicitó leña adicional, huésped CAB 1 pendiente de pago..."
             ></textarea>
 
+                </section>
+
+    </section>
+
+    <!-- =========================
+         SECCIÓN CALENDARIO
+    ========================== -->
+
+    <section id="seccion-calendario" class="seccion-app">
+
+        <header class="cabecera">
+
+            <div>
+                <p class="subtitulo">Planificación</p>
+                <h2>Calendario</h2>
+                <p class="texto-secundario">
+                    Selecciona un día para revisar o preparar el turno.
+                </p>
+            </div>
+
+        </header>
+
+        <section class="panel calendario-panel">
+
+            <div class="calendario-cabecera">
+
+                <button id="mes-anterior" class="boton-calendario">
+                    ←
+                </button>
+
+                <h3 id="titulo-mes">
+                    Agosto 2026
+                </h3>
+
+                <button id="mes-siguiente" class="boton-calendario">
+                    →
+                </button>
+
+            </div>
+
+            <div class="dias-semana">
+                <span>Lun</span>
+                <span>Mar</span>
+                <span>Mié</span>
+                <span>Jue</span>
+                <span>Vie</span>
+                <span>Sáb</span>
+                <span>Dom</span>
+            </div>
+
+            <div id="calendario-grid" class="calendario-grid">
+                <!-- JavaScript generará los días aquí -->
+            </div>
+
         </section>
 
-    </main>
+    </section>
+
+</main>
 
 
     <!-- JAVASCRIPT -->
