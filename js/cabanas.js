@@ -48,6 +48,7 @@ datos.cabanas[numeroCabana][campo] = valor;
 guardarDatos();
 
 actualizarResumenDia(fechaSeleccionada);
+actualizarResumenAseo(fechaSeleccionada);
 }
 
 
@@ -114,6 +115,7 @@ function cargarCabanasDia(fecha) {
 
     actualizarResumenDia(fecha);
     actualizarTarjetasRevision(fecha);
+    actualizarResumenAseo(fecha);
 
 }
 
@@ -584,4 +586,93 @@ if (revisionCabanaGuardada) {
         revisionCabanaGuardada
     );
 
+}
+
+// ========================================
+// RESUMEN DE ASEO
+// ========================================
+
+function actualizarResumenAseo(fecha) {
+
+    const contenedor =
+        document.getElementById("aseo-resumen");
+
+    if (!contenedor || !fecha) {
+        return;
+    }
+
+    const datos = obtenerDatosDia(fecha);
+
+    contenedor.innerHTML = "";
+
+    for (let numeroCabana = 1; numeroCabana <= 11; numeroCabana++) {
+
+        const cabana =
+            datos.cabanas[numeroCabana] || {};
+
+        const encargado =
+            cabana.aseo || "Sin asignar";
+
+        const horaIn =
+            cabana.aseoIn || "--:--";
+
+        const horaOut =
+            cabana.aseoOut || "--:--";
+        
+        const estadoFinal =
+            cabana.estadoFinal || "Pendiente";
+
+        let claseEstado = "aseo-pendiente";
+
+        if (estadoFinal === "LISTA") {
+            claseEstado = "aseo-lista";
+        }
+
+        if (estadoFinal === "CON DETALLES") {
+            claseEstado = "aseo-detalles";
+        }
+
+        const tarjeta =
+            document.createElement("div");
+
+        tarjeta.className =
+            `aseo-resumen-cabana ${claseEstado}`;
+
+        tarjeta.innerHTML = `
+            <div class="aseo-resumen-cabecera">
+
+            <div class="aseo-resumen-numero">
+            CAB ${numeroCabana}
+            </div>
+
+            <span class="aseo-estado">
+                ${estadoFinal}
+            </span>
+
+</div>
+
+            <div class="aseo-resumen-datos">
+
+                <div class="aseo-resumen-encargado">
+                    <span>Encargado</span>
+                    <strong>${encargado}</strong>
+                </div>
+
+                <div class="aseo-resumen-horario">
+                    <div>
+                        <span>IN</span>
+                        <strong>${horaIn}</strong>
+                    </div>
+
+                    <div>
+                        <span>OUT</span>
+                        <strong>${horaOut}</strong>
+                    </div>
+                </div>
+
+            </div>
+        `;
+
+        contenedor.appendChild(tarjeta);
+    }
 }

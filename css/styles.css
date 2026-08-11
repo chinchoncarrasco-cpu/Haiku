@@ -1619,3 +1619,171 @@ input[type="time"].campo-cabana {
     }
 
 }
+
+/* ========================================
+   SECCIÓN ASEO
+======================================== */
+
+.aseo-panel {
+    padding: 28px;
+}
+
+.aseo-resumen {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 18px;
+    margin-top: 24px;
+}
+
+/* TARJETA DE CADA CABAÑA */
+
+.aseo-resumen-cabana {
+    background: #ffffff;
+    border: 1px solid #e4e7e5;
+    border-radius: 12px;
+    padding: 20px;
+    min-height: 150px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.aseo-resumen-numero {
+    font-size: 14px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #eeeeee;
+}
+
+.aseo-resumen-datos {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+/* ENCARGADO */
+
+.aseo-resumen-encargado {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.aseo-resumen-encargado span,
+.aseo-resumen-horario span {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: #7a817d;
+}
+
+.aseo-resumen-encargado strong {
+    font-size: 16px;
+    font-weight: 600;
+}
+
+/* HORARIOS */
+
+.aseo-resumen-horario {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+}
+
+.aseo-resumen-horario > div {
+    background: #f7f8f7;
+    border-radius: 8px;
+    padding: 10px 12px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.aseo-resumen-horario strong {
+    font-size: 14px;
+}
+
+/* RESPONSIVE */
+
+@media (max-width: 1100px) {
+    .aseo-resumen {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    .aseo-resumen {
+        grid-template-columns: 1fr;
+    }
+
+    .aseo-panel {
+        padding: 18px;
+    }
+}
+
+/* ========================================
+   ESTADOS DEL ASEO
+======================================== */
+
+.aseo-resumen-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    padding-bottom: 12px;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.aseo-resumen-cabecera .aseo-resumen-numero {
+    padding-bottom: 0;
+    border-bottom: none;
+}
+
+.aseo-estado {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+
+    padding: 5px 8px;
+    border-radius: 20px;
+}
+
+
+/* PENDIENTE */
+
+.aseo-resumen-cabana.aseo-pendiente {
+    background: #fff8ed;
+    border-color: #edc98f;
+}
+
+.aseo-pendiente .aseo-estado {
+    background: #f6e1bd;
+}
+
+
+/* CON DETALLES */
+
+.aseo-resumen-cabana.aseo-detalles {
+    background: #fffdec;
+    border-color: #e7d77d;
+}
+
+.aseo-detalles .aseo-estado {
+    background: #f3e8a4;
+}
+
+
+/* LISTA */
+
+.aseo-resumen-cabana.aseo-lista {
+    background: #f1f8f3;
+    border-color: #9bc5a5;
+}
+
+.aseo-lista .aseo-estado {
+    background: #cee7d3;
+}
