@@ -317,6 +317,8 @@ const revisionFecha =
 const revisionInfoOperativa =
     document.getElementById("revision-info-operativa");
 
+const revisionNotaOperativa =
+    document.getElementById("revision-nota-operativa");
 
 document
     .querySelectorAll(".cabana-revision")
@@ -354,6 +356,32 @@ function abrirRevisionCabana(numeroCabana) {
 
     const datosCabana =
         datos.cabanas[numeroCabana] || {};
+
+    // ========================================
+    // NOTA OPERATIVA DE LA CABAÑA
+    // ========================================
+
+const notasCabana =
+    (datos.notasOperativas || []).filter(nota => {
+        return String(nota.cabana) === String(numeroCabana);
+    });
+
+if (notasCabana.length > 0) {
+
+    revisionNotaOperativa.innerHTML = `
+        <strong>📝 Nota operativa</strong>
+        <span>
+            ${notasCabana.map(nota => nota.texto).join(" · ")}
+        </span>
+    `;
+
+    revisionNotaOperativa.style.display = "";
+
+} else {
+
+    revisionNotaOperativa.innerHTML = "";
+    revisionNotaOperativa.style.display = "none";
+}
 
 
     // Título

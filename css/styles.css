@@ -1523,3 +1523,99 @@ input[type="time"].campo-cabana {
     font-size: 12px;
     line-height: 1.3;
 }
+
+/* ========================================
+   CABECERA REVISIÓN DE CABAÑA
+======================================== */
+
+.revision-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 32px;
+}
+
+.revision-cabecera-info {
+    flex: 1;
+    min-width: 0;
+}
+
+
+/* ========================================
+   NOTA OPERATIVA EN REVISIÓN
+======================================== */
+
+.revision-nota-operativa {
+    width: 300px;
+    max-width: 35%;
+
+    padding: 14px 16px;
+
+    background: #ffffff;
+    border: 1px solid #d9dedb;
+    border-radius: 10px;
+
+    font-size: 13px;
+    line-height: 1.5;
+}
+
+
+/* Si no hay nota, no mostrar la caja */
+.revision-nota-operativa:empty {
+    display: none;
+}
+
+
+/* ========================================
+   CELULAR
+======================================== */
+
+@media (max-width: 700px) {
+
+    .revision-cabecera {
+        flex-direction: column;
+        gap: 14px;
+    }
+
+    .revision-nota-operativa {
+        width: 100%;
+        max-width: none;
+        box-sizing: border-box;
+    }
+
+}
+
+/* ========================================
+   CHECKLIST REVISIÓN - CELULAR
+======================================== */
+
+@media (max-width: 700px) {
+
+    .revision-checklist {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 28px 20px;
+        padding: 20px;
+    }
+
+    /* Orden móvil:
+       Cocina | Living
+       Baño   | Terraza
+    */
+
+    .checklist-area:nth-child(1) {
+        order: 1;
+    }
+
+    .checklist-area:nth-child(2) {
+        order: 3;
+    }
+
+    .checklist-area:nth-child(3) {
+        order: 2;
+    }
+
+    .checklist-area:nth-child(4) {
+        order: 4;
+    }
+
+}

@@ -246,13 +246,13 @@ botonCancelarNota.addEventListener("click", () => {
 
 // ========================================
 // MOSTRAR NOTAS OPERATIVAS EN LA TABLA
-// CAB 1 A CAB 11
 // ========================================
 
 function mostrarNotasOperativas(fecha) {
 
     const datos = obtenerDatosDia(fecha);
 
+    // Recorrer CAB 1 hasta CAB 11
     for (let numeroCabana = 1; numeroCabana <= 11; numeroCabana++) {
 
         const cajaNota =

@@ -176,12 +176,20 @@ generarCalendario();
 // SELECCIONAR DÍA OPERATIVO
 // ========================================
 
+const fechaHoy =
+`${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
+
 let fechaSeleccionada =
-    `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
+localStorage.getItem("haikuFechaSeleccionada") || fechaHoy;
 
 function seleccionarDia(año, mes, dia, fechaISO) {
 
     fechaSeleccionada = fechaISO;
+
+    localStorage.setItem(
+        "haikuFechaSeleccionada",
+        fechaSeleccionada
+    );
 
     cargarDatosDia(fechaSeleccionada);
     cargarCabanasDia(fechaSeleccionada);
