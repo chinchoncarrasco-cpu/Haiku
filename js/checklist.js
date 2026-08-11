@@ -1568,6 +1568,31 @@ function crearItemsChecklist(
         checkbox.dataset.checklistId =
             `${grupo}-${indice}`;
 
+        const datosDia = obtenerDatosDia(fechaSeleccionada);
+
+        if (!datosDia.cabanas[numeroCabana]) {
+            datosDia.cabanas[numeroCabana] = {};
+        }
+
+        if (!datosDia.cabanas[numeroCabana].checklist) {
+            datosDia.cabanas[numeroCabana].checklist = {};
+        }
+
+const checklistGuardado =
+    datosDia.cabanas[numeroCabana].checklist;
+
+checkbox.checked =
+    checklistGuardado[checkbox.dataset.checklistId] === true;
+
+    checkbox.addEventListener("change", () => {
+
+    checklistGuardado[checkbox.dataset.checklistId] =
+        checkbox.checked;
+
+    guardarDatos();
+
+});
+
 
         const texto =
             document.createElement("span");

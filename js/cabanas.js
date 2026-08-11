@@ -317,6 +317,9 @@ const revisionFecha =
 const revisionInfoOperativa =
     document.getElementById("revision-info-operativa");
 
+const revisionEstado =
+    document.getElementById("revision-estado");
+
 const revisionNotaOperativa =
     document.getElementById("revision-nota-operativa");
 
@@ -356,6 +359,9 @@ function abrirRevisionCabana(numeroCabana) {
 
     const datosCabana =
         datos.cabanas[numeroCabana] || {};
+
+    revisionEstado.value =
+        datosCabana.estadoRevision || "pendiente";
 
     // ========================================
     // NOTA OPERATIVA DE LA CABAÑA
@@ -491,6 +497,36 @@ if (notasCabana.length > 0) {
     );
 
 }
+
+// ========================================
+// GUARDAR ESTADO DE REVISIÓN
+// ========================================
+
+revisionEstado.addEventListener("change", () => {
+
+    if (!fechaSeleccionada) {
+        return;
+    }
+
+    const numeroCabana =
+        localStorage.getItem("haikuRevisionCabana");
+
+    if (!numeroCabana) {
+        return;
+    }
+
+    const datos =
+        obtenerDatosDia(fechaSeleccionada);
+
+    if (!datos.cabanas[numeroCabana]) {
+        datos.cabanas[numeroCabana] = {};
+    }
+
+    datos.cabanas[numeroCabana].estadoRevision =
+        revisionEstado.value;
+
+    guardarDatos();
+});
 
 // ========================================
 // VOLVER AL LISTADO DE CABAÑAS
