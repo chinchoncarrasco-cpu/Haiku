@@ -2074,3 +2074,47 @@ input[type="time"].campo-cabana {
     outline: none;
     border-color: #2f7658;
 }
+
+/* ==========================================
+   CIERRE DE TURNO · ETAPA 3 · TINAJAS
+========================================== */
+
+[data-cierre-etapa="3"] .cierre-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 14px;
+    margin-top: 20px;
+}
+
+[data-cierre-etapa="3"] .cierre-card {
+    border: 1px solid #dfe4e1;
+    border-radius: 12px;
+    padding: 18px;
+    background: #ffffff;
+}
+
+[data-cierre-etapa="3"] .cierre-card h3 {
+    margin: 0 0 16px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e5e8e6;
+}
+
+[data-cierre-etapa="3"] .cierre-pregunta {
+    margin: 0 0 14px;
+}
+
+[data-cierre-etapa="3"] .cierre-check {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 9px 0;
+    cursor: pointer;
+}
+
+[data-cierre-etapa="3"] .cierre-check + .cierre-check {
+    border-top: 1px solid #eef0ef;
+}
+
+[data-cierre-etapa="3"] .cierre-check input {
+    margin: 0;
+}

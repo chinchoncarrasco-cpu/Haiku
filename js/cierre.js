@@ -29,7 +29,17 @@ function obtenerCierreDia(fecha) {
     detallesCabanas: "",
     pendientesHacer: "",
     hayNovedades: "",
-    novedades: ""
+    novedades: "",
+
+    // =========================
+    // ETAPA 3 · TINAJAS
+    // =========================
+
+    tinajaTonelApagado: false,
+    tinajaJacuzziApagado: false,
+    tinajaTonelFuncionamiento: false,
+    tinajaJacuzziFuncionamiento: false,
+    tinajaCojinesRetirados: false
 
 };
 
@@ -104,8 +114,55 @@ function cargarCierreDia(fecha) {
 
     if (pago) {
         pago.checked = cierre.pagoRegistrado === true;
-    }
     
+        // =========================
+// CHECKBOXES ETAPA 3 - TINAJAS
+// =========================
+
+const tonelApagado = document.querySelector(
+    '[data-cierre-campo="tinaja-tonel-apagado"]'
+);
+
+const jacuzziApagado = document.querySelector(
+    '[data-cierre-campo="tinaja-jacuzzi-apagado"]'
+);
+
+const tonelFuncionamiento = document.querySelector(
+    '[data-cierre-campo="tinaja-tonel-funcionamiento"]'
+);
+
+const jacuzziFuncionamiento = document.querySelector(
+    '[data-cierre-campo="tinaja-jacuzzi-funcionamiento"]'
+);
+
+const cojinesRetirados = document.querySelector(
+    '[data-cierre-campo="tinaja-cojines-retirados"]'
+);
+
+if (tonelApagado) {
+    tonelApagado.checked = cierre.tinajaTonelApagado === true;
+}
+
+if (jacuzziApagado) {
+    jacuzziApagado.checked = cierre.tinajaJacuzziApagado === true;
+}
+
+if (tonelFuncionamiento) {
+    tonelFuncionamiento.checked =
+        cierre.tinajaTonelFuncionamiento === true;
+}
+
+if (jacuzziFuncionamiento) {
+    jacuzziFuncionamiento.checked =
+        cierre.tinajaJacuzziFuncionamiento === true;
+}
+
+if (cojinesRetirados) {
+    cojinesRetirados.checked =
+        cierre.tinajaCojinesRetirados === true;
+}
+    }
+
     // ----------------
     // TEXTAREA ETAPA 2
     // ----------------
@@ -157,6 +214,35 @@ const hayNovedadesInputs =
 
 const novedadesInput =
     document.querySelector('[data-cierre-campo="novedades"]');
+
+// =========================
+// CONTROLES ETAPA 3 · TINAJAS
+// =========================
+
+const checkTinajaTonelApagado =
+    document.querySelector(
+        '[data-cierre-campo="tinaja-tonel-apagado"]'
+    );
+
+const checkTinajaJacuzziApagado =
+    document.querySelector(
+        '[data-cierre-campo="tinaja-jacuzzi-apagado"]'
+    );
+
+const checkTinajaTonelFuncionamiento =
+    document.querySelector(
+        '[data-cierre-campo="tinaja-tonel-funcionamiento"]'
+    );
+
+const checkTinajaJacuzziFuncionamiento =
+    document.querySelector(
+        '[data-cierre-campo="tinaja-jacuzzi-funcionamiento"]'
+    );
+
+const checkTinajaCojinesRetirados =
+    document.querySelector(
+        '[data-cierre-campo="tinaja-cojines-retirados"]'
+    );
 
 
 // ========================================
@@ -293,6 +379,35 @@ if (novedadesInput) {
 
 }
 
+// =========================
+// ACTIVAR GUARDADO ETAPA 3
+// =========================
+
+guardarCheckCierre(
+    checkTinajaTonelApagado,
+    "tinajaTonelApagado"
+);
+
+guardarCheckCierre(
+    checkTinajaJacuzziApagado,
+    "tinajaJacuzziApagado"
+);
+
+guardarCheckCierre(
+    checkTinajaTonelFuncionamiento,
+    "tinajaTonelFuncionamiento"
+);
+
+guardarCheckCierre(
+    checkTinajaJacuzziFuncionamiento,
+    "tinajaJacuzziFuncionamiento"
+);
+
+guardarCheckCierre(
+    checkTinajaCojinesRetirados,
+    "tinajaCojinesRetirados"
+);
+
 // ========================================
 // ACTUALIZAR PROGRESO DEL CIERRE
 // ========================================
@@ -369,14 +484,39 @@ console.log(
 );
 
 // =========================
+// ETAPA 3 - TINAJAS
+// =========================
+
+const controlesEtapa3 = [
+    cierre.tinajaTonelApagado === true,
+    cierre.tinajaJacuzziApagado === true,
+    cierre.tinajaTonelFuncionamiento === true,
+    cierre.tinajaJacuzziFuncionamiento === true,
+    cierre.tinajaCojinesRetirados === true
+];
+
+const completadosEtapa3 =
+    controlesEtapa3.filter(Boolean).length;
+
+const totalEtapa3 =
+    controlesEtapa3.length;
+
+const porcentajeEtapa3 =
+    Math.round((completadosEtapa3 / totalEtapa3) * 100);
+
+console.log(
+    `Cierre Etapa 3: ${completadosEtapa3}/${totalEtapa3} - ${porcentajeEtapa3}%`
+);
+
+// =========================
 // PROGRESO GENERAL
 // =========================
 
 const completadosGeneral =
-    completados + completadosEtapa2;
+    completados + completadosEtapa2 + completadosEtapa3;
 
 const totalGeneral =
-    total + totalEtapa2;
+    total + totalEtapa2 + totalEtapa3;
 
 const porcentajeGeneral =
     Math.round((completadosGeneral / totalGeneral) * 100);
