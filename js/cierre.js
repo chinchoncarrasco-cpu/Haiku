@@ -11,38 +11,47 @@ function obtenerCierreDia(fecha) {
 
         datos.cierre = {
 
-    // =========================
-    // ETAPA 1
-    // =========================
+            // =========================
+            // ETAPA 1
+            // =========================
 
-    salidaTemprana: "",
-    salioAntes: "",
-    llavesRetiradas: "",
-    registroGuardado: false,
-    reservaMarcada: false,
-    pagoRegistrado: false,
+            salidaTemprana: "",
+            salioAntes: "",
+            llavesRetiradas: "",
+            registroGuardado: false,
+            reservaMarcada: false,
+            pagoRegistrado: false,
 
-    // =========================
-    // ETAPA 2
-    // =========================
+            // =========================
+            // ETAPA 2
+            // =========================
 
-    detallesCabanas: "",
-    pendientesHacer: "",
-    hayNovedades: "",
-    novedades: "",
+            detallesCabanas: "",
+            pendientesHacer: "",
+            hayNovedades: "",
+            novedades: "",
 
-    // =========================
-    // ETAPA 3 · TINAJAS
-    // =========================
+            // =========================
+            // ETAPA 3 · TINAJAS
+            // =========================
 
-    tinajaTonelApagado: false,
-    tinajaJacuzziApagado: false,
-    tinajaTonelFuncionamiento: false,
-    tinajaJacuzziFuncionamiento: false,
-    tinajaCojinesRetirados: false
+            tinajaTonelApagado: false,
+            tinajaJacuzziApagado: false,
+            tinajaTonelFuncionamiento: false,
+            tinajaJacuzziFuncionamiento: false,
+            tinajaCojinesRetirados: false,
 
-};
+            // =========================
+            // ETAPA 4 · CABAÑAS
+            // =========================
 
+            cabanasCierre: {}
+        };
+    }
+
+    // Compatibilidad con días guardados anteriormente
+    if (!datos.cierre.cabanasCierre) {
+        datos.cierre.cabanasCierre = {};
     }
 
     return datos.cierre;
@@ -174,6 +183,40 @@ if (cojinesRetirados) {
     if (novedades) {
         novedades.value = cierre.novedades || "";
     }
+    
+    // ===============================
+// CARGAR ETAPA 4 - CABAÑAS
+// ===============================
+
+// Cargar checks internos de cada cabaña
+const checksCabanas = document.querySelectorAll(
+    '[data-cierre-cabana][data-item]'
+);
+
+checksCabanas.forEach(check => {
+
+    const cabana = check.dataset.cierreCabana;
+    const item = check.dataset.item;
+
+    const datosCabana = cierre.cabanasCierre?.[cabana];
+
+    check.checked = datosCabana?.[item] === true;
+});
+
+
+// Cargar "Ocupada / No revisar"
+const checksOcupadas = document.querySelectorAll(
+    '[data-cierre-cabana-ocupada]'
+);
+
+checksOcupadas.forEach(check => {
+
+    const cabana = check.dataset.cierreCabanaOcupada;
+
+    const datosCabana = cierre.cabanasCierre?.[cabana];
+
+    check.checked = datosCabana?.ocupada === true;
+});
 
 }
 
@@ -407,6 +450,78 @@ guardarCheckCierre(
     checkTinajaCojinesRetirados,
     "tinajaCojinesRetirados"
 );
+
+// ===============================
+// ACTIVAR GUARDADO ETAPA 4
+// CABAÑAS
+// ===============================
+
+const checksCabanasCierre = document.querySelectorAll(
+    '[data-cierre-cabana][data-item]'
+);
+
+checksCabanasCierre.forEach(check => {
+
+    check.addEventListener("change", () => {
+
+        if (!fechaSeleccionada) {
+            return;
+        }
+
+        const cabana = check.dataset.cierreCabana;
+        const item = check.dataset.item;
+
+        const cierre = obtenerCierreDia(fechaSeleccionada);
+
+        // Crear la cabaña si todavía no existe
+        if (!cierre.cabanasCierre[cabana]) {
+            cierre.cabanasCierre[cabana] = {};
+        }
+
+        // Guardar el estado del checkbox
+        cierre.cabanasCierre[cabana][item] = check.checked;
+
+        guardarDatos();
+
+        actualizarCierreTurno();
+    });
+
+});
+
+// ===============================
+// CABAÑA OCUPADA / NO REVISAR
+// ===============================
+
+const checksCabanasOcupadas = document.querySelectorAll(
+    '[data-cierre-cabana-ocupada]'
+);
+
+checksCabanasOcupadas.forEach(check => {
+
+    check.addEventListener("change", () => {
+
+        if (!fechaSeleccionada) {
+            return;
+        }
+
+        const cabana = check.dataset.cierreCabanaOcupada;
+
+        const cierre = obtenerCierreDia(fechaSeleccionada);
+
+        // Crear la cabaña si todavía no existe
+        if (!cierre.cabanasCierre[cabana]) {
+            cierre.cabanasCierre[cabana] = {};
+        }
+
+        // Guardar si está ocupada
+        cierre.cabanasCierre[cabana].ocupada = check.checked;
+
+        guardarDatos();
+
+        actualizarCierreTurno();
+    });
+
+});
 
 // ========================================
 // ACTUALIZAR PROGRESO DEL CIERRE
