@@ -2846,13 +2846,263 @@
             </div>
         </div>
 
-        <div class="cierre-placeholder">
+        <!-- ========================================
+     PROGRESO DEL CIERRE
+======================================== -->
+
+<div class="cierre-progreso">
+
+    <div class="cierre-progreso-info">
+        <span>Progreso del cierre</span>
+        <strong id="cierre-porcentaje">0%</strong>
+    </div>
+
+    <div class="cierre-barra">
+        <div
+            id="cierre-barra-progreso"
+            class="cierre-barra-progreso"
+        ></div>
+    </div>
+
+    <div class="cierre-etapas-resumen">
+
+        <span data-etapa-resumen="1">
+            1 · Salidas y recepción
+        </span>
+
+        <span data-etapa-resumen="2">
+            2 · Pendientes
+        </span>
+
+        <span data-etapa-resumen="3">
+            3 · Seguridad
+        </span>
+
+        <span data-etapa-resumen="4">
+            4 · Cabañas
+        </span>
+
+    </div>
+
+</div>
+
+
+<!-- ========================================
+     ETAPA 1 · SALIDAS Y RECEPCIÓN
+======================================== -->
+
+<section
+    class="cierre-etapa"
+    data-cierre-etapa="1"
+>
+
+    <div class="cierre-etapa-cabecera">
+
+        <div>
+            <span class="cierre-etapa-numero">
+                ETAPA 1
+            </span>
+
+            <h3>Salidas y recepción</h3>
 
             <p>
-                El cierre de turno se configurará aquí.
+                Verificación administrativa de huéspedes,
+                registros y pagos del turno.
             </p>
+        </div>
+
+        <span class="cierre-etapa-estado">
+            Pendiente
+        </span>
+
+    </div>
+
+
+    <div class="cierre-bloques">
+
+        <!-- HUÉSPED / CHECK-OUT -->
+
+        <div class="cierre-bloque">
+
+            <div class="cierre-bloque-titulo">
+                <h4>🚪 Huésped / Check-out</h4>
+            </div>
+
+            <div class="cierre-pregunta">
+
+                <span>
+                    ¿Se confirmó hora de salida temprana?
+                </span>
+
+                <div class="cierre-opciones">
+                    <label>
+                        <input
+                            type="radio"
+                            name="salida-temprana"
+                            value="si"
+                        >
+                        Sí
+                    </label>
+
+                    <label>
+                        <input
+                            type="radio"
+                            name="salida-temprana"
+                            value="no-hay"
+                        >
+                        No hay
+                    </label>
+                </div>
+
+            </div>
+
+
+            <div class="cierre-pregunta">
+
+                <span>
+                    ¿Salió antes de lo previsto?
+                </span>
+
+                <div class="cierre-opciones">
+                    <label>
+                        <input
+                            type="radio"
+                            name="salio-antes"
+                            value="si"
+                        >
+                        Sí
+                    </label>
+
+                    <label>
+                        <input
+                            type="radio"
+                            name="salio-antes"
+                            value="no"
+                        >
+                        No
+                    </label>
+                </div>
+
+            </div>
 
         </div>
+
+
+        <!-- LLAVES -->
+
+        <div class="cierre-bloque">
+
+            <div class="cierre-bloque-titulo">
+                <h4>🔑 Llaves de huéspedes</h4>
+            </div>
+
+            <div class="cierre-pregunta">
+
+                <span>
+                    ¿Llaves retiradas?
+                </span>
+
+                <div class="cierre-opciones">
+
+                    <label>
+                        <input
+                            type="radio"
+                            name="llaves-retiradas"
+                            value="si"
+                        >
+                        Sí
+                    </label>
+
+                    <label>
+                        <input
+                            type="radio"
+                            name="llaves-retiradas"
+                            value="no"
+                        >
+                        No
+                    </label>
+
+                    <label>
+                        <input
+                            type="radio"
+                            name="llaves-retiradas"
+                            value="no-aplica"
+                        >
+                        No aplica
+                    </label>
+
+                </div>
+
+            </div>
+
+        </div>
+
+
+        <!-- REGISTROS -->
+
+        <div class="cierre-bloque">
+
+            <div class="cierre-bloque-titulo">
+                <h4>📝 Registros</h4>
+            </div>
+
+            <label class="cierre-check">
+
+                <input
+                    type="checkbox"
+                    data-cierre-campo="registro-guardado"
+                >
+
+                <span>
+                    Hoja de registro impresa y guardada
+                </span>
+
+            </label>
+
+        </div>
+
+
+        <!-- CLOUDBEDS -->
+
+        <div class="cierre-bloque">
+
+            <div class="cierre-bloque-titulo">
+                <h4>💳 Pagos / CloudBeds</h4>
+            </div>
+
+            <label class="cierre-check">
+
+                <input
+                    type="checkbox"
+                    data-cierre-campo="reserva-marcada"
+                >
+
+                <span>
+                    Reserva marcada correctamente
+                    (check-in / check-out)
+                </span>
+
+            </label>
+
+
+            <label class="cierre-check">
+
+                <input
+                    type="checkbox"
+                    data-cierre-campo="pago-registrado"
+                >
+
+                <span>
+                    Pago registrado y adjuntado
+                </span>
+
+            </label>
+
+        </div>
+
+    </div>
+
+</section>
 
     </section>
 
@@ -2866,6 +3116,7 @@
     <script src="js/checklist.js"></script>
     <script src="js/app.js"></script>
     <script src="js/cabanas.js"></script>
+    <script src="js/cierre.js"></script>
 
 </body>
 
