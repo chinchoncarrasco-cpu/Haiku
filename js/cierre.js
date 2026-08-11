@@ -623,15 +623,65 @@ console.log(
     `Cierre Etapa 3: ${completadosEtapa3}/${totalEtapa3} - ${porcentajeEtapa3}%`
 );
 
+// ============================
+// ETAPA 4 - CABAÑAS
+// ============================
+
+let completadosEtapa4 = 0;
+const totalEtapa4 = 11;
+
+for (let numero = 1; numero <= 11; numero++) {
+
+    const cabana = cierre.cabanasCierre?.[numero] || {};
+
+    // Si está ocupada, la cabaña cuenta como 100% revisada
+    if (cabana.ocupada === true) {
+        completadosEtapa4 += 1;
+        continue;
+    }
+
+    // Controles de revisión de esta cabaña
+    const controlesCabana = [
+        cabana.perillas === true,
+        cabana.gas === true,
+        cabana.refri === true,
+        cabana.calefactor === true,
+        cabana.tv === true,
+        cabana.ac === true,
+        cabana.luces === true
+    ];
+
+    const checksCompletados =
+        controlesCabana.filter(Boolean).length;
+
+    // Cada cabaña vale máximo 1 punto.
+    // Cada check aporta 1/7.
+    completadosEtapa4 +=
+        checksCompletados / controlesCabana.length;
+}
+
+const porcentajeEtapa4 =
+    Math.round((completadosEtapa4 / totalEtapa4) * 100);
+
+console.log(
+    `Cierre Etapa 4: ${completadosEtapa4.toFixed(2)}/${totalEtapa4} - ${porcentajeEtapa4}%`
+);
+
 // =========================
 // PROGRESO GENERAL
 // =========================
 
 const completadosGeneral =
-    completados + completadosEtapa2 + completadosEtapa3;
+    completados +
+    completadosEtapa2 +
+    completadosEtapa3 +
+    completadosEtapa4;
 
 const totalGeneral =
-    total + totalEtapa2 + totalEtapa3;
+    total +
+    totalEtapa2 +
+    totalEtapa3 +
+    totalEtapa4;
 
 const porcentajeGeneral =
     Math.round((completadosGeneral / totalGeneral) * 100);
