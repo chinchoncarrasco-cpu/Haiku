@@ -2035,3 +2035,42 @@ input[type="time"].campo-cabana {
     }
 
 }
+
+/* =========================================
+   CIERRE · CAMPOS DE TEXTO
+========================================= */
+
+.cierre-campo-texto {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    width: 100%;
+}
+
+.cierre-campo-texto > span {
+    display: block;
+    width: 100%;
+    line-height: 1.4;
+}
+
+.cierre-campo-texto textarea {
+    width: 100%;
+    min-height: 110px;
+    padding: 12px 14px;
+
+    border: 1px solid #dfe4e1;
+    border-radius: 8px;
+
+    font-family: inherit;
+    font-size: 14px;
+    line-height: 1.5;
+
+    resize: vertical;
+    box-sizing: border-box;
+    background: #fff;
+}
+
+.cierre-campo-texto textarea:focus {
+    outline: none;
+    border-color: #2f7658;
+}

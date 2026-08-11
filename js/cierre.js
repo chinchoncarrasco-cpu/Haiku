@@ -10,13 +10,28 @@ function obtenerCierreDia(fecha) {
     if (!datos.cierre) {
 
         datos.cierre = {
-            salidaTemprana: "",
-            salioAntes: "",
-            llavesRetiradas: "",
-            registroGuardado: false,
-            reservaMarcada: false,
-            pagoRegistrado: false
-        };
+
+    // =========================
+    // ETAPA 1
+    // =========================
+
+    salidaTemprana: "",
+    salioAntes: "",
+    llavesRetiradas: "",
+    registroGuardado: false,
+    reservaMarcada: false,
+    pagoRegistrado: false,
+
+    // =========================
+    // ETAPA 2
+    // =========================
+
+    detallesCabanas: "",
+    pendientesHacer: "",
+    hayNovedades: "",
+    novedades: ""
+
+};
 
     }
 
@@ -108,6 +123,22 @@ const checkReservaMarcada =
 
 const checkPagoRegistrado =
     document.querySelector('[data-cierre-campo="pago-registrado"]');
+
+    // =========================================
+// CONTROLES ETAPA 2
+// =========================================
+
+const detallesCabanasInputs =
+    document.querySelectorAll('input[name="detalles-cabanas"]');
+
+const pendientesHacerInputs =
+    document.querySelectorAll('input[name="pendientes-hacer"]');
+
+const hayNovedadesInputs =
+    document.querySelectorAll('input[name="hay-novedades"]');
+
+const novedadesInput =
+    document.querySelector('[data-cierre-campo="novedades"]');
 
 
 // ========================================
@@ -203,6 +234,47 @@ guardarCheckCierre(
     "pagoRegistrado"
 );
 
+// =========================================
+// ACTIVAR GUARDADO ETAPA 2
+// =========================================
+
+guardarRadioCierre(
+    "detalles-cabanas",
+    "detallesCabanas"
+);
+
+guardarRadioCierre(
+    "pendientes-hacer",
+    "pendientesHacer"
+);
+
+guardarRadioCierre(
+    "hay-novedades",
+    "hayNovedades"
+);
+
+if (novedadesInput) {
+
+    novedadesInput.addEventListener("input", () => {
+
+        if (!fechaSeleccionada) {
+            return;
+        }
+
+        const cierre =
+            obtenerCierreDia(fechaSeleccionada);
+
+        cierre.novedades =
+            novedadesInput.value;
+
+        guardarDatos();
+
+        actualizarCierreTurno();
+
+    });
+
+}
+
 // ========================================
 // ACTUALIZAR PROGRESO DEL CIERRE
 // ========================================
@@ -246,12 +318,57 @@ function actualizarCierreTurno() {
         `Cierre Etapa 1: ${completados}/${total} - ${porcentaje}%`
     );
 
+    // =========================================
+// ETAPA 2
+// =========================================
+
+const controlesEtapa2 = [
+
+    cierre.detallesCabanas === "si" ||
+    cierre.detallesCabanas === "pendientes",
+
+    cierre.pendientesHacer === "si" ||
+    cierre.pendientesHacer === "no",
+
+    cierre.hayNovedades === "no" ||
+    cierre.hayNovedades === "si"
+
+];
+
+const completadosEtapa2 =
+    controlesEtapa2.filter(Boolean).length;
+
+const totalEtapa2 =
+    controlesEtapa2.length;
+
+const porcentajeEtapa2 =
+    Math.round(
+        (completadosEtapa2 / totalEtapa2) * 100
+    );
+
+console.log(
+    `Cierre Etapa 2: ${completadosEtapa2}/${totalEtapa2} - ${porcentajeEtapa2}%`
+);
+
+// =========================
+// PROGRESO GENERAL
+// =========================
+
+const completadosGeneral =
+    completados + completadosEtapa2;
+
+const totalGeneral =
+    total + totalEtapa2;
+
+const porcentajeGeneral =
+    Math.round((completadosGeneral / totalGeneral) * 100);
+
     // Actualizar porcentaje visual
     const porcentajeElemento =
     document.getElementById("cierre-porcentaje");
 
     if (porcentajeElemento) {
-    porcentajeElemento.textContent = `${porcentaje}%`;
+    porcentajeElemento.textContent = `${porcentajeGeneral}%`;
     }
 
     // Actualizar barra visual
@@ -259,7 +376,7 @@ function actualizarCierreTurno() {
     document.getElementById("cierre-barra-progreso");
 
     if (barraProgreso) {
-    barraProgreso.style.width = `${porcentaje}%`;
+    barraProgreso.style.width = `${porcentajeGeneral}%`;
     }
 
     }
