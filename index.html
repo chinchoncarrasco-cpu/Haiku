@@ -2988,78 +2988,141 @@
         </div>
 
 
-        <!-- LLAVES -->
+<!-- LLAVES DE RECEPCIÓN -->
 
-        <div class="cierre-bloque">
+<div class="cierre-bloque cierre-llaves-recepcion">
 
-            <div class="cierre-bloque-titulo">
-                <h4>🔑 Llaves de huéspedes</h4>
-            </div>
+    <div class="cierre-bloque-titulo">
+        <h4>🔑 Llaves de recepción</h4>
+    </div>
 
-            <div class="cierre-pregunta">
+    <p class="cierre-card-descripcion">
+        Verificación final de llaves antes de cerrar el turno.
+    </p>
 
-                <span>
-                    ¿Llaves retiradas?
-                </span>
+    <div class="cierre-llaves-grid">
 
-                <div class="cierre-opciones">
+        <label class="cierre-check">
+            <input type="checkbox" data-cierre-llave="tonel">
+            <span>Llave Tonel <small>(Negra)</small></span>
+        </label>
 
-                    <label>
-                        <input
-                            type="radio"
-                            name="llaves-retiradas"
-                            value="si"
-                        >
-                        Sí
-                    </label>
+        <label class="cierre-check">
+            <input type="checkbox" data-cierre-llave="jacuzzi">
+            <span>Llave Jacuzzi <small>(Azul)</small></span>
+        </label>
 
-                    <label>
-                        <input
-                            type="radio"
-                            name="llaves-retiradas"
-                            value="no"
-                        >
-                        No
-                    </label>
+        <label class="cierre-check">
+            <input type="checkbox" data-cierre-llave="lavanderia">
+            <span>Llave Lavandería</span>
+        </label>
 
-                    <label>
-                        <input
-                            type="radio"
-                            name="llaves-retiradas"
-                            value="no-aplica"
-                        >
-                        No aplica
-                    </label>
+        <label class="cierre-check">
+            <input type="checkbox" data-cierre-llave="masajes">
+            <span>Sala de Masajes <small>(Verde Claro)</small></span>
+        </label>
 
-                </div>
+        <label class="cierre-check">
+            <input type="checkbox" data-cierre-llave="generadores">
+            <span>Generadores y Camas Adicionales <small>(Madera redonda)</small></span>
+        </label>
 
-            </div>
+        <label class="cierre-check">
+            <input type="checkbox" data-cierre-llave="jardineria">
+            <span>Jardinería <small>(Verde Claro)</small></span>
+        </label>
 
-        </div>
+        <label class="cierre-check">
+            <input type="checkbox" data-cierre-llave="marcelo">
+            <span>Llave de Marcelo <small>(Verde Oscuro)</small></span>
+        </label>
 
+        <label class="cierre-check">
+            <input type="checkbox" data-cierre-llave="cisterna">
+            <span>Cisterna</span>
+        </label>
+
+        <label class="cierre-check">
+            <input type="checkbox" data-cierre-llave="internet">
+            <span>Caja principal internet <small>(Naranja)</small></span>
+        </label>
+
+        <label class="cierre-check">
+            <input type="checkbox" data-cierre-llave="gas11">
+            <span>Gas CAB 11 <small>(Azul Oscura)</small></span>
+        </label>
+
+        <label class="cierre-check">
+            <input type="checkbox" data-cierre-llave="torreon">
+            <span>Torreón <small>(Azul Oscura)</small></span>
+        </label>
+
+    </div>
+
+</div>
 
         <!-- REGISTROS -->
 
-        <div class="cierre-bloque">
+<div class="cierre-bloque cierre-bloque-evidencia">
 
-            <div class="cierre-bloque-titulo">
-                <h4>📝 Registros</h4>
-            </div>
+    <div class="cierre-bloque-titulo">
+        <h4>📝 Registros</h4>
+    </div>
 
-            <label class="cierre-check">
+    <label class="cierre-check">
+        <input
+            type="checkbox"
+            data-cierre-campo="registro-guardado"
+            data-evidencia-check="registro"
+        >
+        <span>Hoja de registro impresa y guardada</span>
+    </label>
 
+    <!-- EVIDENCIA -->
+    <div class="cierre-evidencia" data-evidencia="registro" hidden>
+
+        <div class="cierre-evidencia-titulo">
+            📷 Evidencia
+        </div>
+
+        <div class="cierre-evidencia-acciones">
+
+            <label class="cierre-evidencia-boton">
+                📁 Subir imagen
                 <input
-                    type="checkbox"
-                    data-cierre-campo="registro-guardado"
+                    type="file"
+                    accept="image/*"
+                    data-evidencia-input="registro"
+                    hidden
                 >
-
-                <span>
-                    Hoja de registro impresa y guardada
-                </span>
-
             </label>
 
+            <button
+                type="button"
+                class="cierre-evidencia-boton"
+                data-evidencia-pegar="registro"
+            >
+                📋 Pegar imagen
+            </button>
+
         </div>
+
+        <div
+            class="cierre-evidencia-zona"
+            data-evidencia-zona="registro"
+            tabindex="0"
+        >
+            <span>Haz clic aquí y presiona Ctrl + V para pegar una imagen</span>
+        </div>
+
+        <div
+            class="cierre-evidencia-preview"
+            data-evidencia-preview="registro"
+        ></div>
+
+    </div>
+
+</div>
 
 
         <!-- CLOUDBEDS -->

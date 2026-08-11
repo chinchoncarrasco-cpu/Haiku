@@ -2186,3 +2186,155 @@ input[type="time"].campo-cabana {
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================================
+   CIERRE DE TURNO - LLAVES DE RECEPCIÓN
+   ========================================= */
+
+.cierre-llaves-recepcion {
+    padding: 18px;
+}
+
+.cierre-llaves-recepcion .cierre-bloque-titulo {
+    margin-bottom: 4px;
+}
+
+.cierre-llaves-recepcion .cierre-bloque-titulo h4 {
+    margin: 0;
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.cierre-llaves-recepcion .cierre-card-descripcion {
+    margin: 0 0 12px 0;
+    font-size: 12px;
+    color: #6f756f;
+}
+
+/* Las llaves se distribuyen en 2 columnas */
+.cierre-llaves-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    column-gap: 22px;
+    row-gap: 0;
+}
+
+.cierre-llaves-grid .cierre-check {
+    min-height: 38px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 7px 0;
+    margin: 0;
+    border-bottom: 1px solid #e8ebe8;
+}
+
+.cierre-llaves-grid .cierre-check span {
+    font-size: 12px;
+    line-height: 1.25;
+}
+
+.cierre-llaves-grid .cierre-check small {
+    font-size: 10px;
+    color: #737973;
+}
+
+/* En pantallas pequeñas vuelve a una columna */
+@media (max-width: 700px) {
+    .cierre-llaves-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* =========================================
+   CIERRE DE TURNO - EVIDENCIAS / IMÁGENES
+   ========================================= */
+
+.cierre-bloque-evidencia {
+    position: relative;
+}
+
+/* Contenedor que aparece al marcar el check */
+.cierre-evidencia {
+    margin-top: 12px;
+    padding: 14px;
+    border: 1px solid #dfe5e1;
+    border-radius: 10px;
+    background: #f8faf9;
+}
+
+.cierre-evidencia[hidden] {
+    display: none;
+}
+
+.cierre-evidencia-titulo {
+    margin-bottom: 10px;
+    font-size: 12px;
+    font-weight: 600;
+}
+
+/* Botones */
+.cierre-evidencia-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.cierre-evidencia-boton {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 34px;
+    padding: 7px 12px;
+    border: 1px solid #d7ddd9;
+    border-radius: 8px;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 11px;
+    color: #29312c;
+    cursor: pointer;
+}
+
+.cierre-evidencia-boton:hover {
+    background: #f1f5f2;
+}
+
+/* Zona para Ctrl + V */
+.cierre-evidencia-zona {
+    min-height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 12px;
+    border: 1px dashed #b9c5bd;
+    border-radius: 8px;
+    background: #ffffff;
+    text-align: center;
+    cursor: pointer;
+    outline: none;
+}
+
+.cierre-evidencia-zona span {
+    font-size: 11px;
+    color: #7a817c;
+}
+
+.cierre-evidencia-zona:focus {
+    border-color: #2f7657;
+}
+
+/* Imagen agregada */
+.cierre-evidencia-preview {
+    margin-top: 10px;
+}
+
+.cierre-evidencia-preview img {
+    display: block;
+    max-width: 100%;
+    max-height: 220px;
+    object-fit: contain;
+    border: 1px solid #dfe5e1;
+    border-radius: 8px;
+    background: #ffffff;
+}

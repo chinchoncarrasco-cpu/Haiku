@@ -1,4 +1,86 @@
 // ========================================
+// BASE DE DATOS DE EVIDENCIAS
+// IndexedDB
+// ========================================
+
+let dbEvidencias = null;
+
+function abrirDBEvidencias() {
+
+    return new Promise((resolve, reject) => {
+
+        const request = indexedDB.open("haikuEvidencias", 1);
+
+        request.onupgradeneeded = (event) => {
+
+            const db = event.target.result;
+
+            if (!db.objectStoreNames.contains("imagenes")) {
+                db.createObjectStore("imagenes");
+            }
+        };
+
+        request.onsuccess = (event) => {
+            dbEvidencias = event.target.result;
+            resolve(dbEvidencias);
+        };
+
+        request.onerror = () => {
+            reject(request.error);
+        };
+    });
+}
+
+
+async function guardarEvidencia(fecha, nombre, imagen) {
+
+    if (!dbEvidencias) {
+        await abrirDBEvidencias();
+    }
+
+    const clave = `${fecha}_${nombre}`;
+
+    const transaction = dbEvidencias.transaction(
+        "imagenes",
+        "readwrite"
+    );
+
+    transaction
+        .objectStore("imagenes")
+        .put(imagen, clave);
+}
+
+
+async function obtenerEvidencia(fecha, nombre) {
+
+    if (!dbEvidencias) {
+        await abrirDBEvidencias();
+    }
+
+    const clave = `${fecha}_${nombre}`;
+
+    return new Promise((resolve, reject) => {
+
+        const transaction = dbEvidencias.transaction(
+            "imagenes",
+            "readonly"
+        );
+
+        const request = transaction
+            .objectStore("imagenes")
+            .get(clave);
+
+        request.onsuccess = () => {
+            resolve(request.result || null);
+        };
+
+        request.onerror = () => {
+            reject(request.error);
+        };
+    });
+}
+
+// ========================================
 // CIERRE DE TURNO
 // ========================================
 
@@ -216,6 +298,55 @@ checksOcupadas.forEach(check => {
     const datosCabana = cierre.cabanasCierre?.[cabana];
 
     check.checked = datosCabana?.ocupada === true;
+});
+
+// ========================================
+// CARGAR EVIDENCIAS GUARDADAS
+// ========================================
+
+document.querySelectorAll("[data-evidencia-preview]").forEach(async (preview) => {
+
+    const nombre = preview.dataset.evidenciaPreview;
+
+    const imagenGuardada = await obtenerEvidencia(fecha, nombre);
+
+    const zona = document.querySelector(
+        `[data-evidencia-zona="${nombre}"]`
+    );
+
+    if (imagenGuardada) {
+
+    preview.innerHTML = "";
+
+    const imagen = document.createElement("img");
+
+    imagen.src = imagenGuardada;
+    imagen.alt = "Evidencia guardada";
+
+    preview.appendChild(imagen);
+
+    preview.style.display = "block";
+
+    if (zona) {
+        zona.style.display = "none";
+    }
+
+    // Mantener abierto el bloque de evidencia
+    const bloqueEvidencia = preview.closest("[data-evidencia]");
+
+    if (bloqueEvidencia) {
+        bloqueEvidencia.hidden = false;
+    }
+
+} else {
+
+    preview.innerHTML = "";
+    preview.style.display = "none";
+
+    if (zona) {
+        zona.style.display = "";
+    }
+}
 });
 
 }
@@ -521,6 +652,195 @@ checksCabanasOcupadas.forEach(check => {
         actualizarCierreTurno();
     });
 
+});
+
+// ========================================
+// EVIDENCIAS - MOSTRAR AL MARCAR CHECK
+// ========================================
+
+const checksEvidencia = document.querySelectorAll(
+    "[data-evidencia-check]"
+);
+
+checksEvidencia.forEach(check => {
+
+    check.addEventListener("change", () => {
+
+        const nombre = check.dataset.evidenciaCheck;
+
+        const evidencia = document.querySelector(
+            `[data-evidencia="${nombre}"]`
+        );
+
+        if (!evidencia) return;
+
+        // Mostrar evidencia cuando el check está marcado
+        evidencia.hidden = !check.checked;
+
+        // Dar foco automáticamente a la zona de pegado
+        if (check.checked) {
+
+            const zona = evidencia.querySelector(
+                `[data-evidencia-zona="${nombre}"]`
+            );
+
+            if (zona) {
+                zona.focus();
+            }
+        }
+
+    });
+
+});
+
+// ========================================
+// EVIDENCIAS - SUBIR IMAGEN
+// ========================================
+
+const inputsEvidencia = document.querySelectorAll(
+    "[data-evidencia-input]"
+);
+
+inputsEvidencia.forEach(input => {
+
+    input.addEventListener("change", () => {
+
+        const archivo = input.files[0];
+
+        if (!archivo) return;
+
+        // Solo aceptar imágenes
+        if (!archivo.type.startsWith("image/")) {
+            alert("Selecciona un archivo de imagen.");
+            input.value = "";
+            return;
+        }
+
+        const nombre = input.dataset.evidenciaInput;
+
+        const preview = document.querySelector(
+            `[data-evidencia-preview="${nombre}"]`
+        );
+
+        if (!preview) return;
+
+        const lector = new FileReader();
+
+        lector.onload = () => {
+
+            preview.innerHTML = "";
+
+            const imagen = document.createElement("img");
+
+            imagen.src = lector.result;
+            imagen.alt = "Evidencia adjunta";
+
+            preview.appendChild(imagen);
+
+        };
+
+        lector.readAsDataURL(archivo);
+
+    });
+
+});
+
+// ========================================
+// EVIDENCIAS - PEGAR IMAGEN
+// ========================================
+
+const zonasPegarEvidencia = document.querySelectorAll(
+    "[data-evidencia-zona]"
+);
+
+zonasPegarEvidencia.forEach(zona => {
+
+    // Al hacer clic, el cuadro queda preparado para Ctrl + V
+    zona.addEventListener("click", () => {
+        zona.focus();
+    });
+
+    // Escuchar Ctrl + V dentro del cuadro
+    zona.addEventListener("paste", (evento) => {
+
+        const items = evento.clipboardData?.items;
+
+        if (!items) return;
+
+        for (const item of items) {
+
+            if (!item.type.startsWith("image/")) {
+                continue;
+            }
+
+            evento.preventDefault();
+
+            const archivo = item.getAsFile();
+
+            if (!archivo) return;
+
+            const nombre = zona.dataset.evidenciaZona;
+
+            const preview = document.querySelector(
+                `[data-evidencia-preview="${nombre}"]`
+            );
+
+            if (!preview) return;
+
+            const lector = new FileReader();
+
+            lector.onload = () => {
+
+                preview.innerHTML = "";
+
+                const imagen = document.createElement("img");
+
+                imagen.src = lector.result;
+                imagen.alt = "Evidencia pegada";
+
+                preview.appendChild(imagen);
+                
+                // GUARDAR IMAGEN POR FECHA
+                guardarEvidencia(fechaSeleccionada, nombre, lector.result);
+
+                // Ocultar el cuadro de instrucciones
+                zona.style.display = "none";
+
+                // Mostrar el preview
+                preview.style.display = "block";
+            };
+
+            lector.readAsDataURL(archivo);
+
+            break;
+        }
+    });
+});
+
+
+// ========================================
+// BOTÓN PEGAR IMAGEN
+// ========================================
+
+const botonesPegarEvidencia = document.querySelectorAll(
+    "[data-evidencia-pegar]"
+);
+
+botonesPegarEvidencia.forEach(boton => {
+
+    boton.addEventListener("click", () => {
+
+        const nombre = boton.dataset.evidenciaPegar;
+
+        const zona = document.querySelector(
+            `[data-evidencia-zona="${nombre}"]`
+        );
+
+        if (!zona) return;
+
+        zona.style.display = "flex";
+        zona.focus();
+    });
 });
 
 // ========================================
