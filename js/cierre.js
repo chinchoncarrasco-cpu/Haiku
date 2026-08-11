@@ -51,10 +51,16 @@ function cargarCierreDia(fecha) {
     // ----------------
 
     const radios = [
-        ["salida-temprana", cierre.salidaTemprana],
-        ["salio-antes", cierre.salioAntes],
-        ["llaves-retiradas", cierre.llavesRetiradas]
-    ];
+    // ETAPA 1
+    ["salida-temprana", cierre.salidaTemprana],
+    ["salio-antes", cierre.salioAntes],
+    ["llaves-retiradas", cierre.llavesRetiradas],
+
+    // ETAPA 2
+    ["detalles-cabanas", cierre.detallesCabanas],
+    ["pendientes-hacer", cierre.pendientesHacer],
+    ["hay-novedades", cierre.hayNovedades]
+];
 
     radios.forEach(([nombre, valor]) => {
 
@@ -98,6 +104,18 @@ function cargarCierreDia(fecha) {
 
     if (pago) {
         pago.checked = cierre.pagoRegistrado === true;
+    }
+    
+    // ----------------
+    // TEXTAREA ETAPA 2
+    // ----------------
+
+    const novedades = document.querySelector(
+        '[data-cierre-campo="novedades"]'
+    );
+
+    if (novedades) {
+        novedades.value = cierre.novedades || "";
     }
 
 }
