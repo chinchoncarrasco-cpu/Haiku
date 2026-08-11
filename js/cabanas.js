@@ -336,6 +336,15 @@ document
 
 function abrirRevisionCabana(numeroCabana) {
 
+    // ========================================
+    // RECORDAR REVISIÓN ABIERTA
+    // ========================================
+
+    localStorage.setItem(
+    "haikuRevisionCabana",
+    numeroCabana
+    );
+
     if (!fechaSeleccionada) {
         return;
     }
@@ -461,6 +470,12 @@ function abrirRevisionCabana(numeroCabana) {
 
 function volverListadoCabanas() {
 
+    // ========================================
+    // BORRAR REVISIÓN ABIERTA
+    // ========================================
+
+    localStorage.removeItem("haikuRevisionCabana");
+
     revisionIndividual.classList.remove("activa");
 
     listaRevisionCabanas.style.display = "";
@@ -489,5 +504,20 @@ if (botonMenuCabanas) {
         volverListadoCabanas();
 
     });
+
+}
+
+// ========================================
+// RESTAURAR REVISIÓN ABIERTA AL RECARGAR
+// ========================================
+
+const revisionCabanaGuardada =
+    localStorage.getItem("haikuRevisionCabana");
+
+if (revisionCabanaGuardada) {
+
+    abrirRevisionCabana(
+        revisionCabanaGuardada
+    );
 
 }

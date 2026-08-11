@@ -11,6 +11,15 @@ botonesMenu.forEach(boton => {
 
         const seccionDestino = boton.dataset.seccion;
 
+        // ========================================
+        // RECORDAR SECCIÓN ACTUAL
+        // ========================================
+
+        localStorage.setItem(
+        "haikuSeccionActual",
+        seccionDestino
+        );
+
         // Ocultar todas las secciones
         seccionesApp.forEach(seccion => {
             seccion.classList.remove("activa");
@@ -33,6 +42,54 @@ botonesMenu.forEach(boton => {
     });
 
 });
+
+// ========================================
+// RESTAURAR SECCIÓN AL RECARGAR
+// ========================================
+
+const seccionGuardada =
+    localStorage.getItem("haikuSeccionActual");
+
+if (seccionGuardada) {
+
+    // Ocultar todas las secciones
+
+    seccionesApp.forEach(seccion => {
+        seccion.classList.remove("activa");
+    });
+
+
+    // Quitar activo de todos los botones
+
+    botonesMenu.forEach(boton => {
+        boton.classList.remove("activo");
+    });
+
+
+    // Recuperar sección guardada
+
+    const seccionRestaurada =
+        document.getElementById(
+            `seccion-${seccionGuardada}`
+        );
+
+
+    const botonRestaurado =
+        document.querySelector(
+            `.menu-item[data-seccion="${seccionGuardada}"]`
+        );
+
+
+    if (seccionRestaurada) {
+        seccionRestaurada.classList.add("activa");
+    }
+
+
+    if (botonRestaurado) {
+        botonRestaurado.classList.add("activo");
+    }
+
+}
 
 // ========================================
 // DATOS OPERATIVOS POR FECHA
