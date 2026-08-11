@@ -5,6 +5,16 @@
 const botonesMenu = document.querySelectorAll(".menu-item[data-seccion]");
 const seccionesApp = document.querySelectorAll(".seccion-app");
 
+// ========================================
+// PANEL AGREGAR NOTA
+// ========================================
+
+const botonAgregarNota =
+    document.getElementById("agregar-nota");
+
+const panelAgregarNota =
+    document.getElementById("panel-agregar-nota");
+
 botonesMenu.forEach(boton => {
 
     boton.addEventListener("click", () => {
@@ -113,11 +123,17 @@ function obtenerDatosDia(fecha) {
         datosPorFecha[fecha] = {
             encargado: "",
             notas: "",
+            notasOperativas: [],
             cabanas: {},
             servicios: [],
             pagos: []
         };
 
+    }
+
+    if (!datosPorFecha[fecha].notasOperativas) {
+         datosPorFecha[fecha].notasOperativas = [];
+    
     }
 
     return datosPorFecha[fecha];
@@ -148,8 +164,9 @@ function cargarDatosDia(fecha) {
 
     notasDia.value = datos.notas || "";
 
-    cargarCabanasDia(fecha);
+    // cargarCabanasDia(fecha);
 
+    mostrarNotasOperativas(fecha);
 }
 
 
@@ -176,3 +193,124 @@ notasDia.addEventListener("input", () => {
 // ========================================
 
 cargarDatosDia(fechaSeleccionada);
+
+// ========================================
+// ABRIR PANEL AGREGAR NOTA
+// ========================================
+
+botonAgregarNota.addEventListener("click", () => {
+
+    panelAgregarNota.classList.add("activo");
+
+});
+
+// ========================================
+// CERRAR PANEL AGREGAR NOTA
+// ========================================
+
+const botonCerrarNota =
+    document.getElementById("cerrar-panel-nota");
+
+const botonCancelarNota =
+    document.getElementById("cancelar-nota");
+
+const botonGuardarNota =
+    document.getElementById("guardar-nota");
+
+const selectorNotaCabana =
+    document.getElementById("nota-cabana");
+
+const textoNota =
+    document.getElementById("nota-texto");
+
+
+function cerrarPanelNota() {
+
+    panelAgregarNota.classList.remove("activo");
+
+}
+
+
+botonCerrarNota.addEventListener("click", () => {
+
+    cerrarPanelNota();
+
+});
+
+
+botonCancelarNota.addEventListener("click", () => {
+
+    cerrarPanelNota();
+
+});
+
+// ========================================
+// MOSTRAR NOTAS OPERATIVAS EN LA TABLA
+// CAB 1 A CAB 11
+// ========================================
+
+function mostrarNotasOperativas(fecha) {
+
+    const datos = obtenerDatosDia(fecha);
+
+    for (let numeroCabana = 1; numeroCabana <= 11; numeroCabana++) {
+
+        const cajaNota =
+            document.querySelector(
+                `[data-nota-cabana="${numeroCabana}"]`
+            );
+
+        if (!cajaNota) {
+            continue;
+        }
+
+        const notasCabana =
+            datos.notasOperativas.filter(nota => {
+                return String(nota.cabana) === String(numeroCabana);
+            });
+
+        if (notasCabana.length === 0) {
+            cajaNota.textContent = "";
+            continue;
+        }
+
+        cajaNota.textContent =
+            notasCabana
+                .map(nota => nota.texto)
+                .join(" · ");
+    }
+}
+
+// ========================================
+// GUARDAR NOTA OPERATIVA
+// ========================================
+
+botonGuardarNota.addEventListener("click", () => {
+
+    if (!fechaSeleccionada) {
+        return;
+    }
+
+    const nota = textoNota.value.trim();
+
+    if (!nota) {
+        return;
+    }
+
+    const datos = obtenerDatosDia(fechaSeleccionada);
+
+    datos.notasOperativas.push({
+        cabana: selectorNotaCabana.value,
+        texto: nota
+    });
+
+    guardarDatos();
+
+    mostrarNotasOperativas(fechaSeleccionada);
+
+    textoNota.value = "";
+    selectorNotaCabana.value = "";
+
+    cerrarPanelNota();
+
+});

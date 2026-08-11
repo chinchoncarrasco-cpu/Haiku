@@ -147,8 +147,12 @@
                     <p>Operación general del día</p>
                 </div>
 
-                <button class="boton-secundario">
-                    + Agregar nota
+                <button
+                    type="button"
+                    id="agregar-nota"
+                    class="boton-secundario"
+                >
+                + Agregar nota
                 </button>
             </div>
 
@@ -162,6 +166,7 @@
                             <th>Cabaña</th>
                             <th>Estado</th>
                             <th>Aseo</th>
+                            <th>Notas</th>
                             <th>Ingreso</th>
                             <th>Servicios</th>
                             <th>Estado final</th>
@@ -285,6 +290,14 @@
 
 </div>
 
+</td>
+
+<!-- NOTAS -->
+<td class="celda-notas">
+    <div
+        class="nota-cabana"
+        data-nota-cabana="1"
+    ></div>
 </td>
 
     <td>
@@ -447,6 +460,14 @@
 
 </td>
 
+<!-- NOTAS -->
+<td class="celda-notas">
+    <div
+        class="nota-cabana"
+        data-nota-cabana="2"
+    ></div>
+</td>
+
     <td>
         <input
             type="time"
@@ -605,6 +626,14 @@
 
 </div>
 
+</td>
+
+<!-- NOTAS -->
+<td class="celda-notas">
+    <div
+        class="nota-cabana"
+        data-nota-cabana="3"
+    ></div>
 </td>
 
     <td>
@@ -767,6 +796,14 @@
 
 </td>
 
+<!-- NOTAS -->
+<td class="celda-notas">
+    <div
+        class="nota-cabana"
+        data-nota-cabana="4"
+    ></div>
+</td>
+
     <td>
         <input
             type="time"
@@ -925,6 +962,14 @@
 
 </div>
 
+</td>
+
+<!-- NOTAS -->
+<td class="celda-notas">
+    <div
+        class="nota-cabana"
+        data-nota-cabana="5"
+    ></div>
 </td>
 
     <td>
@@ -1087,6 +1132,14 @@
 
 </td>
 
+<!-- NOTAS -->
+<td class="celda-notas">
+    <div
+        class="nota-cabana"
+        data-nota-cabana="6"
+    ></div>
+</td>
+
     <td>
         <input
             type="time"
@@ -1245,6 +1298,14 @@
 
 </div>
 
+</td>
+
+<!-- NOTAS -->
+<td class="celda-notas">
+    <div
+        class="nota-cabana"
+        data-nota-cabana="7"
+    ></div>
 </td>
 
     <td>
@@ -1407,6 +1468,14 @@
 
 </td>
 
+<!-- NOTAS -->
+<td class="celda-notas">
+    <div
+        class="nota-cabana"
+        data-nota-cabana="8"
+    ></div>
+</td>
+
     <td>
         <input
             type="time"
@@ -1565,6 +1634,14 @@
 
 </div>
 
+</td>
+
+<!-- NOTAS -->
+<td class="celda-notas">
+    <div
+        class="nota-cabana"
+        data-nota-cabana="9"
+    ></div>
 </td>
 
     <td>
@@ -1727,6 +1804,14 @@
 
 </td>
 
+<!-- NOTAS -->
+<td class="celda-notas">
+    <div
+        class="nota-cabana"
+        data-nota-cabana="10"
+    ></div>
+</td>
+
     <td>
         <input
             type="time"
@@ -1887,6 +1972,14 @@
 
 </td>
 
+<!-- NOTAS -->
+<td class="celda-notas">
+    <div
+        class="nota-cabana"
+        data-nota-cabana="11"
+    ></div>
+</td>
+
     <td>
         <input
             type="time"
@@ -1938,6 +2031,91 @@
             </div>
 
         </section>
+
+        <!-- =========================
+        PANEL AGREGAR NOTA
+        ========================== -->
+
+<div id="panel-agregar-nota">
+
+    <div class="panel-nota">
+
+        <div class="panel-nota-cabecera">
+
+            <div>
+                <p class="subtitulo">NOTA OPERATIVA</p>
+                <h3>Agregar nota</h3>
+            </div>
+
+            <button
+                type="button"
+                id="cerrar-panel-nota"
+                class="boton-cerrar-nota"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <label class="campo-nota">
+            Cabaña
+
+            <select id="nota-cabana">
+
+                <option value="">
+                    General
+                </option>
+
+                <option value="1">CAB 1</option>
+                <option value="2">CAB 2</option>
+                <option value="3">CAB 3</option>
+                <option value="4">CAB 4</option>
+                <option value="5">CAB 5</option>
+                <option value="6">CAB 6</option>
+                <option value="7">CAB 7</option>
+                <option value="8">CAB 8</option>
+                <option value="9">CAB 9</option>
+                <option value="10">CAB 10</option>
+                <option value="11">CAB 11</option>
+
+            </select>
+        </label>
+
+
+        <label class="campo-nota">
+            Nota
+
+            <textarea
+                id="nota-texto"
+                placeholder="Ej: Agregar 2 batas&#10;Sacar alfombra&#10;Preparar cama adicional"
+            ></textarea>
+        </label>
+
+
+        <div class="panel-nota-acciones">
+
+            <button
+                type="button"
+                id="cancelar-nota"
+                class="boton-secundario"
+            >
+                Cancelar
+            </button>
+
+            <button
+                type="button"
+                id="guardar-nota"
+                class="boton-principal"
+            >
+                Guardar nota
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 
 
         <!-- =========================
