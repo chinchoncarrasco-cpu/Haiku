@@ -103,6 +103,10 @@ function obtenerCierreDia(fecha) {
             registroGuardado: false,
             reservaMarcada: false,
             pagoRegistrado: false,
+            // MANAGER
+            managerPagos: false,
+            managerCaja: false,
+            managerValeSalida: false,
 
             // =========================
             // ETAPA 2
@@ -194,6 +198,22 @@ function cargarCierreDia(fecha) {
         '[data-cierre-campo="pago-registrado"]'
     );
 
+    // ==========================
+    // MANAGER
+    // ==========================
+
+    const managerPagos = document.querySelector(
+    '[data-cierre-campo="manager-pagos"]'
+    );
+
+    const managerCaja = document.querySelector(
+    '[data-cierre-campo="manager-caja"]'
+    );
+
+    const managerValeSalida = document.querySelector(
+    '[data-cierre-campo="manager-vale-salida"]'
+    );
+
 
     if (registro) {
         registro.checked = cierre.registroGuardado === true;
@@ -205,6 +225,33 @@ function cargarCierreDia(fecha) {
 
     if (pago) {
         pago.checked = cierre.pagoRegistrado === true;
+    
+    // ==============================
+// CARGAR LLAVES DE RECEPCIÓN
+// ==============================
+
+const checksLlavesRecepcionCargar = document.querySelectorAll(
+    '[data-cierre-llave]'
+);
+
+checksLlavesRecepcionCargar.forEach(check => {
+    const llave = check.dataset.cierreLlave;
+
+    check.checked =
+        cierre.llavesRecepcion?.[llave] === true;
+});
+
+    if (managerPagos) {
+    managerPagos.checked = cierre.managerPagos === true;
+    }
+
+    if (managerCaja) {
+    managerCaja.checked = cierre.managerCaja === true;
+    }
+
+    if (managerValeSalida) {
+    managerValeSalida.checked = cierre.managerValeSalida === true;
+    }
     
         // =========================
 // CHECKBOXES ETAPA 3 - TINAJAS
@@ -510,6 +557,57 @@ guardarCheckCierre(
 guardarCheckCierre(
     checkPagoRegistrado,
     "pagoRegistrado"
+);
+
+// ==============================
+// GUARDAR LLAVES DE RECEPCIÓN
+// ==============================
+
+const checksLlavesRecepcion = document.querySelectorAll(
+    '[data-cierre-llave]'
+);
+
+checksLlavesRecepcion.forEach(check => {
+
+    check.addEventListener("change", () => {
+
+        if (!fechaSeleccionada) {
+            return;
+        }
+
+        const llave = check.dataset.cierreLlave;
+
+        const cierre = obtenerCierreDia(fechaSeleccionada);
+
+        if (!cierre.llavesRecepcion) {
+            cierre.llavesRecepcion = {};
+        }
+
+        cierre.llavesRecepcion[llave] = check.checked;
+
+        guardarDatos();
+        actualizarCierreTurno();
+    });
+
+});
+
+// ==========================
+// GUARDAR MANAGER
+// ==========================
+
+guardarCheckCierre(
+    document.querySelector('[data-cierre-campo="manager-pagos"]'),
+    "managerPagos"
+);
+
+guardarCheckCierre(
+    document.querySelector('[data-cierre-campo="manager-caja"]'),
+    "managerCaja"
+);
+
+guardarCheckCierre(
+    document.querySelector('[data-cierre-campo="manager-vale-salida"]'),
+    "managerValeSalida"
 );
 
 // =========================================

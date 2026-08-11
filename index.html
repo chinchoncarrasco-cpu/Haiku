@@ -3127,43 +3127,290 @@
 
         <!-- CLOUDBEDS -->
 
-        <div class="cierre-bloque">
+<div class="cierre-bloque">
 
-            <div class="cierre-bloque-titulo">
-                <h4>💳 Pagos / CloudBeds</h4>
+    <div class="cierre-bloque-titulo">
+        <h4>💳 Pagos / CloudBeds</h4>
+    </div>
+
+    <!-- RESERVA MARCADA -->
+    <div class="cierre-item-evidencia">
+
+        <label class="cierre-check">
+            <input
+                type="checkbox"
+                data-cierre-campo="reserva-marcada"
+                data-evidencia-check="cloudbeds-reserva"
+            >
+            <span>
+                Reserva marcada correctamente (check-in / check-out)
+            </span>
+        </label>
+
+        <div
+            class="cierre-evidencia"
+            data-evidencia="cloudbeds-reserva"
+            hidden
+        >
+
+            <div class="cierre-evidencia-titulo">
+                📷 Evidencia
             </div>
 
-            <label class="cierre-check">
+            <div class="cierre-evidencia-acciones">
 
-                <input
-                    type="checkbox"
-                    data-cierre-campo="reserva-marcada"
+                <label class="cierre-evidencia-boton">
+                    📁 Subir imagen
+
+                    <input
+                        type="file"
+                        accept="image/*"
+                        data-evidencia-input="cloudbeds-reserva"
+                        hidden
+                    >
+                </label>
+
+                <button
+                    type="button"
+                    class="cierre-evidencia-boton"
+                    data-evidencia-pegar="cloudbeds-reserva"
                 >
+                    📋 Pegar imagen
+                </button>
 
+            </div>
+
+            <div
+                class="cierre-evidencia-zona"
+                data-evidencia-zona="cloudbeds-reserva"
+                tabindex="0"
+            >
                 <span>
-                    Reserva marcada correctamente
-                    (check-in / check-out)
+                    Haz clic aquí y presiona Ctrl + V para pegar una imagen
                 </span>
+            </div>
 
-            </label>
-
-
-            <label class="cierre-check">
-
-                <input
-                    type="checkbox"
-                    data-cierre-campo="pago-registrado"
-                >
-
-                <span>
-                    Pago registrado y adjuntado
-                </span>
-
-            </label>
+            <div
+                class="cierre-evidencia-preview"
+                data-evidencia-preview="cloudbeds-reserva"
+            ></div>
 
         </div>
 
     </div>
+
+    <!-- PAGO REGISTRADO -->
+    <div class="cierre-item-evidencia">
+
+        <label class="cierre-check">
+            <input
+                type="checkbox"
+                data-cierre-campo="pago-registrado"
+                data-evidencia-check="cloudbeds-pago"
+            >
+            <span>
+                Pago registrado y adjuntado
+            </span>
+        </label>
+
+        <div
+            class="cierre-evidencia"
+            data-evidencia="cloudbeds-pago"
+            hidden
+        >
+
+            <div class="cierre-evidencia-titulo">
+                📷 Evidencia
+            </div>
+
+            <div class="cierre-evidencia-acciones">
+
+                <label class="cierre-evidencia-boton">
+                    📁 Subir imagen
+
+                    <input
+                        type="file"
+                        accept="image/*"
+                        data-evidencia-input="cloudbeds-pago"
+                        hidden
+                    >
+                </label>
+
+                <button
+                    type="button"
+                    class="cierre-evidencia-boton"
+                    data-evidencia-pegar="cloudbeds-pago"
+                >
+                    📋 Pegar imagen
+                </button>
+
+            </div>
+
+            <div
+                class="cierre-evidencia-zona"
+                data-evidencia-zona="cloudbeds-pago"
+                tabindex="0"
+            >
+                <span>
+                    Haz clic aquí y presiona Ctrl + V para pegar una imagen
+                </span>
+            </div>
+
+            <div
+                class="cierre-evidencia-preview"
+                data-evidencia-preview="cloudbeds-pago"
+            ></div>
+
+        </div>
+
+    </div>
+
+</div>
+
+<!-- MANAGER / CAJA -->
+
+<div class="cierre-bloque">
+
+    <div class="cierre-bloque-titulo">
+        <h4>💻 Manager / Impresión de caja y comprobantes</h4>
+    </div>
+
+    <!-- PAGOS AGREGADOS A MANAGER -->
+    <div class="cierre-item-evidencia">
+
+        <label class="cierre-check">
+            <input
+                type="checkbox"
+                data-cierre-campo="manager-pagos"
+                data-evidencia-check="manager-pagos"
+            >
+            <span>¿Se agregaron todos los pagos a Manager?</span>
+        </label>
+
+        <div
+            class="cierre-evidencia"
+            data-evidencia="manager-pagos"
+            hidden
+        >
+            <div class="cierre-evidencia-titulo">
+                📷 Comprobantes
+            </div>
+
+            <div class="cierre-evidencia-acciones">
+
+                <label class="cierre-evidencia-boton">
+                    📁 Subir imagen
+                    <input
+                        type="file"
+                        accept="image/*"
+                        data-evidencia-input="manager-pagos"
+                        hidden
+                    >
+                </label>
+
+                <button
+                    type="button"
+                    class="cierre-evidencia-boton"
+                    data-evidencia-pegar="manager-pagos"
+                >
+                    📋 Pegar imagen
+                </button>
+
+            </div>
+
+            <div
+                class="cierre-evidencia-zona"
+                data-evidencia-zona="manager-pagos"
+                tabindex="0"
+            >
+                <span>Haz clic aquí y presiona Ctrl + V para pegar una imagen</span>
+            </div>
+
+            <div
+                class="cierre-evidencia-preview"
+                data-evidencia-preview="manager-pagos"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- IMPRESIÓN DE CAJA -->
+    <div class="cierre-item-evidencia">
+
+        <label class="cierre-check">
+            <input
+                type="checkbox"
+                data-cierre-campo="manager-caja"
+                data-evidencia-check="manager-caja"
+            >
+            <span>¿Impresión de caja limpia?</span>
+        </label>
+
+        <div
+            class="cierre-evidencia"
+            data-evidencia="manager-caja"
+            hidden
+        >
+            <div class="cierre-evidencia-titulo">
+                📷 Impresión de caja
+            </div>
+
+            <div class="cierre-evidencia-acciones">
+
+                <label class="cierre-evidencia-boton">
+                    📁 Subir imagen
+                    <input
+                        type="file"
+                        accept="image/*"
+                        data-evidencia-input="manager-caja"
+                        hidden
+                    >
+                </label>
+
+                <button
+                    type="button"
+                    class="cierre-evidencia-boton"
+                    data-evidencia-pegar="manager-caja"
+                >
+                    📋 Pegar imagen
+                </button>
+
+            </div>
+
+            <div
+                class="cierre-evidencia-zona"
+                data-evidencia-zona="manager-caja"
+                tabindex="0"
+            >
+                <span>Haz clic aquí y presiona Ctrl + V para pegar una imagen</span>
+            </div>
+
+            <div
+                class="cierre-evidencia-preview"
+                data-evidencia-preview="manager-caja"
+            ></div>
+
+        </div>
+
+    </div>
+
+
+    <!-- VALE DE SALIDA -->
+    <div class="cierre-item-evidencia">
+
+        <label class="cierre-check">
+            <input
+                type="checkbox"
+                data-cierre-campo="manager-vale-salida"
+            >
+            <span>¿Vale de salida cortesías listo?</span>
+        </label>
+
+    </div>
+
+</div>
 
 </section>
 
