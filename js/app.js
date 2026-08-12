@@ -314,3 +314,51 @@ botonGuardarNota.addEventListener("click", () => {
     cerrarPanelNota();
 
 });
+
+// =====================================================
+// ESTADO FINAL · TEXTO COMPACTO EN CELULAR
+// =====================================================
+
+function actualizarTextoEstadoFinalResponsive() {
+
+    const esMovil = window.innerWidth <= 700;
+
+    document.querySelectorAll('.estado-final-select').forEach(select => {
+
+        Array.from(select.options).forEach(option => {
+
+            // Guardamos el texto original una sola vez
+            if (!option.dataset.textoOriginal) {
+                option.dataset.textoOriginal = option.textContent;
+            }
+
+            if (esMovil) {
+
+                if (option.value === 'Pendiente') {
+                    option.textContent = 'PEND.';
+                }
+
+                else if (option.value === 'LISTA') {
+                    option.textContent = 'LISTA';
+                }
+
+                else if (option.value === 'CON DETALLES') {
+                    option.textContent = 'DET.';
+                }
+
+            } else {
+
+                // En computador vuelve al texto normal
+                option.textContent = option.dataset.textoOriginal;
+
+            }
+
+        });
+
+    });
+
+}
+
+actualizarTextoEstadoFinalResponsive();
+
+window.addEventListener('resize', actualizarTextoEstadoFinalResponsive);

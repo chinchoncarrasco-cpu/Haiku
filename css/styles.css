@@ -340,6 +340,35 @@ body {
     overflow-x: auto;
 }
 
+/* =========================================
+   COLUMNA CABAÑA FIJA EN RESUMEN
+========================================= */
+
+.tabla-contenedor {
+    position: relative;
+}
+
+/* Encabezado CABAÑA fijo */
+.tabla-contenedor th:first-child {
+    position: sticky;
+    left: 0;
+    z-index: 4;
+    background: #fafafa;
+}
+
+/* Celdas CABAÑA fijas */
+.tabla-contenedor td.info-cabana {
+    position: sticky;
+    left: 0;
+    z-index: 3;
+    background: #ffffff;
+}
+
+/* Línea divisoria para notar dónde comienza el scroll */
+.tabla-contenedor th:first-child,
+.tabla-contenedor td.info-cabana {
+    box-shadow: 1px 0 0 var(--borde);
+}
 
 table {
     width: 100%;
@@ -2337,4 +2366,467 @@ input[type="time"].campo-cabana {
     border: 1px solid #dfe5e1;
     border-radius: 8px;
     background: #ffffff;
+}
+
+/* =====================================================
+   RESUMEN DE CABAÑAS · OPTIMIZACIÓN DE ESPACIO
+   ===================================================== */
+
+/* Solo afecta la tabla principal de cabañas */
+.tabla-contenedor > table {
+    table-layout: auto;
+}
+
+/* Menos espacio desperdiciado */
+.tabla-contenedor > table th {
+    padding: 10px 8px;
+}
+
+.tabla-contenedor > table td {
+    padding: 11px 8px;
+}
+
+/* CABAÑA */
+.tabla-contenedor > table th:nth-child(1),
+.tabla-contenedor > table td:nth-child(1) {
+    min-width: 105px;
+}
+
+/* ESTADO */
+.tabla-contenedor > table th:nth-child(2),
+.tabla-contenedor > table td:nth-child(2) {
+    min-width: 115px;
+}
+
+/* ASEO */
+.tabla-contenedor > table th:nth-child(3),
+.tabla-contenedor > table td:nth-child(3) {
+    min-width: 145px;
+}
+
+/* NOTAS */
+.tabla-contenedor > table th:nth-child(4),
+.tabla-contenedor > table td:nth-child(4) {
+    min-width: 90px;
+}
+
+/* INGRESO */
+.tabla-contenedor > table th:nth-child(5),
+.tabla-contenedor > table td:nth-child(5) {
+    min-width: 105px;
+}
+
+/* SERVICIOS */
+.tabla-contenedor > table th:nth-child(6),
+.tabla-contenedor > table td:nth-child(6) {
+    min-width: 135px;
+}
+
+/* ESTADO FINAL */
+.tabla-contenedor > table th:nth-child(7),
+.tabla-contenedor > table td:nth-child(7) {
+    min-width: 145px;
+}
+
+
+/* =====================================================
+   CELULAR
+   ===================================================== */
+
+@media (max-width: 700px) {
+
+    .tabla-contenedor {
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+    }
+
+    .tabla-contenedor > table {
+        min-width: 700px;
+    }
+
+    .tabla-contenedor > table th {
+        padding: 7px 5px;
+        font-size: 9px;
+        letter-spacing: 0.2px;
+        white-space: nowrap;
+        text-align: center;
+    }
+
+    .tabla-contenedor > table td {
+        padding: 8px 5px;
+        font-size: 11px;
+        vertical-align: middle;
+    }
+
+    /* Cabaña */
+    .tabla-contenedor > table th:nth-child(1),
+    .tabla-contenedor > table td:nth-child(1) {
+        min-width: 85px;
+    }
+
+    /* Estado */
+    .tabla-contenedor > table th:nth-child(2),
+    .tabla-contenedor > table td:nth-child(2) {
+        min-width: 88px;
+    }
+
+    /* Aseo: le dejamos espacio útil */
+    .tabla-contenedor > table th:nth-child(3),
+    .tabla-contenedor > table td:nth-child(3) {
+        min-width: 125px;
+    }
+
+    /* Notas */
+    .tabla-contenedor > table th:nth-child(4),
+    .tabla-contenedor > table td:nth-child(4) {
+        min-width: 62px;
+        text-align: center;
+    }
+
+    /* Ingreso */
+    .tabla-contenedor > table th:nth-child(5),
+    .tabla-contenedor > table td:nth-child(5) {
+        min-width: 82px;
+    }
+
+    /* Servicios */
+    .tabla-contenedor > table th:nth-child(6),
+    .tabla-contenedor > table td:nth-child(6) {
+        min-width: 100px;
+    }
+
+    /* Estado final */
+    .tabla-contenedor > table th:nth-child(7),
+    .tabla-contenedor > table td:nth-child(7) {
+        min-width: 105px;
+    }
+
+    /* Estados más compactos */
+    .tabla-contenedor .estado {
+        padding: 4px 6px;
+        font-size: 9px;
+    }
+
+}
+
+/* =====================================================
+   ESTADO FINAL · COMPACTO
+   ===================================================== */
+
+/* Checkbox + selector en una misma línea */
+.tabla-contenedor .estado-final-contenido {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+}
+
+/* Selector de estado final */
+.tabla-contenedor .estado-final-select {
+    width: 100%;
+    min-width: 100px;
+    padding: 8px 7px;
+    font-size: 11px;
+}
+
+
+/* =====================================================
+   ESTADO FINAL · CELULAR
+   ===================================================== */
+
+@media (max-width: 700px) {
+
+    /* Reducimos bastante esta columna */
+    .tabla-contenedor > table th:nth-child(7),
+    .tabla-contenedor > table td:nth-child(7) {
+        min-width: 90px;
+    }
+
+    .tabla-contenedor .estado-final-contenido {
+        gap: 4px;
+    }
+
+    /* Checkbox un poco más pequeño solo aquí */
+    .tabla-contenedor .estado-final-contenido input[type="checkbox"] {
+        width: 15px;
+        height: 15px;
+        margin-right: 0;
+        flex: 0 0 auto;
+    }
+
+    /* Selector compacto */
+    .tabla-contenedor .estado-final-select {
+        width: 70px;
+        min-width: 70px;
+        padding: 6px 3px;
+        font-size: 9px;
+    }
+
+}
+
+/* =====================================================
+   ASEO · CAMARERO + HORARIO
+   ===================================================== */
+
+.tabla-contenedor .aseo-principal {
+    margin-bottom: 6px;
+}
+
+.tabla-contenedor .campo-encargado-aseo {
+    width: 100%;
+}
+
+.tabla-contenedor .aseo-horarios {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+/* Flecha entre hora inicio y hora término */
+.tabla-contenedor .aseo-horarios::before {
+    content: "";
+}
+
+.tabla-contenedor .aseo-horarios input[type="time"] {
+    min-width: 0;
+    width: 78px;
+}
+
+/* La flecha se genera sin tocar el HTML */
+.tabla-contenedor .aseo-horarios input[type="time"] + input[type="time"] {
+    position: relative;
+}
+
+.tabla-contenedor .aseo-horarios::after {
+    content: "→";
+    order: 2;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+/* Ordenamos: inicio → flecha → término */
+.tabla-contenedor .aseo-horarios input:first-child {
+    order: 1;
+}
+
+.tabla-contenedor .aseo-horarios input:last-child {
+    order: 3;
+}
+
+
+/* =====================================================
+   ASEO · CELULAR
+   ===================================================== */
+
+@media (max-width: 700px) {
+
+    .tabla-contenedor > table th:nth-child(3),
+    .tabla-contenedor > table td:nth-child(3) {
+        min-width: 112px;
+    }
+
+    .tabla-contenedor .campo-encargado-aseo {
+        font-size: 10px;
+        padding: 6px 5px;
+    }
+
+    .tabla-contenedor .aseo-principal {
+        margin-bottom: 4px;
+    }
+
+    .tabla-contenedor .aseo-horarios {
+        gap: 3px;
+    }
+
+    .tabla-contenedor .aseo-horarios input[type="time"] {
+        width: 67px;
+        padding: 5px 2px;
+        font-size: 9px;
+    }
+
+    .tabla-contenedor .aseo-horarios::after {
+        font-size: 11px;
+    }
+
+}
+
+/* =====================================================
+   RESUMEN DEL DÍA · AJUSTE MÓVIL
+   Servicios + Estado final
+===================================================== */
+
+@media (max-width: 700px) {
+
+    /* SERVICIOS */
+    .tabla-contenedor td:nth-child(6),
+    .tabla-contenedor th:nth-child(6) {
+        min-width: 120px;
+        width: 120px;
+    }
+
+    .tabla-contenedor td:nth-child(6) input {
+        width: 100%;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+
+    /* ESTADO FINAL */
+    .tabla-contenedor td:nth-child(7),
+    .tabla-contenedor th:nth-child(7) {
+        min-width: 105px;
+        width: 105px;
+    }
+
+    .estado-final-contenido {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+    }
+
+    .estado-final-contenido input[type="checkbox"] {
+        width: 16px;
+        height: 16px;
+        min-width: 16px;
+        margin: 0;
+    }
+
+    .estado-final-select {
+        width: 78px;
+        min-width: 78px;
+        padding: 7px 4px;
+        font-size: 11px;
+    }
+
+}
+
+/* =====================================================
+   RESUMEN DEL DÍA · COLUMNAS CENTRALES COMPACTAS
+===================================================== */
+
+@media (max-width: 700px) {
+
+    /* NOTAS */
+    .tabla-contenedor th:nth-child(4),
+    .tabla-contenedor td:nth-child(4) {
+        min-width: 75px;
+        width: 75px;
+    }
+
+    .tabla-contenedor td:nth-child(4) input,
+    .tabla-contenedor td:nth-child(4) textarea {
+        width: 65px;
+        min-width: 65px;
+        box-sizing: border-box;
+    }
+
+
+    /* INGRESO */
+    .tabla-contenedor th:nth-child(5),
+    .tabla-contenedor td:nth-child(5) {
+        min-width: 105px;
+        width: 105px;
+    }
+
+    .tabla-contenedor td:nth-child(5) input {
+        width: 95px;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+
+    /* SERVICIOS */
+    .tabla-contenedor th:nth-child(6),
+    .tabla-contenedor td:nth-child(6) {
+        min-width: 115px;
+        width: 115px;
+    }
+
+    .tabla-contenedor td:nth-child(6) input {
+        width: 105px;
+        min-width: 0;
+        box-sizing: border-box;
+    }
+
+
+    /* Menos espacio horizontal general */
+    .tabla-contenedor th {
+        padding-left: 7px;
+        padding-right: 7px;
+    }
+
+    .tabla-contenedor td {
+        padding-left: 7px;
+        padding-right: 7px;
+    }
+
+}
+
+/* =========================================
+   CABAÑA COMPACTA - CELULAR
+========================================= */
+
+@media (max-width: 768px) {
+
+    /* ===== ADL / KID / PET ===== */
+
+    .info-cabana .ocupacion-cabana {
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+    }
+
+    .info-cabana .ocupacion-cabana label {
+        display: flex !important;
+        align-items: center !important;
+
+        /* Oculta ADL / KID / PET */
+        font-size: 0 !important;
+
+        gap: 0 !important;
+        margin: 0 !important;
+        padding: 0 !important;
+    }
+
+    .info-cabana .ocupacion-cabana label input {
+        width: 34px !important;
+        min-width: 34px !important;
+        height: 24px !important;
+
+        margin: 0 !important;
+        padding: 2px !important;
+
+        font-size: 11px !important;
+    }
+
+
+    /* ===== OUT ===== */
+
+    .info-cabana .checkout-cabana {
+        font-size: 0 !important;
+
+        display: flex !important;
+        align-items: center !important;
+
+        margin-top: 5px !important;
+        gap: 0 !important;
+    }
+
+    .info-cabana .checkout-cabana input {
+        width: 105px !important;
+        min-width: 105px !important;
+
+        font-size: 11px !important;
+        margin: 0 !important;
+    }
+
+
+    /* ===== COLUMNA CABAÑA ===== */
+
+    .tabla-contenedor th:first-child,
+    .tabla-contenedor td.info-cabana {
+        width: 120px !important;
+        min-width: 120px !important;
+        max-width: 120px !important;
+    }
+
 }
