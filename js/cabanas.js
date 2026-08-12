@@ -322,6 +322,9 @@ const revisionInfoOperativa =
 const revisionEstado =
     document.getElementById("revision-estado");
 
+const revisionDetalles =
+    document.getElementById("revision-detalles");
+
 const revisionNotaOperativa =
     document.getElementById("revision-nota-operativa");
 
@@ -364,6 +367,9 @@ function abrirRevisionCabana(numeroCabana) {
 
     revisionEstado.value =
         datosCabana.estadoRevision || "pendiente";
+
+    revisionDetalles.value =
+    datosCabana.detallesRevision || "";
 
     // ========================================
     // NOTA OPERATIVA DE LA CABAÑA
@@ -504,6 +510,32 @@ if (notasCabana.length > 0) {
 // GUARDAR ESTADO DE REVISIÓN
 // ========================================
 
+revisionDetalles.addEventListener("input", () => {
+
+    if (!fechaSeleccionada) {
+        return;
+    }
+
+    const numeroCabana =
+        localStorage.getItem("haikuRevisionCabana");
+
+    if (!numeroCabana) {
+        return;
+    }
+
+    const datos =
+        obtenerDatosDia(fechaSeleccionada);
+
+    if (!datos.cabanas[numeroCabana]) {
+        datos.cabanas[numeroCabana] = {};
+    }
+
+    datos.cabanas[numeroCabana].detallesRevision =
+        revisionDetalles.value;
+
+    guardarDatos();
+});
+
 revisionEstado.addEventListener("change", () => {
 
     if (!fechaSeleccionada) {
@@ -525,9 +557,28 @@ revisionEstado.addEventListener("change", () => {
     }
 
     datos.cabanas[numeroCabana].estadoRevision =
-        revisionEstado.value;
+    revisionEstado.value;
 
     guardarDatos();
+
+// Sincronizar el selector de la tabla principal
+const filaCabana = document.querySelector(
+    `[data-cabana="${numeroCabana}"]`
+);
+
+if (filaCabana) {
+
+    const selectorResumen = filaCabana.querySelector(
+        '[data-campo="estadoRevision"]'
+    );
+
+    if (selectorResumen) {
+        selectorResumen.value = revisionEstado.value;
+    }
+}
+
+actualizarTarjetasRevision(fechaSeleccionada);
+actualizarResumenAseo(fechaSeleccionada);
 });
 
 // ========================================
@@ -620,7 +671,11 @@ function actualizarResumenAseo(fecha) {
             cabana.aseoOut || "--:--";
         
         const estadoFinal =
-            cabana.estadoFinal || "Pendiente";
+              cabana.estadoRevision === "lista"
+            ? "LISTA"
+            : cabana.estadoRevision === "con-detalles"
+            ? "CON DETALLES"
+            : "Pendiente";
 
         let claseEstado = "aseo-pendiente";
 
@@ -645,9 +700,25 @@ function actualizarResumenAseo(fecha) {
             CAB ${numeroCabana}
             </div>
 
-            <span class="aseo-estado">
-                ${estadoFinal}
-            </span>
+            <select
+    class="aseo-estado aseo-estado-select"
+    data-estado-revision="${numeroCabana}"
+>
+    <option value="pendiente"
+        ${cabana.estadoRevision === "pendiente" || !cabana.estadoRevision ? "selected" : ""}>
+        Pendiente
+    </option>
+
+    <option value="con-detalles"
+        ${cabana.estadoRevision === "con-detalles" ? "selected" : ""}>
+        Con detalles
+    </option>
+
+    <option value="lista"
+        ${cabana.estadoRevision === "lista" ? "selected" : ""}>
+        Lista
+    </option>
+</select>
 
 </div>
 
@@ -675,4 +746,54 @@ function actualizarResumenAseo(fecha) {
 
         contenedor.appendChild(tarjeta);
     }
+
+    // ========================================
+// CAMBIAR ESTADO DESDE RESUMEN DE ASEO
+// ========================================
+
+document.addEventListener("change", (evento) => {
+
+    const selector =
+        evento.target.closest("[data-estado-revision]");
+
+    if (!selector) {
+        return;
+    }
+
+    if (!fechaSeleccionada) {
+        return;
+    }
+
+    const numeroCabana =
+        selector.dataset.estadoRevision;
+
+    const datos =
+        obtenerDatosDia(fechaSeleccionada);
+
+    if (!datos.cabanas[numeroCabana]) {
+        datos.cabanas[numeroCabana] = {};
+    }
+
+    // MISMO ESTADO UTILIZADO POR LA REVISIÓN INDIVIDUAL
+    datos.cabanas[numeroCabana].estadoRevision =
+        selector.value;
+
+    guardarDatos();
+
+    // Actualizar resumen
+    actualizarResumenAseo(fechaSeleccionada);
+
+    // Si justo está abierta esta misma cabaña,
+    // actualizar también su selector
+    const cabanaAbierta =
+        localStorage.getItem("haikuRevisionCabana");
+
+    if (
+        cabanaAbierta === String(numeroCabana) &&
+        revisionEstado
+    ) {
+        revisionEstado.value = selector.value;
+    }
+});
+
 }
