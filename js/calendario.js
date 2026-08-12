@@ -179,8 +179,20 @@ generarCalendario();
 const fechaHoy =
 `${hoy.getFullYear()}-${String(hoy.getMonth() + 1).padStart(2, "0")}-${String(hoy.getDate()).padStart(2, "0")}`;
 
-let fechaSeleccionada =
-localStorage.getItem("haikuFechaSeleccionada") || fechaHoy;
+// ========================================
+// FECHA OPERATIVA AL INICIAR
+// ========================================
+
+// Al abrir Haiku, siempre comenzamos en el día actual.
+// Los días anteriores siguen guardados y pueden
+// consultarse manualmente desde el calendario.
+
+let fechaSeleccionada = fechaHoy;
+
+localStorage.setItem(
+    "haikuFechaSeleccionada",
+    fechaSeleccionada
+);
 
 function seleccionarDia(año, mes, dia, fechaISO) {
 
@@ -192,7 +204,16 @@ function seleccionarDia(año, mes, dia, fechaISO) {
     );
 
     cargarDatosDia(fechaSeleccionada);
-    cargarCabanasDia(fechaSeleccionada);
+cargarCabanasDia(fechaSeleccionada);
+
+// Cargar cierre correspondiente al día seleccionado
+if (typeof cargarCierreDia === "function") {
+    cargarCierreDia(fechaSeleccionada);
+}
+
+if (typeof actualizarCierreTurno === "function") {
+    actualizarCierreTurno();
+}
 
     const fechaElegida = new Date(
         año,

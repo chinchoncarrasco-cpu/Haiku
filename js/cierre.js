@@ -372,7 +372,14 @@ document.querySelectorAll("[data-evidencia-preview]").forEach(async (preview) =>
 
     preview.appendChild(imagen);
 
-    preview.style.display = "block";
+    prepararToggleEvidencia(preview);
+preview.style.display = "none";
+
+const botonToggle = preview.previousElementSibling;
+
+if (botonToggle?.classList.contains("cierre-evidencia-toggle")) {
+    botonToggle.textContent = "▸ Abrir evidencia";
+}
 
     if (zona) {
         zona.style.display = "none";
@@ -824,18 +831,50 @@ inputsEvidencia.forEach(input => {
 
         const lector = new FileReader();
 
-        lector.onload = () => {
+        lector.onload = async () => {
 
-            preview.innerHTML = "";
+    preview.innerHTML = "";
 
-            const imagen = document.createElement("img");
+    const imagen = document.createElement("img");
 
-            imagen.src = lector.result;
-            imagen.alt = "Evidencia adjunta";
+    imagen.src = lector.result;
+    imagen.alt = "Evidencia adjunta";
 
-            preview.appendChild(imagen);
+    preview.appendChild(imagen);
 
-        };
+    // GUARDAR IMAGEN POR FECHA
+    await guardarEvidencia(
+        fechaSeleccionada,
+        nombre,
+        lector.result
+    );
+
+    prepararToggleEvidencia(preview);
+preview.style.display = "block";
+
+const botonToggle = preview.previousElementSibling;
+
+if (botonToggle?.classList.contains("cierre-evidencia-toggle")) {
+    botonToggle.textContent = "▾ Cerrar evidencia";
+}
+
+    // Ocultar zona de instrucciones
+    const zona = document.querySelector(
+        `[data-evidencia-zona="${nombre}"]`
+    );
+
+    if (zona) {
+        zona.style.display = "none";
+    }
+
+    // Mantener abierto el bloque de evidencia
+    const bloqueEvidencia =
+        preview.closest("[data-evidencia]");
+
+    if (bloqueEvidencia) {
+        bloqueEvidencia.hidden = false;
+    }
+};
 
         lector.readAsDataURL(archivo);
 
@@ -905,7 +944,14 @@ zonasPegarEvidencia.forEach(zona => {
                 zona.style.display = "none";
 
                 // Mostrar el preview
+                prepararToggleEvidencia(preview);
                 preview.style.display = "block";
+
+                const botonToggle = preview.previousElementSibling;
+
+                if (botonToggle?.classList.contains("cierre-evidencia-toggle")) {
+                botonToggle.textContent = "▾ Cerrar evidencia";
+                }
             };
 
             lector.readAsDataURL(archivo);
@@ -1124,3 +1170,53 @@ const porcentajeGeneral =
 
     cargarCierreDia(fechaSeleccionada);
     actualizarCierreTurno();
+
+    // ==========================================
+// ABRIR / CERRAR PREVIEW DE EVIDENCIAS
+// ==========================================
+
+function prepararToggleEvidencia(preview) {
+
+    if (!preview) return;
+
+    // Evitar crear el botón más de una vez
+    if (preview.dataset.togglePreparado === "true") return;
+
+    preview.dataset.togglePreparado = "true";
+
+    const boton = document.createElement("button");
+
+    boton.type = "button";
+    boton.className = "cierre-evidencia-toggle";
+    boton.textContent = "▸ Abrir evidencia";
+
+    // Insertar botón justo antes del preview
+    preview.parentNode.insertBefore(boton, preview);
+
+    // Imagen cerrada por defecto
+    preview.style.display = "none";
+
+    boton.addEventListener("click", () => {
+
+        const estaAbierto = preview.style.display !== "none";
+
+        if (estaAbierto) {
+
+            preview.style.display = "none";
+            boton.textContent = "▸ Abrir evidencia";
+
+        } else {
+
+            preview.style.display = "block";
+            boton.textContent = "▾ Cerrar evidencia";
+
+        }
+
+    });
+}
+
+
+// Preparar todos los previews existentes
+document.querySelectorAll("[data-evidencia-preview]").forEach(preview => {
+    prepararToggleEvidencia(preview);
+});
