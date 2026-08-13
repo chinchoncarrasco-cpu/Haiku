@@ -260,6 +260,28 @@ function actualizarTarjetasRevision(fecha) {
                     : "Sin huéspedes registrados";
         }
 
+// -------------------------
+// ESTADO OPERATIVO
+// -------------------------
+
+const estadoOperativo =
+    tarjeta.querySelector(".cabana-estado-operativo");
+
+if (estadoOperativo) {
+
+    const nombresEstadoOperativo = {
+        "libre-libre": "L/L",
+        "libre-ingresa": "L/IN",
+        "sale-libre": "S/L",
+        "sale-ingresa": "S/IN",
+        "continua": "CONT",
+        "bloqueada": "BLQ",
+        "fullday": "F/D"
+    };
+
+    estadoOperativo.textContent =
+        nombresEstadoOperativo[datosCabana.estado] || "";
+}
 
         // -------------------------
 // ESTADO DE REVISIÓN
@@ -283,6 +305,16 @@ if (estado) {
         nombresEstadoRevision[estadoRevision] || "PENDIENTE";
 
     estado.dataset.estado = estadoRevision;
+
+    // Color de la tarjeta según estado de revisión
+tarjeta.classList.remove(
+    "revision-pendiente",
+    "revision-con-detalles",
+    "revision-lista"
+);
+
+tarjeta.classList.add(`revision-${estadoRevision}`);
+
 }
 
 
@@ -833,3 +865,70 @@ document.addEventListener("change", (evento) => {
 });
 
 }
+
+// ========================================
+// ESTADOS COMPACTOS EN CELULAR
+// ========================================
+
+const nombresEstadoDesktop = {
+    "libre-libre": "LIBRE / LIBRE",
+    "libre-ingresa": "LIBRE / INGRESA",
+    "sale-libre": "SALE / LIBRE",
+    "sale-ingresa": "SALE / INGRESA",
+    "continua": "CONTINÚA",
+    "bloqueada": "BLOQUEADA",
+    "fullday": "FULLDAY"
+};
+
+const nombresEstadoMovil = {
+    "libre-libre": "L/L",
+    "libre-ingresa": "L/IN",
+    "sale-libre": "S/L",
+    "sale-ingresa": "S/IN",
+    "continua": "CONT",
+    "bloqueada": "BLQ",
+    "fullday": "F/D"
+};
+
+
+function actualizarNombresEstadosResponsive() {
+
+    const esMovil = window.innerWidth <= 768;
+
+    document
+        .querySelectorAll('[data-campo="estado"]')
+        .forEach(selector => {
+
+            Array.from(selector.options).forEach(opcion => {
+
+                const valor = opcion.value;
+
+                if (esMovil && nombresEstadoMovil[valor]) {
+
+                    opcion.textContent =
+                        nombresEstadoMovil[valor];
+
+                } else if (
+                    !esMovil &&
+                    nombresEstadoDesktop[valor]
+                ) {
+
+                    opcion.textContent =
+                        nombresEstadoDesktop[valor];
+                }
+
+            });
+
+        });
+}
+
+
+// Ejecutar al cargar
+actualizarNombresEstadosResponsive();
+
+
+// Actualizar si cambia el tamaño de pantalla
+window.addEventListener(
+    "resize",
+    actualizarNombresEstadosResponsive
+);

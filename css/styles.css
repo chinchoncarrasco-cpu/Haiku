@@ -913,6 +913,28 @@ input[type="time"].campo-cabana {
     transform: translateY(-1px);
 }
 
+/* =================================
+   COLORES ESTADO DE REVISIÓN
+================================= */
+
+/* PENDIENTE */
+.cabana-revision.revision-pendiente {
+    background: #fff8ed;
+    border-color: #efc477;
+}
+
+/* CON DETALLES */
+.cabana-revision.revision-con-detalles {
+    background: #fffdec;
+    border-color: #e7cf63;
+}
+
+/* LISTA */
+.cabana-revision.revision-lista {
+    background: #f1f8f3;
+    border-color: #9bc8a7;
+}
+
 .cabana-revision strong {
     font-size: 15px;
     color: #17221d;
@@ -921,6 +943,28 @@ input[type="time"].campo-cabana {
 .cabana-revision span {
     font-size: 12px;
     color: #69736e;
+}
+
+/* =================================
+   PASTILLA ESTADO DE REVISIÓN
+================================= */
+
+/* LISTA */
+.cabana-estado[data-estado="lista"] {
+    background: #cfe8d5;
+    color: #315c3b;
+}
+
+/* PENDIENTE */
+.cabana-estado[data-estado="pendiente"] {
+    background: #f7dfb4;
+    color: #72501d;
+}
+
+/* CON DETALLES */
+.cabana-estado[data-estado="con-detalles"] {
+    background: #f5e7a5;
+    color: #665515;
 }
 
 /* Información dentro de cada tarjeta */
