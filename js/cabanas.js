@@ -45,9 +45,30 @@ function guardarCampoCabana(elemento) {
 
 datos.cabanas[numeroCabana][campo] = valor;
 
+// ========================================
+// SINCRONIZAR ESTADO FINAL -> REVISIÓN
+// ========================================
+
+if (campo === "estadoFinal") {
+
+    let estadoRevision = "pendiente";
+
+    if (valor === "LISTA") {
+        estadoRevision = "lista";
+    }
+
+    else if (valor === "CON DETALLES") {
+        estadoRevision = "con-detalles";
+    }
+
+    datos.cabanas[numeroCabana].estadoRevision =
+        estadoRevision;
+}
+
 guardarDatos();
 
 actualizarResumenDia(fechaSeleccionada);
+actualizarTarjetasRevision(fechaSeleccionada);
 actualizarResumenAseo(fechaSeleccionada);
 }
 
@@ -240,30 +261,28 @@ function actualizarTarjetasRevision(fecha) {
         }
 
 
-        // ----------------------------
-        // ESTADO
-        // ----------------------------
+        // -------------------------
+// ESTADO DE REVISIÓN
+// -------------------------
 
-        const estado =
-            tarjeta.querySelector(".cabana-estado");
+const estado =
+    tarjeta.querySelector(".cabana-estado");
 
-        if (estado) {
+if (estado) {
 
-    const nombresEstado = {
-        "libre-libre": "LIBRE / LIBRE",
-        "libre-ingresa": "LIBRE / INGRESA",
-        "sale-libre": "SALE / LIBRE",
-        "sale-ingresa": "SALE / INGRESA",
-        "continua": "CONTINÚA",
-        "bloqueada": "BLOQUEADA"
+    const nombresEstadoRevision = {
+        "pendiente": "PENDIENTE",
+        "con-detalles": "C/DETALLE",
+        "lista": "LISTA"
     };
 
-    estado.textContent =
-        nombresEstado[datosCabana.estado] ||
-        "Sin estado";
+    const estadoRevision =
+        datosCabana.estadoRevision || "pendiente";
 
-    estado.dataset.estado =
-        datosCabana.estado || "";
+    estado.textContent =
+        nombresEstadoRevision[estadoRevision] || "PENDIENTE";
+
+    estado.dataset.estado = estadoRevision;
 }
 
 
@@ -561,19 +580,36 @@ revisionEstado.addEventListener("change", () => {
 
     guardarDatos();
 
-// Sincronizar el selector de la tabla principal
+// Sincronizar ESTADO DE REVISIÓN -> ESTADO FINAL del resumen
 const filaCabana = document.querySelector(
-    `[data-cabana="${numeroCabana}"]`
+    `tr[data-cabana="${numeroCabana}"]`
 );
 
 if (filaCabana) {
 
     const selectorResumen = filaCabana.querySelector(
-        '[data-campo="estadoRevision"]'
+        '[data-campo="estadoFinal"]'
     );
 
     if (selectorResumen) {
-        selectorResumen.value = revisionEstado.value;
+
+        if (revisionEstado.value === "lista") {
+            selectorResumen.value = "LISTA";
+        }
+
+        else if (revisionEstado.value === "con-detalles") {
+            selectorResumen.value = "CON DETALLES";
+        }
+
+        else {
+            selectorResumen.value = "";
+        }
+
+        // Guardar también estadoFinal
+        datos.cabanas[numeroCabana].estadoFinal =
+            selectorResumen.value;
+
+        guardarDatos();
     }
 }
 
