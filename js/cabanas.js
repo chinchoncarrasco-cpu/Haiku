@@ -317,6 +317,20 @@ tarjeta.classList.add(`revision-${estadoRevision}`);
 
 }
 
+// ---------------------------
+// CHECK IN
+// ---------------------------
+
+const checkin =
+    tarjeta.querySelector(".cabana-in");
+
+if (checkin) {
+    checkin.textContent =
+        datosCabana.ingreso
+            ? `IN ${datosCabana.ingreso}`
+            : "";
+}
+
 
         // ----------------------------
         // CHECK OUT

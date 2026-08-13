@@ -2874,3 +2874,9 @@ input[type="time"].campo-cabana {
     }
 
 }
+
+.cabana-in:not(:empty)::before {
+    content: "·";
+    margin: 0 7px;
+    color: #8a8a8a;
+}
