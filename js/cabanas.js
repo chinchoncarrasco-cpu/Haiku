@@ -849,46 +849,54 @@ function actualizarResumenAseo(fecha) {
         contenedor.appendChild(tarjeta);
     }
 
-    // ========================================
-// CAMBIAR ESTADO DESDE RESUMEN DE ASEO
+}
+
+// ========================================
+// CAMBIAR ESTADO DESDE ASEO
 // ========================================
 
 document.addEventListener("change", (evento) => {
 
-    const selector =
-        evento.target.closest("[data-estado-revision]");
+    const selector = evento.target.closest("[data-estado-revision]");
 
-    if (!selector) {
+    if (!selector || !fechaSeleccionada) {
         return;
     }
 
-    if (!fechaSeleccionada) {
-        return;
-    }
-
-    const numeroCabana =
-        selector.dataset.estadoRevision;
-
-    const datos =
-        obtenerDatosDia(fechaSeleccionada);
+    const numeroCabana = selector.dataset.estadoRevision;
+    const datos = obtenerDatosDia(fechaSeleccionada);
 
     if (!datos.cabanas[numeroCabana]) {
         datos.cabanas[numeroCabana] = {};
     }
 
-    // MISMO ESTADO UTILIZADO POR LA REVISIÓN INDIVIDUAL
-    datos.cabanas[numeroCabana].estadoRevision =
-        selector.value;
+    // Guardar estado para Revisión
+datos.cabanas[numeroCabana].estadoRevision = selector.value;
+
+// Convertir el estado de Aseo al formato que usa Resumen
+let estadoFinalResumen = "";
+
+if (selector.value === "lista") {
+    estadoFinalResumen = "LISTA";
+} else if (selector.value === "con-detalles") {
+    estadoFinalResumen = "CON DETALLES";
+}
+
+// Guardar estado para Resumen
+datos.cabanas[numeroCabana].estadoFinal = estadoFinalResumen;
 
     guardarDatos();
 
-    // Actualizar resumen
-    actualizarResumenAseo(fechaSeleccionada);
+// Actualizar tabla Estado de cabañas
+cargarCabanasDia(fechaSeleccionada);
 
-    // Si justo está abierta esta misma cabaña,
-    // actualizar también su selector
-    const cabanaAbierta =
-        localStorage.getItem("haikuRevisionCabana");
+// Actualizar las demás vistas
+actualizarResumenDia(fechaSeleccionada);
+actualizarResumenAseo(fechaSeleccionada);
+actualizarTarjetasRevision(fechaSeleccionada);
+
+    // Si está abierta esa misma cabaña, actualizar su selector
+    const cabanaAbierta = localStorage.getItem("haikuRevisionCabana");
 
     if (
         cabanaAbierta === String(numeroCabana) &&
@@ -896,9 +904,8 @@ document.addEventListener("change", (evento) => {
     ) {
         revisionEstado.value = selector.value;
     }
-});
 
-}
+});
 
 // ========================================
 // ESTADOS COMPACTOS EN CELULAR
