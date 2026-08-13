@@ -945,6 +945,25 @@ input[type="time"].campo-cabana {
     color: #69736e;
 }
 
+/* =========================================
+   NOTA OPERATIVA - TARJETA CABAÑA
+========================================= */
+
+.cabana-nota-operativa {
+    display: block;
+    margin-top: 8px;
+    padding-top: 7px;
+    border-top: 1px dashed #d7ddd9;
+
+    font-size: 12px;
+    line-height: 1.35;
+    color: #505b55;
+}
+
+.cabana-nota-operativa:not(:empty)::before {
+    content: "📝 ";
+}
+
 /* =================================
    PASTILLA ESTADO DE REVISIÓN
 ================================= */
@@ -1365,6 +1384,11 @@ input[type="time"].campo-cabana {
     .resumen {
         grid-template-columns: 1fr;
     }
+
+    /* CABAÑAS - CELULAR */
+
+.cabana-abrir {
+    display: none;
 
 }
 /* ========================================
@@ -2879,4 +2903,35 @@ input[type="time"].campo-cabana {
     content: "·";
     margin: 0 7px;
     color: #8a8a8a;
+}
+
+/* ========================================
+   CABAÑAS - VERSIÓN CELULAR
+======================================== */
+
+@media (max-width: 600px) {
+
+    .lista-revision-cabanas {
+        grid-template-columns: 1fr;
+        gap: 10px;
+        padding: 12px;
+    }
+
+    .cabana-revision {
+        min-height: auto;
+        padding: 14px 16px;
+    }
+
+    /* En celular toda la tarjeta es clickeable,
+       por lo tanto no necesitamos este texto */
+    .cabana-abrir {
+        display: none;
+    }
+
+    .cabana-datos-operativos {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 5px;
+    }
 }

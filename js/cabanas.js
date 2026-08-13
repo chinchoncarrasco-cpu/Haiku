@@ -359,8 +359,28 @@ if (checkin) {
                 datosCabana.aseo || "";
         }
 
+        // -------------------------
+// NOTA OPERATIVA
+// -------------------------
+
+const notaOperativa =
+    tarjeta.querySelector(".cabana-nota-operativa");
+
+if (notaOperativa) {
+
+    const notaCabana = datos.notasOperativas.find(
+        nota => String(nota.cabana) === String(numeroCabana)
+    );
+
+    notaOperativa.textContent = notaCabana
+    ? notaCabana.texto
+    : "";
+}
+
     });
 }
+
+
 
 // ========================================
 // ABRIR REVISIÓN INDIVIDUAL
