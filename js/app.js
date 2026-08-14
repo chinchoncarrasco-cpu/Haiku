@@ -49,6 +49,12 @@ botonesMenu.forEach(boton => {
             boton.classList.add("activo");
         }
 
+        // Actualizar Pagos al entrar a la sección
+        if (seccionDestino === "pagos") {
+        cargarAbonosPagos();
+        cargarSaldosCheckin();
+        }
+
     });
 
 });
