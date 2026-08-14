@@ -1374,6 +1374,17 @@ input[type="time"].campo-cabana {
     padding: 26px;
 }
 
+/* ========================================
+   NAVEGACIÓN ENTRE SECCIONES
+======================================== */
+
+.seccion-app {
+    display: none;
+}
+
+.seccion-app.activa {
+    display: block;
+}
 
 /* ========================================
    CELULAR PEQUEÑO
@@ -1390,17 +1401,6 @@ input[type="time"].campo-cabana {
 .cabana-abrir {
     display: none;
 
-}
-/* ========================================
-   NAVEGACIÓN ENTRE SECCIONES
-======================================== */
-
-.seccion-app {
-    display: none;
-}
-
-.seccion-app.activa {
-    display: block;
 }
 
 /* ========================================
@@ -1714,6 +1714,8 @@ input[type="time"].campo-cabana {
     .checklist-area:nth-child(4) {
         order: 4;
     }
+
+}
 
 }
 
