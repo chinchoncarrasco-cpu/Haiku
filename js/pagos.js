@@ -220,83 +220,91 @@ const abono = Number(
 tarjeta.className = "pago-checkin-item";
 
 tarjeta.innerHTML = `
-    <div class="pago-checkin-titulo">
-        <strong>CAB ${numeroCabana}</strong>
-        <span>· ${titular}</span>
-    </div>
+    <div class="pago-checkin-contenido">
 
-    <div class="pago-checkin-totales">
-        <label>
-            Total:
-            <input
-                type="number"
-                class="pago-checkin-total"
-                data-pago-checkin-total="${numeroCabana}"
-                placeholder="300000"
-            >
-        </label>
-
-        <div>
-            Saldo:
-            <strong class="pago-checkin-saldo">
-                $0
-            </strong>
+        <div class="pago-checkin-titulo">
+            <strong>CAB ${numeroCabana}</strong>
+            <span> · ${titular}</span>
         </div>
-    </div>
 
-    <div class="pago-checkin-medio">
-        <label>
-            Medio:
-            <select data-pago-checkin-medio="${numeroCabana}">
-                <option value="">Seleccionar...</option>
-                <option value="WebPay Débito">WebPay Débito</option>
-                <option value="WebPay Crédito">WebPay Crédito</option>
-                <option value="Transferencia">Transferencia</option>
-                <option value="Efectivo">Efectivo</option>
-            </select>
-        </label>
+        <div class="pago-checkin-resumen">
+            <label>
+                <span>Total:</span>
+                <div class="pago-checkin-total-wrap">
+                    <span>$</span>
+                    <input
+                        type="number"
+                        class="pago-checkin-total"
+                        data-pago-checkin-total="${numeroCabana}"
+                        placeholder="300000"
+                    >
+                </div>
+            </label>
 
-        <input
-            type="checkbox"
-            data-pago-checkin-cobrado="${numeroCabana}"
-        >
-    </div>
+            <div class="pago-checkin-saldo-bloque">
+                <span>Saldo:</span>
+                <strong class="pago-checkin-saldo">$0</strong>
+            </div>
+        </div>
 
-    <div class="pago-checkin-datos">
-        <label>
-            Folio:
-            <input
-                type="text"
-                data-pago-checkin-folio="${numeroCabana}"
-                placeholder="Rellenar"
-            >
-        </label>
+        <div class="pago-checkin-fila pago-checkin-fila-medio">
+            <label>
+                <span>Medio:</span>
+                <select data-pago-checkin-medio="${numeroCabana}">
+                    <option value="">Seleccionar...</option>
+                    <option value="WebPay Débito">WebPay Débito</option>
+                    <option value="WebPay Crédito">WebPay Crédito</option>
+                    <option value="Transferencia">Transferencia</option>
+                    <option value="Efectivo">Efectivo</option>
+                </select>
+            </label>
 
-        <label>
-            CodAut:
-            <input
-                type="text"
-                data-pago-checkin-codaut="${numeroCabana}"
-                placeholder="Rellenar"
-            >
-        </label>
-
-        <label>
-            Bove:
-            <input
-                type="text"
-                data-pago-checkin-bove="${numeroCabana}"
-                placeholder="Rellenar"
-            >
-        </label>
-
-        <label>
-            Manager:
             <input
                 type="checkbox"
-                data-pago-checkin-manager="${numeroCabana}"
+                class="pago-checkin-check"
+                data-pago-checkin-cobrado="${numeroCabana}"
             >
-        </label>
+        </div>
+
+        <div class="pago-checkin-fila">
+            <label>
+                <span>Folio:</span>
+                <input
+                    type="text"
+                    data-pago-checkin-folio="${numeroCabana}"
+                    placeholder="Rellenar"
+                >
+            </label>
+
+            <label>
+                <span>CodAut:</span>
+                <input
+                    type="text"
+                    data-pago-checkin-codaut="${numeroCabana}"
+                    placeholder="Rellenar"
+                >
+            </label>
+        </div>
+
+        <div class="pago-checkin-fila">
+            <label>
+                <span>Bove:</span>
+                <input
+                    type="text"
+                    data-pago-checkin-bove="${numeroCabana}"
+                    placeholder="Rellenar"
+                >
+            </label>
+
+            <label class="pago-checkin-manager">
+                <span>Manager:</span>
+                <input
+                    type="checkbox"
+                    data-pago-checkin-manager="${numeroCabana}"
+                >
+            </label>
+        </div>
+
     </div>
 `;
 
@@ -327,6 +335,19 @@ const inputBove = tarjeta.querySelector(
 const checkManager = tarjeta.querySelector(
     `[data-pago-checkin-manager="${numeroCabana}"]`
 );
+
+function actualizarEstadoCompleto() {
+    const completo =
+        Number(inputTotal.value) > 0 &&
+        selectMedio.value !== "" &&
+        checkCobrado.checked &&
+        inputFolio.value.trim() !== "" &&
+        inputCodAut.value.trim() !== "" &&
+        inputBove.value.trim() !== "" &&
+        checkManager.checked;
+
+    tarjeta.classList.toggle("pago-checkin-completo", completo);
+}
 
 // Recuperar valores guardados
 selectMedio.value = cabana.checkinMedio || "";
@@ -374,6 +395,19 @@ checkManager.addEventListener("change", () => {
     guardarDatos();
 });
 
+[
+    inputTotal,
+    selectMedio,
+    checkCobrado,
+    inputFolio,
+    inputCodAut,
+    inputBove,
+    checkManager
+].forEach(elemento => {
+    elemento.addEventListener("input", actualizarEstadoCompleto);
+    elemento.addEventListener("change", actualizarEstadoCompleto);
+});
+
 inputTotal.value = cabana.totalReserva || "";
 
 function actualizarSaldo() {
@@ -396,6 +430,7 @@ inputTotal.addEventListener("input", () => {
 });
 
 actualizarSaldo();
+actualizarEstadoCompleto();
 
 });
 

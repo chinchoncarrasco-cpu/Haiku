@@ -3153,3 +3153,299 @@ input[type="time"].campo-cabana {
     background: #f1faf3;
     border-color: #90c5a5;
 }
+
+/* =========================================
+   SALDOS CHECK-IN
+========================================= */
+
+.pago-checkin-item {
+    padding: 16px;
+    border: 1px solid #d9dfdc;
+    border-radius: 12px;
+    background: #fff;
+}
+
+.pago-checkin-titulo {
+    margin-bottom: 12px;
+    font-size: 16px;
+}
+
+.pago-checkin-resumen {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.pago-checkin-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pago-checkin-campo span {
+    font-size: 11px;
+    color: #68716d;
+}
+
+.pago-checkin-campo input,
+.pago-checkin-campo select {
+    width: 100%;
+    min-width: 0;
+    height: 36px;
+    padding: 0 9px;
+    border: 1px solid #ccd3cf;
+    border-radius: 7px;
+    background: #fff;
+    font: inherit;
+}
+
+.pago-checkin-saldo {
+    font-weight: 600;
+}
+
+.pago-checkin-check {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.pago-checkin-check input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    flex: 0 0 18px;
+}
+
+/* Móvil */
+@media (max-width: 450px) {
+
+    .pago-checkin-item {
+        padding: 13px;
+    }
+
+    .pago-checkin-resumen {
+        gap: 8px;
+    }
+
+    .pago-checkin-campo input,
+    .pago-checkin-campo select {
+        height: 34px;
+        font-size: 13px;
+    }
+}
+
+/* =========================================
+   PAGOS - SALDOS CHECK-IN
+========================================= */
+
+.pago-checkin-item {
+    padding: 14px 16px;
+    border-bottom: 1px solid #e4e7e5;
+}
+
+.pago-checkin-item:last-child {
+    border-bottom: none;
+}
+
+.pago-checkin-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pago-checkin-titulo {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 16px;
+}
+
+.pago-checkin-titulo strong {
+    font-weight: 700;
+}
+
+/* TOTAL + SALDO */
+
+.pago-checkin-resumen {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: end;
+}
+
+.pago-checkin-resumen label,
+.pago-checkin-saldo-bloque {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pago-checkin-total-wrap {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.pago-checkin-total {
+    width: 100%;
+}
+
+.pago-checkin-saldo {
+    min-height: 34px;
+    display: flex;
+    align-items: center;
+    font-size: 16px;
+}
+
+/* FILAS */
+
+.pago-checkin-fila {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    align-items: end;
+}
+
+.pago-checkin-fila label {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pago-checkin-fila input[type="text"],
+.pago-checkin-fila select,
+.pago-checkin-total {
+    height: 36px;
+    padding: 6px 9px;
+    border: 1px solid #d8ddda;
+    border-radius: 7px;
+    background: #fff;
+    box-sizing: border-box;
+    font: inherit;
+}
+
+/* MEDIO + TICKET */
+
+.pago-checkin-fila-medio {
+    grid-template-columns: 1fr auto;
+}
+
+.pago-checkin-check {
+    width: 18px;
+    height: 18px;
+    margin-bottom: 8px;
+    accent-color: #2f7d59;
+}
+
+/* MANAGER */
+
+.pago-checkin-manager {
+    flex-direction: row !important;
+    align-items: center;
+    gap: 8px !important;
+    height: 36px;
+}
+
+.pago-checkin-manager input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    accent-color: #2f7d59;
+}
+
+/* MÓVIL */
+
+@media (max-width: 600px) {
+    .pago-checkin-item {
+        padding: 12px 14px;
+    }
+
+    .pago-checkin-contenido {
+        gap: 8px;
+    }
+
+    .pago-checkin-resumen,
+    .pago-checkin-fila {
+        gap: 8px;
+    }
+
+    .pago-checkin-fila input[type="text"],
+    .pago-checkin-fila select,
+    .pago-checkin-total {
+        min-width: 0;
+        width: 100%;
+    }
+}
+
+/* PAGOS CHECK-IN - AJUSTE COMPACTO */
+
+.pago-checkin-item {
+    padding: 8px 12px;
+}
+
+.pago-checkin-contenido {
+    gap: 4px;
+    font-size: 13px;
+}
+
+.pago-checkin-titulo {
+    font-size: 14px;
+    margin-bottom: 3px;
+}
+
+.pago-checkin-resumen {
+    gap: 8px;
+}
+
+.pago-checkin-resumen label,
+.pago-checkin-saldo-bloque,
+.pago-checkin-fila label {
+    gap: 1px;
+}
+
+.pago-checkin-fila {
+    gap: 8px;
+}
+
+.pago-checkin-fila input[type="text"],
+.pago-checkin-fila select,
+.pago-checkin-total {
+    height: 28px;
+    padding: 2px 7px;
+    font-size: 13px;
+    border-radius: 6px;
+}
+
+.pago-checkin-saldo {
+    min-height: 28px;
+    font-size: 14px;
+}
+
+.pago-checkin-check {
+    width: 16px;
+    height: 16px;
+    margin-bottom: 6px;
+}
+
+.pago-checkin-manager {
+    height: 28px;
+    font-size: 13px;
+}
+
+.pago-checkin-manager input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+}
+
+/* =========================================
+   PAGO CHECK-IN COMPLETADO
+========================================= */
+
+.pago-checkin-item {
+    transition: background-color 0.2s ease,
+                border-color 0.2s ease;
+}
+
+.pago-checkin-item.pago-checkin-completo {
+    background-color: #eef8f1;
+    border-color: #8fc9a3;
+}
