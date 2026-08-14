@@ -44,8 +44,8 @@
             🛁 Servicios
         </button>
 
-        <button class="menu-item">
-            💳 Pagos
+        <button class="menu-item" data-seccion="pagos">
+        💳 Pagos
         </button>
 
         <button class="menu-item" data-seccion="cierre">
@@ -4387,6 +4387,69 @@
 
 </section>
 
+<!-- ============================= -->
+<!-- SECCIÓN PAGOS -->
+<!-- ============================= -->
+
+<section id="seccion-pagos" class="seccion-app">
+
+    <header class="cabecera">
+        <div>
+            <p class="eyebrow">CONTROL FINANCIERO</p>
+            <h1>Pagos</h1>
+            <p class="subtitulo">
+                Verificación de abonos y cobros del día.
+            </p>
+        </div>
+    </header>
+
+    <!-- RESUMEN DE PAGOS -->
+
+<section class="pagos-resumen">
+
+    <div class="pago-indicador">
+        <span>Abonos por verificar</span>
+        <strong id="pagos-contador-abonos">0</strong>
+    </div>
+
+    <div class="pago-indicador">
+        <span>Saldos Check-in</span>
+        <strong id="pagos-contador-checkin">0</strong>
+    </div>
+
+    <div class="pago-indicador">
+        <span>Cobros Check-out</span>
+        <strong id="pagos-contador-checkout">0</strong>
+    </div>
+
+    <div class="pago-indicador">
+        <span>WebPay por confirmar</span>
+        <strong id="pagos-contador-webpay">0</strong>
+    </div>
+
+</section>
+
+<!-- ===================================== -->
+<!-- VERIFICAR ABONOS -->
+<!-- ===================================== -->
+
+<section class="panel pagos-panel">
+
+    <div class="panel-titulo">
+        <div>
+            <h2>Verificar abonos</h2>
+            <p>Confirma los abonos de las reservas que ingresan hoy.</p>
+        </div>
+    </div>
+
+    <div id="pagos-lista-abonos">
+        <!-- Aquí aparecerán automáticamente las reservas -->
+    </div>
+
+</section>
+
+</section>
+
 </main>
 
 
@@ -4396,6 +4459,7 @@
     <script src="js/app.js"></script>
     <script src="js/cabanas.js"></script>
     <script src="js/cierre.js"></script>
+    <script src="js/pagos.js"></script>
 
 </body>
 

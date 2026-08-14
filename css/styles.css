@@ -3019,3 +3019,77 @@ input[type="time"].campo-cabana {
     line-height: 1;
 }
 }
+
+/* =========================================
+   PAGOS - RESUMEN SUPERIOR
+========================================= */
+
+.pagos-resumen {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.pago-indicador {
+    background: var(--panel);
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: 10px 12px;
+
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.pago-indicador span {
+    font-size: 11px;
+    color: var(--texto-suave);
+}
+
+.pago-indicador strong {
+    font-size: 18px;
+    line-height: 1;
+}
+
+/* =========================================
+   PAGOS - ABONOS POR VERIFICAR
+========================================= */
+
+#pagos-lista-abonos {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.pago-abono-item {
+    background: #fff;
+    border: 1px solid var(--borde);
+    border-radius: 10px;
+    padding: 10px 12px;
+}
+
+.pago-abono-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.pago-abono-info strong {
+    font-size: 13px;
+    font-weight: 700;
+}
+
+.pago-abono-info span {
+    font-size: 11px;
+    color: var(--texto-suave);
+}
+
+.pago-vacio {
+    padding: 12px;
+    text-align: center;
+    font-size: 12px;
+    color: var(--texto-suave);
+}
