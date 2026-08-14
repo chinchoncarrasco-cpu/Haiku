@@ -1087,4 +1087,15 @@ document.addEventListener("click", (evento) => {
 
     titular.textContent =
         nombreFinal || "Sin titular";
+
+        const datos = obtenerDatosDia(fechaSeleccionada);
+
+if (!datos.cabanas[numeroCabana]) {
+    datos.cabanas[numeroCabana] = {};
+}
+
+datos.cabanas[numeroCabana].titular = nombreFinal;
+
+guardarDatos();
+
 });
