@@ -832,16 +832,28 @@ function actualizarResumenAseo(fecha) {
                 </div>
 
                 <div class="aseo-resumen-horario">
-                    <div>
-                        <span>IN</span>
-                        <strong>${horaIn}</strong>
-                    </div>
+    <div>
+        <span>IN</span>
+        <input
+            type="time"
+            class="aseo-hora-input"
+            data-aseo-hora="aseoIn"
+            data-cabana="${numeroCabana}"
+            value="${cabana.aseoIn || ""}"
+        >
+    </div>
 
-                    <div>
-                        <span>OUT</span>
-                        <strong>${horaOut}</strong>
-                    </div>
-                </div>
+    <div>
+        <span>OUT</span>
+        <input
+            type="time"
+            class="aseo-hora-input"
+            data-aseo-hora="aseoOut"
+            data-cabana="${numeroCabana}"
+            value="${cabana.aseoOut || ""}"
+        >
+    </div>
+</div>
 
             </div>
         `;
@@ -905,6 +917,37 @@ actualizarTarjetasRevision(fechaSeleccionada);
         revisionEstado.value = selector.value;
     }
 
+});
+
+// ========================================
+// CAMBIAR HORARIOS IN / OUT DESDE ASEO
+// ========================================
+
+document.addEventListener("change", (evento) => {
+
+    const inputHora = evento.target.closest(".aseo-hora-input");
+
+    if (!inputHora || !fechaSeleccionada) {
+        return;
+    }
+
+    const numeroCabana = inputHora.dataset.cabana;
+    const campoHora = inputHora.dataset.aseoHora;
+
+    const datos = obtenerDatosDia(fechaSeleccionada);
+
+    if (!datos.cabanas[numeroCabana]) {
+        datos.cabanas[numeroCabana] = {};
+    }
+
+    // Guardar en el mismo campo que utiliza Resumen
+    datos.cabanas[numeroCabana][campoHora] = inputHora.value;
+
+    guardarDatos();
+
+    // Actualizar Resumen y Aseo
+    cargarCabanasDia(fechaSeleccionada);
+    actualizarResumenAseo(fechaSeleccionada);
 });
 
 // ========================================
