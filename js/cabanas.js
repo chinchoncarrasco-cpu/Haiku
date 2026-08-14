@@ -230,6 +230,21 @@ function actualizarTarjetasRevision(fecha) {
         const datosCabana =
             datos.cabanas[numeroCabana] || {};
 
+        // -------------------------
+// TITULAR DE LA RESERVA
+// -------------------------
+
+const titularCabana = document.querySelector(
+    `[data-titular-cabana="${numeroCabana}"]`
+);
+
+if (titularCabana) {
+    titularCabana.textContent =
+        datosCabana.titular && datosCabana.titular.trim() !== ""
+            ? datosCabana.titular
+            : "Sin titular";
+}    
+
 
         // ----------------------------
         // HUÉSPEDES
@@ -1030,3 +1045,46 @@ window.addEventListener(
     "resize",
     actualizarNombresEstadosResponsive
 );
+
+// ==========================================
+// EDITAR TITULAR DE RESERVA
+// ==========================================
+
+document.addEventListener("click", (evento) => {
+
+    const boton = evento.target.closest(".editar-titular");
+
+    if (!boton) {
+        return;
+    }
+
+    const numeroCabana = boton.dataset.editarTitular;
+
+    const titular = document.querySelector(
+        `[data-titular-cabana="${numeroCabana}"]`
+    );
+
+    if (!titular) {
+        return;
+    }
+
+    const nombreActual =
+        titular.textContent.trim() === "Sin titular"
+            ? ""
+            : titular.textContent.trim();
+
+    const nuevoNombre = prompt(
+        `Titular CAB ${numeroCabana}:`,
+        nombreActual
+    );
+
+    // Si presiona Cancelar, no hacemos nada
+    if (nuevoNombre === null) {
+        return;
+    }
+
+    const nombreFinal = nuevoNombre.trim();
+
+    titular.textContent =
+        nombreFinal || "Sin titular";
+});

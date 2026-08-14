@@ -3093,3 +3093,28 @@ input[type="time"].campo-cabana {
     font-size: 12px;
     color: var(--texto-suave);
 }
+
+/* Titular + lápiz en una sola línea */
+.cabana-titular-linea {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    white-space: nowrap;
+}
+
+.editar-titular {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    margin: 0;
+
+    border: none;
+    background: transparent;
+    font-size: 13px;
+    line-height: 1;
+    cursor: pointer;
+}
