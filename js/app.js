@@ -274,12 +274,64 @@ function mostrarNotasOperativas(fecha) {
             continue;
         }
 
-        cajaNota.textContent =
-            notasCabana
-                .map(nota => nota.texto)
-                .join(" · ");
+        cajaNota.innerHTML = notasCabana
+    .map(nota => `
+        <span class="nota-operativa-item">
+            ${nota.texto}
+            <button
+                type="button"
+                class="nota-eliminar"
+                data-cabana="${numeroCabana}"
+                data-texto="${nota.texto}"
+                title="Eliminar nota"
+            >×</button>
+        </span>
+    `)
+    .join(" ");
     }
 }
+
+// =====================================
+// ELIMINAR NOTA OPERATIVA
+// =====================================
+
+document.addEventListener("click", (evento) => {
+
+    const boton = evento.target.closest(".nota-eliminar");
+
+    if (!boton || !fechaSeleccionada) {
+        return;
+    }
+
+    const numeroCabana = boton.dataset.cabana;
+    const textoNota = boton.dataset.texto;
+
+    const datos = obtenerDatosDia(fechaSeleccionada);
+
+    const indice = datos.notasOperativas.findIndex(nota =>
+        String(nota.cabana) === String(numeroCabana) &&
+        nota.texto === textoNota
+    );
+
+    if (indice === -1) {
+        return;
+    }
+
+    datos.notasOperativas.splice(indice, 1);
+
+    guardarDatos();
+
+mostrarNotasOperativas(fechaSeleccionada);
+
+// Actualizar automáticamente las otras secciones
+actualizarTarjetasRevision(fechaSeleccionada);
+actualizarResumenAseo(fechaSeleccionada);
+
+textoNota.value = "";
+selectorNotaCabana.value = "";
+
+cerrarPanelNota();
+});
 
 // ========================================
 // GUARDAR NOTA OPERATIVA
@@ -306,12 +358,16 @@ botonGuardarNota.addEventListener("click", () => {
 
     guardarDatos();
 
-    mostrarNotasOperativas(fechaSeleccionada);
+mostrarNotasOperativas(fechaSeleccionada);
 
-    textoNota.value = "";
-    selectorNotaCabana.value = "";
+// Sincronizar Cabañas y Aseo inmediatamente
+actualizarTarjetasRevision(fechaSeleccionada);
+actualizarResumenAseo(fechaSeleccionada);
 
-    cerrarPanelNota();
+textoNota.value = "";
+selectorNotaCabana.value = "";
+
+cerrarPanelNota();
 
 });
 

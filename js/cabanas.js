@@ -383,12 +383,12 @@ const notaOperativa =
 
 if (notaOperativa) {
 
-    const notaCabana = datos.notasOperativas.find(
-        nota => String(nota.cabana) === String(numeroCabana)
-    );
+    const notasCabana = datos.notasOperativas.filter(
+    nota => String(nota.cabana) === String(numeroCabana)
+);
 
-    notaOperativa.textContent = notaCabana
-    ? notaCabana.texto
+notaOperativa.textContent = notasCabana.length
+    ? notasCabana.map(nota => nota.texto).join(" · ")
     : "";
 }
 
@@ -787,12 +787,12 @@ function actualizarResumenAseo(fecha) {
         const horaOut =
             cabana.aseoOut || "--:--";
 
-        const notaCabana = datos.notasOperativas.find(
+        const notasCabana = datos.notasOperativas.filter(
     nota => String(nota.cabana) === String(numeroCabana)
 );
 
-const notaAseo = notaCabana
-    ? notaCabana.texto
+const notaAseo = notasCabana.length
+    ? notasCabana.map(nota => nota.texto).join(" · ")
     : "";
         
         const estadoFinal =

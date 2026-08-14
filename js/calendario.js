@@ -206,6 +206,11 @@ function seleccionarDia(año, mes, dia, fechaISO) {
     cargarDatosDia(fechaSeleccionada);
 cargarCabanasDia(fechaSeleccionada);
 
+// Actualizar pagos del día seleccionado
+if (typeof cargarAbonosPagos === "function") {
+    cargarAbonosPagos();
+}
+
 // Cargar cierre correspondiente al día seleccionado
 if (typeof cargarCierreDia === "function") {
     cargarCierreDia(fechaSeleccionada);

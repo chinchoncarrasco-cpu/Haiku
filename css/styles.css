@@ -1517,26 +1517,6 @@ input[type="time"].campo-cabana {
    PANEL AGREGAR NOTA
 ======================================== */
 
-/* Fondo del panel: oculto por defecto */
-#panel-agregar-nota {
-    display: none;
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.35);
-    z-index: 1000;
-
-    align-items: center;
-    justify-content: center;
-
-    padding: 24px;
-}
-
-/* Cuando JavaScript agrega "activo", aparece */
-#panel-agregar-nota.activo {
-    display: flex;
-}
-
-
 /* Caja blanca */
 .panel-nota {
     width: 100%;
@@ -3119,4 +3099,57 @@ input[type="time"].campo-cabana {
     font-size: 13px;
     line-height: 1;
     cursor: pointer;
+}
+
+/* ========================================
+   PAGOS - CAMPOS DE ABONO
+======================================== */
+
+.pago-abono-linea-detalle {
+    display: flex;
+    align-items: flex-end;
+    gap: 10px;
+    flex-wrap: wrap;
+}
+
+.pago-abono-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.pago-abono-monto-wrap {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.pago-abono-monto {
+    width: 90px;
+    box-sizing: border-box;
+}
+
+.pago-abono-medio {
+    width: 145px;
+    box-sizing: border-box;
+}
+
+.pago-abono-check {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    white-space: nowrap;
+    padding-bottom: 2px;
+}
+
+/* ABONO VERIFICADO */
+
+.pago-abono-item {
+    transition: background-color 0.2s ease,
+                border-color 0.2s ease;
+}
+
+.pago-abono-item.abono-verificado {
+    background: #f1faf3;
+    border-color: #90c5a5;
 }
