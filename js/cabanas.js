@@ -771,6 +771,14 @@ function actualizarResumenAseo(fecha) {
 
         const horaOut =
             cabana.aseoOut || "--:--";
+
+        const notaCabana = datos.notasOperativas.find(
+    nota => String(nota.cabana) === String(numeroCabana)
+);
+
+const notaAseo = notaCabana
+    ? notaCabana.texto
+    : "";
         
         const estadoFinal =
               cabana.estadoRevision === "lista"
@@ -854,6 +862,12 @@ function actualizarResumenAseo(fecha) {
         >
     </div>
 </div>
+
+${notaAseo ? `
+    <div class="aseo-resumen-nota">
+        📝 ${notaAseo}
+    </div>
+` : ""}
 
             </div>
         `;

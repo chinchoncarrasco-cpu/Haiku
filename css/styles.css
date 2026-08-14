@@ -2935,3 +2935,52 @@ input[type="time"].campo-cabana {
         gap: 5px;
     }
 }
+
+/* =========================================
+   HORARIOS IN / OUT - ASEO
+   ========================================= */
+
+.aseo-resumen-horario > div {
+    flex: 1;
+    background: #f7f8f8;
+    border-radius: 10px;
+    padding: 10px 12px;
+    min-width: 0;
+}
+
+.aseo-resumen-horario span {
+    display: block;
+    font-size: 10px;
+    color: #777;
+    margin-bottom: 4px;
+    letter-spacing: 0.5px;
+}
+
+/* Input de hora */
+.aseo-resumen-horario input[type="time"] {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 0;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: #202723;
+
+    cursor: pointer;
+}
+
+/* Quitar aspecto de caja interna del navegador */
+.aseo-resumen-horario input[type="time"]:focus {
+    border: none;
+    outline: none;
+    box-shadow: none;
+}
+
+/* Icono del reloj un poco más discreto */
+.aseo-resumen-horario input[type="time"]::-webkit-calendar-picker-indicator {
+    opacity: 0.45;
+    cursor: pointer;
+}
