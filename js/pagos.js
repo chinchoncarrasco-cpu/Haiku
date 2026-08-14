@@ -158,6 +158,248 @@ tarjeta.innerHTML = `
 // ========================================
 
 cargarAbonosPagos();
+cargarSaldosCheckin();
+
+// =====================================
+// SALDOS CHECK-IN
+// =====================================
+
+function cargarSaldosCheckin() {
+
+    const lista = document.getElementById("pagos-lista-checkin");
+    const contador = document.getElementById("pagos-contador-checkin");
+
+    if (!lista || !contador) {
+        return;
+    }
+
+    if (!fechaSeleccionada) {
+        return;
+    }
+
+    const datos = obtenerDatosDia(fechaSeleccionada);
+
+    if (!datos || !datos.cabanas) {
+        return;
+    }
+
+    lista.innerHTML = "";
+
+    let cantidad = 0;
+
+    Object.entries(datos.cabanas).forEach(([numeroCabana, cabana]) => {
+
+    const estado = cabana.estado || "";
+
+    const ingresa =
+        estado === "libre-ingresa" ||
+        estado === "sale-ingresa";
+
+    if (!ingresa) {
+        return;
+    }
+
+    cantidad++;
+
+    const titular =
+        cabana.titular ||
+        cabana.nombre ||
+        cabana.huesped ||
+        "Sin titular";
+
+    const abonoTexto =
+    cabana.abono ||
+    cabana.montoAbono ||
+    "0";
+
+const abono = Number(
+    String(abonoTexto).replace(/\D/g, "")
+);
+
+    const tarjeta = document.createElement("div");
+tarjeta.className = "pago-checkin-item";
+
+tarjeta.innerHTML = `
+    <div class="pago-checkin-titulo">
+        <strong>CAB ${numeroCabana}</strong>
+        <span>· ${titular}</span>
+    </div>
+
+    <div class="pago-checkin-totales">
+        <label>
+            Total:
+            <input
+                type="number"
+                class="pago-checkin-total"
+                data-pago-checkin-total="${numeroCabana}"
+                placeholder="300000"
+            >
+        </label>
+
+        <div>
+            Saldo:
+            <strong class="pago-checkin-saldo">
+                $0
+            </strong>
+        </div>
+    </div>
+
+    <div class="pago-checkin-medio">
+        <label>
+            Medio:
+            <select data-pago-checkin-medio="${numeroCabana}">
+                <option value="">Seleccionar...</option>
+                <option value="WebPay Débito">WebPay Débito</option>
+                <option value="WebPay Crédito">WebPay Crédito</option>
+                <option value="Transferencia">Transferencia</option>
+                <option value="Efectivo">Efectivo</option>
+            </select>
+        </label>
+
+        <input
+            type="checkbox"
+            data-pago-checkin-cobrado="${numeroCabana}"
+        >
+    </div>
+
+    <div class="pago-checkin-datos">
+        <label>
+            Folio:
+            <input
+                type="text"
+                data-pago-checkin-folio="${numeroCabana}"
+                placeholder="Rellenar"
+            >
+        </label>
+
+        <label>
+            CodAut:
+            <input
+                type="text"
+                data-pago-checkin-codaut="${numeroCabana}"
+                placeholder="Rellenar"
+            >
+        </label>
+
+        <label>
+            Bove:
+            <input
+                type="text"
+                data-pago-checkin-bove="${numeroCabana}"
+                placeholder="Rellenar"
+            >
+        </label>
+
+        <label>
+            Manager:
+            <input
+                type="checkbox"
+                data-pago-checkin-manager="${numeroCabana}"
+            >
+        </label>
+    </div>
+`;
+
+lista.appendChild(tarjeta);
+
+const inputTotal = tarjeta.querySelector(".pago-checkin-total");
+const saldoTexto = tarjeta.querySelector(".pago-checkin-saldo");
+const selectMedio = tarjeta.querySelector(
+    `[data-pago-checkin-medio="${numeroCabana}"]`
+);
+
+const checkCobrado = tarjeta.querySelector(
+    `[data-pago-checkin-cobrado="${numeroCabana}"]`
+);
+
+const inputFolio = tarjeta.querySelector(
+    `[data-pago-checkin-folio="${numeroCabana}"]`
+);
+
+const inputCodAut = tarjeta.querySelector(
+    `[data-pago-checkin-codaut="${numeroCabana}"]`
+);
+
+const inputBove = tarjeta.querySelector(
+    `[data-pago-checkin-bove="${numeroCabana}"]`
+);
+
+const checkManager = tarjeta.querySelector(
+    `[data-pago-checkin-manager="${numeroCabana}"]`
+);
+
+// Recuperar valores guardados
+selectMedio.value = cabana.checkinMedio || "";
+checkCobrado.checked = cabana.checkinCobrado === true;
+
+// Recuperar datos administrativos guardados
+inputFolio.value = cabana.checkinFolio || "";
+inputCodAut.value = cabana.checkinCodAut || "";
+inputBove.value = cabana.checkinBove || "";
+checkManager.checked = cabana.checkinManager === true;
+
+// Guardar medio de pago
+selectMedio.addEventListener("change", () => {
+    cabana.checkinMedio = selectMedio.value;
+    guardarDatos();
+});
+
+// Guardar ticket de cobro
+checkCobrado.addEventListener("change", () => {
+    cabana.checkinCobrado = checkCobrado.checked;
+    guardarDatos();
+});
+
+// Guardar Folio
+inputFolio.addEventListener("input", () => {
+    cabana.checkinFolio = inputFolio.value;
+    guardarDatos();
+});
+
+// Guardar Código de Autorización
+inputCodAut.addEventListener("input", () => {
+    cabana.checkinCodAut = inputCodAut.value;
+    guardarDatos();
+});
+
+// Guardar Bove
+inputBove.addEventListener("input", () => {
+    cabana.checkinBove = inputBove.value;
+    guardarDatos();
+});
+
+// Guardar Manager
+checkManager.addEventListener("change", () => {
+    cabana.checkinManager = checkManager.checked;
+    guardarDatos();
+});
+
+inputTotal.value = cabana.totalReserva || "";
+
+function actualizarSaldo() {
+
+    const total = Number(inputTotal.value) || 0;
+
+    const saldo = Math.max(total - abono, 0);
+
+    saldoTexto.textContent =
+        "$" + saldo.toLocaleString("es-CL");
+}
+
+inputTotal.addEventListener("input", () => {
+
+    cabana.totalReserva = inputTotal.value;
+
+    guardarDatos();
+
+    actualizarSaldo();
+});
+
+actualizarSaldo();
+
+});
+
+}
 
 // ========================================
 // ABONO VERIFICADO - CAMBIO VISUAL

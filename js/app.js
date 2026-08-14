@@ -167,6 +167,15 @@ function cargarDatosDia(fecha) {
     // cargarCabanasDia(fecha);
 
     mostrarNotasOperativas(fecha);
+
+    // Actualizar pagos para la fecha seleccionada
+    if (typeof cargarAbonosPagos === "function") {
+        cargarAbonosPagos();
+    }
+
+    if (typeof cargarSaldosCheckin === "function") {
+        cargarSaldosCheckin();
+    }
 }
 
 
