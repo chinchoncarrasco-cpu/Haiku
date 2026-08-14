@@ -42,7 +42,9 @@ function cargarAbonosPagos() {
             return;
         }
 
-        cantidad++;
+        if (cabana.abonoVerificado !== true) {
+    cantidad++;
+}
 
         const tarjeta = document.createElement("div");
         tarjeta.className = "pago-abono-item";
@@ -98,31 +100,17 @@ tarjeta.innerHTML = `
         <strong>Medio:</strong>
 
         <select
-            class="pago-abono-medio"
-            data-pago-cabana="${numeroCabana}"
-        >
-            <option value="">Seleccionar...</option>
-
-            <option value="Transferencia"
-                ${medioPago === "Transferencia" ? "selected" : ""}>
-                Transferencia
-            </option>
-
-            <option value="WebPay Crédito"
-                ${medioPago === "WebPay Crédito" ? "selected" : ""}>
-                WebPay Crédito
-            </option>
-
-            <option value="WebPay Débito"
-                ${medioPago === "WebPay Débito" ? "selected" : ""}>
-                WebPay Débito
-            </option>
-
-            <option value="Efectivo"
-                ${medioPago === "Efectivo" ? "selected" : ""}>
-                Efectivo
-            </option>
-        </select>
+    class="pago-abono-medio"
+    data-pago-cabana="${numeroCabana}"
+>
+    <option value="">Seleccionar...</option>
+    <option value="Transferencia">Transferencia</option>
+    <option value="WebPay Crédito">WebPay Crédito</option>
+    <option value="WebPay Débito">WebPay Débito</option>
+    <option value="Tarjeta Crédito">Tarjeta Crédito</option>
+    <option value="Tarjeta Débito">Tarjeta Débito</option>
+    <option value="Efectivo">Efectivo</option>
+</select>
     </label>
 
     <label class="pago-abono-check">
@@ -143,13 +131,6 @@ tarjeta.innerHTML = `
 
     contador.textContent = cantidad;
 
-    if (cantidad === 0) {
-        lista.innerHTML = `
-            <div class="pago-vacio">
-                No hay abonos por verificar.
-            </div>
-        `;
-    }
 }
 
 
@@ -251,12 +232,14 @@ tarjeta.innerHTML = `
             <label>
                 <span>Medio:</span>
                 <select data-pago-checkin-medio="${numeroCabana}">
-                    <option value="">Seleccionar...</option>
-                    <option value="WebPay Débito">WebPay Débito</option>
-                    <option value="WebPay Crédito">WebPay Crédito</option>
-                    <option value="Transferencia">Transferencia</option>
-                    <option value="Efectivo">Efectivo</option>
-                </select>
+    <option value="">Seleccionar...</option>
+    <option value="WebPay Débito">WebPay Débito</option>
+    <option value="WebPay Crédito">WebPay Crédito</option>
+    <option value="Tarjeta Débito">Tarjeta Débito</option>
+    <option value="Tarjeta Crédito">Tarjeta Crédito</option>
+    <option value="Transferencia">Transferencia</option>
+    <option value="Efectivo">Efectivo</option>
+</select>
             </label>
 
             <input
@@ -347,6 +330,14 @@ function actualizarEstadoCompleto() {
         checkManager.checked;
 
     tarjeta.classList.toggle("pago-checkin-completo", completo);
+
+
+const pendientes = lista.querySelectorAll(
+    ".pago-checkin-item:not(.pago-checkin-completo)"
+).length;
+
+contador.textContent = pendientes;
+
 }
 
 // Recuperar valores guardados
@@ -434,6 +425,12 @@ actualizarEstadoCompleto();
 
 });
 
+const pendientes = lista.querySelectorAll(
+    ".pago-checkin-item:not(.pago-checkin-completo)"
+).length;
+
+contador.textContent = pendientes;
+
 }
 
 // ========================================
@@ -505,8 +502,9 @@ document.addEventListener("change", (evento) => {
     }
 
     if (verificado) {
-        cabana.abonoVerificado = verificado.checked;
-    }
+    cabana.abonoVerificado = verificado.checked;
+}
 
-    guardarDatos();
+guardarDatos();
+cargarAbonosPagos();
 });

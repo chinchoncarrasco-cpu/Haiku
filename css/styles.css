@@ -3449,3 +3449,19 @@ input[type="time"].campo-cabana {
     background-color: #eef8f1;
     border-color: #8fc9a3;
 }
+
+/* ========================================
+   PAGOS - ESTADO PENDIENTE
+======================================== */
+
+/* Abonos pendientes */
+.pago-abono-item {
+    background: #fff8ec;
+    border-color: #e6b85c;
+}
+
+/* Saldos Check-in pendientes */
+.pago-checkin-item {
+    background: #fff8ec;
+    border-color: #e6b85c;
+}
