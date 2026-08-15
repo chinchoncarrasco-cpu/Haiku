@@ -110,6 +110,17 @@ function cargarCabanasDia(fecha) {
         const datosCabana =
             datos.cabanas[numeroCabana] || {};
 
+        const titularCabana = fila.querySelector(
+    `[data-titular-cabana="${numeroCabana}"]`
+);
+
+if (titularCabana) {
+    titularCabana.textContent =
+        datosCabana.titular && datosCabana.titular.trim() !== ""
+            ? datosCabana.titular
+            : "Sin titular";
+}
+
         const campos =
             fila.querySelectorAll(".campo-cabana");
 
@@ -234,7 +245,7 @@ function actualizarTarjetasRevision(fecha) {
 // TITULAR DE LA RESERVA
 // -------------------------
 
-const titularCabana = document.querySelector(
+const titularCabana = tarjeta.querySelector(
     `[data-titular-cabana="${numeroCabana}"]`
 );
 
@@ -243,7 +254,7 @@ if (titularCabana) {
         datosCabana.titular && datosCabana.titular.trim() !== ""
             ? datosCabana.titular
             : "Sin titular";
-}    
+} 
 
 
         // ----------------------------
@@ -818,11 +829,17 @@ const notaAseo = notasCabana.length
         tarjeta.className =
             `aseo-resumen-cabana ${claseEstado}`;
 
+            const nombreHuesped =
+  cabana.titular ||
+  cabana.nombre ||
+  cabana.huesped ||
+  "";
+
         tarjeta.innerHTML = `
             <div class="aseo-resumen-cabecera">
 
             <div class="aseo-resumen-numero">
-            CAB ${numeroCabana}
+            CAB ${numeroCabana}${nombreHuesped ? ` · ${nombreHuesped}` : ""}
             </div>
 
             <select
@@ -1097,5 +1114,8 @@ if (!datos.cabanas[numeroCabana]) {
 datos.cabanas[numeroCabana].titular = nombreFinal;
 
 guardarDatos();
+
+actualizarTarjetasRevision(fechaSeleccionada);
+actualizarResumenAseo(fechaSeleccionada);
 
 });
