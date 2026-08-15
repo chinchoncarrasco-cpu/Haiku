@@ -64,9 +64,7 @@ const montoAbono =
     cabana.montoAbono ||
     "";
 
-const medioPago =
-    cabana.medioPago ||
-    "Transferencia/WebPay";
+const medioPago = cabana.medioPago || "";
 
 tarjeta.innerHTML = `
     <div class="pago-abono-contenido">
@@ -100,16 +98,16 @@ tarjeta.innerHTML = `
         <strong>Medio:</strong>
 
         <select
-    class="pago-abono-medio"
-    data-pago-cabana="${numeroCabana}"
+  class="pago-abono-medio"
+  data-pago-cabana="${numeroCabana}"
 >
-    <option value="">Seleccionar...</option>
-    <option value="Transferencia">Transferencia</option>
-    <option value="WebPay Crédito">WebPay Crédito</option>
-    <option value="WebPay Débito">WebPay Débito</option>
-    <option value="Tarjeta Crédito">Tarjeta Crédito</option>
-    <option value="Tarjeta Débito">Tarjeta Débito</option>
-    <option value="Efectivo">Efectivo</option>
+  <option value="" ${medioPago === "" ? "selected" : ""}>Seleccionar...</option>
+  <option value="Transferencia" ${medioPago === "Transferencia" ? "selected" : ""}>Transferencia</option>
+  <option value="WebPay Crédito" ${medioPago === "WebPay Crédito" ? "selected" : ""}>WebPay Crédito</option>
+  <option value="WebPay Débito" ${medioPago === "WebPay Débito" ? "selected" : ""}>WebPay Débito</option>
+  <option value="Tarjeta Crédito" ${medioPago === "Tarjeta Crédito" ? "selected" : ""}>Tarjeta Crédito</option>
+  <option value="Tarjeta Débito" ${medioPago === "Tarjeta Débito" ? "selected" : ""}>Tarjeta Débito</option>
+  <option value="Efectivo" ${medioPago === "Efectivo" ? "selected" : ""}>Efectivo</option>
 </select>
     </label>
 
