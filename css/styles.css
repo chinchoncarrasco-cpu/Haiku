@@ -1819,6 +1819,48 @@ input[type="time"].campo-cabana {
     gap: 3px;
 }
 
+/* =========================================
+   ENCARGADO + REVISIÓN - ASEO
+========================================= */
+
+.aseo-resumen-personal {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 18px;
+}
+
+.aseo-resumen-encargado,
+.aseo-resumen-revision {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+
+.aseo-resumen-revision span {
+    font-size: 10px;
+    color: #777;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.aseo-revision-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    padding: 0;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 600;
+    color: #202723;
+}
+
+.aseo-revision-input::placeholder {
+    color: #aaa;
+    font-weight: 400;
+}
+
 .aseo-resumen-horario strong {
     font-size: 14px;
 }

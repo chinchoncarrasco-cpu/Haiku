@@ -866,10 +866,25 @@ const notaAseo = notasCabana.length
 
             <div class="aseo-resumen-datos">
 
-                <div class="aseo-resumen-encargado">
-                    <span>Encargado</span>
-                    <strong>${encargado}</strong>
-                </div>
+                <div class="aseo-resumen-personal">
+
+    <div class="aseo-resumen-encargado">
+        <span>Encargado</span>
+        <strong>${encargado}</strong>
+    </div>
+
+    <div class="aseo-resumen-revision">
+        <span>Revisión</span>
+        <input
+    type="text"
+    class="aseo-revision-input"
+    data-revision-cabana="${numeroCabana}"
+    placeholder="Nombre"
+    value="${cabana.revisionAseo || ""}"
+>
+    </div>
+
+</div>
 
                 <div class="aseo-resumen-horario">
     <div>
@@ -906,6 +921,26 @@ ${notaAseo ? `
 
         contenedor.appendChild(tarjeta);
     }
+
+    document.querySelectorAll(".aseo-revision-input").forEach(input => {
+
+    input.addEventListener("input", () => {
+
+        const numeroCabana = input.dataset.revisionCabana;
+
+        const datos = obtenerDatosDia(fecha);
+
+        if (!datos.cabanas[numeroCabana]) {
+            datos.cabanas[numeroCabana] = {};
+        }
+
+        datos.cabanas[numeroCabana].revisionAseo = input.value;
+
+        guardarDatos();
+
+    });
+
+});
 
 }
 
