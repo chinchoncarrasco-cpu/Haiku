@@ -2841,6 +2841,11 @@
         ></p>
 
         <div
+            id="revision-solicitud-aseo"
+            class="revision-solicitud-aseo"
+        ></div>
+
+        <div
             id="revision-info-operativa"
             class="revision-info-operativa"
         ></div>
@@ -2976,17 +2981,106 @@
         <div class="panel-titulo">
             <div>
                 <h3>Planificación de aseo</h3>
-                <p>
-                    Información sincronizada automáticamente con el resumen principal.
-                </p>
+                
             </div>
         </div>
+
+        <div class="aseo-solicita-acciones">
+
+    <button
+        type="button"
+        id="agregar-solicita"
+        class="boton-secundario"
+    >
+        ＋ Agregar Solicita
+    </button>
+
+</div>
 
         <div id="aseo-resumen" class="aseo-resumen">
 
             <!-- JavaScript generará aquí las 11 cabañas -->
 
         </div>
+
+        <!-- ========================================
+     MODAL SOLICITA - ASEO EXPRESS
+======================================== -->
+
+<div id="panel-agregar-solicita">
+
+    <div class="panel-nota">
+
+        <div class="panel-nota-cabecera">
+
+            <div>
+                <p class="subtitulo">SOLICITUD ASEO EXPRESS</p>
+                <h2>Agregar solicita</h2>
+            </div>
+
+            <button
+                type="button"
+                id="cerrar-solicita"
+                class="cerrar-panel-nota"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <label class="campo-nota">
+            Cabaña
+
+            <select id="solicita-cabana">
+                <option value="1">CAB 1</option>
+                <option value="2">CAB 2</option>
+                <option value="3">CAB 3</option>
+                <option value="4">CAB 4</option>
+                <option value="5">CAB 5</option>
+                <option value="6">CAB 6</option>
+                <option value="7">CAB 7</option>
+                <option value="8">CAB 8</option>
+                <option value="9">CAB 9</option>
+                <option value="10">CAB 10</option>
+                <option value="11">CAB 11</option>
+            </select>
+
+        </label>
+
+        <label class="campo-nota">
+            Solicita
+
+            <textarea
+                id="solicita-texto"
+                placeholder="Ej:&#10;Reponer café&#10;Llevar carbón&#10;Cambiar toallas"
+            ></textarea>
+
+        </label>
+
+        <div class="panel-nota-acciones">
+
+            <button
+                type="button"
+                id="cancelar-solicita"
+                class="boton-secundario"
+            >
+                Cancelar
+            </button>
+
+            <button
+                type="button"
+                id="guardar-solicita"
+                class="boton-principal"
+            >
+                Guardar solicita
+            </button>
+
+        </div>
+
+    </div>
+
+</div>
 
     </section>
 

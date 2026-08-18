@@ -1460,7 +1460,8 @@ input[type="time"].campo-cabana {
    PANEL AGREGAR NOTA
 ======================================== */
 
-#panel-agregar-nota {
+#panel-agregar-nota,
+#panel-agregar-solicita {
     display: none;
     position: fixed;
     inset: 0;
@@ -1473,7 +1474,8 @@ input[type="time"].campo-cabana {
     background: rgba(0, 0, 0, 0.35);
 }
 
-#panel-agregar-nota.activo {
+#panel-agregar-nota.activo,
+#panel-agregar-solicita.activo {
     display: flex;
 }
 

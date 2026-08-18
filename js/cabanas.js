@@ -427,6 +427,9 @@ const revisionTitulo =
 const revisionFecha =
     document.getElementById("revision-fecha");
 
+const revisionSolicitudAseo =
+    document.getElementById("revision-solicitud-aseo");    
+
 const revisionInfoOperativa =
     document.getElementById("revision-info-operativa");
 
@@ -475,6 +478,21 @@ function abrirRevisionCabana(numeroCabana) {
 
     const datosCabana =
         datos.cabanas[numeroCabana] || {};
+
+    const solicitudAseo =
+    datosCabana.solicitudAseoExpress || "";
+
+if (revisionSolicitudAseo) {
+
+    if (solicitudAseo) {
+        revisionSolicitudAseo.textContent = `📌 ${solicitudAseo}`;
+        revisionSolicitudAseo.style.display = "";
+    } else {
+        revisionSolicitudAseo.textContent = "";
+        revisionSolicitudAseo.style.display = "none";
+    }
+
+}    
 
     revisionEstado.value =
         datosCabana.estadoRevision || "pendiente";
@@ -789,6 +807,16 @@ function actualizarResumenAseo(fecha) {
         const cabana =
             datos.cabanas[numeroCabana] || {};
 
+        const solicitudAseo =
+              cabana.solicitudAseoExpress || "";
+
+        console.log(
+    "CAB",
+    numeroCabana,
+    "SOLICITUD:",
+    cabana.solicitudAseoExpress
+);      
+
         const encargado =
             cabana.aseo || "Sin asignar";
 
@@ -916,6 +944,21 @@ ${notaAseo ? `
     </div>
 ` : ""}
 
+${solicitudAseo ? `
+    <div class="aseo-resumen-solicita">
+        <span>📌 ${solicitudAseo}</span>
+
+        <button
+            type="button"
+            class="aseo-solicita-eliminar"
+            data-eliminar-solicita="${numeroCabana}"
+            aria-label="Eliminar solicitud"
+        >
+            ×
+        </button>
+    </div>
+` : ""}
+
             </div>
         `;
 
@@ -940,6 +983,31 @@ ${notaAseo ? `
 
         guardarDatos();
 
+    });
+
+});
+
+// ELIMINAR SOLICITUD DE ASEO
+document.querySelectorAll(".aseo-solicita-eliminar").forEach(boton => {
+
+    boton.addEventListener("click", (evento) => {
+        evento.stopPropagation();
+
+        const numeroCabana = boton.dataset.eliminarSolicita;
+        const datos = obtenerDatosDia(fecha);
+
+        if (!datos.cabanas[numeroCabana]) {
+            return;
+        }
+
+        // Borrar solicitud
+        datos.cabanas[numeroCabana].solicitudAseoExpress = "";
+
+        // Guardar cambio
+        guardarDatos();
+
+        // Actualizar las tarjetas inmediatamente
+        actualizarResumenAseo(fecha);
     });
 
 });
@@ -1026,6 +1094,25 @@ function abrirRevisionAseoExpress(numeroCabana) {
 
     const datosCabana =
         datos.cabanas[numeroCabana] || {};
+
+    const solicitudAseoExpress =
+    document.getElementById("aseo-express-solicitud");
+
+if (solicitudAseoExpress) {
+
+    const solicitud =
+        datosCabana.solicitudAseoExpress || "";
+
+    if (solicitud) {
+        solicitudAseoExpress.textContent =
+            `📌 ${solicitud}`;
+
+        solicitudAseoExpress.style.display = "";
+    } else {
+        solicitudAseoExpress.textContent = "";
+        solicitudAseoExpress.style.display = "none";
+    }
+}    
 
     const checklistExpress =
         datosCabana.checklistAseoExpress || {};
@@ -1236,6 +1323,114 @@ if (estadoAseoExpress) {
             revisionEstado.value =
                 estadoAseoExpress.value;
         }
+
+    });
+
+}
+
+// ========================================
+// MODAL SOLICITA - ASEO EXPRESS
+// ========================================
+
+const botonAgregarSolicita =
+    document.getElementById("agregar-solicita");
+
+const panelAgregarSolicita =
+    document.getElementById("panel-agregar-solicita");
+
+const botonCerrarSolicita =
+    document.getElementById("cerrar-solicita");
+
+const botonCancelarSolicita =
+    document.getElementById("cancelar-solicita");
+
+
+// ABRIR MODAL
+if (botonAgregarSolicita && panelAgregarSolicita) {
+
+    botonAgregarSolicita.addEventListener("click", () => {
+
+        panelAgregarSolicita.classList.add("activo");
+
+    });
+
+}
+
+
+// CERRAR CON X
+if (botonCerrarSolicita && panelAgregarSolicita) {
+
+    botonCerrarSolicita.addEventListener("click", () => {
+
+        panelAgregarSolicita.classList.remove("activo");
+
+    });
+
+}
+
+
+// CERRAR CON CANCELAR
+if (botonCancelarSolicita && panelAgregarSolicita) {
+
+    botonCancelarSolicita.addEventListener("click", () => {
+
+        panelAgregarSolicita.classList.remove("activo");
+
+    });
+
+}
+
+// ========================================
+// GUARDAR SOLICITA - ASEO EXPRESS
+// ========================================
+
+const botonGuardarSolicita =
+    document.getElementById("guardar-solicita");
+
+const selectCabanaSolicita =
+    document.getElementById("solicita-cabana");
+
+const textoSolicita =
+    document.getElementById("solicita-texto");
+
+if (
+    botonGuardarSolicita &&
+    selectCabanaSolicita &&
+    textoSolicita
+) {
+
+    botonGuardarSolicita.addEventListener("click", () => {
+
+        if (!fechaSeleccionada) {
+            return;
+        }
+
+        const numeroCabana = selectCabanaSolicita.value;
+        const solicitud = textoSolicita.value.trim();
+
+        if (!numeroCabana || !solicitud) {
+            return;
+        }
+
+        const datos = obtenerDatosDia(fechaSeleccionada);
+
+        if (!datos.cabanas[numeroCabana]) {
+            datos.cabanas[numeroCabana] = {};
+        }
+
+        // Guardamos la solicitud dentro de ESA fecha y ESA cabaña
+        datos.cabanas[numeroCabana].solicitudAseoExpress = solicitud;
+
+        guardarDatos();
+
+        // Limpiar campo
+        textoSolicita.value = "";
+
+        // Cerrar modal
+        panelAgregarSolicita.classList.remove("activo");
+
+        // Actualizar Aseo
+        actualizarResumenAseo(fechaSeleccionada);
 
     });
 
