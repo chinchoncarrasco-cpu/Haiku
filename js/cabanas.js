@@ -919,6 +919,8 @@ ${notaAseo ? `
             </div>
         `;
 
+        tarjeta.dataset.aseoExpressCabana = numeroCabana;
+
         contenedor.appendChild(tarjeta);
     }
 
@@ -941,6 +943,301 @@ ${notaAseo ? `
     });
 
 });
+
+}
+
+// ========================================
+// ABRIR REVISIÓN ASEO EXPRESS
+// ========================================
+
+document.addEventListener("click", (evento) => {
+
+    const tarjeta = evento.target.closest(
+        "[data-aseo-express-cabana]"
+    );
+
+    if (!tarjeta || !fechaSeleccionada) {
+        return;
+    }
+
+    // No abrir la revisión si estamos usando
+    // un select, input o botón de la tarjeta
+    if (evento.target.closest("select, input, button")) {
+        return;
+    }
+
+    const numeroCabana =
+        tarjeta.dataset.aseoExpressCabana;
+
+    abrirRevisionAseoExpress(numeroCabana);
+
+});
+
+function abrirRevisionAseoExpress(numeroCabana) {
+
+    const panelAseo =
+        document.querySelector("#seccion-aseo .aseo-panel");
+
+    const revisionExpress =
+        document.getElementById("aseo-express-individual");
+
+    const titulo =
+        document.getElementById("aseo-express-titulo");
+
+    const fecha =
+        document.getElementById("aseo-express-fecha");
+
+    if (
+        !panelAseo ||
+        !revisionExpress ||
+        !titulo ||
+        !fecha
+    ) {
+        return;
+    }
+
+    titulo.textContent = `CAB ${numeroCabana}`;
+
+    const fechaRevision =
+        new Date(`${fechaSeleccionada}T12:00:00`);
+
+    fecha.textContent =
+        fechaRevision.toLocaleDateString(
+            "es-CL",
+            {
+                weekday: "long",
+                day: "numeric",
+                month: "long",
+                year: "numeric"
+            }
+        );
+
+    localStorage.setItem(
+        "haikuAseoExpressCabana",
+        numeroCabana
+    );
+
+        // ========================================
+    // CARGAR CHECKLIST ASEO EXPRESS
+    // ========================================
+
+    const datos =
+        obtenerDatosDia(fechaSeleccionada);
+
+    const datosCabana =
+        datos.cabanas[numeroCabana] || {};
+
+    const checklistExpress =
+        datosCabana.checklistAseoExpress || {};
+
+    document
+        .querySelectorAll("[data-aseo-express-item]")
+        .forEach(check => {
+
+            const item =
+                check.dataset.aseoExpressItem;
+
+            check.checked =
+                checklistExpress[item] === true;
+
+        });
+
+            // ========================================
+    // CARGAR DETALLES Y ESTADO
+    // ========================================
+
+    const detallesExpress =
+        document.getElementById("aseo-express-detalles");
+
+    const estadoExpress =
+        document.getElementById("aseo-express-estado");
+
+    if (detallesExpress) {
+        detallesExpress.value =
+            datosCabana.detallesAseoExpress || "";
+    }
+
+    if (estadoExpress) {
+        estadoExpress.value =
+            datosCabana.estadoRevision || "pendiente";
+    }
+
+    panelAseo.style.display = "none";
+
+    revisionExpress.classList.add("activa");
+
+}
+
+// ========================================
+// GUARDAR CHECKLIST ASEO EXPRESS
+// ========================================
+
+document.addEventListener("change", (evento) => {
+
+    const check =
+        evento.target.closest("[data-aseo-express-item]");
+
+    if (!check || !fechaSeleccionada) {
+        return;
+    }
+
+    const numeroCabana =
+        localStorage.getItem("haikuAseoExpressCabana");
+
+    if (!numeroCabana) {
+        return;
+    }
+
+    const datos =
+        obtenerDatosDia(fechaSeleccionada);
+
+    if (!datos.cabanas[numeroCabana]) {
+        datos.cabanas[numeroCabana] = {};
+    }
+
+    if (!datos.cabanas[numeroCabana].checklistAseoExpress) {
+        datos.cabanas[numeroCabana].checklistAseoExpress = {};
+    }
+
+    const item =
+        check.dataset.aseoExpressItem;
+
+    datos.cabanas[numeroCabana]
+        .checklistAseoExpress[item] =
+        check.checked;
+
+    guardarDatos();
+
+});
+
+const botonVolverAseo =
+    document.getElementById("volver-aseo");
+
+if (botonVolverAseo) {
+
+    botonVolverAseo.addEventListener("click", () => {
+
+        const panelAseo =
+            document.querySelector("#seccion-aseo .aseo-panel");
+
+        const revisionExpress =
+            document.getElementById("aseo-express-individual");
+
+        if (revisionExpress) {
+            revisionExpress.classList.remove("activa");
+        }
+
+        if (panelAseo) {
+            panelAseo.style.display = "";
+        }
+
+    });
+
+}
+
+// ========================================
+// GUARDAR DETALLES ASEO EXPRESS
+// ========================================
+
+const detallesAseoExpress =
+    document.getElementById("aseo-express-detalles");
+
+if (detallesAseoExpress) {
+
+    detallesAseoExpress.addEventListener("input", () => {
+
+        if (!fechaSeleccionada) {
+            return;
+        }
+
+        const numeroCabana =
+            localStorage.getItem("haikuAseoExpressCabana");
+
+        if (!numeroCabana) {
+            return;
+        }
+
+        const datos =
+            obtenerDatosDia(fechaSeleccionada);
+
+        if (!datos.cabanas[numeroCabana]) {
+            datos.cabanas[numeroCabana] = {};
+        }
+
+        datos.cabanas[numeroCabana].detallesAseoExpress =
+            detallesAseoExpress.value;
+
+        guardarDatos();
+
+    });
+
+}
+
+// ========================================
+// CAMBIAR ESTADO DESDE REVISIÓN ASEO EXPRESS
+// ========================================
+
+const estadoAseoExpress =
+    document.getElementById("aseo-express-estado");
+
+if (estadoAseoExpress) {
+
+    estadoAseoExpress.addEventListener("change", () => {
+
+        if (!fechaSeleccionada) {
+            return;
+        }
+
+        const numeroCabana =
+            localStorage.getItem("haikuAseoExpressCabana");
+
+        if (!numeroCabana) {
+            return;
+        }
+
+        const datos =
+            obtenerDatosDia(fechaSeleccionada);
+
+        if (!datos.cabanas[numeroCabana]) {
+            datos.cabanas[numeroCabana] = {};
+        }
+
+        // Estado compartido
+        datos.cabanas[numeroCabana].estadoRevision =
+            estadoAseoExpress.value;
+
+        // Sincronizar Estado Final
+        if (estadoAseoExpress.value === "lista") {
+
+            datos.cabanas[numeroCabana].estadoFinal =
+                "LISTA";
+
+        } else if (
+            estadoAseoExpress.value === "con-detalles"
+        ) {
+
+            datos.cabanas[numeroCabana].estadoFinal =
+                "CON DETALLES";
+
+        } else {
+
+            datos.cabanas[numeroCabana].estadoFinal = "";
+
+        }
+
+        guardarDatos();
+
+        // Actualizar todas las vistas conectadas
+        cargarCabanasDia(fechaSeleccionada);
+
+        // Mantener sincronizado el selector
+        // de la revisión normal de Cabañas
+        if (revisionEstado) {
+            revisionEstado.value =
+                estadoAseoExpress.value;
+        }
+
+    });
 
 }
 

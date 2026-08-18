@@ -21,6 +21,26 @@ botonesMenu.forEach(boton => {
 
         const seccionDestino = boton.dataset.seccion;
 
+                // Si volvemos a Aseo desde Revisión Aseo Express,
+        // restaurar el listado principal de Aseo
+        if (seccionDestino === "aseo") {
+
+            const panelAseo =
+                document.querySelector("#seccion-aseo .aseo-panel");
+
+            const revisionExpress =
+                document.getElementById("aseo-express-individual");
+
+            if (revisionExpress) {
+                revisionExpress.classList.remove("activa");
+            }
+
+            if (panelAseo) {
+                panelAseo.style.display = "";
+            }
+
+        }
+
         // ========================================
         // RECORDAR SECCIÓN ACTUAL
         // ========================================

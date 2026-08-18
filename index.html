@@ -2990,6 +2990,241 @@
 
     </section>
 
+    <!-- ========================================
+     REVISIÓN ASEO EXPRESS
+======================================== -->
+
+<section id="aseo-express-individual" class="revision-individual">
+
+    <button
+        type="button"
+        id="volver-aseo"
+        class="boton-volver-revision"
+    >
+        ← Volver a Aseo
+    </button>
+
+    <div class="revision-cabecera">
+
+        <div class="revision-cabecera-info">
+
+            <p class="subtitulo">REVISIÓN ASEO EXPRESS</p>
+
+            <h2 id="aseo-express-titulo">
+                CAB 1
+            </h2>
+
+            <p
+                id="aseo-express-fecha"
+                class="revision-fecha"
+            ></p>
+
+            <div
+                id="aseo-express-solicitud"
+                class="revision-info-operativa"
+            ></div>
+
+        </div>
+
+    </div>
+
+    <section class="panel revision-panel">
+
+        <div class="panel-titulo">
+            <div>
+                <h3>Checklist Aseo Express</h3>
+                <p>
+                    Revisión de los elementos solicitados durante el aseo express.
+                </p>
+            </div>
+        </div>
+
+        <div
+    id="aseo-express-checklist"
+    class="revision-checklist"
+>
+
+    <!-- COCINA -->
+    <div class="revision-area">
+
+        <h4>🍳 COCINA</h4>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="losa">
+            Losa
+        </label>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="llaveGas">
+            Llave de gas
+        </label>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="te">
+            Té
+        </label>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="cafe">
+            Café
+        </label>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="teHierbas">
+            Té Hierbas
+        </label>
+
+    </div>
+
+
+    <!-- LIVING / C -->
+    <div class="revision-area">
+
+        <h4>🛏️ LIVING/C</h4>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="cama">
+            Cama
+        </label>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="salamandra">
+            Salamandra
+        </label>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="lena">
+            Leña
+        </label>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="diario">
+            Diario
+        </label>
+
+    </div>
+
+
+    <!-- BAÑO -->
+    <div class="revision-area">
+
+        <h4>🚿 BAÑO</h4>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="amenities">
+            Amenities
+        </label>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="papelH">
+            Papel H.
+        </label>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="toallas">
+            Toallas
+        </label>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="wc">
+            WC
+        </label>
+
+    </div>
+
+
+    <!-- TERRAZA -->
+    <div class="revision-area">
+
+        <h4>🌄 TERRAZA</h4>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="carbon">
+            Carbón
+        </label>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="fogon">
+            Fogón
+        </label>
+
+        <label>
+            <input type="checkbox" data-aseo-express-item="ventanas">
+            Ventanas
+        </label>
+
+    </div>
+
+</div>
+
+    </section>
+
+    <!-- ========================================
+     DETALLES ASEO EXPRESS
+======================================== -->
+
+<section class="panel revision-detalles-panel">
+
+    <div class="panel-titulo">
+        <div>
+            <h3>Detalles</h3>
+            <p>
+                Observaciones encontradas durante la revisión.
+            </p>
+        </div>
+    </div>
+
+    <div class="revision-detalles-contenido">
+
+        <textarea
+            id="aseo-express-detalles"
+            class="revision-detalles"
+            placeholder="Ej: Cocina:
+- Reponer té
+
+Terraza:
+- Falta carbón"
+        ></textarea>
+
+        <button
+    type="button"
+    id="copiar-detalles-aseo-express"
+    class="boton-copiar-detalles"
+    title="Copiar detalles"
+>
+    📋
+</button>
+
+        <div class="revision-estado">
+
+    <label for="aseo-express-estado">
+        Estado de revisión
+    </label>
+
+    <select id="aseo-express-estado">
+
+        <option value="pendiente">
+            PENDIENTE
+        </option>
+
+        <option value="con-detalles">
+            C/DETALLE
+        </option>
+
+        <option value="lista">
+            LISTA
+        </option>
+
+    </select>
+
+        </div>
+
+    </div>
+
+</section>
+
+</section>
+
 </section>
 
 <!-- ========================================

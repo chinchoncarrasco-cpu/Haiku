@@ -1178,7 +1178,8 @@ input[type="time"].campo-cabana {
     position: relative;
 }
 
-#revision-detalles {
+#revision-detalles,
+#aseo-express-detalles {
     width: 100%;
     min-height: 220px;
 
@@ -1198,8 +1199,9 @@ input[type="time"].campo-cabana {
     outline: none;
 }
 
-#revision-detalles:focus {
-    border-color: #8ca99a;
+#revision-detalles:focus,
+#aseo-express-detalles:focus {
+    border-color: #8ca89a;
 }
 
 
@@ -3544,4 +3546,33 @@ input[type="time"].campo-cabana {
 .pago-checkin-item {
     background: #fff8ec;
     border-color: #e6b85c;
+}
+
+/* ========================================
+   CHECKLIST ASEO EXPRESS
+======================================== */
+
+#aseo-express-checklist .revision-area {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+}
+
+#aseo-express-checklist .revision-area h4 {
+    width: 100%;
+    margin: 0 0 10px 0;
+}
+
+#aseo-express-checklist .revision-area label {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    width: 100%;
+    margin-bottom: 8px;
+    cursor: pointer;
+}
+
+#aseo-express-checklist .revision-area input[type="checkbox"] {
+    flex: 0 0 auto;
+    margin: 0;
 }
