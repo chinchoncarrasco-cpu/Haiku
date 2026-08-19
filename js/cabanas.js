@@ -72,6 +72,46 @@ actualizarTarjetasRevision(fechaSeleccionada);
 actualizarResumenAseo(fechaSeleccionada);
 }
 
+// ============================================
+// COLOR OPERATIVO DE CADA CABAÑA
+// ============================================
+
+function actualizarColorCabana(fila) {
+
+    if (!fila || !fechaSeleccionada) {
+        return;
+    }
+
+    const numeroCabana = fila.dataset.cabana;
+    const datos = obtenerDatosDia(fechaSeleccionada);
+
+    const datosCabana =
+        datos.cabanas[numeroCabana] || {};
+
+    // Limpiar estados anteriores
+    fila.classList.remove(
+        "cabana-checkout",
+        "cabana-checkin",
+        "cabana-libre"
+    );
+
+    // PRIORIDAD 1: CHECK-IN REALIZADO → VERDE
+    if (datosCabana.checkinRealizado === true) {
+        fila.classList.add("cabana-checkin");
+        return;
+    }
+
+    // PRIORIDAD 2: CHECK-OUT REALIZADO → AZUL
+    if (datosCabana.checkout) {
+        fila.classList.add("cabana-checkout");
+        return;
+    }
+
+    // PRIORIDAD 3: LIBRE / LIBRE → GRIS
+    if (datosCabana.estado === "libre-libre") {
+        fila.classList.add("cabana-libre");
+    }
+}
 
 // ========================================
 // ESCUCHAR CAMBIOS
@@ -83,15 +123,17 @@ filasCabanas.forEach(fila => {
 
     campos.forEach(campo => {
 
-        campo.addEventListener("input", () => {
-            guardarCampoCabana(campo);
-        });
-
-        campo.addEventListener("change", () => {
-            guardarCampoCabana(campo);
-        });
-
+    campo.addEventListener("input", () => {
+        guardarCampoCabana(campo);
+        actualizarColorCabana(fila);
     });
+
+    campo.addEventListener("change", () => {
+        guardarCampoCabana(campo);
+        actualizarColorCabana(fila);
+    });
+
+});
 
 });
 
@@ -142,6 +184,8 @@ if (titularCabana) {
             }
 
         });
+
+            actualizarColorCabana(fila);
 
     });
 

@@ -3578,3 +3578,118 @@ input[type="time"].campo-cabana {
     flex: 0 0 auto;
     margin: 0;
 }
+
+/* =========================================
+   CHECK-IN AL LADO DEL ESTADO DE RESERVA
+   ========================================= */
+
+.checkin-cabana {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 4px;
+    margin-left: 6px;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+.checkin-cabana input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.checkin-cabana span {
+    font-size: 12px;
+}
+
+.estado-reserva-con-checkin {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    flex-wrap: nowrap;
+}
+
+.estado-reserva-con-checkin > select {
+    min-width: 0;
+    flex: 1;
+}
+
+.estado-reserva-con-checkin .checkin-cabana {
+    flex: 0 0 auto;
+    margin-left: 0;
+}
+
+/* =========================================
+   MÁS ESPACIO PARA ESTADO DE RESERVA
+   ========================================= */
+
+.estado-reserva-con-checkin {
+    min-width: 102px;
+}
+
+.estado-reserva-con-checkin > select {
+    min-width: 74px;
+    width: 74px;
+    flex: 0 0 74px;
+}
+
+/* =========================================
+   COLORES OPERATIVOS DE CABAÑA
+   ========================================= */
+
+/* Huésped anterior realizó check-out */
+tr.cabana-checkout {
+    background-color: #eef6fb;
+}
+
+/* Nuevo huésped realizó check-in */
+tr.cabana-checkin {
+    background-color: #eef8f1;
+}
+
+/* =========================================
+   COLORES OPERATIVOS DE CABAÑAS
+   ========================================= */
+
+/* CHECK-OUT realizado → azul suave */
+tr.cabana-checkout > td {
+    background-color: #eef6fb;
+}
+
+/* CHECK-IN realizado → verde */
+tr.cabana-checkin > td {
+    background-color: #eef8f1;
+}
+
+/* LIBRE / LIBRE → gris suave */
+tr.cabana-libre > td {
+    background-color: #f3f4f4;
+}
+
+/* En celular, el color cubre TODA la cabaña */
+tr.cabana-checkout {
+    background-color: #eef6fb;
+}
+
+tr.cabana-checkin {
+    background-color: #eef8f1;
+}
+
+tr.cabana-libre {
+    background-color: #f3f4f4;
+}
+
+/* El encabezado/nombre de la cabaña hereda el color de la fila */
+tr.cabana-checkout .info-cabana {
+    background-color: #eef6fb;
+}
+
+tr.cabana-checkin .info-cabana {
+    background-color: #eef8f1;
+}
+
+tr.cabana-libre .info-cabana {
+    background-color: #f3f4f4;
+}
