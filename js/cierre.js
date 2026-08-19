@@ -140,6 +140,15 @@ function obtenerCierreDia(fecha) {
         datos.cierre.cabanasCierre = {};
     }
 
+    // Conectar Mantención y Lavandería con los datos generales del día
+    if (!datos.mantencion) {
+    datos.mantencion = [];
+    }
+
+    if (!datos.lavanderia) {
+    datos.lavanderia = [];
+    }
+
     return datos.cierre;
 }
 
@@ -150,6 +159,7 @@ function obtenerCierreDia(fecha) {
 function cargarCierreDia(fecha) {
 
     const cierre = obtenerCierreDia(fecha);
+    const datos = obtenerDatosDia(fecha);
 
     // ----------------
     // RADIOS
@@ -402,6 +412,23 @@ if (botonToggle?.classList.contains("cierre-evidencia-toggle")) {
     }
 }
 });
+
+// Cargar información general del día
+cargarResumenMantencionLavanderia(datos);
+
+}
+
+// ========================================
+// RESUMEN AUTOMÁTICO: MANTENCIÓN Y LAVANDERÍA
+// ========================================
+
+function cargarResumenMantencionLavanderia(datos) {
+
+    const mantenciones = datos.mantencion || [];
+    const lavanderia = datos.lavanderia || [];
+
+    console.log("Mantenciones del día:", mantenciones);
+    console.log("Lavandería del día:", lavanderia);
 
 }
 

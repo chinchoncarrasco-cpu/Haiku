@@ -3693,3 +3693,79 @@ tr.cabana-checkin .info-cabana {
 tr.cabana-libre .info-cabana {
     background-color: #f3f4f4;
 }
+
+/* =========================================
+   RESUMEN DEL DÍA
+========================================= */
+
+.resumen-dia-contenido {
+    padding: 20px 24px 24px;
+}
+
+#resumen-dia-fecha {
+    margin: 0 0 18px;
+    font-size: 14px;
+    font-weight: 700;
+}
+
+#resumen-dia-texto {
+    padding: 16px;
+    margin-bottom: 20px;
+
+    background: #f7f8f8;
+    border: 1px solid #e1e5e3;
+    border-radius: 10px;
+
+    font-size: 13px;
+    line-height: 1.55;
+    white-space: pre-wrap;
+}
+
+.resumen-dia-manual {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.resumen-dia-manual label {
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.resumen-dia-manual textarea {
+    width: 100%;
+    min-height: 80px;
+    padding: 12px;
+
+    box-sizing: border-box;
+    resize: vertical;
+
+    border: 1px solid #dfe3e1;
+    border-radius: 9px;
+    background: #fff;
+
+    font-family: inherit;
+    font-size: 13px;
+    line-height: 1.4;
+}
+
+#copiar-resumen-dia {
+    width: 100%;
+    margin-top: 18px;
+    padding: 12px 16px;
+
+    border: 1px solid #d9dedb;
+    border-radius: 9px;
+    background: #fff;
+
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+#copiar-resumen-dia:hover {
+    background: #f4f6f5;
+}

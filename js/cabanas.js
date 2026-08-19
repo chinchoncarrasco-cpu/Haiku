@@ -192,6 +192,7 @@ if (titularCabana) {
     actualizarResumenDia(fecha);
     actualizarTarjetasRevision(fecha);
     actualizarResumenAseo(fecha);
+    generarResumenOperativo(fecha);
 
 }
 
@@ -260,6 +261,192 @@ function actualizarResumenDia(fecha) {
 
     document.getElementById("contador-servicios").textContent =
         servicios;
+}
+
+// ====================================
+// RESUMEN OPERATIVO DEL DÍA
+// ====================================
+
+function generarResumenOperativo(fecha) {
+
+    if (!fecha) {
+        return;
+    }
+
+    const datos = obtenerDatosDia(fecha);
+
+    const ingresan = [];
+    const salen = [];
+    const continuan = [];
+
+    Object.entries(datos.cabanas).forEach(([numeroCabana, cabana]) => {
+
+    const estado = cabana.estado || "";
+
+    if (
+        estado === "libre-ingresa" ||
+        estado === "sale-ingresa"
+    ) {
+        ingresan.push(numeroCabana);
+    }
+
+    if (
+        estado === "sale-libre" ||
+        estado === "sale-ingresa"
+    ) {
+        salen.push(numeroCabana);
+    }
+
+    if (estado === "continua") {
+        continuan.push(numeroCabana);
+    }
+
+});
+
+const lineas = [];
+
+const [anio, mes, dia] = fecha.split("-");
+
+const fechaResumen =
+    `${dia}.${mes}.${anio.slice(-2)}`;
+
+lineas.push(`RESUMEN DEL DÍA ${fechaResumen}`);
+
+if (ingresan.length > 0) {
+    lineas.push("");
+    lineas.push("INGRESAN");
+    ingresan.forEach(numeroCabana => {
+
+    const cabana = datos.cabanas[numeroCabana] || {};
+
+    const adultos = Number(cabana.adultos) || 0;
+    const ninos = Number(cabana.ninos) || 0;
+    const mascotas = Number(cabana.mascotas) || 0;
+
+    let detalles = [];
+
+    if (adultos > 0) {
+        detalles.push(`${adultos} ADL`);
+    }
+
+    if (ninos > 0) {
+        detalles.push(`${ninos} KID`);
+    }
+
+    if (mascotas > 0) {
+        detalles.push(`${mascotas} PET`);
+    }
+
+    if (detalles.length > 0) {
+        lineas.push(`CAB ${numeroCabana} x ${detalles.join(" + ")}`);
+    } else {
+        lineas.push(`CAB ${numeroCabana}`);
+    }
+
+});
+}
+
+if (salen.length > 0) {
+    lineas.push("");
+    lineas.push("SALEN");
+    salen.forEach(numeroCabana => {
+        lineas.push(`CAB ${numeroCabana}`);
+    });
+}
+
+if (continuan.length > 0) {
+    lineas.push("");
+    lineas.push("CONTINÚAN");
+    continuan.forEach(numeroCabana => {
+        lineas.push(`CAB ${numeroCabana}`);
+    });
+}
+
+// SERVICIOS
+const serviciosCabana = [];
+
+Object.entries(datos.cabanas).forEach(([numeroCabana, cabana]) => {
+    const servicio = cabana.servicio || "";
+
+    if (servicio.trim() !== "") {
+        serviciosCabana.push({
+            cabana: numeroCabana,
+            servicio: servicio.trim()
+        });
+    }
+});
+
+if (serviciosCabana.length > 0) {
+    lineas.push("");
+    lineas.push("SERVICIOS");
+
+    serviciosCabana.forEach(item => {
+        lineas.push(`CAB ${item.cabana} — ${item.servicio}`);
+    });
+}
+
+// NOTAS DE CABAÑAS
+if (
+    Array.isArray(datos.notasOperativas) &&
+    datos.notasOperativas.length > 0
+) {
+    lineas.push("");
+    lineas.push("NOTAS");
+
+    datos.notasOperativas.forEach(nota => {
+        const numeroCabana = nota.cabana;
+        const textoNota = nota.texto || nota.nota || "";
+
+        if (textoNota.trim() !== "") {
+            lineas.push(`CAB ${numeroCabana} — ${textoNota.trim()}`);
+        }
+    });
+}
+
+// HORARIOS DE INGRESO
+const horariosIngreso = [];
+
+Object.entries(datos.cabanas).forEach(([numeroCabana, cabana]) => {
+    const horaIngreso = cabana.ingreso || "";
+
+    if (horaIngreso.trim() !== "") {
+        horariosIngreso.push({
+            cabana: numeroCabana,
+            hora: horaIngreso.trim()
+        });
+    }
+});
+
+// Ordenar desde el ingreso más temprano al más tarde
+horariosIngreso.sort((a, b) => {
+    return a.hora.localeCompare(b.hora);
+});
+
+if (horariosIngreso.length > 0) {
+    lineas.push("");
+    lineas.push("INGRESO");
+
+    horariosIngreso.forEach(item => {
+        lineas.push(`CAB ${item.cabana} — ${item.hora}`);
+    });
+}
+
+// NOTAS IMPORTANTES
+const notas = document.getElementById("notas-dia");
+
+if (notas && notas.value.trim() !== "") {
+    lineas.push("");
+    lineas.push("NOTAS:");
+    lineas.push(notas.value.trim());
+}
+
+const resumenTexto = document.getElementById("resumen-dia-texto");
+
+if (resumenTexto) {
+    resumenTexto.textContent = lineas.join("\n");
+}
+
+    console.log("CABANAS RESUMEN:", datos.cabanas);
 }
 
 // ========================================
@@ -1690,3 +1877,49 @@ actualizarTarjetasRevision(fechaSeleccionada);
 actualizarResumenAseo(fechaSeleccionada);
 
 });
+
+// ======================================
+// COPIAR RESUMEN DEL DÍA
+// ======================================
+
+const botonCopiarResumen = document.getElementById("copiar-resumen-dia");
+
+if (botonCopiarResumen) {
+    botonCopiarResumen.addEventListener("click", async () => {
+
+        const resumen =
+            document.getElementById("resumen-dia-texto")?.textContent.trim() || "";
+
+        const mantencion =
+            document.getElementById("resumen-mantencion")?.value.trim() || "";
+
+        const lavanderia =
+            document.getElementById("resumen-lavanderia")?.value.trim() || "";
+
+        const partes = [resumen];
+
+        if (mantencion) {
+            partes.push(`MANTENCIÓN\n${mantencion}`);
+        }
+
+        if (lavanderia) {
+            partes.push(`LAVANDERÍA\n${lavanderia}`);
+        }
+
+        const textoFinal = partes.join("\n\n");
+
+        try {
+            await navigator.clipboard.writeText(textoFinal);
+
+            const textoOriginal = botonCopiarResumen.textContent;
+            botonCopiarResumen.textContent = "✓ Resumen copiado";
+
+            setTimeout(() => {
+                botonCopiarResumen.textContent = textoOriginal;
+            }, 2000);
+
+        } catch (error) {
+            console.error("No se pudo copiar el resumen:", error);
+        }
+    });
+}

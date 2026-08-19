@@ -133,6 +133,12 @@ if (seccionGuardada) {
 
 const notasDia = document.getElementById("notas-dia");
 
+const resumenMantencion =
+    document.getElementById("resumen-mantencion");
+
+const resumenLavanderia =
+    document.getElementById("resumen-lavanderia");
+
 // Recuperar información guardada en este navegador
 let datosPorFecha =
     JSON.parse(localStorage.getItem("haikuDatos")) || {};
@@ -152,7 +158,9 @@ function obtenerDatosDia(fecha) {
             notasOperativas: [],
             cabanas: {},
             servicios: [],
-            pagos: []
+            pagos: [],
+            mantencion: [],
+            lavanderia: []
         };
 
     }
@@ -160,6 +168,14 @@ function obtenerDatosDia(fecha) {
     if (!datosPorFecha[fecha].notasOperativas) {
          datosPorFecha[fecha].notasOperativas = [];
     
+    }
+
+    if (!datosPorFecha[fecha].mantencion) {
+    datosPorFecha[fecha].mantencion = [];
+    }
+
+    if (!datosPorFecha[fecha].lavanderia) {
+    datosPorFecha[fecha].lavanderia = [];
     }
 
     return datosPorFecha[fecha];
@@ -189,6 +205,9 @@ function cargarDatosDia(fecha) {
     const datos = obtenerDatosDia(fecha);
 
     notasDia.value = datos.notas || "";
+
+    resumenMantencion.value = datos.mantencion || "";
+    resumenLavanderia.value = datos.lavanderia || "";
 
     // cargarCabanasDia(fecha);
 
@@ -221,6 +240,33 @@ notasDia.addEventListener("input", () => {
 
     guardarDatos();
 
+});
+
+resumenMantencion.addEventListener("input", () => {
+
+    if (!fechaSeleccionada) {
+        return;
+    }
+
+    const datos = obtenerDatosDia(fechaSeleccionada);
+
+    datos.mantencion = resumenMantencion.value;
+
+    guardarDatos();
+});
+
+
+resumenLavanderia.addEventListener("input", () => {
+
+    if (!fechaSeleccionada) {
+        return;
+    }
+
+    const datos = obtenerDatosDia(fechaSeleccionada);
+
+    datos.lavanderia = resumenLavanderia.value;
+
+    guardarDatos();
 });
 
 // ========================================
