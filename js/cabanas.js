@@ -90,10 +90,11 @@ function actualizarColorCabana(fila) {
 
     // Limpiar estados anteriores
     fila.classList.remove(
-        "cabana-checkout",
-        "cabana-checkin",
-        "cabana-libre"
-    );
+    "cabana-checkout",
+    "cabana-checkin",
+    "cabana-libre",
+    "cabana-bloqueada"
+);
 
     // PRIORIDAD 1: CHECK-IN REALIZADO → VERDE
     if (datosCabana.checkinRealizado === true) {
@@ -106,6 +107,12 @@ function actualizarColorCabana(fila) {
         fila.classList.add("cabana-checkout");
         return;
     }
+
+    // PRIORIDAD 3: BLOQUEADA → ROJO
+if (datosCabana.estado === "bloqueada") {
+    fila.classList.add("cabana-bloqueada");
+    return;
+}
 
     // PRIORIDAD 3: LIBRE / LIBRE → GRIS
     if (datosCabana.estado === "libre-libre") {

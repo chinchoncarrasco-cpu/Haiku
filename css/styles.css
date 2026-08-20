@@ -3668,6 +3668,15 @@ tr.cabana-libre > td {
     background-color: #f3f4f4;
 }
 
+/* BLOQUEADA → rojo suave */
+tr.cabana-bloqueada > td {
+    background-color: #fde2e2;
+}
+
+tr.cabana-bloqueada .info-cabana {
+    background-color: #fde2e2;
+}
+
 /* En celular, el color cubre TODA la cabaña */
 tr.cabana-checkout {
     background-color: #eef6fb;
