@@ -115,10 +115,19 @@ if (datosCabana.estado === "bloqueada") {
     return;
 }
 
-    // PRIORIDAD 3: LIBRE / LIBRE → GRIS
-    if (datosCabana.estado === "libre-libre") {
-        fila.classList.add("cabana-libre");
-    }
+    // PRIORIDAD 4: TODOS LOS ESTADOS OPERATIVOS → GRIS
+// BLOQUEADA ya fue capturada arriba y permanece ROJA
+if (
+    datosCabana.estado === "libre-libre" ||
+    datosCabana.estado === "libre-ingresa" ||
+    datosCabana.estado === "sale-libre" ||
+    datosCabana.estado === "sale-ingresa" ||
+    datosCabana.estado === "continua" ||
+    datosCabana.estado === "fullday"
+) {
+    fila.classList.add("cabana-libre");
+}
+
 }
 
 // ========================================
