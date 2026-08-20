@@ -94,6 +94,7 @@ function actualizarColorCabana(fila) {
     "cabana-checkout",
     "cabana-checkin",
     "cabana-libre",
+    "cabana-ingresa",
     "cabana-bloqueada"
 );
 
@@ -115,13 +116,19 @@ if (datosCabana.estado === "bloqueada") {
     return;
 }
 
-    // PRIORIDAD 4: TODOS LOS ESTADOS OPERATIVOS → GRIS
-// BLOQUEADA ya fue capturada arriba y permanece ROJA
+    // PRIORIDAD 4: ESTADOS CON INGRESO → GRIS MÁS OSCURO
+if (
+    datosCabana.estado === "libre-ingresa" ||
+    datosCabana.estado === "sale-ingresa"
+) {
+    fila.classList.add("cabana-ingresa");
+    return;
+}
+
+// PRIORIDAD 5: RESTO DE ESTADOS OPERATIVOS → GRIS CLARO
 if (
     datosCabana.estado === "libre-libre" ||
-    datosCabana.estado === "libre-ingresa" ||
     datosCabana.estado === "sale-libre" ||
-    datosCabana.estado === "sale-ingresa" ||
     datosCabana.estado === "continua" ||
     datosCabana.estado === "fullday"
 ) {

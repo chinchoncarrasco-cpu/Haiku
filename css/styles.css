@@ -3690,6 +3690,16 @@ tr.cabana-libre {
     background-color: #f3f4f4;
 }
 
+/* L/IN y S/IN - ingreso pendiente */
+tr.cabana-ingresa {
+    background-color: #eceeef;
+}
+
+/* L/IN y S/IN - cubrir también la columna CAB */
+tr.cabana-ingresa .info-cabana {
+    background-color: #eceeef;
+}
+
 /* El encabezado/nombre de la cabaña hereda el color de la fila */
 tr.cabana-checkout .info-cabana {
     background-color: #eef6fb;
