@@ -70,6 +70,7 @@ guardarDatos();
 actualizarResumenDia(fechaSeleccionada);
 actualizarTarjetasRevision(fechaSeleccionada);
 actualizarResumenAseo(fechaSeleccionada);
+generarResumenOperativo(fechaSeleccionada);
 }
 
 // ============================================
@@ -227,20 +228,22 @@ function actualizarResumenDia(fecha) {
         const estado = cabana.estado || "";
 
         // INGRESAN
-        if (
-            estado === "libre-ingresa" ||
-            estado === "sale-ingresa"
-        ) {
-            ingresan++;
-        }
+if (
+    estado === "libre-ingresa" ||
+    estado === "sale-ingresa" ||
+    estado === "fullday"
+) {
+    ingresan++;
+}
 
         // SALEN
-        if (
-            estado === "sale-libre" ||
-            estado === "sale-ingresa"
-        ) {
-            salen++;
-        }
+if (
+    estado === "sale-libre" ||
+    estado === "sale-ingresa" ||
+    estado === "fullday"
+) {
+    salen++;
+}
 
         // CONTINÚAN
         if (estado === "continua") {
@@ -291,18 +294,20 @@ function generarResumenOperativo(fecha) {
     const estado = cabana.estado || "";
 
     if (
-        estado === "libre-ingresa" ||
-        estado === "sale-ingresa"
-    ) {
-        ingresan.push(numeroCabana);
-    }
+    estado === "libre-ingresa" ||
+    estado === "sale-ingresa" ||
+    estado === "fullday"
+) {
+    ingresan.push(numeroCabana);
+}
 
-    if (
-        estado === "sale-libre" ||
-        estado === "sale-ingresa"
-    ) {
-        salen.push(numeroCabana);
-    }
+if (
+    estado === "sale-libre" ||
+    estado === "sale-ingresa" ||
+    estado === "fullday"
+) {
+    salen.push(numeroCabana);
+}
 
     if (estado === "continua") {
         continuan.push(numeroCabana);
@@ -344,11 +349,14 @@ if (ingresan.length > 0) {
         detalles.push(`${mascotas} PET`);
     }
 
-    if (detalles.length > 0) {
-        lineas.push(`CAB ${numeroCabana} x ${detalles.join(" + ")}`);
-    } else {
-        lineas.push(`CAB ${numeroCabana}`);
-    }
+    const esFullDay = cabana.estado === "fullday";
+const etiquetaFullDay = esFullDay ? " (FullDay)" : "";
+
+if (detalles.length > 0) {
+    lineas.push(`CAB ${numeroCabana} × ${detalles.join(" + ")}${etiquetaFullDay}`);
+} else {
+    lineas.push(`CAB ${numeroCabana}${etiquetaFullDay}`);
+}
 
 });
 }
@@ -443,7 +451,7 @@ const notas = document.getElementById("notas-dia");
 
 if (notas && notas.value.trim() !== "") {
     lineas.push("");
-    lineas.push("NOTAS:");
+    lineas.push("IMPORTANTE:");
     lineas.push(notas.value.trim());
 }
 

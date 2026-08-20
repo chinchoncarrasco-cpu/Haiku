@@ -133,6 +133,18 @@ if (seccionGuardada) {
 
 const notasDia = document.getElementById("notas-dia");
 
+notasDia.addEventListener("input", () => {
+    if (!fechaSeleccionada) return;
+
+    const datos = obtenerDatosDia(fechaSeleccionada);
+
+    datos.notas = notasDia.value;
+
+    guardarDatos();
+
+    generarResumenOperativo(fechaSeleccionada);
+});
+
 const resumenMantencion =
     document.getElementById("resumen-mantencion");
 
@@ -444,6 +456,7 @@ mostrarNotasOperativas(fechaSeleccionada);
 // Sincronizar Cabañas y Aseo inmediatamente
 actualizarTarjetasRevision(fechaSeleccionada);
 actualizarResumenAseo(fechaSeleccionada);
+generarResumenOperativo(fechaSeleccionada);
 
 textoNota.value = "";
 selectorNotaCabana.value = "";
