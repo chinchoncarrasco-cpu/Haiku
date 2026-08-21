@@ -1159,9 +1159,16 @@ const notaAseo = notasCabana.length
                 <div class="aseo-resumen-personal">
 
     <div class="aseo-resumen-encargado">
-        <span>Encargado</span>
-        <strong>${encargado}</strong>
-    </div>
+    <span>Encargado</span>
+
+    <input
+        type="text"
+        class="aseo-encargado-input"
+        data-aseo-encargado="${numeroCabana}"
+        placeholder="Sin asignar"
+        value="${cabana.aseo || ""}"
+    >
+</div>
 
     <div class="aseo-resumen-revision">
         <span>Revisión</span>
@@ -1245,6 +1252,32 @@ ${solicitudAseo ? `
 
         guardarDatos();
 
+    });
+
+});
+
+// ======================================
+// CAMBIAR ENCARGADO DESDE ASEO
+// ======================================
+
+document.querySelectorAll(".aseo-encargado-input").forEach(input => {
+
+    input.addEventListener("change", () => {
+
+        const numeroCabana = input.dataset.aseoEncargado;
+        const datos = obtenerDatosDia(fecha);
+
+        if (!datos.cabanas[numeroCabana]) {
+            datos.cabanas[numeroCabana] = {};
+        }
+
+        // Guardar encargado
+        datos.cabanas[numeroCabana].aseo = input.value.trim();
+
+        guardarDatos();
+
+        // Refrescar Estado de cabañas
+        cargarCabanasDia(fecha);
     });
 
 });

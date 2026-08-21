@@ -3788,3 +3788,35 @@ tr.cabana-libre .info-cabana {
 #copiar-resumen-dia:hover {
     background: #f4f6f5;
 }
+
+/* =========================================
+   ASEO - CAMPO ENCARGADO EDITABLE
+   ========================================= */
+
+.aseo-encargado-input {
+    width: 100%;
+    max-width: 150px;
+
+    padding: 0;
+
+    border: none;
+    background: transparent;
+
+    font-family: inherit;
+    font-size: 14px;
+    font-weight: 700;
+    color: #222;
+
+    box-sizing: border-box;
+    outline: none;
+}
+
+.aseo-encargado-input:focus {
+    border: none;
+    outline: none;
+    background: transparent;
+}
+
+.aseo-encargado-input::placeholder {
+    color: #999;
+}
