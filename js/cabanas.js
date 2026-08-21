@@ -2005,13 +2005,27 @@ if (!Number.isInteger(noches) || noches < 1) {
 
 datos.cabanas[numeroCabana].noches = noches;
 
+// Crear Reserva ID solamente si esta reserva todavía no tiene uno
+if (!datos.cabanas[numeroCabana].reservaId) {
+    datos.cabanas[numeroCabana].reservaId =
+        generarReservaId(fechaSeleccionada, numeroCabana);
+}
+
 guardarDatos();
+
+// Crear los días de continuidad de esta reserva
+crearContinuidadesReserva(
+    fechaSeleccionada,
+    numeroCabana,
+    noches
+);
 
 const valorNoches = boton.querySelector(".valor-noches");
 
 if (valorNoches) {
     valorNoches.textContent = noches;
 }
+
 });
 
 // ======================================

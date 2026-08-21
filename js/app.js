@@ -193,6 +193,125 @@ function obtenerDatosDia(fecha) {
     return datosPorFecha[fecha];
 }
 
+// ===============================
+// GENERAR ID ÚNICO DE RESERVA
+// ===============================
+
+function generarReservaId(fecha, numeroCabana) {
+
+    const fechaLimpia = String(fecha).replaceAll("-", "");
+
+    let contador = 1;
+    let reservaId = "";
+
+    do {
+
+        reservaId = `R-${fechaLimpia}-${numeroCabana}-${contador}`;
+        contador++;
+
+    } while (existeReservaId(reservaId));
+
+    return reservaId;
+}
+
+
+// ===============================
+// COMPROBAR SI EXISTE RESERVA ID
+// ===============================
+
+function existeReservaId(reservaId) {
+
+    return Object.values(datosPorFecha).some(dia => {
+
+        if (!dia.cabanas) return false;
+
+        return Object.values(dia.cabanas).some(cabana =>
+            cabana?.reservaId === reservaId
+        );
+
+    });
+}
+
+// =============================
+// SUMAR DÍAS A UNA FECHA
+// =============================
+
+function sumarDiasFecha(fecha, cantidadDias) {
+
+    const [anio, mes, dia] = fecha.split("-").map(Number);
+
+    const fechaBase = new Date(anio, mes - 1, dia);
+
+    fechaBase.setDate(fechaBase.getDate() + cantidadDias);
+
+    const nuevoAnio = fechaBase.getFullYear();
+    const nuevoMes = String(fechaBase.getMonth() + 1).padStart(2, "0");
+    const nuevoDia = String(fechaBase.getDate()).padStart(2, "0");
+
+    return `${nuevoAnio}-${nuevoMes}-${nuevoDia}`;
+}
+
+// =============================
+// CREAR CONTINUIDADES DE RESERVA
+// =============================
+
+function crearContinuidadesReserva(fechaInicio, numeroCabana, noches) {
+
+    const datosInicio = obtenerDatosDia(fechaInicio);
+    const cabanaInicio = datosInicio.cabanas?.[numeroCabana];
+
+    if (!cabanaInicio || noches <= 1) {
+        return;
+    }
+
+    const reservaId = cabanaInicio.reservaId;
+
+    if (!reservaId) {
+        return;
+    }
+
+    for (let i = 1; i <= noches; i++) {
+
+        const fechaContinuidad = sumarDiasFecha(fechaInicio, i);
+        const datosContinuidad = obtenerDatosDia(fechaContinuidad);
+
+        if (!datosContinuidad.cabanas) {
+            datosContinuidad.cabanas = {};
+        }
+
+        // Si la cabaña todavía no existe ese día, crearla
+        if (!datosContinuidad.cabanas[numeroCabana]) {
+            datosContinuidad.cabanas[numeroCabana] = {};
+        }
+
+        const destino = datosContinuidad.cabanas[numeroCabana];
+
+        // Identificador de la misma reserva
+        destino.reservaId = reservaId;
+
+        // Datos que heredamos
+        destino.titular = cabanaInicio.titular || "";
+        destino.adultos = cabanaInicio.adultos || "";
+        destino.ninos = cabanaInicio.ninos || "";
+        destino.mascotas = cabanaInicio.mascotas || "";
+
+        // Estado según el día de la reserva
+        if (i < noches) {
+        destino.estado = "continua";
+        } else {
+        destino.estado = "sale-libre";
+        }
+
+        // Información de estadía
+        destino.noches = noches;
+
+        // Marcamos que esta fila fue creada automáticamente
+        destino.continuidadAutomatica = true;
+        destino.fechaOrigenReserva = fechaInicio;
+    }
+
+    guardarDatos();
+}
 
 // ========================================
 // GUARDAR TODO
