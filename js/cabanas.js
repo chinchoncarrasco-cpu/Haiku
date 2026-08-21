@@ -187,6 +187,14 @@ if (titularCabana) {
             : "Sin titular";
 }
 
+const valorNoches = fila.querySelector(
+    `[data-valor-noches="${numeroCabana}"]`
+);
+
+if (valorNoches) {
+    valorNoches.textContent = datosCabana.noches || "";
+}
+
         const campos =
             fila.querySelectorAll(".campo-cabana");
 
@@ -1940,6 +1948,70 @@ guardarDatos();
 actualizarTarjetasRevision(fechaSeleccionada);
 actualizarResumenAseo(fechaSeleccionada);
 
+});
+
+// ==========================================
+// EDITAR CANTIDAD DE NOCHES
+// ==========================================
+
+document.addEventListener("click", (evento) => {
+
+  const boton = evento.target.closest("[data-editar-noches]");
+
+  if (!boton || !fechaSeleccionada) {
+    return;
+  }
+
+  const numeroCabana = boton.dataset.editarNoches;
+  const datos = obtenerDatosDia(fechaSeleccionada);
+
+  if (!datos.cabanas[numeroCabana]) {
+    datos.cabanas[numeroCabana] = {};
+  }
+
+  const nochesActuales = datos.cabanas[numeroCabana].noches || "";
+
+  const respuesta = prompt(
+    `Noches CAB ${numeroCabana}:`,
+    nochesActuales
+  );
+
+  if (respuesta === null) {
+    return;
+  }
+
+  // Si deja vacío o escribe 0, borrar cantidad de noches
+if (respuesta.trim() === "" || respuesta.trim() === "0") {
+
+    datos.cabanas[numeroCabana].noches = "";
+
+    guardarDatos();
+
+    const valorNoches = boton.querySelector(".valor-noches");
+
+    if (valorNoches) {
+        valorNoches.textContent = "";
+    }
+
+    return;
+}
+
+const noches = parseInt(respuesta, 10);
+
+if (!Number.isInteger(noches) || noches < 1) {
+    alert("Ingresa una cantidad válida de noches.");
+    return;
+}
+
+datos.cabanas[numeroCabana].noches = noches;
+
+guardarDatos();
+
+const valorNoches = boton.querySelector(".valor-noches");
+
+if (valorNoches) {
+    valorNoches.textContent = noches;
+}
 });
 
 // ======================================
