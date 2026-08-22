@@ -1974,6 +1974,25 @@ if (!datos.cabanas[numeroCabana]) {
 
 const cabanaActual = datos.cabanas[numeroCabana];
 
+// Si este día estaba vacío manualmente y ahora recibe un nuevo titular,
+// dejamos que vuelva a participar normalmente en el autocompletado.
+if (
+    nombreFinal !== "" &&
+    cabanaActual.borradoManual === true
+) {
+    cabanaActual.borradoManual = false;
+}
+
+// Si borramos manualmente el titular,
+// este espacio deja de pertenecer a la reserva anterior.
+if (nombreFinal === "") {
+    cabanaActual.borradoManual = true;
+    cabanaActual.reservaId = "";
+    cabanaActual.continuidadAutomatica = false;
+    cabanaActual.fechaOrigenReserva = "";
+    cabanaActual.noches = "";
+}
+
 // Si este día venía de una continuidad automática
 // y cambiamos manualmente el titular,
 // desde aquí comienza una reserva nueva e independiente.

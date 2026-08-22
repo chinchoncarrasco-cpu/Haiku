@@ -320,14 +320,24 @@ function crearContinuidadesReserva(fechaInicio, numeroCabana, noches) {
 
         const destino = datosContinuidad.cabanas[numeroCabana];
 
-// ¿Ya existe información manual o una reserva REAL en esta cabaña para este día?
+// ¿Ya existe otra reserva REAL en esta cabaña para este día?
 const hayOtraReserva =
     destino.reservaId &&
-    destino.reservaId !== reservaId;
+    destino.reservaId !== reservaId &&
+    destino.titular;
 
-// Si existe información manual o una reserva distinta,
-// la continuidad automática NO la sobrescribe
 if (hayOtraReserva) {
+
+    // Si este es el día de salida de la reserva anterior,
+    // y ya comienza otra reserva en la misma cabaña,
+    // la nueva reserva pasa a SALE / INGRESA.
+    if (i === noches) {
+        destino.estado = "sale-ingresa";
+    }
+
+    // IMPORTANTE:
+    // No modificar titular, pasajeros, noches ni reservaId
+    // de la reserva que ya existe.
     continue;
 }
 
