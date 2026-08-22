@@ -252,6 +252,40 @@ function sumarDiasFecha(fecha, cantidadDias) {
 }
 
 // =============================
+// SINCRONIZAR DATOS DE RESERVA
+// =============================
+
+function sincronizarDatosReserva(reservaId, numeroCabana, campo, valor) {
+
+    if (!reservaId) {
+        return;
+    }
+
+    Object.values(datosPorFecha).forEach(dia => {
+
+        if (!dia.cabanas) {
+            return;
+        }
+
+        const cabana = dia.cabanas[numeroCabana];
+
+        if (!cabana) {
+            return;
+        }
+
+        // Solo modificar días pertenecientes a la misma reserva
+        if (cabana.reservaId !== reservaId) {
+            return;
+        }
+
+        cabana[campo] = valor;
+
+    });
+
+    guardarDatos();
+}
+
+// =============================
 // CREAR CONTINUIDADES DE RESERVA
 // =============================
 
@@ -286,14 +320,25 @@ function crearContinuidadesReserva(fechaInicio, numeroCabana, noches) {
 
         const destino = datosContinuidad.cabanas[numeroCabana];
 
-        // Identificador de la misma reserva
-        destino.reservaId = reservaId;
+// ¿Ya existe información manual o una reserva REAL en esta cabaña para este día?
+const hayOtraReserva =
+    destino.reservaId &&
+    destino.reservaId !== reservaId;
 
-        // Datos que heredamos
-        destino.titular = cabanaInicio.titular || "";
-        destino.adultos = cabanaInicio.adultos || "";
-        destino.ninos = cabanaInicio.ninos || "";
-        destino.mascotas = cabanaInicio.mascotas || "";
+// Si existe información manual o una reserva distinta,
+// la continuidad automática NO la sobrescribe
+if (hayOtraReserva) {
+    continue;
+}
+
+// Identificador de la misma reserva
+destino.reservaId = reservaId;
+
+// Datos que heredamos
+destino.titular = cabanaInicio.titular || "";
+destino.adultos = cabanaInicio.adultos || "";
+destino.ninos = cabanaInicio.ninos || "";
+destino.mascotas = cabanaInicio.mascotas || "";
 
         // Estado según el día de la reserva
         if (i < noches) {

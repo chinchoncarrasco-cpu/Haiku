@@ -45,6 +45,37 @@ function guardarCampoCabana(elemento) {
 
 datos.cabanas[numeroCabana][campo] = valor;
 
+// Sincronizar ocupación en todos los días de la misma reserva
+const reservaIdActual = datos.cabanas[numeroCabana].reservaId;
+
+if (
+    reservaIdActual &&
+    ["adultos", "ninos", "mascotas"].includes(campo)
+) {
+    sincronizarDatosReserva(
+        reservaIdActual,
+        numeroCabana,
+        campo,
+        valor
+    );
+}
+
+// Si una continuidad automática recibe un nuevo titular manualmente,
+// pasa a ser una reserva independiente
+if (
+    campo === "titular" &&
+    datos.cabanas[numeroCabana].continuidadAutomatica === true
+) {
+    datos.cabanas[numeroCabana].reservaId =
+        generarReservaId(fechaSeleccionada, numeroCabana);
+
+    datos.cabanas[numeroCabana].continuidadAutomatica = false;
+    datos.cabanas[numeroCabana].fechaOrigenReserva = fechaSeleccionada;
+}
+
+// Marcar que este día/cabaña fue editado manualmente
+datos.cabanas[numeroCabana].editadoManual = true;
+
 // ========================================
 // SINCRONIZAR ESTADO FINAL -> REVISIÓN
 // ========================================
@@ -1941,7 +1972,28 @@ if (!datos.cabanas[numeroCabana]) {
     datos.cabanas[numeroCabana] = {};
 }
 
-datos.cabanas[numeroCabana].titular = nombreFinal;
+const cabanaActual = datos.cabanas[numeroCabana];
+
+// Si este día venía de una continuidad automática
+// y cambiamos manualmente el titular,
+// desde aquí comienza una reserva nueva e independiente.
+if (
+    cabanaActual.continuidadAutomatica === true &&
+    nombreFinal !== nombreActual
+) {
+    cabanaActual.reservaId =
+        generarReservaId(fechaSeleccionada, numeroCabana);
+
+    cabanaActual.continuidadAutomatica = false;
+    cabanaActual.fechaOrigenReserva = fechaSeleccionada;
+
+    // Las noches de la reserva anterior no pertenecen
+    // automáticamente a esta nueva reserva.
+    cabanaActual.noches = "";
+}
+
+cabanaActual.titular = nombreFinal;
+cabanaActual.editadoManual = true;
 
 guardarDatos();
 
