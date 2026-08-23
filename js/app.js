@@ -294,9 +294,9 @@ function crearContinuidadesReserva(fechaInicio, numeroCabana, noches) {
     const datosInicio = obtenerDatosDia(fechaInicio);
     const cabanaInicio = datosInicio.cabanas?.[numeroCabana];
 
-    if (!cabanaInicio || noches <= 1) {
-        return;
-    }
+    if (!cabanaInicio || noches < 1) {
+    return;
+}
 
     const reservaId = cabanaInicio.reservaId;
 
