@@ -341,83 +341,156 @@ if (serviciosDelDia.length === 0) {
     return;
 }
 
-agenda.innerHTML = serviciosDelDia.map(servicio => `
-    <div class="servicios-agenda-item">
+agenda.innerHTML = serviciosDelDia.map(servicio => {
 
-        <div>
-            <strong>
-                ${servicio.hora || "--:--"} · ${servicio.nombre}
-            </strong>
+  const esCortesia =
+    servicio.cortesia === true ||
+    servicio.tipoCobro === "cortesia";
+
+  const estaRealizado =
+    servicio.estadoServicio === "realizado";
+
+  const estaPagado =
+    servicio.estadoPago === "pagado";
+
+  const claseEstado = estaRealizado
+    ? "estado-realizado"
+    : "estado-pendiente";
+
+  return `
+    <div class="servicios-agenda-item ${claseEstado}">
+
+      <!-- CABECERA -->
+      <div class="servicio-agenda-cabecera">
+
+        <div class="servicio-agenda-principal">
+          <span class="servicio-agenda-hora">
+            ${servicio.hora || "--:--"}
+          </span>
+
+          <strong class="servicio-agenda-nombre">
+            ${servicio.nombre}
+          </strong>
         </div>
 
-        <div>
-            Cabaña ${servicio.numeroCabana}
-            ${servicio.titular ? ` · ${servicio.titular}` : ""}
-        </div>
+        ${
+          estaRealizado
+            ? `<span class="servicio-estado-badge realizado">✓ Realizado</span>`
+            : `<span class="servicio-estado-badge pendiente">Pendiente</span>`
+        }
 
-        <div>
-    ${servicio.cortesia || servicio.tipoCobro === "cortesia"
-        ? `
-            <strong>🎁 CORTESÍA</strong>
-        `
-        : `
-            <strong>
+      </div>
+
+
+      <!-- HUÉSPED / CABAÑA -->
+      <div class="servicio-agenda-huesped">
+        CAB ${servicio.numeroCabana}
+        ${servicio.titular ? ` · ${servicio.titular}` : ""}
+      </div>
+
+
+      <!-- COBRO -->
+      <div class="servicio-agenda-cobro">
+
+        ${
+          esCortesia
+            ? `
+              <span class="servicios-cortesia">
+                🎁 CORTESÍA
+              </span>
+            `
+            : `
+              <strong class="servicio-agenda-precio">
                 $${Number(servicio.total || 0).toLocaleString("es-CL")}
-            </strong>
+              </strong>
 
-            ${servicio.estadoPago === "pendiente"
-                ? `Pendiente de pago
-                    <button
-                        type="button"
-                        onclick="marcarServicioPagado('${servicio.id}')"
-                    >
-                        Marcar pagado
-                    </button>
-                `
-                : servicio.estadoPago === "pagado"
-                ? `✓ Pagado
-                    <button
-                        type="button"
-                        onclick="deshacerServicioPagado('${servicio.id}')"
-                    >
-                        ↩ Deshacer
-                    </button>
-                `
-                : "No corresponde"}
-        `
-    }
-</div>
+              ${
+                servicio.estadoPago === "pendiente"
+                  ? `
+                    <span class="servicios-pago-pendiente">
+                      Pendiente de pago
+                    </span>
+                  `
+                  : estaPagado
+                    ? `
+                      <span class="servicios-pago-ok">
+                        ✓ Pagado
+                      </span>
+                    `
+                    : ""
+              }
+            `
+        }
 
-        <div>
-    ${servicio.estadoServicio === "realizado"
-    ? `✓ Realizado
+      </div>
+
+
+      <!-- ACCIONES -->
+      <div class="servicio-agenda-acciones">
+
+        ${
+          !esCortesia && servicio.estadoPago === "pendiente"
+            ? `
+              <button
+                type="button"
+                class="servicio-btn servicio-btn-ok"
+                onclick="marcarServicioPagado('${servicio.id}')"
+              >
+                ✓ Marcar pagado
+              </button>
+            `
+            : ""
+        }
+
+        ${
+          !esCortesia && estaPagado
+            ? `
+              <button
+                type="button"
+                class="servicio-btn servicio-btn-secundario"
+                onclick="deshacerServicioPagado('${servicio.id}')"
+              >
+                ↶ Deshacer pago
+              </button>
+            `
+            : ""
+        }
+
+        ${
+          estaRealizado
+            ? `
+              <button
+                type="button"
+                class="servicio-btn servicio-btn-secundario"
+                onclick="deshacerServicioRealizado('${servicio.id}')"
+              >
+                ↶ Deshacer realizado
+              </button>
+            `
+            : `
+              <button
+                type="button"
+                class="servicio-btn servicio-btn-ok"
+                onclick="marcarServicioRealizado('${servicio.id}')"
+              >
+                ✓ Marcar realizado
+              </button>
+            `
+        }
+
         <button
-            type="button"
-            onclick="deshacerServicioRealizado('${servicio.id}')"
+          type="button"
+          class="servicio-btn servicio-btn-eliminar"
+          onclick="eliminarServicio('${servicio.id}')"
         >
-            ↩ Deshacer
+          Eliminar
         </button>
-      `
-    : `<button
-        type="button"
-        onclick="marcarServicioRealizado('${servicio.id}')"
-      >
-        Marcar realizado
-      </button>`
-}
-</div>
 
-<div>
-    <button
-        type="button"
-        onclick="eliminarServicio('${servicio.id}')"
-    >
-        Eliminar
-    </button>
-</div>
+      </div>
 
     </div>
-`).join("");
+  `;
+}).join("");
 
 }
 

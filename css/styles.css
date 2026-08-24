@@ -3841,3 +3841,716 @@ tr.cabana-libre .info-cabana {
 .editar-noches:hover {
   opacity: 0.7;
 }
+
+/* =========================================================
+   SERVICIOS — DISEÑO BASE
+   ========================================================= */
+
+#seccion-servicios {
+  color: #202820;
+}
+
+
+/* ---------------------------------------------------------
+   RESUMEN SUPERIOR
+   Próximo servicio / Servicios de hoy / Pendientes
+   --------------------------------------------------------- */
+
+#seccion-servicios .servicios-resumen {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 18px 0;
+}
+
+#seccion-servicios .servicios-resumen-item {
+  background: #ffffff;
+  border: 1px solid #e1e5e2;
+  border-radius: 11px;
+  padding: 10px 11px;
+  min-width: 0;
+}
+
+#seccion-servicios .servicios-resumen-item span {
+  display: block;
+  font-size: 10px;
+  color: #7c827e;
+  margin-bottom: 3px;
+}
+
+#seccion-servicios .servicios-resumen-item strong {
+  display: block;
+  font-size: 16px;
+  color: #202820;
+}
+
+
+/* ---------------------------------------------------------
+   TARJETAS PRINCIPALES
+   --------------------------------------------------------- */
+
+#seccion-servicios .servicios-card {
+  background: #ffffff;
+  border: 1px solid #dde2de;
+  border-radius: 14px;
+  overflow: hidden;
+  margin-bottom: 18px;
+}
+
+#seccion-servicios .servicios-card-header {
+  padding: 18px 20px 15px;
+  border-bottom: 1px solid #e5e8e5;
+}
+
+#seccion-servicios .servicios-card-header h3 {
+  margin: 0 0 3px;
+  font-size: 21px;
+  font-weight: 600;
+  color: #202820;
+}
+
+#seccion-servicios .servicios-card-header p {
+  margin: 0;
+  font-size: 12px;
+  color: #858b87;
+}
+
+
+/* ---------------------------------------------------------
+   AGENDA DEL DÍA
+   --------------------------------------------------------- */
+
+#servicios-agenda {
+  padding: 12px;
+}
+
+.servicios-agenda-item {
+  border: 1px solid #e0e4e1;
+  border-radius: 12px;
+  padding: 13px;
+  margin-bottom: 10px;
+  background: #ffffff;
+}
+
+.servicios-agenda-item:last-child {
+  margin-bottom: 0;
+}
+
+
+/* PENDIENTE */
+
+.servicios-agenda-item.estado-pendiente {
+  background: #fff9ee;
+  border-color: #efc575;
+}
+
+
+/* EN PROCESO */
+
+.servicios-agenda-item.estado-proceso {
+  background: #fff4e8;
+  border-color: #e99a45;
+}
+
+
+/* REALIZADO */
+
+.servicios-agenda-item.estado-realizado {
+  background: #f0f8f3;
+  border-color: #9bc9aa;
+}
+
+
+/* ---------------------------------------------------------
+   CORTESÍA
+   --------------------------------------------------------- */
+
+.servicios-cortesia {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+
+  padding: 4px 9px;
+  margin-top: 5px;
+
+  background: #e2f2e6;
+  border: 1px solid #b9d9c1;
+  border-radius: 999px;
+
+  color: #356b46;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+
+/* ---------------------------------------------------------
+   ESTADOS DE PAGO
+   --------------------------------------------------------- */
+
+.servicios-pago-pendiente {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+
+  background: #fff0cf;
+  border-radius: 999px;
+
+  color: #79571c;
+  font-size: 11px;
+}
+
+.servicios-pago-ok {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 8px;
+
+  background: #dcefe1;
+  border-radius: 999px;
+
+  color: #356b46;
+  font-size: 11px;
+}
+
+
+/* ---------------------------------------------------------
+   FORMULARIO CONSUMOS ADICIONALES
+   --------------------------------------------------------- */
+
+#servicios-formulario {
+  padding: 18px 20px 20px;
+}
+
+#servicios-formulario > div {
+  margin-bottom: 13px;
+}
+
+#servicios-formulario label {
+  display: block;
+  margin-bottom: 5px;
+
+  color: #555d57;
+  font-size: 11px;
+  font-weight: 500;
+}
+
+#servicios-formulario select,
+#servicios-formulario input[type="number"],
+#servicios-formulario input[type="date"],
+#servicios-formulario input[type="time"],
+#servicios-formulario input[type="text"] {
+  width: 100%;
+  box-sizing: border-box;
+
+  min-height: 38px;
+  padding: 8px 10px;
+
+  background: #ffffff;
+  border: 1px solid #d9dedb;
+  border-radius: 8px;
+
+  color: #283029;
+  font-size: 13px;
+}
+
+
+/* ---------------------------------------------------------
+   NORMAL / CORTESÍA
+   --------------------------------------------------------- */
+
+.servicios-cobro {
+  padding: 11px 12px;
+  background: #f7f8f7;
+  border: 1px solid #e3e6e4;
+  border-radius: 9px;
+}
+
+.servicios-cobro > label:first-child {
+  margin-bottom: 8px;
+}
+
+.servicios-cobro label:not(:first-child) {
+  display: inline-flex !important;
+  align-items: center;
+  gap: 5px;
+
+  margin-right: 14px;
+  margin-bottom: 0 !important;
+
+  font-size: 12px !important;
+  cursor: pointer;
+}
+
+
+/* ---------------------------------------------------------
+   TOTAL
+   --------------------------------------------------------- */
+
+#servicios-total {
+  padding: 12px 14px;
+
+  background: #f3f6f4;
+  border-radius: 9px;
+
+  font-size: 18px;
+  font-weight: 600;
+  color: #202820;
+}
+
+
+/* ---------------------------------------------------------
+   BOTONES
+   --------------------------------------------------------- */
+
+#seccion-servicios button {
+  min-height: 34px;
+  padding: 7px 11px;
+
+  background: #ffffff;
+  border: 1px solid #d9dedb;
+  border-radius: 7px;
+
+  color: #343b36;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+#seccion-servicios button:hover {
+  background: #f4f6f4;
+}
+
+#servicios-guardar {
+  background: #294d3b !important;
+  border-color: #294d3b !important;
+  color: #ffffff !important;
+}
+
+
+/* ---------------------------------------------------------
+   AGENDA VACÍA
+   --------------------------------------------------------- */
+
+.servicios-agenda-vacia {
+  margin: 0;
+  padding: 25px 15px;
+
+  text-align: center;
+  color: #8a908c;
+  font-size: 12px;
+}
+
+
+/* ---------------------------------------------------------
+   MÓVIL
+   --------------------------------------------------------- */
+
+@media (max-width: 600px) {
+
+  #seccion-servicios .servicios-resumen {
+    gap: 6px;
+  }
+
+  #seccion-servicios .servicios-resumen-item {
+    padding: 9px 8px;
+  }
+
+  #seccion-servicios .servicios-resumen-item span {
+    font-size: 9px;
+  }
+
+  #seccion-servicios .servicios-resumen-item strong {
+    font-size: 14px;
+  }
+
+  #seccion-servicios .servicios-card-header {
+    padding: 16px 17px 13px;
+  }
+
+  #servicios-formulario {
+    padding: 16px;
+  }
+}
+
+/* =========================================================
+   SERVICIOS · AGENDA DEL DÍA · DISEÑO DE TARJETAS
+   ========================================================= */
+
+
+/* TARJETA INDIVIDUAL */
+
+.servicios-agenda-item {
+  padding: 14px 15px;
+
+  background: #ffffff;
+  border: 1px solid #dfe4e1;
+  border-radius: 11px;
+
+  transition:
+    background-color 0.15s ease,
+    border-color 0.15s ease;
+}
+
+
+/* separación entre servicios */
+
+.servicios-agenda-item + .servicios-agenda-item {
+  margin-top: 9px;
+}
+
+
+/* ---------------------------------------------------------
+   ESTADO DE LA TARJETA
+   --------------------------------------------------------- */
+
+
+/* PENDIENTE */
+
+.servicios-agenda-item.estado-pendiente {
+  background: #fffaf1;
+  border-color: #ebcf9d;
+}
+
+
+/* REALIZADO */
+
+.servicios-agenda-item.estado-realizado {
+  background: #f1f8f3;
+  border-color: #a8ccb1;
+}
+
+
+/* ---------------------------------------------------------
+   CABECERA
+   --------------------------------------------------------- */
+
+.servicio-agenda-cabecera {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+
+  gap: 12px;
+
+  margin-bottom: 8px;
+}
+
+
+/* hora + nombre */
+
+.servicio-agenda-principal {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+
+  gap: 5px;
+}
+
+
+.servicio-agenda-hora {
+  font-size: 14px;
+  font-weight: 700;
+  color: #202723;
+}
+
+
+.servicio-agenda-nombre {
+  font-size: 14px;
+  font-weight: 600;
+  color: #202723;
+}
+
+
+/* ---------------------------------------------------------
+   BADGE DE ESTADO
+   --------------------------------------------------------- */
+
+.servicio-estado-badge {
+  flex-shrink: 0;
+
+  padding: 4px 8px;
+
+  border-radius: 999px;
+
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+
+  white-space: nowrap;
+}
+
+
+.servicio-estado-badge.pendiente {
+  background: #f7dfb4;
+  color: #72501d;
+}
+
+
+.servicio-estado-badge.realizado {
+  background: #cfe8d5;
+  color: #315c3b;
+}
+
+
+/* ---------------------------------------------------------
+   HUÉSPED / CABAÑA
+   --------------------------------------------------------- */
+
+.servicio-agenda-huesped {
+  margin-bottom: 9px;
+
+  color: #68716c;
+
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+
+/* ---------------------------------------------------------
+   COBRO
+   --------------------------------------------------------- */
+
+.servicio-agenda-cobro {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 7px;
+
+  margin-bottom: 11px;
+}
+
+
+.servicio-agenda-precio {
+  font-size: 13px;
+  font-weight: 700;
+  color: #263029;
+}
+
+
+/* cortesía */
+
+.servicios-cortesia {
+  display: inline-flex;
+  align-items: center;
+
+  padding: 4px 8px;
+
+  background: #fff1cc;
+  border-radius: 999px;
+
+  color: #765719;
+
+  font-size: 10px;
+  font-weight: 700;
+}
+
+
+/* ---------------------------------------------------------
+   ACCIONES
+   --------------------------------------------------------- */
+
+.servicio-agenda-acciones {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+
+  gap: 6px;
+
+  padding-top: 10px;
+
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+
+/* hacemos los botones MUCHO más compactos */
+
+#seccion-servicios .servicio-agenda-acciones button {
+  min-height: 27px;
+
+  padding: 4px 8px;
+
+  border-radius: 6px;
+
+  font-size: 10px;
+  line-height: 1.2;
+}
+
+
+/* acción positiva */
+
+#seccion-servicios .servicio-btn-ok {
+  background: #edf6f0;
+  border-color: #bdd8c5;
+  color: #315f40;
+}
+
+
+/* acción secundaria */
+
+#seccion-servicios .servicio-btn-secundario {
+  background: #ffffff;
+  border-color: #dce1de;
+  color: #626a65;
+}
+
+
+/* eliminar mucho más discreto */
+
+#seccion-servicios .servicio-btn-eliminar {
+  margin-left: auto;
+
+  background: transparent;
+  border-color: transparent;
+
+  color: #8b918d;
+}
+
+
+#seccion-servicios .servicio-btn-eliminar:hover {
+  background: #faeeee;
+  border-color: #efd1d1;
+  color: #a94d4d;
+}
+
+
+/* ---------------------------------------------------------
+   MÓVIL
+   --------------------------------------------------------- */
+
+@media (max-width: 600px) {
+
+  .servicios-agenda-item {
+    padding: 12px 13px;
+  }
+
+  .servicio-agenda-cabecera {
+    gap: 8px;
+  }
+
+  .servicio-agenda-hora,
+  .servicio-agenda-nombre {
+    font-size: 13px;
+  }
+
+  .servicio-agenda-huesped {
+    font-size: 11px;
+  }
+
+  .servicio-agenda-acciones {
+    gap: 5px;
+  }
+
+  #seccion-servicios .servicio-agenda-acciones button {
+    min-height: 25px;
+    padding: 4px 7px;
+    font-size: 9px;
+  }
+}
+
+/* =========================================================
+   SERVICIOS · RESUMEN SUPERIOR
+   ========================================================= */
+
+.servicios-resumen {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+
+  gap: 9px;
+
+  margin: 22px 0 22px;
+}
+
+
+.servicios-resumen > div {
+  min-width: 0;
+
+  padding: 11px 12px;
+
+  background: #ffffff;
+
+  border: 1px solid #e1e6e3;
+  border-radius: 10px;
+}
+
+
+/* texto descriptivo */
+
+.servicios-resumen span,
+.servicios-resumen p {
+  display: block;
+
+  margin: 0 0 4px;
+
+  color: #747d78;
+
+  font-size: 10px;
+  line-height: 1.25;
+}
+
+
+/* valor */
+
+.servicios-resumen strong {
+  display: block;
+
+  color: #202723;
+
+  font-size: 16px;
+  line-height: 1.2;
+}
+
+
+/* =========================================================
+   SERVICIOS · BOTÓN REGISTRAR
+   ========================================================= */
+
+#seccion-servicios .servicios-form-toggle {
+  margin: 0;
+
+  padding: 7px 11px;
+
+  min-height: 31px;
+
+  background: #ffffff;
+
+  border: 1px solid #d9dfdc;
+  border-radius: 7px;
+
+  color: #344139;
+
+  font-size: 10px;
+  font-weight: 500;
+
+  cursor: pointer;
+}
+
+
+#seccion-servicios .servicios-form-toggle:hover {
+  background: #f3f7f4;
+  border-color: #b8c9bf;
+}
+
+
+/* =========================================================
+   SERVICIOS · MÓVIL
+   ========================================================= */
+
+@media (max-width: 600px) {
+
+  .servicios-resumen {
+    gap: 7px;
+    margin: 18px 0 20px;
+  }
+
+  .servicios-resumen > div {
+    padding: 10px 8px;
+  }
+
+  .servicios-resumen span,
+  .servicios-resumen p {
+    font-size: 9px;
+  }
+
+  .servicios-resumen strong {
+    font-size: 14px;
+  }
+
+}
