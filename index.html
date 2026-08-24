@@ -40,8 +40,8 @@
             🧹 Aseo
         </button>
 
-        <button class="menu-item">
-            🛁 Servicios
+        <button class="menu-item" data-seccion="servicios">
+            🛎 Servicios
         </button>
 
         <button class="menu-item" data-seccion="pagos">
@@ -5209,6 +5209,159 @@ Terraza:
 
 </section>
 
+<!-- ===================================== -->
+<!-- SERVICIOS -->
+<!-- ===================================== -->
+
+<section id="seccion-servicios" class="seccion-app">
+
+    <header class="cabecera">
+        <div>
+            <p class="eyebrow">SERVICIOS COMPLEMENTARIOS</p>
+            <h1>Servicios</h1>
+            <p class="subtitulo">
+                Control de servicios adicionales y consumos de huéspedes.
+            </p>
+        </div>
+    </header>
+
+    <!-- RESUMEN DE SERVICIOS -->
+    <section class="servicios-resumen">
+
+        <div class="servicio-indicador">
+            <span>Próximo servicio</span>
+            <strong id="servicios-proximo">Sin servicios</strong>
+        </div>
+
+        <div class="servicio-indicador">
+            <span>Servicios de hoy</span>
+            <strong id="servicios-contador-hoy">0</strong>
+        </div>
+
+        <div class="servicio-indicador">
+            <span>Pendientes de pago</span>
+            <strong id="servicios-contador-pendientes">0</strong>
+        </div>
+
+    </section>
+
+    <!-- AGENDA DEL DÍA -->
+    <section class="panel servicios-panel">
+
+        <div class="panel-titulo">
+            <div>
+                <h2>Agenda del día</h2>
+                <p>Tinajas, masajes y servicios programados.</p>
+            </div>
+        </div>
+
+        <div id="servicios-agenda">
+            <!-- Aquí aparecerán automáticamente los servicios del día -->
+        </div>
+
+    </section>
+
+    <!-- CONSUMOS ADICIONALES -->
+<section class="panel servicios-panel">
+
+    <div class="panel-titulo">
+        <div>
+            <h2>Consumos adicionales</h2>
+            <p>Registra servicios y productos asociados a cada cabaña.</p>
+        </div>
+    </div>
+
+    <button
+        type="button"
+        id="servicios-btn-nuevo"
+        class="servicios-btn-nuevo"
+    >
+        + Registrar servicio
+    </button>
+
+    <!-- FORMULARIO NUEVO SERVICIO -->
+<div id="servicios-formulario" hidden>
+
+    <div>
+        <label for="servicios-cabana">Cabaña</label>
+        <select id="servicios-cabana">
+            <option value="">Seleccionar cabaña</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="servicios-producto">Servicio / producto</label>
+        <select id="servicios-producto">
+        <option value="">Seleccionar servicio</option>
+        </select>
+    </div>
+
+    <div>
+        <label for="servicios-cantidad">Cantidad</label>
+        <input
+            type="number"
+            id="servicios-cantidad"
+            min="1"
+            value="1"
+        >
+    </div>
+
+    <!-- FECHA Y HORA: SOLO TINAJAS Y MASAJES -->
+<div id="servicios-programacion" hidden>
+
+    <div>
+        <label for="servicios-fecha">Fecha</label>
+        <input
+            type="date"
+            id="servicios-fecha"
+        >
+    </div>
+
+    <div>
+        <label for="servicios-hora">Hora</label>
+        <input
+            type="time"
+            id="servicios-hora"
+        >
+    </div>
+
+</div>
+
+    <div>
+    <label for="servicios-precio">Total</label>
+
+    <strong id="servicios-precio">$0</strong>
+
+    <input
+        type="number"
+        id="servicios-precio-manual"
+        min="0"
+        step="1000"
+        placeholder="Valor total"
+        hidden
+    >
+</div>
+
+    <button type="button" id="servicios-btn-guardar">
+        Guardar servicio
+    </button>
+
+    <button type="button" id="servicios-btn-cancelar">
+        Cancelar
+    </button>
+
+</div>
+
+    <div id="servicios-consumos">
+        <!-- Aquí aparecerán los consumos registrados -->
+    </div>
+
+</section>
+
+    </section>
+
+</section>
+
 </main>
 
 
@@ -5219,6 +5372,7 @@ Terraza:
     <script src="js/cabanas.js"></script>
     <script src="js/cierre.js"></script>
     <script src="js/pagos.js"></script>
+    <script src="js/servicios.js"></script>
 
 </body>
 

@@ -206,6 +206,10 @@ function seleccionarDia(año, mes, dia, fechaISO) {
     cargarDatosDia(fechaSeleccionada);
 cargarCabanasDia(fechaSeleccionada);
 
+if (typeof renderizarAgendaServicios === "function") {
+    renderizarAgendaServicios();
+}
+
 // Actualizar pagos del día seleccionado
 if (typeof cargarAbonosPagos === "function") {
     cargarAbonosPagos();
