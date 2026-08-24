@@ -198,6 +198,7 @@ function registrarServicio({
     tipoServicio,
     cantidad = 1,
     personas = 1,
+    tipoCobro = "normal",
     fechaServicio = "",
     hora = "",
     precioManual = null,
@@ -244,8 +245,8 @@ if (
     // CORTESÍA
     // -------------------------------------
 
-    if (cortesia) {
-        total = 0;
+    if (tipoCobro === "cortesia") {
+    total = 0;
     }
 
     const nuevoServicio = {
@@ -271,7 +272,8 @@ if (
         precioUnitario,
         total,
 
-        cortesia,
+        tipoCobro,
+        cortesia: tipoCobro === "cortesia",
 
         estadoServicio: "pendiente",
 
@@ -308,6 +310,22 @@ function renderizarAgendaServicios() {
     .filter(servicio => servicio.fechaServicio === fechaSeleccionada)
     .sort((a, b) => (a.hora || "").localeCompare(b.hora || ""));
 
+    const contadorHoy = document.getElementById("servicios-contador-hoy");
+
+if (contadorHoy) {
+  contadorHoy.textContent = serviciosDelDia.length;
+}
+
+const contadorPendientes = document.getElementById("servicios-contador-pendientes");
+
+if (contadorPendientes) {
+    const pendientes = serviciosDelDia.filter(
+        servicio => servicio.estadoPago === "pendiente"
+    );
+
+    contadorPendientes.textContent = pendientes.length;
+}
+
     console.log(
     "AGENDA DEL DÍA:",
     fechaSeleccionada,
@@ -325,11 +343,205 @@ if (serviciosDelDia.length === 0) {
 
 agenda.innerHTML = serviciosDelDia.map(servicio => `
     <div class="servicios-agenda-item">
-        <strong>${servicio.hora || "--:--"} · ${servicio.nombre}</strong>
-        <span>Cabaña ${servicio.numeroCabana}</span>
+
+        <div>
+            <strong>
+                ${servicio.hora || "--:--"} · ${servicio.nombre}
+            </strong>
+        </div>
+
+        <div>
+            Cabaña ${servicio.numeroCabana}
+            ${servicio.titular ? ` · ${servicio.titular}` : ""}
+        </div>
+
+        <div>
+    ${servicio.cortesia || servicio.tipoCobro === "cortesia"
+        ? `
+            <strong>🎁 CORTESÍA</strong>
+        `
+        : `
+            <strong>
+                $${Number(servicio.total || 0).toLocaleString("es-CL")}
+            </strong>
+
+            ${servicio.estadoPago === "pendiente"
+                ? `Pendiente de pago
+                    <button
+                        type="button"
+                        onclick="marcarServicioPagado('${servicio.id}')"
+                    >
+                        Marcar pagado
+                    </button>
+                `
+                : servicio.estadoPago === "pagado"
+                ? `✓ Pagado
+                    <button
+                        type="button"
+                        onclick="deshacerServicioPagado('${servicio.id}')"
+                    >
+                        ↩ Deshacer
+                    </button>
+                `
+                : "No corresponde"}
+        `
+    }
+</div>
+
+        <div>
+    ${servicio.estadoServicio === "realizado"
+    ? `✓ Realizado
+        <button
+            type="button"
+            onclick="deshacerServicioRealizado('${servicio.id}')"
+        >
+            ↩ Deshacer
+        </button>
+      `
+    : `<button
+        type="button"
+        onclick="marcarServicioRealizado('${servicio.id}')"
+      >
+        Marcar realizado
+      </button>`
+}
+</div>
+
+<div>
+    <button
+        type="button"
+        onclick="eliminarServicio('${servicio.id}')"
+    >
+        Eliminar
+    </button>
+</div>
+
     </div>
 `).join("");
 
+}
+
+// =====================================
+// MARCAR SERVICIO COMO REALIZADO
+// =====================================
+
+function marcarServicioRealizado(idServicio) {
+
+    const servicio = serviciosRegistrados.find(
+        servicio => servicio.id === idServicio
+    );
+
+    if (!servicio) {
+        console.error("No se encontró el servicio:", idServicio);
+        return;
+    }
+
+    servicio.estadoServicio = "realizado";
+
+    guardarServicios();
+    renderizarAgendaServicios();
+
+    console.log("SERVICIO REALIZADO:", servicio);
+}
+
+// =====================================
+// DESHACER SERVICIO REALIZADO
+// =====================================
+
+function deshacerServicioRealizado(idServicio) {
+
+    const servicio = serviciosRegistrados.find(
+        servicio => servicio.id === idServicio
+    );
+
+    if (!servicio) {
+        console.error("No se encontró el servicio:", idServicio);
+        return;
+    }
+
+    servicio.estadoServicio = "pendiente";
+
+    guardarServicios();
+    renderizarAgendaServicios();
+
+    console.log("SERVICIO REALIZADO DESHECHO:", servicio);
+}
+
+// =====================================
+// MARCAR SERVICIO COMO PAGADO
+// =====================================
+
+function marcarServicioPagado(idServicio) {
+
+    const servicio = serviciosRegistrados.find(
+        servicio => servicio.id === idServicio
+    );
+
+    if (!servicio) {
+        console.error("No se encontró el servicio:", idServicio);
+        return;
+    }
+
+    servicio.estadoPago = "pagado";
+
+    guardarServicios();
+    renderizarAgendaServicios();
+
+    console.log("SERVICIO PAGADO:", servicio);
+}
+
+// ===================================
+// DESHACER SERVICIO PAGADO
+// ===================================
+
+function deshacerServicioPagado(idServicio) {
+
+    const servicio = serviciosRegistrados.find(
+        servicio => servicio.id === idServicio
+    );
+
+    if (!servicio) {
+        console.error("No se encontró el servicio:", idServicio);
+        return;
+    }
+
+    servicio.estadoPago = "pendiente";
+
+    guardarServicios();
+    renderizarAgendaServicios();
+
+    console.log("PAGO DESHECHO:", servicio);
+}
+
+// =====================================
+// ELIMINAR SERVICIO
+// =====================================
+
+function eliminarServicio(idServicio) {
+
+    const servicio = serviciosRegistrados.find(
+        servicio => servicio.id === idServicio
+    );
+
+    if (!servicio) {
+        console.error("No se encontró el servicio:", idServicio);
+        return;
+    }
+
+    const confirmar = confirm(
+        `¿Eliminar ${servicio.nombre} de la cabaña ${servicio.numeroCabana}?`
+    );
+
+    if (!confirmar) return;
+
+    serviciosRegistrados = serviciosRegistrados.filter(
+        servicio => servicio.id !== idServicio
+    );
+
+    guardarServicios();
+    renderizarAgendaServicios();
+
+    console.log("SERVICIO ELIMINADO:", servicio);
 }
 
 // ============================================
@@ -489,6 +701,10 @@ btnGuardar.addEventListener("click", () => {
     const idServicio = selectProducto.value;
     const cantidad = Number(inputCantidad.value) || 1;
 
+    const tipoCobro = document.querySelector(
+    'input[name="servicios-tipo-cobro"]:checked'
+    )?.value || "normal";
+
     const servicio = CATALOGO_SERVICIOS[idServicio];
 
 const requiereProgramacion =
@@ -525,6 +741,7 @@ const precioManual =
     tipoServicio: idServicio,
     cantidad: cantidad,
     personas: cantidad,
+    tipoCobro: tipoCobro,
 
     fechaServicio: fechaServicio,
     hora: horaServicio,
@@ -540,5 +757,7 @@ btnCancelar.addEventListener("click", () => {
     formulario.hidden = true;
     btnNuevo.hidden = false;
 });
+
+renderizarAgendaServicios();
 
 });
