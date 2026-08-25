@@ -1449,6 +1449,183 @@ function cargarServiciosFichaReserva(reservaId) {
 }
 
 // ========================================
+// PAGOS DE LA FICHA POR RESERVA ID
+// ========================================
+
+function buscarDatosReservaPorId(reservaId) {
+
+    if (!reservaId) {
+        return null;
+    }
+
+    let encontrado = null;
+
+    Object.entries(datosPorFecha).some(([fecha, datosDia]) => {
+
+        if (!datosDia?.cabanas) {
+            return false;
+        }
+
+        return Object.entries(datosDia.cabanas).some(
+            ([numeroCabana, cabana]) => {
+
+                if (
+                    String(cabana?.reservaId || "") !==
+                    String(reservaId)
+                ) {
+                    return false;
+                }
+
+                // Preferimos el registro original de la reserva,
+                // porque ahí están los datos administrativos.
+                if (
+                    cabana.fechaOrigenReserva === fecha ||
+                    cabana.continuidadAutomatica !== true
+                ) {
+
+                    encontrado = {
+                        fecha,
+                        numeroCabana,
+                        cabana
+                    };
+
+                    return true;
+                }
+
+                // Respaldo por si encontramos primero una continuidad
+                if (!encontrado) {
+
+                    encontrado = {
+                        fecha,
+                        numeroCabana,
+                        cabana
+                    };
+                }
+
+                return false;
+            }
+        );
+
+    });
+
+    return encontrado;
+}
+
+
+function cargarPagosFichaReserva(reservaId) {
+
+    const campoTotal =
+        document.getElementById(
+            "ficha-pago-total"
+        );
+
+    const campoAbono =
+        document.getElementById(
+            "ficha-pago-abono"
+        );
+
+    const campoSaldo =
+        document.getElementById(
+            "ficha-pago-saldo"
+        );
+
+    const campoServicios =
+        document.getElementById(
+            "ficha-pago-servicios"
+        );
+
+
+    if (
+        !campoTotal ||
+        !campoAbono ||
+        !campoSaldo ||
+        !campoServicios
+    ) {
+        return;
+    }
+
+
+    // ====================================
+    // DATOS DE LA RESERVA
+    // ====================================
+
+    const registroReserva =
+        buscarDatosReservaPorId(reservaId);
+
+    const cabanaReserva =
+        registroReserva?.cabana || {};
+
+
+    const totalReserva =
+        Number(cabanaReserva.totalReserva) || 0;
+
+    const abono =
+        Number(cabanaReserva.abono) || 0;
+
+    const saldo =
+        Math.max(
+            totalReserva - abono,
+            0
+        );
+
+
+    // ====================================
+    // SERVICIOS PENDIENTES DE PAGO
+    // ====================================
+
+    const servicios =
+        JSON.parse(
+            localStorage.getItem("haikuServicios")
+        ) || [];
+
+
+    const serviciosPendientes =
+        servicios.filter(servicio =>
+
+            String(servicio.reservaId || "") ===
+            String(reservaId) &&
+
+            servicio.estadoPago === "pendiente" &&
+
+            servicio.tipoCobro !== "cortesia" &&
+
+            servicio.cortesia !== true
+        );
+
+
+    const totalServiciosPendientes =
+        serviciosPendientes.reduce(
+            (acumulado, servicio) => {
+
+                return (
+                    acumulado +
+                    (Number(servicio.total) || 0)
+                );
+
+            },
+            0
+        );
+
+
+    // ====================================
+    // MOSTRAR
+    // ====================================
+
+    campoTotal.textContent =
+        `$${totalReserva.toLocaleString("es-CL")}`;
+
+    campoAbono.textContent =
+        `$${abono.toLocaleString("es-CL")}`;
+
+    campoSaldo.textContent =
+        `$${saldo.toLocaleString("es-CL")}`;
+
+    campoServicios.textContent =
+        `$${totalServiciosPendientes.toLocaleString("es-CL")}`;
+
+}
+
+// ========================================
 // ABRIR FICHA DE RESERVA
 // ========================================
 
@@ -1745,10 +1922,15 @@ if (acompananteSuperior) {
 
 
     // ====================================
-// SERVICIOS DE LA RESERVA
-// ====================================
+    // SERVICIOS DE LA RESERVA
+    // ====================================
 
-cargarServiciosFichaReserva(reservaId);
+    cargarServiciosFichaReserva(reservaId);
+
+    // ====================================
+    // PAGOS DE LA RESERVA
+    // ====================================
+    cargarPagosFichaReserva(reservaId);
 
 
     // ====================================
