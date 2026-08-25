@@ -750,16 +750,75 @@ function actualizarProgramacionServicio() {
         return;
     }
 
+    const esLateCheckout =
+        servicio.categoria === "checkout";
+
     const requiereProgramacion =
         servicio.categoria === "tinaja" ||
-        servicio.categoria === "masaje";
+        servicio.categoria === "masaje" ||
+        esLateCheckout;
 
     programacionServicio.hidden = !requiereProgramacion;
 
     if (!requiereProgramacion) {
         inputFechaServicio.value = "";
         inputHoraServicio.value = "";
+        return;
     }
+
+    // Tinajas y masajes siguen funcionando como hasta ahora
+    if (!esLateCheckout) {
+        return;
+    }
+
+    // Late Check-out:
+    // buscar automáticamente el día de salida de la cabaña elegida
+    const numeroCabana = selectCabana.value;
+
+    if (!numeroCabana) {
+        inputFechaServicio.value = "";
+        inputHoraServicio.value = "";
+        return;
+    }
+
+    let fechaCheckout = "";
+
+    for (let i = 0; i < 60; i++) {
+
+        const fechaBusqueda = new Date(
+            fechaSeleccionada + "T12:00:00"
+        );
+
+        fechaBusqueda.setDate(
+            fechaBusqueda.getDate() + i
+        );
+
+        const fechaISO =
+            fechaBusqueda.toISOString().split("T")[0];
+
+        const datosBusqueda =
+            obtenerDatosDia(fechaISO);
+
+        const cabanaBusqueda =
+            datosBusqueda.cabanas?.[numeroCabana] || {};
+
+        const estado =
+            cabanaBusqueda.estado || "";
+
+        if (
+            estado === "sale-libre" ||
+            estado === "sale-ingresa" ||
+            estado === "fullday"
+        ) {
+            fechaCheckout = fechaISO;
+            break;
+        }
+    }
+
+    inputFechaServicio.value = fechaCheckout;
+
+    // Primera hora cobrable después del checkout normal
+    inputHoraServicio.value = "13:00";
 }
 
 selectProducto.addEventListener("change", actualizarProgramacionServicio);
@@ -782,7 +841,8 @@ btnGuardar.addEventListener("click", () => {
 
 const requiereProgramacion =
     servicio?.categoria === "tinaja" ||
-    servicio?.categoria === "masaje";
+    servicio?.categoria === "masaje" ||
+    servicio?.categoria === "checkout";
 
 const fechaServicio = requiereProgramacion
     ? inputFechaServicio.value
