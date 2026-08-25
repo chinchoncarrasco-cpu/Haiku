@@ -5531,6 +5531,135 @@ Terraza:
 
 </section>
 
+<!-- ============================= -->
+<!-- WEBPAY POR CONFIRMAR -->
+<!-- ============================= -->
+
+<section class="panel pagos-panel">
+
+    <div class="panel-titulo">
+        <div>
+            <h2>WebPay por confirmar</h2>
+            <p>Pagos WebPay pendientes de revisión administrativa.</p>
+        </div>
+    </div>
+
+    <div class="pagos-webpay-nuevo">
+
+        <div class="pagos-webpay-campo">
+            <label>Nombre</label>
+            <input
+                type="text"
+                id="pagos-webpay-nombre"
+                placeholder="Nombre del huésped"
+            >
+        </div>
+
+        <div class="pagos-webpay-campo">
+            <label>RUT</label>
+            <input
+                type="text"
+                id="pagos-webpay-rut"
+                placeholder="12.345.678-9"
+            >
+        </div>
+
+        <div class="pagos-webpay-fila">
+
+            <div class="pagos-webpay-campo">
+                <label>Cabaña</label>
+                <select id="pagos-webpay-cabana">
+                    <option value="">Seleccionar</option>
+                    <option value="1">CAB 1</option>
+                    <option value="2">CAB 2</option>
+                    <option value="3">CAB 3</option>
+                    <option value="4">CAB 4</option>
+                    <option value="5">CAB 5</option>
+                    <option value="6">CAB 6</option>
+                    <option value="7">CAB 7</option>
+                    <option value="8">CAB 8</option>
+                    <option value="9">CAB 9</option>
+                    <option value="10">CAB 10</option>
+                    <option value="11">CAB 11</option>
+                </select>
+            </div>
+
+            <div class="pagos-webpay-campo">
+                <label>Monto</label>
+                <input
+                    type="number"
+                    id="pagos-webpay-monto"
+                    min="0"
+                    step="1000"
+                    placeholder="160000"
+                >
+            </div>
+
+        </div>
+
+        <div class="pagos-webpay-fila">
+
+            <div class="pagos-webpay-campo">
+                <label>Cod. Aut.</label>
+                <input
+                    type="text"
+                    id="pagos-webpay-codaut"
+                    placeholder="822236"
+                >
+            </div>
+
+            <div class="pagos-webpay-campo">
+                <label>Tipo</label>
+                <select id="pagos-webpay-tipo">
+                    <option value="">Seleccionar</option>
+                    <option value="VC">VC</option>
+                    <option value="VN">VN</option>
+                    <option value="VD">VD</option>
+                </select>
+            </div>
+
+        </div>
+
+        <div class="pagos-webpay-campo">
+            <label>Fecha de pago</label>
+            <input
+                type="date"
+                id="pagos-webpay-fecha-pago"
+            >
+        </div>
+
+        <div class="pagos-webpay-campo">
+            <label>Fecha reserva</label>
+            <input
+                type="date"
+                id="pagos-webpay-fecha-reserva"
+            >
+        </div>
+
+        <div class="pagos-webpay-campo">
+            <label>Tarjeta</label>
+            <input
+                type="text"
+                id="pagos-webpay-tarjeta"
+                placeholder="548742XXXXXX7786 Mastercard"
+            >
+        </div>
+
+        <button
+            type="button"
+            id="pagos-webpay-agregar"
+        >
+            + Agregar WebPay
+        </button>
+
+    </div>
+
+    <div id="pagos-lista-webpay">
+        <!-- Aquí aparecerán las tarjetas WebPay -->
+    </div>
+
+</section>
+
 </section>
 
 <!-- ===================================== -->

@@ -131,6 +131,345 @@ tarjeta.innerHTML = `
 
 }
 
+// ========================================
+// WEBPAY POR CONFIRMAR
+// ========================================
+
+let registrosWebpay = JSON.parse(
+    localStorage.getItem("haikuWebpay")
+) || [];
+
+function guardarWebpay() {
+    localStorage.setItem(
+        "haikuWebpay",
+        JSON.stringify(registrosWebpay)
+    );
+}
+
+function formatearFechaWebpay(fecha) {
+
+    if (!fecha) return "Sin datos";
+
+    const partes = fecha.split("-");
+
+    if (partes.length !== 3) return fecha;
+
+    return `${partes[2]}-${partes[1]}-${partes[0]}`;
+}
+
+
+function cargarWebpayPendientes() {
+
+    const lista =
+        document.getElementById("pagos-lista-webpay");
+
+    const contador =
+        document.getElementById("pagos-contador-webpay");
+
+    if (!lista || !contador) return;
+
+    const pendientes =
+    registrosWebpay.filter(registro =>
+        !registro.primerAbono
+    );
+
+    contador.textContent = pendientes.length;
+
+    lista.innerHTML = "";
+
+    if (pendientes.length === 0) {
+
+        lista.innerHTML = `
+            <p class="pagos-checkout-vacio">
+                No hay WebPay pendientes de confirmar.
+            </p>
+        `;
+
+        return;
+    }
+
+
+    pendientes.forEach(registro => {
+
+        const tarjeta =
+            document.createElement("div");
+
+        tarjeta.className =
+            "pago-webpay-item";
+
+        tarjeta.innerHTML = `
+
+            <div class="pago-webpay-header">
+
+    <div class="pago-webpay-titulo">
+
+        <strong>
+            CAB ${registro.cabana}
+        </strong>
+
+        <span>
+            · ${registro.nombre || "Sin titular"}
+        </span>
+
+    </div>
+
+    <button
+        type="button"
+        class="pago-webpay-eliminar"
+        data-webpay-eliminar="${registro.id}"
+        title="Eliminar WebPay"
+        aria-label="Eliminar WebPay"
+    >
+        ×
+    </button>
+
+</div>
+
+
+            <div class="pago-webpay-monto">
+                $${Number(
+                    registro.monto || 0
+                ).toLocaleString("es-CL")}
+            </div>
+
+
+            <div class="pago-webpay-detalles">
+
+                <div>
+                    RUT:
+                    ${registro.rut || "Sin datos"}
+                </div>
+
+                <div>
+                    Cod. Aut:
+                    ${registro.codAut || "Sin datos"}
+                </div>
+
+                <div>
+                    Tipo:
+                    ${registro.tipo || "Sin datos"}
+                </div>
+
+                <div>
+                    Fecha pago:
+                    ${formatearFechaWebpay(
+                        registro.fechaPago
+                    )}
+                </div>
+
+                <div>
+                    Fecha reserva:
+                    ${formatearFechaWebpay(
+                        registro.fechaReserva
+                    )}
+                </div>
+
+                <div>
+                    Tarjeta:
+                    ${registro.tarjeta || "Sin datos"}
+                </div>
+
+            </div>
+
+<div class="pago-webpay-manager">
+
+    <span>
+        Fecha 1er abono
+    </span>
+
+    <input
+        type="date"
+        data-webpay-primer-abono="${registro.id}"
+    >
+
+</div>
+        `;
+
+        lista.appendChild(tarjeta);
+
+    });
+
+}
+
+// ========================================
+// AGREGAR WEBPAY
+// ========================================
+
+const botonAgregarWebpay =
+    document.getElementById("pagos-webpay-agregar");
+
+if (botonAgregarWebpay) {
+
+    botonAgregarWebpay.addEventListener("click", () => {
+
+        const nombre =
+            document.getElementById("pagos-webpay-nombre");
+
+        const rut =
+            document.getElementById("pagos-webpay-rut");
+
+        const cabana =
+            document.getElementById("pagos-webpay-cabana");
+
+        const monto =
+            document.getElementById("pagos-webpay-monto");
+
+        const codAut =
+            document.getElementById("pagos-webpay-codaut");
+
+        const tipo =
+            document.getElementById("pagos-webpay-tipo");
+
+        const fechaPago =
+            document.getElementById("pagos-webpay-fecha-pago");
+
+        const fechaReserva =
+            document.getElementById("pagos-webpay-fecha-reserva");
+
+        const tarjeta =
+            document.getElementById("pagos-webpay-tarjeta");
+
+
+        if (
+            !nombre.value.trim() ||
+            !cabana.value ||
+            !monto.value
+        ) {
+            alert(
+                "Completa al menos Nombre, Cabaña y Monto."
+            );
+            return;
+        }
+
+
+        const nuevoWebpay = {
+
+            id:
+                "webpay-" +
+                Date.now() +
+                "-" +
+                Math.random()
+                    .toString(36)
+                    .slice(2, 7),
+
+            nombre:
+                nombre.value.trim(),
+
+            rut:
+                rut.value.trim(),
+
+            cabana:
+                cabana.value,
+
+            monto:
+                Number(monto.value) || 0,
+
+            codAut:
+                codAut.value.trim(),
+
+            tipo:
+                tipo.value,
+
+            fechaPago:
+                fechaPago.value,
+
+            fechaReserva:
+                fechaReserva.value,
+
+            tarjeta:
+                tarjeta.value.trim(),
+
+            primerAbono: "",
+
+            primerAbono: "",
+
+            creadoEn:
+                new Date().toISOString()
+
+        };
+
+
+        registrosWebpay.push(nuevoWebpay);
+
+        guardarWebpay();
+        cargarWebpayPendientes();
+
+
+        // Limpiar formulario
+        nombre.value = "";
+        rut.value = "";
+        cabana.value = "";
+        monto.value = "";
+        codAut.value = "";
+        tipo.value = "";
+        fechaPago.value = "";
+        fechaReserva.value = "";
+        tarjeta.value = "";
+
+    });
+
+}
+
+// ========================================
+// CONFIRMAR FECHA PRIMER ABONO WEBPAY
+// ========================================
+
+document.addEventListener("change", (evento) => {
+
+    const campoFecha =
+        evento.target.closest(
+            "[data-webpay-primer-abono]"
+        );
+
+    if (!campoFecha) return;
+
+    const idWebpay =
+        campoFecha.dataset.webpayPrimerAbono;
+
+    const registro =
+        registrosWebpay.find(
+            item => item.id === idWebpay
+        );
+
+    if (!registro) return;
+
+    if (!campoFecha.value) return;
+
+    registro.primerAbono =
+        campoFecha.value;
+
+    guardarWebpay();
+
+    cargarWebpayPendientes();
+
+});
+
+// ========================================
+// ELIMINAR WEBPAY PENDIENTE
+// ========================================
+
+document.addEventListener("click", (evento) => {
+
+    const boton =
+        evento.target.closest(
+            "[data-webpay-eliminar]"
+        );
+
+    if (!boton) return;
+
+    const idWebpay =
+        boton.dataset.webpayEliminar;
+
+    registrosWebpay =
+        registrosWebpay.filter(
+            registro =>
+                String(registro.id) !== String(idWebpay)
+        );
+
+    guardarWebpay();
+    cargarWebpayPendientes();
+
+});
 
 // ========================================
 // CARGA INICIAL DE PAGOS
@@ -139,6 +478,7 @@ tarjeta.innerHTML = `
 cargarAbonosPagos();
 cargarSaldosCheckin();
 cargarCobrosCheckout();
+cargarWebpayPendientes();
 
 // ========================================
 // COBROS CHECK-OUT DESDE SERVICIOS
@@ -727,7 +1067,9 @@ document.addEventListener("change", (evento) => {
 }
 
 guardarDatos();
+
 cargarAbonosPagos();
+cargarSaldosCheckin();
 });
 
 // ========================================

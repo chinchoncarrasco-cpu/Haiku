@@ -4904,3 +4904,210 @@ tr.cabana-libre .info-cabana {
     font-size: 14px;
     font-weight: 600;
 }
+
+/* ========================================
+   PAGOS · WEBPAY POR CONFIRMAR
+======================================== */
+
+.pagos-webpay-nuevo {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 14px;
+}
+
+.pagos-webpay-campo {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    min-width: 0;
+}
+
+.pagos-webpay-campo label {
+    font-size: 11px;
+    font-weight: 500;
+    color: #5f665f;
+}
+
+.pagos-webpay-campo input,
+.pagos-webpay-campo select {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 10px 11px;
+
+    border: 1px solid #d8ddd9;
+    border-radius: 9px;
+
+    background: #ffffff;
+    color: #273029;
+
+    font-size: 13px;
+    font-family: inherit;
+
+    outline: none;
+}
+
+.pagos-webpay-campo input:focus,
+.pagos-webpay-campo select:focus {
+    border-color: #8fa99a;
+}
+
+.pagos-webpay-fila {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+}
+
+/* BOTÓN AGREGAR */
+
+#pagos-webpay-agregar {
+    width: 100%;
+
+    margin-top: 3px;
+    padding: 11px 14px;
+
+    border: 1px solid #b9cec1;
+    border-radius: 9px;
+
+    background: #edf7f0;
+    color: #245438;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+#pagos-webpay-agregar:active {
+    transform: scale(0.99);
+}
+
+/* LISTA DE WEBPAY */
+
+#pagos-lista-webpay {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+
+    padding: 0 14px 14px;
+}
+
+/* FUTURAS TARJETAS WEBPAY */
+
+.pago-webpay-item {
+    padding: 12px;
+
+    border: 1px solid #e4c77d;
+    border-radius: 12px;
+
+    background: #fffaf0;
+}
+
+.pago-webpay-titulo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px;
+
+    margin-bottom: 8px;
+
+    font-size: 13px;
+}
+
+.pago-webpay-titulo strong {
+    font-weight: 600;
+}
+
+.pago-webpay-titulo span {
+    color: #68706a;
+    font-size: 12px;
+}
+
+.pago-webpay-monto {
+    margin: 7px 0;
+
+    font-size: 15px;
+    font-weight: 600;
+}
+
+.pago-webpay-detalles {
+    display: grid;
+    gap: 4px;
+
+    font-size: 11px;
+    color: #606760;
+}
+
+.pago-webpay-manager{
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid #d8d2c5;
+}
+
+.pago-webpay-manager span{
+  font-size: 13px;
+  font-weight: 600;
+  color: #5f5a4f;
+}
+
+.pago-webpay-manager input[type="date"]{
+  width: 100%;
+  min-height: 42px;
+  padding: 10px 12px;
+  border: 1px solid #cfc7b6;
+  border-radius: 10px;
+  background: #ffffff;
+  color: #2f2f2f;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+/* ========================================
+   BOTÓN ELIMINAR WEBPAY
+======================================== */
+
+.pago-webpay-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.pago-webpay-header .pago-webpay-titulo {
+    flex: 1;
+    min-width: 0;
+}
+
+.pago-webpay-eliminar {
+    width: 28px;
+    height: 28px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    padding: 0;
+
+    border: 1px solid #d9cfbb;
+    border-radius: 50%;
+
+    background: #fffaf0;
+    color: #756955;
+
+    font-family: inherit;
+    font-size: 18px;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.pago-webpay-eliminar:active {
+    transform: scale(0.94);
+}
