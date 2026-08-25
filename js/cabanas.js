@@ -528,29 +528,6 @@ if (serviciosDelDia.length > 0) {
     });
 }
 
-// SERVICIOS
-const serviciosCabana = [];
-
-Object.entries(datos.cabanas).forEach(([numeroCabana, cabana]) => {
-    const servicio = cabana.servicio || "";
-
-    if (servicio.trim() !== "") {
-        serviciosCabana.push({
-            cabana: numeroCabana,
-            servicio: servicio.trim()
-        });
-    }
-});
-
-if (serviciosCabana.length > 0) {
-    lineas.push("");
-    lineas.push("SERVICIOS");
-
-    serviciosCabana.forEach(item => {
-        lineas.push(`CAB ${item.cabana} — ${item.servicio}`);
-    });
-}
-
 // NOTAS DE CABAÑAS
 if (
     Array.isArray(datos.notasOperativas) &&
