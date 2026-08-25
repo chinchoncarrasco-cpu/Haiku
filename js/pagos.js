@@ -138,6 +138,229 @@ tarjeta.innerHTML = `
 
 cargarAbonosPagos();
 cargarSaldosCheckin();
+cargarCobrosCheckout();
+
+// ========================================
+// COBROS CHECK-OUT DESDE SERVICIOS
+// ========================================
+
+function cargarCobrosCheckout() {
+
+    const lista =
+        document.getElementById("pagos-lista-checkout");
+
+    const contador =
+        document.getElementById("pagos-contador-checkout");
+
+    if (!lista || !contador) {
+        return;
+    }
+
+    const servicios = JSON.parse(
+        localStorage.getItem("haikuServicios")
+    ) || [];
+
+    // ========================================
+// RESERVAS QUE HACEN CHECK-OUT HOY
+// ========================================
+
+const datosDia = obtenerDatosDia(fechaSeleccionada);
+
+const reservasCheckout = new Set();
+
+Object.entries(datosDia.cabanas || {}).forEach(
+    ([numeroCabana, cabana]) => {
+
+        const estado = cabana.estado || "";
+
+        const saleHoy =
+            estado === "sale-libre" ||
+            estado === "sale-ingresa" ||
+            estado === "fullday";
+
+        if (
+            saleHoy &&
+            cabana.reservaId
+        ) {
+            reservasCheckout.add(
+                String(cabana.reservaId)
+            );
+        }
+
+    }
+);
+
+// ========================================
+// COBROS PENDIENTES DE ESAS RESERVAS
+// ========================================
+
+const pendientes = servicios.filter(servicio => {
+
+    const pagoPendiente =
+        servicio.estadoPago === "pendiente";
+
+    const perteneceReservaCheckout =
+        servicio.reservaId &&
+        reservasCheckout.has(
+            String(servicio.reservaId)
+        );
+
+    return (
+        pagoPendiente &&
+        perteneceReservaCheckout
+    );
+
+});
+
+    lista.innerHTML = "";
+
+    contador.textContent = pendientes.length;
+
+    if (pendientes.length === 0) {
+        lista.innerHTML = `
+            <p class="pagos-checkout-vacio">
+                No hay cobros pendientes de servicios.
+            </p>
+        `;
+        return;
+    }
+
+    // ========================================
+// AGRUPAR COBROS POR RESERVA
+// ========================================
+
+const gruposPorReserva = {};
+
+pendientes.forEach(servicio => {
+
+    const clave =
+        servicio.reservaId ||
+        `cab-${servicio.numeroCabana}`;
+
+    if (!gruposPorReserva[clave]) {
+
+        gruposPorReserva[clave] = {
+            reservaId: servicio.reservaId || "",
+            numeroCabana: servicio.numeroCabana || "",
+            titular: servicio.titular || "",
+            servicios: []
+        };
+
+    }
+
+    gruposPorReserva[clave].servicios.push(servicio);
+
+});
+
+
+// ========================================
+// CREAR UNA TARJETA POR RESERVA
+// ========================================
+
+Object.values(gruposPorReserva).forEach(grupo => {
+
+    const tarjeta =
+        document.createElement("div");
+
+    tarjeta.className =
+        "pago-checkout-item";
+
+
+    // Ordenar servicios por fecha y hora
+    grupo.servicios.sort((a, b) => {
+
+        const fechaA =
+            `${a.fechaServicio || ""} ${a.hora || ""}`;
+
+        const fechaB =
+            `${b.fechaServicio || ""} ${b.hora || ""}`;
+
+        return fechaA.localeCompare(fechaB);
+
+    });
+
+
+    const totalReserva =
+        grupo.servicios.reduce(
+            (suma, servicio) =>
+                suma + Number(servicio.total || 0),
+            0
+        );
+
+
+    const serviciosHTML =
+        grupo.servicios.map(servicio => {
+
+            return `
+                <div class="pago-checkout-servicio-fila">
+
+                    <div class="pago-checkout-servicio-info">
+
+                        <strong>
+                            ${servicio.hora
+                                ? `${servicio.hora} · `
+                                : ""}
+                            ${servicio.nombre}
+                        </strong>
+
+                    </div>
+
+                    <strong class="pago-checkout-servicio-monto">
+                        $${Number(
+                            servicio.total || 0
+                        ).toLocaleString("es-CL")}
+                    </strong>
+
+                </div>
+            `;
+
+        }).join("");
+
+
+    tarjeta.innerHTML = `
+
+        <div class="pago-checkout-contenido">
+
+            <div class="pago-checkout-titulo">
+
+                <strong>
+                    CAB ${grupo.numeroCabana}
+                </strong>
+
+                <span>
+                    ${grupo.titular
+                        ? ` · ${grupo.titular}`
+                        : ""}
+                </span>
+
+            </div>
+
+            <div class="pago-checkout-servicios-lista">
+
+                ${serviciosHTML}
+
+            </div>
+
+            <div class="pago-checkout-total">
+
+                <span>
+                    Pendiente total
+                </span>
+
+                <strong>
+                    $${totalReserva.toLocaleString("es-CL")}
+                </strong>
+
+            </div>
+
+        </div>
+    `;
+
+    lista.appendChild(tarjeta);
+
+});
+
+}
 
 // =====================================
 // SALDOS CHECK-IN
@@ -505,4 +728,25 @@ document.addEventListener("change", (evento) => {
 
 guardarDatos();
 cargarAbonosPagos();
+});
+
+// ========================================
+// ACTUALIZAR PAGOS AL ENTRAR A LA SECCIÓN
+// ========================================
+
+document.addEventListener("click", (e) => {
+
+    const botonPagos =
+        e.target.closest('[data-seccion="pagos"]');
+
+    if (!botonPagos) return;
+
+    setTimeout(() => {
+
+        cargarAbonosPagos();
+        cargarSaldosCheckin();
+        cargarCobrosCheckout();
+
+    }, 0);
+
 });

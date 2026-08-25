@@ -290,10 +290,13 @@ if (
     serviciosRegistrados.push(nuevoServicio);
 
     guardarServicios();
+renderizarAgendaServicios();
 
-    renderizarAgendaServicios();
+if (typeof cargarCobrosCheckout === "function") {
+    cargarCobrosCheckout();
+}
 
-    return nuevoServicio;
+return nuevoServicio;
 }
 
 // =====================================
@@ -560,6 +563,10 @@ function marcarServicioPagado(idServicio) {
     guardarServicios();
     renderizarAgendaServicios();
 
+    if (typeof cargarCobrosCheckout === "function") {
+    cargarCobrosCheckout();
+}
+
     console.log("SERVICIO PAGADO:", servicio);
 }
 
@@ -582,6 +589,10 @@ function deshacerServicioPagado(idServicio) {
 
     guardarServicios();
     renderizarAgendaServicios();
+
+    if (typeof cargarCobrosCheckout === "function") {
+    cargarCobrosCheckout();
+}
 
     console.log("PAGO DESHECHO:", servicio);
 }
@@ -613,6 +624,10 @@ function eliminarServicio(idServicio) {
 
     guardarServicios();
     renderizarAgendaServicios();
+
+    if (typeof cargarCobrosCheckout === "function") {
+    cargarCobrosCheckout();
+}
 
     // Actualizar también el Resumen
 if (typeof cargarCabanasDia === "function") {

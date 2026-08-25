@@ -4757,3 +4757,150 @@ tr.cabana-libre .info-cabana {
     cursor: default;
     pointer-events: none;
 }
+
+/* ========================================
+   PAGOS · COBROS CHECK-OUT
+======================================== */
+
+#pagos-lista-checkout {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    padding: 12px;
+}
+
+.pago-checkout-item {
+    border: 1px solid #e6c980;
+    border-radius: 12px;
+    background: #fffaf0;
+    padding: 12px;
+}
+
+.pago-checkout-contenido {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.pago-checkout-titulo {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 3px;
+    font-size: 13px;
+}
+
+.pago-checkout-titulo strong {
+    font-weight: 700;
+}
+
+.pago-checkout-titulo span {
+    color: #626762;
+}
+
+.pago-checkout-servicio {
+    font-size: 14px;
+    font-weight: 600;
+    color: #263029;
+}
+
+.pago-checkout-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+
+    padding-top: 9px;
+    border-top: 1px solid #ece5d7;
+}
+
+.pago-checkout-total span {
+    display: inline-flex;
+    align-items: center;
+
+    padding: 4px 8px;
+    border-radius: 999px;
+
+    background: #fff0c8;
+    color: #775d20;
+
+    font-size: 11px;
+}
+
+.pago-checkout-total strong {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1f2922;
+}
+
+.pagos-checkout-vacio {
+    padding: 12px 4px;
+    margin: 0;
+
+    color: #777;
+    font-size: 13px;
+}
+
+/* ========================================
+   AJUSTE VISUAL COBROS CHECK-OUT
+======================================== */
+
+.pago-checkout-titulo {
+    font-size: 13px;
+    font-weight: 400;
+}
+
+.pago-checkout-titulo strong {
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.pago-checkout-titulo span {
+    font-size: 12px;
+    font-weight: 400;
+    color: #6d746f;
+}
+
+.pago-checkout-servicios-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+}
+
+.pago-checkout-servicio-fila {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 10px;
+}
+
+.pago-checkout-servicio-info {
+    flex: 1;
+    min-width: 0;
+}
+
+.pago-checkout-servicio-info strong {
+    font-size: 13px;
+    font-weight: 500;
+    line-height: 1.35;
+}
+
+.pago-checkout-servicio-monto {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+.pago-checkout-total {
+    margin-top: 3px;
+}
+
+.pago-checkout-total span {
+    font-size: 10px;
+    font-weight: 400;
+}
+
+.pago-checkout-total strong {
+    font-size: 14px;
+    font-weight: 600;
+}
