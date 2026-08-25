@@ -1156,17 +1156,706 @@ const fichaReservaCerrar =
     document.getElementById("ficha-reserva-cerrar");
 
 
-// ABRIR AL TOCAR CAB 1, CAB 2, ETC.
+// ========================================
+// FORMATEAR FECHA PARA LA FICHA
+// ========================================
+
+function formatearFechaFicha(fecha) {
+
+    if (!fecha) return "—";
+
+    const partes = fecha.split("-");
+
+    if (partes.length !== 3) {
+        return fecha;
+    }
+
+    const [anio, mes, dia] = partes;
+
+    return `${dia}-${mes}-${anio.slice(-2)}`;
+}
+
+
+// ========================================
+// CALCULAR FECHA DE SALIDA
+// ========================================
+
+function calcularSalidaReserva(fechaIngreso, noches) {
+
+    if (!fechaIngreso || !noches) {
+        return "";
+    }
+
+    const [anio, mes, dia] =
+        fechaIngreso.split("-").map(Number);
+
+    const fecha =
+        new Date(anio, mes - 1, dia);
+
+    fecha.setDate(
+        fecha.getDate() + Number(noches)
+    );
+
+    const salidaAnio =
+        fecha.getFullYear();
+
+    const salidaMes =
+        String(fecha.getMonth() + 1).padStart(2, "0");
+
+    const salidaDia =
+        String(fecha.getDate()).padStart(2, "0");
+
+    return `${salidaAnio}-${salidaMes}-${salidaDia}`;
+}
+
+// ========================================
+// SERVICIOS DE LA FICHA POR RESERVA ID
+// ========================================
+
+function cargarServiciosFichaReserva(reservaId) {
+
+    const contProgramados =
+        document.getElementById(
+            "ficha-servicios-programados"
+        );
+
+    const contRealizados =
+        document.getElementById(
+            "ficha-servicios-realizados"
+        );
+
+    const contPendientes =
+        document.getElementById(
+            "ficha-servicios-pendientes"
+        );
+
+
+    const contadorProgramados =
+        document.getElementById(
+            "ficha-servicios-programados-contador"
+        );
+
+    const contadorRealizados =
+        document.getElementById(
+            "ficha-servicios-realizados-contador"
+        );
+
+    const contadorPendientes =
+        document.getElementById(
+            "ficha-servicios-pendientes-contador"
+        );
+
+
+    if (
+        !contProgramados ||
+        !contRealizados ||
+        !contPendientes
+    ) {
+        return;
+    }
+
+
+    // Limpiar contenido anterior
+    contProgramados.innerHTML = "";
+    contRealizados.innerHTML = "";
+    contPendientes.innerHTML = "";
+
+
+    // Si no hay reserva, dejamos todo en cero
+    if (!reservaId) {
+
+        contadorProgramados.textContent = "0";
+        contadorRealizados.textContent = "0";
+        contadorPendientes.textContent = "0";
+
+        return;
+    }
+
+
+    const servicios =
+        JSON.parse(
+            localStorage.getItem("haikuServicios")
+        ) || [];
+
+
+    // SOLO servicios pertenecientes a esta reserva
+    const serviciosReserva =
+        servicios.filter(servicio =>
+            String(servicio.reservaId || "") ===
+            String(reservaId)
+        );
+
+
+    // ====================================
+    // CLASIFICAR
+    // ====================================
+
+    const programados =
+        serviciosReserva.filter(servicio =>
+            servicio.estadoServicio !== "realizado"
+        );
+
+
+    const realizados =
+        serviciosReserva.filter(servicio =>
+            servicio.estadoServicio === "realizado"
+        );
+
+
+    const pendientes =
+        serviciosReserva.filter(servicio =>
+            servicio.estadoPago === "pendiente" &&
+            servicio.tipoCobro !== "cortesia" &&
+            servicio.cortesia !== true
+        );
+
+
+    // ====================================
+    // CONTADORES
+    // ====================================
+
+    contadorProgramados.textContent =
+        programados.length;
+
+    contadorRealizados.textContent =
+        realizados.length;
+
+    contadorPendientes.textContent =
+        pendientes.length;
+
+
+    // ====================================
+    // CREAR FILA DE SERVICIO
+    // ====================================
+
+    function crearItemServicio(servicio, mostrarFecha = false) {
+
+    const item =
+        document.createElement("div");
+
+    item.className =
+        "ficha-servicio-item";
+
+
+    const izquierda =
+        document.createElement("span");
+
+
+    const fecha =
+        mostrarFecha && servicio.fechaServicio
+            ? `${formatearFechaFicha(servicio.fechaServicio)} · `
+            : "";
+
+
+    const hora =
+        servicio.hora
+            ? `${servicio.hora} · `
+            : "";
+
+
+    izquierda.textContent =
+        `${fecha}${hora}${servicio.nombre || "Servicio"}`;
+
+
+    const derecha =
+        document.createElement("span");
+
+
+    if (
+        servicio.cortesia === true ||
+        servicio.tipoCobro === "cortesia"
+    ) {
+
+        derecha.textContent = "🎁";
+
+    } else {
+
+        const total =
+            Number(servicio.total) || 0;
+
+        derecha.textContent =
+            total > 0
+                ? `$${total.toLocaleString("es-CL")}`
+                : "";
+    }
+
+
+    item.appendChild(izquierda);
+    item.appendChild(derecha);
+
+    return item;
+}
+
+
+    // ====================================
+    // MOSTRAR PROGRAMADOS
+    // ====================================
+
+    programados
+        .sort((a, b) =>
+            `${a.fechaServicio || ""} ${a.hora || ""}`
+                .localeCompare(
+                    `${b.fechaServicio || ""} ${b.hora || ""}`
+                )
+        )
+        .forEach(servicio => {
+
+            contProgramados.appendChild(
+    crearItemServicio(servicio, true)
+);
+
+        });
+
+
+    // ====================================
+    // MOSTRAR REALIZADOS
+    // ====================================
+
+    realizados
+        .sort((a, b) =>
+            `${a.fechaServicio || ""} ${a.hora || ""}`
+                .localeCompare(
+                    `${b.fechaServicio || ""} ${b.hora || ""}`
+                )
+        )
+        .forEach(servicio => {
+
+            contRealizados.appendChild(
+                crearItemServicio(servicio)
+            );
+
+        });
+
+
+    // ====================================
+    // MOSTRAR PENDIENTES DE PAGO
+    // ====================================
+
+    pendientes
+        .sort((a, b) =>
+            `${a.fechaServicio || ""} ${a.hora || ""}`
+                .localeCompare(
+                    `${b.fechaServicio || ""} ${b.hora || ""}`
+                )
+        )
+        .forEach(servicio => {
+
+            contPendientes.appendChild(
+                crearItemServicio(servicio)
+            );
+
+        });
+
+}
+
+// ========================================
+// ABRIR FICHA DE RESERVA
+// ========================================
+
 document.addEventListener("click", (evento) => {
 
     const cabanaBoton =
         evento.target.closest("[data-ficha-cabana]");
 
     if (!cabanaBoton) return;
+    if (!fichaReservaModal) return;
+    if (!fechaSeleccionada) return;
+
+
+    const numeroCabana =
+        cabanaBoton.dataset.fichaCabana;
+
+
+    const datosDia =
+        obtenerDatosDia(fechaSeleccionada);
+
+
+    const cabana =
+        datosDia.cabanas[numeroCabana] || {};
+
+        // ====================================
+// CANTIDAD AUTOMÁTICA DE ACOMPAÑANTES
+// ====================================
+
+const adultos =
+    Number(cabana.adultos) || 0;
+
+const ninos =
+    Number(cabana.ninos) || 0;
+
+const totalHuespedes =
+    adultos + ninos;
+
+const cantidadAcompanantes =
+    Math.max(0, totalHuespedes - 1);
+
+
+document
+    .querySelectorAll(".ficha-acompanante-fila")
+    .forEach(fila => {
+
+        const numero =
+            Number(fila.dataset.acompananteFila);
+
+        if (numero <= cantidadAcompanantes) {
+
+            fila.style.display = "";
+
+        } else {
+
+            fila.style.display = "none";
+
+        }
+
+    });
+
+
+    // ====================================
+    // IDENTIDAD DE LA RESERVA
+    // ====================================
+
+    const reservaId =
+        cabana.reservaId || "";
+
+    const titular =
+        cabana.titular &&
+        cabana.titular.trim() !== ""
+            ? cabana.titular
+            : "Sin titular";
+
+    const noches =
+        Number(cabana.noches) || 0;
+
+    const fechaIngreso =
+        cabana.fechaOrigenReserva ||
+        fechaSeleccionada;
+
+    const fechaSalida =
+        calcularSalidaReserva(
+            fechaIngreso,
+            noches
+        );
+
+
+    // Guardamos temporalmente qué reserva está abierta
+    fichaReservaModal.dataset.numeroCabana =
+        numeroCabana;
+
+    fichaReservaModal.dataset.reservaId =
+        reservaId;
+
+
+    // ====================================
+    // CABECERA
+    // ====================================
+
+    const campoCabana =
+        document.getElementById(
+            "ficha-reserva-cabana"
+        );
+
+    const campoTitular =
+        document.getElementById(
+            "ficha-reserva-titular"
+        );
+
+    if (campoCabana) {
+        campoCabana.textContent =
+            `CAB ${numeroCabana}`;
+    }
+
+    if (campoTitular) {
+        campoTitular.textContent =
+            titular;
+    }
+
+
+    // El acompañante ya aparecerá en HUÉSPEDES,
+    // por lo que evitamos duplicarlo arriba.
+    const acompananteSuperior =
+    document.getElementById(
+        "ficha-reserva-acompanante-principal"
+    );
+
+if (acompananteSuperior) {
+
+    const fichas =
+        obtenerFichasReservas();
+
+    const fichaReserva =
+        fichas[reservaId] || {};
+
+    const acompanantePrincipal =
+        fichaReserva.acompanante1 || "";
+
+    if (acompanantePrincipal) {
+
+        acompananteSuperior.textContent =
+            `Acompañante principal: ${acompanantePrincipal}`;
+
+        acompananteSuperior.hidden = false;
+
+    } else {
+
+        acompananteSuperior.textContent = "";
+        acompananteSuperior.hidden = true;
+
+    }
+}
+
+
+    // ====================================
+    // DATOS DE ESTANCIA
+    // ====================================
+
+    const campoReservaId =
+        document.getElementById(
+            "ficha-reserva-id"
+        );
+
+    const campoIngreso =
+        document.getElementById(
+            "ficha-reserva-ingreso"
+        );
+
+    const campoSalida =
+        document.getElementById(
+            "ficha-reserva-salida"
+        );
+
+    const campoNoches =
+        document.getElementById(
+            "ficha-reserva-noches"
+        );
+
+
+    if (campoReservaId) {
+        campoReservaId.textContent =
+            reservaId || "Sin ID";
+    }
+
+    if (campoIngreso) {
+        campoIngreso.textContent =
+            formatearFechaFicha(fechaIngreso);
+    }
+
+    if (campoSalida) {
+        campoSalida.textContent =
+            fechaSalida
+                ? formatearFechaFicha(fechaSalida)
+                : "—";
+    }
+
+    if (campoNoches) {
+        campoNoches.textContent =
+            noches || "0";
+    }
+
+
+    // ====================================
+    // TITULAR EN HUÉSPEDES
+    // ====================================
+
+    const huespedTitular =
+        document.getElementById(
+            "ficha-huesped-titular"
+        );
+
+    if (huespedTitular) {
+        huespedTitular.textContent =
+            titular;
+    }
+
+
+    // ====================================
+    // DATOS EDITABLES
+    // ====================================
+
+    const fichas =
+    obtenerFichasReservas();
+
+    const acompanantes =
+    fichas[reservaId] || {};
+
+    for (let i = 1; i <= 5; i++) {
+
+        const campo =
+            document.getElementById(
+                `ficha-acompanante-${i}`
+            );
+
+        if (campo) {
+            campo.value =
+                acompanantes[`acompanante${i}`] || "";
+        }
+    }
+
+
+    const campoRut =
+        document.getElementById(
+            "ficha-reserva-rut"
+        );
+
+    const campoTelefono =
+        document.getElementById(
+            "ficha-reserva-telefono"
+        );
+
+
+    if (campoRut) {
+        campoRut.value =
+            acompanantes.rut || "";
+    }
+
+    if (campoTelefono) {
+        campoTelefono.value =
+            acompanantes.telefono || "";
+    }
+
+
+    // ====================================
+    // ESTADO DE LA RESERVA
+    // ====================================
+
+    const campoEstado =
+        document.getElementById(
+            "ficha-reserva-estado"
+        );
+
+    if (campoEstado) {
+
+        if (cabana.checkout) {
+
+            campoEstado.textContent =
+                "● Checked Out";
+
+        } else if (
+            cabana.checkinRealizado === true
+        ) {
+
+            campoEstado.textContent =
+                "● Hospedado";
+
+        } else {
+
+            campoEstado.textContent =
+                "● Pendiente";
+        }
+    }
+
+
+    // ====================================
+// SERVICIOS DE LA RESERVA
+// ====================================
+
+cargarServiciosFichaReserva(reservaId);
+
+
+    // ====================================
+    // MOSTRAR
+    // ====================================
+
+    fichaReservaModal.hidden = false;
+
+});
+
+// ========================================
+// GUARDAR DATOS EDITABLES DE LA FICHA
+// ========================================
+
+function obtenerFichasReservas() {
+
+    return JSON.parse(
+        localStorage.getItem("haikuFichaReservas")
+    ) || {};
+
+}
+
+
+function guardarFichasReservas(fichas) {
+
+    localStorage.setItem(
+        "haikuFichaReservas",
+        JSON.stringify(fichas)
+    );
+
+}
+
+
+function guardarDatosEditablesFicha() {
 
     if (!fichaReservaModal) return;
 
-    fichaReservaModal.hidden = false;
+    const reservaId =
+        fichaReservaModal.dataset.reservaId;
+
+    if (!reservaId) return;
+
+
+    const fichas =
+        obtenerFichasReservas();
+
+
+    if (!fichas[reservaId]) {
+        fichas[reservaId] = {};
+    }
+
+
+    const ficha =
+        fichas[reservaId];
+
+
+    for (let i = 1; i <= 5; i++) {
+
+        const campo =
+            document.getElementById(
+                `ficha-acompanante-${i}`
+            );
+
+        ficha[`acompanante${i}`] =
+            campo
+                ? campo.value.trim()
+                : "";
+    }
+
+
+    const campoRut =
+        document.getElementById(
+            "ficha-reserva-rut"
+        );
+
+    const campoTelefono =
+        document.getElementById(
+            "ficha-reserva-telefono"
+        );
+
+
+    ficha.rut =
+        campoRut
+            ? campoRut.value.trim()
+            : "";
+
+    ficha.telefono =
+        campoTelefono
+            ? campoTelefono.value.trim()
+            : "";
+
+
+    guardarFichasReservas(fichas);
+
+}
+
+document.addEventListener("change", (evento) => {
+
+    if (
+        !evento.target.closest(
+            ".ficha-dato-editable"
+        )
+    ) {
+        return;
+    }
+
+    guardarDatosEditablesFicha();
 
 });
 

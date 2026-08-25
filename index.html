@@ -2873,26 +2873,93 @@
             <div class="ficha-huespedes-grid">
 
                 <div
-                    id="ficha-reserva-huespedes"
-                    class="ficha-huespedes-lista"
-                >
+    id="ficha-reserva-huespedes"
+    class="ficha-huespedes-lista"
+>
 
-                    <div class="ficha-huesped-fila">
-                        <strong>Titular</strong>
-                        <span>Roberto Sepúlveda</span>
-                    </div>
+    <div class="ficha-huesped-fila">
+        <strong>Titular</strong>
 
-                    <div class="ficha-huesped-fila">
-                        <strong>Acompañante 1</strong>
-                        <span>Andrea Soto</span>
-                    </div>
+        <span id="ficha-huesped-titular">
+            Sin titular
+        </span>
+    </div>
 
-                    <div class="ficha-huesped-fila">
-                        <strong>Acompañante 2</strong>
-                        <span>Luis González</span>
-                    </div>
 
-                </div>
+    <div
+    class="ficha-huesped-fila ficha-acompanante-fila"
+    data-acompanante-fila="1"
+>
+    <strong>Acompañante 1</strong>
+
+    <input
+        type="text"
+        id="ficha-acompanante-1"
+        class="ficha-dato-editable"
+        placeholder="Agregar nombre"
+    >
+</div>
+
+
+    <div
+    class="ficha-huesped-fila ficha-acompanante-fila"
+    data-acompanante-fila="2"
+>
+    <strong>Acompañante 2</strong>
+
+    <input
+        type="text"
+        id="ficha-acompanante-2"
+        class="ficha-dato-editable"
+        placeholder="Agregar nombre"
+    >
+</div>
+
+
+<div
+    class="ficha-huesped-fila ficha-acompanante-fila"
+    data-acompanante-fila="3"
+>
+    <strong>Acompañante 3</strong>
+
+    <input
+        type="text"
+        id="ficha-acompanante-3"
+        class="ficha-dato-editable"
+        placeholder="Agregar nombre"
+    >
+</div>
+
+
+ <div
+    class="ficha-huesped-fila ficha-acompanante-fila"
+    data-acompanante-fila="4"
+>
+    <strong>Acompañante 4</strong>
+
+    <input
+        type="text"
+        id="ficha-acompanante-4"
+        class="ficha-dato-editable"
+        placeholder="Agregar nombre"
+    >
+</div>
+
+<div
+    class="ficha-huesped-fila ficha-acompanante-fila"
+    data-acompanante-fila="5"
+>
+    <strong>Acompañante 5</strong>
+
+    <input
+        type="text"
+        id="ficha-acompanante-5"
+        class="ficha-dato-editable"
+        placeholder="Agregar nombre"
+    >
+</div>
+
+</div>
 
 
                 <div class="ficha-contacto">
@@ -2900,17 +2967,23 @@
                     <div>
                         <span>RUT titular</span>
 
-                        <strong id="ficha-reserva-rut">
-                            12.345.678-9
-                        </strong>
+                        <input
+                        type="text"
+                        id="ficha-reserva-rut"
+                        class="ficha-dato-editable ficha-contacto-editable"
+                        placeholder="Agregar RUT"
+                        >
                     </div>
 
                     <div>
                         <span>Teléfono</span>
 
-                        <strong id="ficha-reserva-telefono">
-                            +56 9 9876 5432
-                        </strong>
+                        <input
+                        type="tel"
+                        id="ficha-reserva-telefono"
+                        class="ficha-dato-editable ficha-contacto-editable"
+                        placeholder="+56 9..."
+                    >
                     </div>
 
                 </div>

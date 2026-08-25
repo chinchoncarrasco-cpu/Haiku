@@ -5729,3 +5729,68 @@ tr.cabana-libre .info-cabana {
 .cabana-ficha-boton:active {
     opacity: 0.7;
 }
+
+/* ========================================
+   DATOS EDITABLES FICHA DE RESERVA
+======================================== */
+
+.ficha-dato-editable {
+    width: 100%;
+    min-width: 0;
+
+    padding: 0;
+
+    border: 0;
+    border-bottom: 1px solid transparent;
+    border-radius: 0;
+
+    background: transparent;
+
+    color: #5e655f;
+
+    font-family: inherit;
+    font-size: 12px;
+    font-weight: 400;
+    line-height: 1.35;
+
+    outline: none;
+
+    box-sizing: border-box;
+}
+
+.ficha-dato-editable::placeholder {
+    color: #a0a49f;
+    opacity: 1;
+}
+
+.ficha-dato-editable:focus {
+    border-bottom-color: #87aa96;
+}
+
+
+/* RUT Y TELÉFONO */
+
+.ficha-contacto-editable {
+    color: #283129;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+#ficha-reserva-telefono {
+    color: #1f6641;
+}
+
+
+/* En móvil mantiene el aspecto compacto */
+
+@media (max-width: 560px) {
+
+    .ficha-dato-editable {
+        font-size: 11px;
+    }
+
+    .ficha-contacto-editable {
+        font-size: 13px;
+    }
+
+}
