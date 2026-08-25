@@ -892,6 +892,9 @@ function actualizarEstadoCompleto() {
 
     tarjeta.classList.toggle("pago-checkin-completo", completo);
 
+    cabana.checkinCompleto = completo;
+    guardarDatos();
+
 
 const pendientes = lista.querySelectorAll(
     ".pago-checkin-item:not(.pago-checkin-completo)"

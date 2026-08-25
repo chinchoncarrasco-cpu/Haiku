@@ -1562,11 +1562,16 @@ function cargarPagosFichaReserva(reservaId) {
     const abono =
         Number(cabanaReserva.abono) || 0;
 
+    const saldoCalculado =
+    Math.max(
+        totalReserva - abono,
+        0
+    );
+
     const saldo =
-        Math.max(
-            totalReserva - abono,
-            0
-        );
+    cabanaReserva.checkinCompleto === true
+        ? 0
+        : saldoCalculado;
 
 
     // ====================================
@@ -2088,9 +2093,15 @@ if (acompananteSuperior) {
     }
 
     if (campoNoches) {
-        campoNoches.textContent =
-            noches || "0";
-    }
+
+    const cantidadNoches =
+        noches || 0;
+
+    campoNoches.textContent =
+        cantidadNoches === 1
+            ? `◷ 1 noche`
+            : `◷ ${cantidadNoches} noches`;
+}
 
 
     // ====================================
@@ -2153,37 +2164,80 @@ if (acompananteSuperior) {
             acompanantes.telefono || "";
     }
 
-
     // ====================================
-    // ESTADO DE LA RESERVA
-    // ====================================
+// ESTADO DE LA RESERVA
+// ====================================
 
-    const campoEstado =
-        document.getElementById(
-            "ficha-reserva-estado"
+const campoEstado =
+    document.getElementById(
+        "ficha-reserva-estado"
+    );
+
+if (campoEstado) {
+
+    let tieneCheckin = false;
+    let tieneCheckout = false;
+
+    Object.values(datosPorFecha).forEach(dia => {
+
+        if (!dia?.cabanas) return;
+
+        Object.values(dia.cabanas).forEach(cabanaDia => {
+
+            if (
+                String(cabanaDia?.reservaId || "") !==
+                String(reservaId)
+            ) {
+                return;
+            }
+
+            if (cabanaDia.checkinRealizado === true) {
+                tieneCheckin = true;
+            }
+
+            if (cabanaDia.checkout) {
+                tieneCheckout = true;
+            }
+
+        });
+
+    });
+
+    campoEstado.classList.remove(
+        "ficha-estado-hospedado",
+        "ficha-estado-checkout",
+        "ficha-estado-pendiente"
+    );
+
+    if (tieneCheckout) {
+
+        campoEstado.textContent =
+            "● Checked Out";
+
+        campoEstado.classList.add(
+            "ficha-estado-checkout"
         );
 
-    if (campoEstado) {
+    } else if (tieneCheckin) {
 
-        if (cabana.checkout) {
+        campoEstado.textContent =
+            "● Hospedado";
 
-            campoEstado.textContent =
-                "● Checked Out";
+        campoEstado.classList.add(
+            "ficha-estado-hospedado"
+        );
 
-        } else if (
-            cabana.checkinRealizado === true
-        ) {
+    } else {
 
-            campoEstado.textContent =
-                "● Hospedado";
+        campoEstado.textContent =
+            "● Pendiente";
 
-        } else {
+        campoEstado.classList.add(
+            "ficha-estado-pendiente"
+        );
 
-            campoEstado.textContent =
-                "● Pendiente";
-        }
     }
-
+}
 
     // ====================================
     // SERVICIOS DE LA RESERVA

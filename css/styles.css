@@ -5264,19 +5264,21 @@ tr.cabana-libre .info-cabana {
 
 .ficha-estancia {
     background: #fffdfa;
+    padding: 10px 12px;
 }
 
 .ficha-estancia-linea {
     display: flex;
-    flex-wrap: wrap;
     align-items: center;
     justify-content: center;
-    gap: 8px;
+    gap: 7px;
+    flex-wrap: nowrap;
 
     text-align: center;
 
     color: #575d59;
-    font-size: 12px;
+    font-size: 11px;
+    white-space: nowrap;
 }
 
 .ficha-estancia-linea strong {
@@ -5293,10 +5295,10 @@ tr.cabana-libre .info-cabana {
 .ficha-estancia-inferior {
     display: flex;
     align-items: center;
-    justify-content: center;
-    gap: 18px;
+    justify-content: space-between;
 
-    margin-top: 12px;
+    margin-top: 8px;
+    padding: 0 8px;
 }
 
 .ficha-noches {
@@ -5317,6 +5319,53 @@ tr.cabana-libre .info-cabana {
 
     font-size: 12px;
     font-weight: 600;
+}
+
+/* =========================================
+   COLORES ESTADO FICHA DE RESERVA
+   ========================================= */
+
+.ficha-estado.ficha-estado-hospedado {
+    background: #dff0e4;
+    color: #205d3a;
+}
+
+.ficha-estado.ficha-estado-checkout {
+    background: #e3f0f8;
+    color: #2f6685;
+}
+
+.ficha-estado.ficha-estado-pendiente {
+    background: #fff0c9;
+    color: #8a6415;
+}
+
+
+.ficha-estancia-id {
+    text-align: center;
+    font-size: 11px;
+    color: #575d59;
+}
+
+.ficha-estancia-id strong {
+    margin-left: 5px;
+    color: #242a26;
+}
+
+.ficha-estancia-fechas {
+    display: flex;
+    justify-content: center;
+    gap: 28px;
+
+    margin-top: 6px;
+
+    font-size: 11px;
+    color: #575d59;
+}
+
+.ficha-estancia-fechas strong {
+    margin-left: 4px;
+    color: #242a26;
 }
 
 
