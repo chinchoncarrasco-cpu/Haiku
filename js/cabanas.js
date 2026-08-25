@@ -1626,6 +1626,270 @@ function cargarPagosFichaReserva(reservaId) {
 }
 
 // ========================================
+// SOLICITUDES DE LA FICHA POR RESERVA ID
+// ========================================
+
+function cargarSolicitudesFichaReserva(reservaId) {
+
+    const contenedor =
+        document.getElementById(
+            "ficha-reserva-solicitudes"
+        );
+
+    const contador =
+        document.getElementById(
+            "ficha-solicitudes-contador"
+        );
+
+    if (!contenedor || !contador) {
+        return;
+    }
+
+
+    const solicitudes = [];
+
+
+    Object.entries(datosPorFecha).forEach(
+        ([fecha, datosDia]) => {
+
+            if (!datosDia?.cabanas) {
+                return;
+            }
+
+
+            Object.entries(datosDia.cabanas).forEach(
+                ([numeroCabana, cabana]) => {
+
+                    if (
+                        String(cabana?.reservaId || "") !==
+                        String(reservaId)
+                    ) {
+                        return;
+                    }
+
+
+                    const solicitud =
+                        String(
+                            cabana.solicitudAseoExpress || ""
+                        ).trim();
+
+
+                    if (!solicitud) {
+                        return;
+                    }
+
+
+                    solicitudes.push({
+                        fecha,
+                        texto: solicitud
+                    });
+
+                }
+            );
+
+        }
+    );
+
+
+    // Evitar repetir exactamente la misma solicitud
+    const solicitudesUnicas =
+        solicitudes.filter(
+            (solicitud, indice, array) =>
+
+                array.findIndex(item =>
+                    item.fecha === solicitud.fecha &&
+                    item.texto === solicitud.texto
+                ) === indice
+        );
+
+
+    contador.textContent =
+        `${solicitudesUnicas.length} pendientes`;
+
+
+    contenedor.innerHTML = "";
+
+
+    if (solicitudesUnicas.length === 0) {
+
+        contenedor.textContent =
+            "Sin solicitudes pendientes.";
+
+        return;
+    }
+
+
+    solicitudesUnicas.forEach(solicitud => {
+
+        const fila =
+            document.createElement("div");
+
+        fila.className =
+            "ficha-solicitud-item";
+
+
+        const fecha =
+            document.createElement("strong");
+
+        fecha.textContent =
+    `${formatearFechaFicha(solicitud.fecha)} ·`;
+
+
+        const texto =
+            document.createElement("span");
+
+        texto.textContent =
+            solicitud.texto;
+
+
+        fila.appendChild(fecha);
+        fila.appendChild(texto);
+
+        contenedor.appendChild(fila);
+
+    });
+
+}
+
+
+
+// ========================================
+// NOTAS DE LA FICHA POR RESERVA ID
+// ========================================
+
+function cargarNotasFichaReserva(reservaId) {
+
+    const contenedor =
+        document.getElementById(
+            "ficha-reserva-notas"
+        );
+
+    if (!contenedor) {
+        return;
+    }
+
+
+    const notasReserva = [];
+
+
+    Object.entries(datosPorFecha).forEach(
+        ([fecha, datosDia]) => {
+
+            if (
+                !datosDia?.cabanas ||
+                !Array.isArray(datosDia.notasOperativas)
+            ) {
+                return;
+            }
+
+
+            Object.entries(datosDia.cabanas).forEach(
+                ([numeroCabana, cabana]) => {
+
+                    if (
+                        String(cabana?.reservaId || "") !==
+                        String(reservaId)
+                    ) {
+                        return;
+                    }
+
+
+                    datosDia.notasOperativas.forEach(
+                        nota => {
+
+                            if (
+                                String(nota.cabana) !==
+                                String(numeroCabana)
+                            ) {
+                                return;
+                            }
+
+
+                            const texto =
+                                String(
+                                    nota.texto ||
+                                    nota.nota ||
+                                    ""
+                                ).trim();
+
+
+                            if (!texto) {
+                                return;
+                            }
+
+
+                            notasReserva.push({
+                                fecha,
+                                texto
+                            });
+
+                        }
+                    );
+
+                }
+            );
+
+        }
+    );
+
+
+    // Evitar duplicados
+    const notasUnicas =
+        notasReserva.filter(
+            (nota, indice, array) =>
+
+                array.findIndex(item =>
+                    item.fecha === nota.fecha &&
+                    item.texto === nota.texto
+                ) === indice
+        );
+
+
+    contenedor.innerHTML = "";
+
+
+    if (notasUnicas.length === 0) {
+
+        contenedor.textContent =
+            "Sin notas registradas.";
+
+        return;
+    }
+
+
+    notasUnicas.forEach(nota => {
+
+        const fila =
+            document.createElement("div");
+
+        fila.className =
+            "ficha-nota-item";
+
+
+        const fecha =
+            document.createElement("strong");
+
+        fecha.textContent =
+    `${formatearFechaFicha(nota.fecha)} ·`;
+
+
+        const texto =
+            document.createElement("span");
+
+        texto.textContent =
+            nota.texto;
+
+
+        fila.appendChild(fecha);
+        fila.appendChild(texto);
+
+        contenedor.appendChild(fila);
+
+    });
+
+}
+
+// ========================================
 // ABRIR FICHA DE RESERVA
 // ========================================
 
@@ -1931,6 +2195,13 @@ if (acompananteSuperior) {
     // PAGOS DE LA RESERVA
     // ====================================
     cargarPagosFichaReserva(reservaId);
+
+    // ====================================
+    // SOLICITUDES Y NOTAS
+    // ====================================
+
+    cargarSolicitudesFichaReserva(reservaId);
+    cargarNotasFichaReserva(reservaId);
 
 
     // ====================================
@@ -3105,6 +3376,13 @@ if (
 
         // Actualizar Aseo
         actualizarResumenAseo(fechaSeleccionada);
+
+        const reservaIdAbierta =
+        fichaReservaModal?.dataset.reservaId || "";
+
+        if (reservaIdAbierta) {
+        cargarSolicitudesFichaReserva(reservaIdAbierta);
+        }
 
     });
 
