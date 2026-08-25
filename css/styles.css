@@ -4554,3 +4554,161 @@ tr.cabana-libre .info-cabana {
   }
 
 }
+
+/* ========================================
+   MODAL SERVICIO DESDE RESUMEN
+======================================== */
+
+.resumen-servicio-modal[hidden] {
+    display: none;
+}
+
+.resumen-servicio-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 18px;
+
+    background: rgba(20, 28, 24, 0.45);
+}
+
+.resumen-servicio-modal-contenido {
+    width: 100%;
+    max-width: 360px;
+    max-height: 90vh;
+    overflow-y: auto;
+
+    background: #ffffff;
+    border: 1px solid #dde2de;
+    border-radius: 16px;
+
+    padding: 20px;
+
+    box-sizing: border-box;
+}
+
+.resumen-servicio-modal-cabecera {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 15px;
+
+    margin-bottom: 18px;
+}
+
+.resumen-servicio-modal-cabecera h3 {
+    margin: 3px 0 0;
+    font-size: 21px;
+}
+
+.resumen-servicio-eyebrow {
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+    color: #2f6b50;
+}
+
+.resumen-servicio-cerrar {
+    width: 32px;
+    height: 32px;
+
+    border: 1px solid #d9dedb;
+    border-radius: 8px;
+    background: #fff;
+
+    font-size: 20px;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.resumen-servicio-campo {
+    margin-bottom: 14px;
+}
+
+.resumen-servicio-campo label {
+    display: block;
+    margin-bottom: 5px;
+
+    font-size: 11px;
+    color: #5f6762;
+}
+
+.resumen-servicio-campo input,
+.resumen-servicio-campo select {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 10px 11px;
+
+    border: 1px solid #d9dedb;
+    border-radius: 9px;
+
+    background: #fff;
+    font: inherit;
+}
+
+.resumen-servicio-cobro {
+    padding: 12px;
+    margin-bottom: 14px;
+
+    background: #f7f8f7;
+    border: 1px solid #e1e5e2;
+    border-radius: 10px;
+}
+
+.resumen-servicio-cobro > span {
+    display: block;
+    margin-bottom: 8px;
+
+    font-size: 11px;
+    color: #5f6762;
+}
+
+.resumen-servicio-cobro label {
+    margin-right: 12px;
+    font-size: 13px;
+}
+
+.resumen-servicio-total {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    margin: 18px 0;
+}
+
+.resumen-servicio-total strong {
+    font-size: 18px;
+}
+
+.resumen-servicio-acciones {
+    display: flex;
+    gap: 8px;
+}
+
+.resumen-servicio-acciones button {
+    padding: 9px 12px;
+
+    border: 1px solid #d9dedb;
+    border-radius: 8px;
+
+    background: #fff;
+    font: inherit;
+    font-size: 12px;
+
+    cursor: pointer;
+}
+
+#resumen-servicio-cabana {
+    background: #f3f5f4;
+    color: #202820;
+    font-weight: 600;
+    cursor: default;
+    pointer-events: none;
+}

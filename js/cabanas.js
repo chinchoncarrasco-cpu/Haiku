@@ -207,6 +207,44 @@ function cargarCabanasDia(fecha) {
         const datosCabana =
             datos.cabanas[numeroCabana] || {};
 
+    // ========================================
+    // SERVICIOS DEL DÍA POR CABAÑA
+    // ========================================
+
+    const serviciosRegistradosCabana = JSON.parse(
+    localStorage.getItem("haikuServicios")
+    ) || [];
+
+    const serviciosCabanaDia =
+    serviciosRegistradosCabana.filter(servicio =>
+        servicio.fechaServicio === fecha &&
+        String(servicio.numeroCabana) === String(numeroCabana)
+    );
+
+    const campoServicio =
+    fila.querySelector('[data-campo="servicio"]');
+
+    if (campoServicio) {
+
+    campoServicio.value = serviciosCabanaDia
+        .map(servicio => {
+
+            const hora = servicio.hora
+                ? `${servicio.hora} `
+                : "";
+
+            const cortesia =
+                servicio.cortesia ||
+                servicio.tipoCobro === "cortesia"
+                    ? " 🎁"
+                    : "";
+
+            return `${hora}${servicio.nombre}${cortesia}`;
+
+        })
+        .join(" · ");
+}
+
         const titularCabana = fila.querySelector(
     `[data-titular-cabana="${numeroCabana}"]`
 );
@@ -233,6 +271,10 @@ if (valorNoches) {
         campos.forEach(campo => {
 
             const nombreCampo = campo.dataset.campo;
+
+            if (nombreCampo === "servicio") {
+            return;
+            }
             const valor = datosCabana[nombreCampo];
 
 
@@ -305,15 +347,21 @@ if (
             continuan++;
         }
 
-        // SERVICIOS
-        if (
-            cabana.servicio &&
-            cabana.servicio.trim() !== ""
-        ) {
-            servicios++;
-        }
 
     });
+
+    // ========================================
+    // SERVICIOS DEL DÍA
+    // Lee directamente el módulo Servicios
+    // ========================================
+
+    const serviciosRegistradosResumen = JSON.parse(
+    localStorage.getItem("haikuServicios")
+    ) || [];
+
+    servicios = serviciosRegistradosResumen.filter(servicio =>
+    servicio.fechaServicio === fecha
+    ).length;
 
     document.getElementById("contador-ingresan").textContent =
         ingresan;
@@ -429,6 +477,54 @@ if (continuan.length > 0) {
     lineas.push("CONTINÚAN");
     continuan.forEach(numeroCabana => {
         lineas.push(`CAB ${numeroCabana}`);
+    });
+}
+
+// ========================================
+// SERVICIOS DEL DÍA
+// ========================================
+
+const serviciosRegistradosResumen = JSON.parse(
+    localStorage.getItem("haikuServicios")
+) || [];
+
+const serviciosDelDia = serviciosRegistradosResumen
+    .filter(servicio =>
+        servicio.fechaServicio === fecha
+    )
+    .sort((a, b) =>
+        (a.hora || "").localeCompare(b.hora || "")
+    );
+
+if (serviciosDelDia.length > 0) {
+
+    lineas.push("");
+    lineas.push("SERVICIOS");
+
+    serviciosDelDia.forEach(servicio => {
+
+        const cabana =
+            servicio.numeroCabana
+                ? `CAB ${servicio.numeroCabana}`
+                : "";
+
+        const hora =
+            servicio.hora
+                ? `${servicio.hora}`
+                : "";
+
+        const nombre =
+            servicio.nombre || "Servicio";
+
+        const cortesia =
+            servicio.cortesia ||
+            servicio.tipoCobro === "cortesia"
+                ? " 🎁 CORTESÍA"
+                : "";
+
+        lineas.push(
+            `${cabana} · ${hora} · ${nombre}${cortesia}`
+        );
     });
 }
 
@@ -1068,6 +1164,311 @@ if (botonMenuCabanas) {
         volverListadoCabanas();
 
     });
+
+}
+
+// ========================================
+// MODAL SERVICIO DESDE RESUMEN
+// ========================================
+
+// ========================================
+// ELEMENTOS MODAL SERVICIOS RESUMEN
+// ========================================
+
+const campoProducto =
+    document.getElementById("resumen-servicio-producto");
+
+const campoCantidad =
+    document.getElementById("resumen-servicio-cantidad");
+
+const campoFecha =
+    document.getElementById("resumen-servicio-fecha");
+
+const campoHora =
+    document.getElementById("resumen-servicio-hora");
+
+const bloqueProgramacion =
+    document.getElementById("resumen-servicio-programacion");
+
+const textoTotal =
+    document.getElementById("resumen-servicio-total");
+
+document.addEventListener("click", (e) => {
+
+    const boton =
+        e.target.closest("[data-agregar-servicio]");
+
+    if (!boton) return;
+
+    const numeroCabana =
+        boton.dataset.agregarServicio;
+
+    const modal =
+        document.getElementById("resumen-servicio-modal");
+
+    const titulo =
+        document.getElementById("resumen-servicio-titulo");
+
+    const campoCabana =
+        document.getElementById("resumen-servicio-cabana");
+
+    
+    if (!modal) return;
+
+    // CAB correspondiente
+    if (campoCabana) {
+        campoCabana.value = `Cabaña ${numeroCabana}`;
+        campoCabana.dataset.numeroCabana = numeroCabana;
+    }
+
+    // Título
+    if (titulo) {
+        titulo.textContent =
+            `Agregar servicio · CAB ${numeroCabana}`;
+    }
+
+    // Valores iniciales
+    if (campoCantidad) {
+        campoCantidad.value = 1;
+    }
+
+    // Cargar catálogo real de Servicios
+if (campoProducto) {
+
+    campoProducto.innerHTML =
+        '<option value="">Seleccionar servicio</option>';
+
+    Object.entries(CATALOGO_SERVICIOS).forEach(
+        ([idServicio, servicio]) => {
+
+            const option =
+                document.createElement("option");
+
+            option.value = idServicio;
+            option.textContent = servicio.nombre;
+
+            campoProducto.appendChild(option);
+        }
+    );
+}
+
+    if (campoFecha) {
+        campoFecha.value = fechaSeleccionada;
+    }
+
+    // Abrir modal
+    modal.hidden = false;
+
+});
+
+function actualizarModalServicioResumen() {
+
+    const idServicio = campoProducto.value;
+    const cantidad = Number(campoCantidad.value) || 1;
+
+    const servicio = CATALOGO_SERVICIOS[idServicio];
+
+    if (!servicio) {
+        textoTotal.textContent = "$0";
+        bloqueProgramacion.hidden = true;
+        return;
+    }
+
+    // PRECIO
+    const total = servicio.precio * cantidad;
+
+    textoTotal.textContent =
+        `$${total.toLocaleString("es-CL")}`;
+
+
+    // FECHA Y HORA
+    const requiereProgramacion =
+        servicio.categoria === "tinaja" ||
+        servicio.categoria === "masaje" ||
+        servicio.categoria === "checkout";
+
+    bloqueProgramacion.hidden = !requiereProgramacion;
+
+    if (requiereProgramacion) {
+
+        if (!campoFecha.value) {
+            campoFecha.value = fechaSeleccionada;
+        }
+
+    } else {
+
+        campoFecha.value = "";
+        campoHora.value = "";
+
+    }
+}
+
+campoProducto.addEventListener(
+    "change",
+    actualizarModalServicioResumen
+);
+
+campoCantidad.addEventListener(
+    "input",
+    actualizarModalServicioResumen
+);
+
+// ========================================
+// GUARDAR SERVICIO DESDE RESUMEN
+// ========================================
+
+const btnGuardarServicioResumen =
+    document.getElementById("resumen-servicio-guardar");
+
+if (btnGuardarServicioResumen) {
+
+    btnGuardarServicioResumen.addEventListener("click", () => {
+
+        const campoCabana =
+            document.getElementById("resumen-servicio-cabana");
+
+        const numeroCabana =
+            campoCabana?.dataset.numeroCabana;
+
+        const idServicio =
+            campoProducto.value;
+
+        const cantidad =
+            Number(campoCantidad.value) || 1;
+
+        const tipoCobro =
+            document.querySelector(
+                'input[name="resumen-servicio-tipo-cobro"]:checked'
+            )?.value || "normal";
+
+        const servicio =
+            CATALOGO_SERVICIOS[idServicio];
+
+        if (!numeroCabana || !idServicio || !servicio) {
+            alert("Selecciona un servicio.");
+            return;
+        }
+
+        const requiereProgramacion =
+            servicio.categoria === "tinaja" ||
+            servicio.categoria === "masaje" ||
+            servicio.categoria === "checkout";
+
+        const fechaServicio =
+            requiereProgramacion
+                ? campoFecha.value
+                : "";
+
+        const horaServicio =
+            requiereProgramacion
+                ? campoHora.value
+                : "";
+
+        if (
+            requiereProgramacion &&
+            (!fechaServicio || !horaServicio)
+        ) {
+            alert("Selecciona fecha y hora.");
+            return;
+        }
+
+        // Datos actuales de la cabaña
+        const datosDia =
+            obtenerDatosDia(fechaSeleccionada);
+
+        const datosCabana =
+            datosDia.cabanas[numeroCabana] || {};
+
+        // Registrar usando EL MISMO sistema de Servicios
+        const nuevoServicio = registrarServicio({
+
+            fecha: fechaSeleccionada,
+
+            numeroCabana: numeroCabana,
+
+            reservaId:
+                datosCabana.reservaId || "",
+
+            titular:
+                datosCabana.titular || "",
+
+            tipoServicio:
+                idServicio,
+
+            cantidad:
+                cantidad,
+
+            personas:
+                cantidad,
+
+            tipoCobro:
+                tipoCobro,
+
+            fechaServicio:
+                fechaServicio,
+
+            hora:
+                horaServicio
+
+        });
+
+        if (!nuevoServicio) return;
+
+        console.log(
+            "SERVICIO GUARDADO DESDE RESUMEN:",
+            nuevoServicio
+        );
+
+        // Actualizar Resumen
+        cargarCabanasDia(fechaSeleccionada);
+        actualizarResumenDia(fechaSeleccionada);
+        generarResumenOperativo(fechaSeleccionada);
+
+        // Cerrar modal
+        cerrarModalServicioResumen();
+
+    });
+
+}
+
+// ========================================
+// CERRAR MODAL SERVICIO
+// ========================================
+
+function cerrarModalServicioResumen() {
+
+    const modal =
+        document.getElementById("resumen-servicio-modal");
+
+    if (modal) {
+        modal.hidden = true;
+    }
+}
+
+
+const btnCerrarServicioResumen =
+    document.getElementById("resumen-servicio-cerrar");
+
+const btnCancelarServicioResumen =
+    document.getElementById("resumen-servicio-cancelar");
+
+
+if (btnCerrarServicioResumen) {
+
+    btnCerrarServicioResumen.addEventListener(
+        "click",
+        cerrarModalServicioResumen
+    );
+
+}
+
+
+if (btnCancelarServicioResumen) {
+
+    btnCancelarServicioResumen.addEventListener(
+        "click",
+        cerrarModalServicioResumen
+    );
 
 }
 
