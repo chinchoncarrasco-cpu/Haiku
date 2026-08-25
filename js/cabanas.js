@@ -1145,6 +1145,58 @@ if (botonMenuCabanas) {
 }
 
 // ========================================
+// FICHA RÁPIDA DE RESERVA
+// ABRIR / CERRAR MODAL
+// ========================================
+
+const fichaReservaModal =
+    document.getElementById("ficha-reserva-modal");
+
+const fichaReservaCerrar =
+    document.getElementById("ficha-reserva-cerrar");
+
+
+// ABRIR AL TOCAR CAB 1, CAB 2, ETC.
+document.addEventListener("click", (evento) => {
+
+    const cabanaBoton =
+        evento.target.closest("[data-ficha-cabana]");
+
+    if (!cabanaBoton) return;
+
+    if (!fichaReservaModal) return;
+
+    fichaReservaModal.hidden = false;
+
+});
+
+
+// CERRAR CON X
+if (fichaReservaCerrar) {
+
+    fichaReservaCerrar.addEventListener("click", () => {
+
+        fichaReservaModal.hidden = true;
+
+    });
+
+}
+
+
+// CERRAR TOCANDO EL FONDO OSCURO
+if (fichaReservaModal) {
+
+    fichaReservaModal.addEventListener("click", (evento) => {
+
+        if (evento.target !== fichaReservaModal) return;
+
+        fichaReservaModal.hidden = true;
+
+    });
+
+}
+
+// ========================================
 // MODAL SERVICIO DESDE RESUMEN
 // ========================================
 
