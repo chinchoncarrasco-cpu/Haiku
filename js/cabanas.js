@@ -1170,6 +1170,12 @@ const bloqueProgramacion =
 const textoTotal =
     document.getElementById("resumen-servicio-total");
 
+const bloquePrecioManual =
+    document.getElementById("resumen-servicio-precio-manual-wrap");
+
+const campoPrecioManual =
+    document.getElementById("resumen-servicio-precio-manual");
+
 document.addEventListener("click", (e) => {
 
     const boton =
@@ -1252,10 +1258,38 @@ function actualizarModalServicioResumen() {
     }
 
     // PRECIO
-    const total = servicio.precio * cantidad;
+    // ========================================
+// PRECIO
+// ========================================
 
-    textoTotal.textContent =
-        `$${total.toLocaleString("es-CL")}`;
+const esJacuzzi =
+    idServicio === "tinajaJacuzzi";
+
+bloquePrecioManual.hidden = !esJacuzzi;
+
+let precioUnitario = servicio.precio || 0;
+
+if (esJacuzzi) {
+
+    // Si todavía no hay precio manual, usar precio base
+    if (!campoPrecioManual.value) {
+        campoPrecioManual.value = precioUnitario;
+    }
+
+    precioUnitario =
+        Number(campoPrecioManual.value) || 0;
+
+} else {
+
+    campoPrecioManual.value = "";
+
+}
+
+const total =
+    precioUnitario * cantidad;
+
+textoTotal.textContent =
+    `$${total.toLocaleString("es-CL")}`;
 
 
     // FECHA Y HORA
@@ -1286,6 +1320,11 @@ campoProducto.addEventListener(
 );
 
 campoCantidad.addEventListener(
+    "input",
+    actualizarModalServicioResumen
+);
+
+campoPrecioManual.addEventListener(
     "input",
     actualizarModalServicioResumen
 );

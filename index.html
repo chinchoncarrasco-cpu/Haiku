@@ -351,12 +351,12 @@
     <div class="servicio-resumen-wrap">
 
         <input
-            type="text"
-            class="campo-cabana"
-            data-campo="servicio"
-            placeholder="Sin servicios"
-            readonly
-        >
+    type="text"
+    class="campo-cabana"
+    data-campo="servicio"
+    placeholder="Sin servicios"
+    readonly
+>
 
         <button
             type="button"
@@ -2737,6 +2737,24 @@
                 value="1"
             >
         </div>
+
+<!-- AQUÍ PEGAS PRECIO JACUZZI -->
+
+<div
+    id="resumen-servicio-precio-manual-wrap"
+    class="resumen-servicio-campo"
+    hidden
+>
+    <label>Precio Jacuzzi</label>
+
+    <input
+        type="number"
+        id="resumen-servicio-precio-manual"
+        min="0"
+        step="1000"
+        placeholder="Ej: 40000"
+    >
+</div>
 
         <div class="resumen-servicio-cobro">
             <span>Cobro</span>

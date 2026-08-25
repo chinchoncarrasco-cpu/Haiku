@@ -4712,3 +4712,48 @@ tr.cabana-libre .info-cabana {
     cursor: default;
     pointer-events: none;
 }
+
+/* ========================================
+   SERVICIOS EN RESUMEN
+======================================== */
+
+.servicio-resumen-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.servicio-resumen-wrap input {
+    flex: 1;
+    min-width: 0;
+}
+
+.servicio-resumen-agregar {
+    width: 26px;
+    height: 26px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    flex-shrink: 0;
+
+    padding: 0;
+
+    border: 1px solid #cfd6d1;
+    border-radius: 7px;
+
+    background: #ffffff;
+
+    font-size: 16px;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.servicio-resumen-wrap input[readonly] {
+    background: #f5f6f5;
+    color: #273029;
+    cursor: default;
+    pointer-events: none;
+}

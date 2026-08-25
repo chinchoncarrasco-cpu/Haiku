@@ -614,6 +614,19 @@ function eliminarServicio(idServicio) {
     guardarServicios();
     renderizarAgendaServicios();
 
+    // Actualizar también el Resumen
+if (typeof cargarCabanasDia === "function") {
+    cargarCabanasDia(fechaSeleccionada);
+}
+
+if (typeof actualizarResumenDia === "function") {
+    actualizarResumenDia(fechaSeleccionada);
+}
+
+if (typeof generarResumenOperativo === "function") {
+    generarResumenOperativo(fechaSeleccionada);
+}
+
     console.log("SERVICIO ELIMINADO:", servicio);
 }
 
