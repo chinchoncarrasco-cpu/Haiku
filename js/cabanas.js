@@ -45,13 +45,26 @@ function guardarCampoCabana(elemento) {
 
 datos.cabanas[numeroCabana][campo] = valor;
 
-// CONTINÚA = huésped ya realizó check-in
+// Recordar si el CHECK-IN fue marcado manualmente
+if (campo === "checkinRealizado") {
+    datos.cabanas[numeroCabana].checkinManual = valor;
+}
+
+// CONTINÚA solo hereda CHECK-IN si esta reserva
+// tuvo un check-in marcado manualmente
 if (
     campo === "estado" &&
     valor === "continua"
 ) {
 
-    datos.cabanas[numeroCabana].checkinRealizado = true;
+    const reservaId =
+        datos.cabanas[numeroCabana].reservaId;
+
+    const tieneCheckinManual =
+        reservaTieneCheckinManual(reservaId);
+
+    datos.cabanas[numeroCabana].checkinRealizado =
+        tieneCheckinManual;
 
     const checkin =
         fila.querySelector(
@@ -59,7 +72,7 @@ if (
         );
 
     if (checkin) {
-        checkin.checked = true;
+        checkin.checked = tieneCheckinManual;
     }
 }
 
@@ -125,6 +138,30 @@ generarResumenOperativo(fechaSeleccionada);
 // ============================================
 // COLOR OPERATIVO DE CADA CABAÑA
 // ============================================
+
+function reservaTieneCheckinManual(reservaId) {
+
+    if (!reservaId) {
+        return false;
+    }
+
+    return Object.values(datosPorFecha).some(dia => {
+
+        if (!dia.cabanas) {
+            return false;
+        }
+
+        return Object.values(dia.cabanas).some(cabana =>
+
+            String(cabana?.reservaId || "") ===
+            String(reservaId) &&
+
+            cabana.checkinManual === true
+
+        );
+
+    });
+}
 
 function actualizarColorCabana(fila) {
 
@@ -225,14 +262,17 @@ function cargarCabanasDia(fecha) {
         const datosCabana =
             datos.cabanas[numeroCabana] || {};
 
-    // Si la reserva CONTINÚA, el huésped ya hizo check-in
-if (
-    datosCabana.estado === "continua" &&
-    datosCabana.checkinRealizado !== true
-) {
+// CONTINÚA solo aparece con CHECK-IN si
+// esta misma reserva tuvo IN manual
+if (datosCabana.estado === "continua") {
 
-    datosCabana.checkinRealizado = true;
-    guardarDatos();
+    const tieneCheckinManual =
+        reservaTieneCheckinManual(
+            datosCabana.reservaId
+        );
+
+    datosCabana.checkinRealizado =
+        tieneCheckinManual;
 }
 
     // ========================================
