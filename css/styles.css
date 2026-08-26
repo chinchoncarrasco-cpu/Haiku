@@ -7264,3 +7264,167 @@ tr.cabana-libre .info-cabana {
         font-size: 13px;
     }
 }
+
+/* =========================================
+   PAGOS · COBROS CHECK-OUT NUEVO DISEÑO
+   ========================================= */
+
+.pago-checkout-item {
+    padding: 0;
+    border: 1px solid #e1e5e2;
+    border-radius: 12px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.pago-checkout-nuevo {
+    padding: 12px;
+}
+
+
+/* CABECERA */
+
+.pago-checkout-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding-bottom: 9px;
+    margin-bottom: 8px;
+
+    border-bottom: 1px solid #edf0ee;
+}
+
+.pago-checkout-identidad {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.pago-checkout-identidad strong {
+    font-size: 12px;
+    color: #26322b;
+}
+
+.pago-checkout-identidad span {
+    min-width: 0;
+
+    font-size: 11px;
+    color: #68716c;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* ESTADO */
+
+.pago-checkout-estado {
+    flex-shrink: 0;
+
+    padding: 4px 7px;
+
+    border-radius: 999px;
+
+    background: #fff1d8;
+    color: #9a691d;
+
+    font-size: 9px;
+    font-weight: 600;
+}
+
+
+/* LISTA DE SERVICIOS */
+
+.pago-checkout-servicios-lista {
+    display: flex;
+    flex-direction: column;
+}
+
+.pago-checkout-servicio-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding: 7px 0;
+
+    border-bottom: 1px solid #f0f2f1;
+}
+
+.pago-checkout-servicio-fila:last-child {
+    border-bottom: 0;
+}
+
+.pago-checkout-servicio-info {
+    min-width: 0;
+}
+
+.pago-checkout-servicio-info strong {
+    font-size: 10px;
+    font-weight: 500;
+    color: #4f5953;
+}
+
+.pago-checkout-servicio-monto {
+    flex-shrink: 0;
+
+    font-size: 11px;
+    color: #26322b;
+}
+
+
+/* TOTAL */
+
+.pago-checkout-total-nuevo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 8px;
+    padding: 9px 10px;
+
+    border-radius: 8px;
+
+    background: #f4f6f5;
+}
+
+.pago-checkout-total-nuevo span {
+    font-size: 9px;
+    color: #727b75;
+}
+
+.pago-checkout-total-nuevo strong {
+    font-size: 14px;
+    color: #26322b;
+}
+
+
+/* MÓVIL */
+
+@media (max-width: 700px) {
+
+    .pago-checkout-nuevo {
+        padding: 11px;
+    }
+
+    .pago-checkout-identidad strong {
+        font-size: 11px;
+    }
+
+    .pago-checkout-identidad span {
+        font-size: 10px;
+    }
+
+    .pago-checkout-servicio-info strong {
+        font-size: 9px;
+    }
+
+    .pago-checkout-total-nuevo strong {
+        font-size: 13px;
+    }
+}

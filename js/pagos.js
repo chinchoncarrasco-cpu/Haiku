@@ -711,42 +711,55 @@ Object.values(gruposPorReserva).forEach(grupo => {
 
     tarjeta.innerHTML = `
 
-        <div class="pago-checkout-contenido">
+    <div class="pago-checkout-nuevo">
 
-            <div class="pago-checkout-titulo">
+        <div class="pago-checkout-cabecera">
+
+            <div class="pago-checkout-identidad">
 
                 <strong>
                     CAB ${grupo.numeroCabana}
                 </strong>
 
                 <span>
-                    ${grupo.titular
-                        ? ` · ${grupo.titular}`
-                        : ""}
+                    ${
+                        grupo.titular
+                            ? `· ${grupo.titular}`
+                            : "· Sin titular"
+                    }
                 </span>
 
             </div>
 
-            <div class="pago-checkout-servicios-lista">
 
-                ${serviciosHTML}
-
-            </div>
-
-            <div class="pago-checkout-total">
-
-                <span>
-                    Pendiente total
-                </span>
-
-                <strong>
-                    $${totalReserva.toLocaleString("es-CL")}
-                </strong>
-
-            </div>
+            <span class="pago-checkout-estado">
+                Pendiente
+            </span>
 
         </div>
-    `;
+
+
+        <div class="pago-checkout-servicios-lista">
+
+            ${serviciosHTML}
+
+        </div>
+
+
+        <div class="pago-checkout-total-nuevo">
+
+            <span>
+                Total pendiente
+            </span>
+
+            <strong>
+                $${totalReserva.toLocaleString("es-CL")}
+            </strong>
+
+        </div>
+
+    </div>
+`;
 
     lista.appendChild(tarjeta);
 
