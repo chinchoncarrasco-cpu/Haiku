@@ -1236,6 +1236,194 @@ function obtenerServiciosProximos() {
         );
 }
 
+// ========================================
+// PAGOS PENDIENTES REALES
+// ========================================
+
+function obtenerPagosPendientes() {
+
+    if (!fechaSeleccionada) {
+        return [];
+    }
+
+    const pendientes = [];
+
+    const datos =
+        obtenerDatosDia(fechaSeleccionada);
+
+    const cabanas =
+        datos?.cabanas || {};
+
+
+    // ====================================
+    // PAGOS DE RESERVAS
+    // ====================================
+
+    Object.entries(cabanas)
+        .forEach(([numeroCabana, cabana]) => {
+
+            if (!cabana) {
+                return;
+            }
+
+            const estado =
+                cabana.estado || "";
+
+            const ingresaHoy =
+                estado === "libre-ingresa" ||
+                estado === "sale-ingresa";
+
+            if (!ingresaHoy) {
+                return;
+            }
+
+
+            const titular =
+                cabana.titular ||
+                cabana.nombre ||
+                cabana.huesped ||
+                "Sin titular";
+
+
+            const abonoTexto =
+                cabana.abono ||
+                cabana.montoAbono ||
+                "0";
+
+            const abono =
+                Number(
+                    String(abonoTexto)
+                        .replace(/\D/g, "")
+                ) || 0;
+
+
+            const total =
+                Number(cabana.totalReserva) || 0;
+
+
+            // --------------------------------
+            // ABONO SIN VERIFICAR
+            // --------------------------------
+
+            if (
+                cabana.abonoVerificado !== true
+            ) {
+
+                pendientes.push({
+                    tipo: "abono",
+
+                    numeroCabana,
+                    reservaId:
+                        cabana.reservaId || "",
+
+                    titular,
+
+                    titulo:
+                        "Abono por verificar",
+
+                    monto: abono
+                });
+            }
+
+
+            // --------------------------------
+            // COBRO CHECK-IN INCOMPLETO
+            // --------------------------------
+
+            const checkinCompleto =
+                total > 0 &&
+                cabana.checkinMedio !== "" &&
+                cabana.checkinCobrado === true &&
+                String(
+                    cabana.checkinFolio || ""
+                ).trim() !== "" &&
+                String(
+                    cabana.checkinCodAut || ""
+                ).trim() !== "" &&
+                String(
+                    cabana.checkinBove || ""
+                ).trim() !== "" &&
+                cabana.checkinManager === true;
+
+
+            if (!checkinCompleto) {
+
+                const saldo =
+                    Math.max(
+                        total - abono,
+                        0
+                    );
+
+                pendientes.push({
+                    tipo: "checkin",
+
+                    numeroCabana,
+                    reservaId:
+                        cabana.reservaId || "",
+
+                    titular,
+
+                    titulo:
+                        "Cobro check-in pendiente",
+
+                    monto: saldo
+                });
+            }
+
+        });
+
+
+    // ====================================
+    // SERVICIOS PENDIENTES DE PAGO
+    // ====================================
+
+    const servicios =
+        JSON.parse(
+            localStorage.getItem(
+                "haikuServicios"
+            )
+        ) || [];
+
+
+    servicios
+        .filter(servicio =>
+            servicio.estadoPago ===
+                "pendiente" &&
+            servicio.fechaServicio ===
+                fechaSeleccionada
+        )
+        .forEach(servicio => {
+
+            pendientes.push({
+
+                tipo: "servicio",
+
+                numeroCabana:
+                    servicio.numeroCabana,
+
+                reservaId:
+                    servicio.reservaId || "",
+
+                titular:
+                    servicio.titular ||
+                    "Sin titular",
+
+                titulo:
+                    servicio.nombre ||
+                    "Servicio",
+
+                monto:
+                    Number(
+                        servicio.total
+                    ) || 0
+            });
+
+        });
+
+
+    return pendientes;
+}
+
 function actualizarNotificaciones() {
 
     if (!contenidoNotificaciones) {
@@ -1248,6 +1436,9 @@ function actualizarNotificaciones() {
     const serviciosProximos =
         obtenerServiciosProximos();
 
+    const pagosPendientes =
+    obtenerPagosPendientes();
+
     contenidoNotificaciones.innerHTML = "";
 
 
@@ -1256,9 +1447,10 @@ function actualizarNotificaciones() {
     // =====================================
 
     if (
-        checkinsPendientes.length === 0 &&
-        serviciosProximos.length === 0
-    ) {
+    checkinsPendientes.length === 0 &&
+    serviciosProximos.length === 0 &&
+    pagosPendientes.length === 0
+) {
 
         contenidoNotificaciones.innerHTML = `
             <div class="notificaciones-vacias">
@@ -1595,6 +1787,161 @@ function actualizarNotificaciones() {
         seccion.appendChild(resumen);
         seccion.appendChild(detalle);
     }
+
+    // =====================================
+// PAGOS PENDIENTES
+// =====================================
+
+if (pagosPendientes.length > 0) {
+
+    const resumenPagos =
+        document.createElement("button");
+
+    resumenPagos.type = "button";
+
+    resumenPagos.className =
+        "notificacion-item";
+
+    resumenPagos.innerHTML = `
+        <span class="notificacion-icono">
+            💳
+        </span>
+
+        <span class="notificacion-contenido">
+            <strong>
+                ${pagosPendientes.length}
+                ${
+                    pagosPendientes.length === 1
+                        ? "pago pendiente"
+                        : "pagos pendientes"
+                }
+            </strong>
+
+            <small>
+                Ver pendientes
+            </small>
+        </span>
+
+        <span class="notificacion-flecha">
+            ›
+        </span>
+    `;
+
+
+    const detallePagos =
+        document.createElement("div");
+
+    detallePagos.className =
+        "notificacion-detalle";
+
+    detallePagos.hidden = true;
+
+
+    pagosPendientes.forEach(pago => {
+
+        const item =
+            document.createElement("button");
+
+        item.type = "button";
+
+        item.className =
+            "notificacion-reserva";
+
+        item.dataset.cabana =
+            pago.numeroCabana;
+
+
+        const montoTexto =
+            Number(pago.monto) > 0
+                ? `$${Number(
+                    pago.monto
+                ).toLocaleString("es-CL")}`
+                : "";
+
+
+        item.innerHTML = `
+            <strong>
+                CAB ${pago.numeroCabana}
+                ·
+                ${pago.titular}
+            </strong>
+
+            <span>
+                ${pago.titulo}
+                ${
+                    montoTexto
+                        ? ` · ${montoTexto}`
+                        : ""
+                }
+            </span>
+        `;
+
+        detallePagos.appendChild(item);
+    });
+
+
+    resumenPagos.addEventListener(
+        "click",
+        () => {
+
+            detallePagos.hidden =
+                !detallePagos.hidden;
+
+            const flecha =
+                resumenPagos.querySelector(
+                    ".notificacion-flecha"
+                );
+
+            if (flecha) {
+
+                flecha.textContent =
+                    detallePagos.hidden
+                        ? "›"
+                        : "⌄";
+            }
+        }
+    );
+
+
+    detallePagos.addEventListener(
+        "click",
+        evento => {
+
+            const pago =
+                evento.target.closest(
+                    ".notificacion-reserva"
+                );
+
+            if (!pago) {
+                return;
+            }
+
+            const numeroCabana =
+                pago.dataset.cabana;
+
+            const botonCabana =
+                document.querySelector(
+                    `[data-ficha-cabana="${numeroCabana}"]`
+                );
+
+            if (botonCabana) {
+
+                cerrarPanelNotificaciones();
+
+                botonCabana.click();
+            }
+        }
+    );
+
+
+    seccion.appendChild(
+        resumenPagos
+    );
+
+    seccion.appendChild(
+        detallePagos
+    );
+}
 
 
     contenidoNotificaciones.appendChild(
