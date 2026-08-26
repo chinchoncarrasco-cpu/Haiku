@@ -6669,3 +6669,46 @@ tr.cabana-libre .info-cabana {
     font-size: 9px;
     color: #7c857f;
 }
+
+/* =========================================
+   ESTADO HORARIO DE SERVICIOS
+   ========================================= */
+
+.notificacion-servicio-tiempo {
+    margin-top: 3px;
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.servicio-programado {
+    color: #7b847e;
+}
+
+.servicio-proximo {
+    color: #567460;
+}
+
+.servicio-atencion {
+    color: #b87922;
+}
+
+.servicio-urgente {
+    color: #c45d26;
+    font-weight: 700;
+}
+
+.servicio-en-curso {
+    color: #3f6f58;
+    font-weight: 700;
+}
+
+.servicio-finalizando {
+    color: #c07a22;
+    font-weight: 700;
+}
+
+.servicio-ahora,
+.servicio-atrasado {
+    color: #b42318;
+    font-weight: 700;
+}

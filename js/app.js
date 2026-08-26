@@ -1203,6 +1203,214 @@ function obtenerCheckinsPendientes() {
 // SERVICIOS PRÓXIMOS REALES
 // ========================================
 
+// ========================================
+// HORARIO INTELIGENTE DE SERVICIOS
+// ========================================
+
+function obtenerFechaLocalISO() {
+
+    const ahora = new Date();
+
+    const anio = ahora.getFullYear();
+
+    const mes =
+        String(
+            ahora.getMonth() + 1
+        ).padStart(2, "0");
+
+    const dia =
+        String(
+            ahora.getDate()
+        ).padStart(2, "0");
+
+    return `${anio}-${mes}-${dia}`;
+}
+
+
+function obtenerEstadoHorarioServicio(
+    fechaServicio,
+    horaServicio,
+    duracionMinutos = 0
+) {
+
+    if (!fechaServicio || !horaServicio) {
+        return null;
+    }
+
+    const hoy =
+        obtenerFechaLocalISO();
+
+    if (fechaServicio !== hoy) {
+
+        return {
+            tipo: "programado",
+            texto: horaServicio,
+            minutos: null
+        };
+    }
+
+
+    const [hora, minutos] =
+        horaServicio
+            .split(":")
+            .map(Number);
+
+    if (
+        Number.isNaN(hora) ||
+        Number.isNaN(minutos)
+    ) {
+        return null;
+    }
+
+
+    const ahora =
+        new Date();
+
+    const inicioServicio =
+        new Date();
+
+    inicioServicio.setHours(
+        hora,
+        minutos,
+        0,
+        0
+    );
+
+
+    const finServicio =
+        new Date(
+            inicioServicio.getTime() +
+            duracionMinutos * 60000
+        );
+
+
+    const minutosParaInicio =
+        Math.round(
+            (
+                inicioServicio.getTime() -
+                ahora.getTime()
+            ) / 60000
+        );
+
+
+    const minutosParaFin =
+        Math.round(
+            (
+                finServicio.getTime() -
+                ahora.getTime()
+            ) / 60000
+        );
+
+
+    // TODAVÍA NO EMPIEZA
+    if (minutosParaInicio > 60) {
+
+        return {
+            tipo: "programado",
+            texto: horaServicio
+        };
+    }
+
+
+    if (minutosParaInicio > 30) {
+
+        return {
+            tipo: "proximo",
+            texto:
+                `En ${minutosParaInicio} min`
+        };
+    }
+
+
+    if (minutosParaInicio > 15) {
+
+        return {
+            tipo: "atencion",
+            texto:
+                `En ${minutosParaInicio} min`
+        };
+    }
+
+
+    if (minutosParaInicio > 0) {
+
+        return {
+            tipo: "urgente",
+            texto:
+                `En ${minutosParaInicio} min`
+        };
+    }
+
+
+    // SERVICIO EN CURSO
+    if (
+        duracionMinutos > 0 &&
+        minutosParaFin > 15
+    ) {
+
+        return {
+            tipo: "en-curso",
+            texto:
+                `En curso · termina ${
+                    String(
+                        finServicio.getHours()
+                    ).padStart(2, "0")
+                }:${
+                    String(
+                        finServicio.getMinutes()
+                    ).padStart(2, "0")
+                }`
+        };
+    }
+
+
+    // ÚLTIMOS 15 MIN
+    if (
+        duracionMinutos > 0 &&
+        minutosParaFin > 0
+    ) {
+
+        return {
+            tipo: "finalizando",
+            texto:
+                `Termina en ${minutosParaFin} min`
+        };
+    }
+
+
+    // JUSTO AL TERMINAR
+    if (
+        duracionMinutos > 0 &&
+        minutosParaFin >= -5
+    ) {
+
+        return {
+            tipo: "ahora",
+            texto:
+                "Finaliza ahora"
+        };
+    }
+
+
+    // YA TERMINÓ
+    if (duracionMinutos > 0) {
+
+        return {
+            tipo: "atrasado",
+            texto:
+                `Terminó hace ${Math.abs(
+                    minutosParaFin
+                )} min`
+        };
+    }
+
+
+    return {
+        tipo: "atrasado",
+        texto: "Hora del servicio"
+    };
+}
+
 function obtenerServiciosProximos() {
 
     if (!fechaSeleccionada) {
@@ -1215,25 +1423,94 @@ function obtenerServiciosProximos() {
         ) || [];
 
     return servicios
-        .filter(servicio => {
+    .filter(servicio => {
 
-            const esDelDia =
-                servicio.fechaServicio ===
-                fechaSeleccionada;
+        const esDelDia =
+            servicio.fechaServicio ===
+            fechaSeleccionada;
 
-            const siguePendiente =
-                servicio.estadoServicio !==
-                "realizado";
+        const siguePendiente =
+            servicio.estadoServicio !==
+            "realizado";
 
-            return (
-                esDelDia &&
-                siguePendiente
-            );
-        })
-        .sort((a, b) =>
-            (a.hora || "")
-                .localeCompare(b.hora || "")
+        return (
+            esDelDia &&
+            siguePendiente
         );
+    })
+    .map(servicio => {
+
+        let duracionMinutos = 0;
+
+        const nombre =
+            String(
+                servicio.nombre || ""
+            ).toLowerCase();
+
+        const tipo =
+            String(
+                servicio.tipoServicio || ""
+            ).toLowerCase();
+
+
+        // ================================
+        // TINAJAS
+        // ================================
+
+        if (
+            tipo.includes("tinaja") ||
+            nombre.includes("tinaja") ||
+            nombre.includes("jacuzzi")
+        ) {
+
+            duracionMinutos = 60;
+        }
+
+
+        // ================================
+        // MASAJES 30 MIN
+        // ================================
+
+        else if (
+            nombre.includes("30 min") ||
+            nombre.includes("30 minutos")
+        ) {
+
+            duracionMinutos = 30;
+        }
+
+
+        // ================================
+        // MASAJES 60 MIN
+        // ================================
+
+        else if (
+            nombre.includes("60 min") ||
+            nombre.includes("60 minutos")
+        ) {
+
+            duracionMinutos = 60;
+        }
+
+
+        const horario =
+            obtenerEstadoHorarioServicio(
+                servicio.fechaServicio,
+                servicio.hora,
+                duracionMinutos
+            );
+
+
+        return {
+            ...servicio,
+            duracionMinutos,
+            horario
+        };
+    })
+    .sort((a, b) =>
+        (a.hora || "")
+            .localeCompare(b.hora || "")
+    );
 }
 
 // ========================================
@@ -1550,21 +1827,36 @@ function actualizarNotificaciones() {
                 servicio.fechaServicio || "";
 
             item.innerHTML = `
-                <strong>
-                    ${servicio.hora || "--:--"}
-                    ·
-                    ${servicio.nombre || "Servicio"}
-                </strong>
+    <strong>
+        ${servicio.hora || "--:--"}
+        ·
+        ${servicio.nombre || "Servicio"}
+    </strong>
 
-                <span>
-                    CAB ${servicio.numeroCabana}
-                    ${
-                        servicio.titular
-                            ? ` · ${servicio.titular}`
-                            : ""
-                    }
+    <span>
+        CAB ${servicio.numeroCabana}
+        ${
+            servicio.titular
+                ? ` · ${servicio.titular}`
+                : ""
+        }
+    </span>
+
+    ${
+        servicio.horario
+            ? `
+                <span
+                    class="
+                        notificacion-servicio-tiempo
+                        servicio-${servicio.horario.tipo}
+                    "
+                >
+                    ${servicio.horario.texto}
                 </span>
-            `;
+            `
+            : ""
+    }
+`;
 
             detalleServicios.appendChild(item);
         });
