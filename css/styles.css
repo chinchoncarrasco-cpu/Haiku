@@ -3018,9 +3018,9 @@ input[type="time"].campo-cabana {
 
     .tabla-contenedor th:first-child,
 .tabla-contenedor td.info-cabana {
-    width: 145px !important;
-    min-width: 145px !important;
-    max-width: 145px !important;
+    width: 135px !important;
+    min-width: 135px !important;
+    max-width: 135px !important;
 }
 
 /* ===== ESTADO + CHECK-IN ===== */
