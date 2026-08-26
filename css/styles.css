@@ -6712,3 +6712,555 @@ tr.cabana-libre .info-cabana {
     color: #b42318;
     font-weight: 700;
 }
+
+/* =========================================
+   PAGOS · ABONOS NUEVO DISEÑO
+   ========================================= */
+
+.pago-abono-item {
+    padding: 0;
+    border: 1px solid #e1e5e2;
+    border-radius: 12px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.pago-abono-nuevo {
+    padding: 12px;
+}
+
+
+/* CABECERA */
+
+.pago-abono-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding-bottom: 9px;
+    margin-bottom: 10px;
+
+    border-bottom: 1px solid #edf0ee;
+}
+
+.pago-abono-identidad {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.pago-abono-identidad strong {
+    font-size: 12px;
+    color: #26322b;
+}
+
+.pago-abono-identidad span {
+    font-size: 11px;
+    color: #666f69;
+
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+
+/* ESTADO */
+
+.pago-abono-estado {
+    flex-shrink: 0;
+
+    padding: 4px 7px;
+
+    border-radius: 999px;
+
+    background: #fff1d8;
+    color: #9a691d;
+
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.pago-abono-item.abono-verificado
+.pago-abono-estado {
+    background: #e7f4ec;
+    color: #28704d;
+}
+
+
+/* CAMPOS */
+
+.pago-abono-grid {
+    display: grid;
+    grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.3fr);
+    gap: 9px;
+}
+
+.pago-abono-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pago-abono-label {
+    font-size: 9px;
+    color: #7a827d;
+}
+
+.pago-abono-monto-wrap {
+    display: flex;
+    align-items: center;
+
+    height: 34px;
+
+    padding: 0 9px;
+
+    border: 1px solid #d9dedb;
+    border-radius: 8px;
+
+    background: #fafbfa;
+}
+
+.pago-abono-monto-wrap > span {
+    margin-right: 4px;
+
+    font-size: 11px;
+    color: #606963;
+}
+
+.pago-abono-monto {
+    width: 100%;
+    min-width: 0;
+
+    border: 0 !important;
+    outline: 0;
+
+    background: transparent !important;
+
+    font-family: inherit;
+    font-size: 11px;
+    color: #26322b;
+}
+
+.pago-abono-medio {
+    width: 100%;
+    height: 34px;
+
+    padding: 0 8px;
+
+    border: 1px solid #d9dedb;
+    border-radius: 8px;
+
+    background: #fafbfa;
+
+    font-family: inherit;
+    font-size: 10px;
+    color: #26322b;
+}
+
+
+/* CONFIRMACIÓN */
+
+.pago-abono-verificacion {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 6px;
+
+    margin-top: 10px;
+
+    font-size: 9px;
+    color: #626b65;
+
+    cursor: pointer;
+}
+
+.pago-abono-verificacion input {
+    width: 15px;
+    height: 15px;
+
+    accent-color: #33815d;
+}
+
+
+/* TARJETA TERMINADA */
+
+.pago-abono-item.abono-verificado {
+    border-color: #bcdac9;
+    background: #f5fbf7;
+}
+
+
+/* MÓVIL */
+
+@media (max-width: 700px) {
+
+    .pago-abono-nuevo {
+        padding: 11px;
+    }
+
+    .pago-abono-grid {
+        grid-template-columns:
+            minmax(0, 0.85fr)
+            minmax(0, 1.25fr);
+
+        gap: 7px;
+    }
+
+    .pago-abono-identidad strong {
+        font-size: 11px;
+    }
+
+    .pago-abono-identidad span {
+        font-size: 10px;
+    }
+
+    .pago-abono-medio {
+        font-size: 9px;
+    }
+}
+
+/* =========================================
+   PAGOS · SALDOS CHECK-IN NUEVO DISEÑO
+   ========================================= */
+
+.pago-checkin-item {
+    padding: 0;
+    border: 1px solid #e1e5e2;
+    border-radius: 12px;
+    background: #ffffff;
+    overflow: hidden;
+}
+
+.pago-checkin-nuevo {
+    padding: 12px;
+}
+
+
+/* CABECERA */
+
+.pago-checkin-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+
+    padding-bottom: 9px;
+    margin-bottom: 11px;
+
+    border-bottom: 1px solid #edf0ee;
+}
+
+.pago-checkin-identidad {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.pago-checkin-identidad strong {
+    font-size: 12px;
+    color: #26322b;
+}
+
+.pago-checkin-identidad span {
+    min-width: 0;
+
+    font-size: 11px;
+    color: #68716c;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* ESTADO */
+
+.pago-checkin-estado {
+    flex-shrink: 0;
+
+    padding: 4px 7px;
+
+    border-radius: 999px;
+
+    background: #fff1d8;
+    color: #9a691d;
+
+    font-size: 9px;
+    font-weight: 600;
+}
+
+.pago-checkin-item.pago-checkin-completo
+.pago-checkin-estado {
+    background: #e7f4ec;
+    color: #28704d;
+}
+
+.pago-checkin-item.pago-checkin-completo
+.pago-checkin-estado {
+    font-size: 0;
+}
+
+.pago-checkin-item.pago-checkin-completo
+.pago-checkin-estado::after {
+    content: "✓ Completo";
+    font-size: 9px;
+}
+
+
+/* TOTAL + SALDO */
+
+.pago-checkin-resumen-nuevo {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+
+    gap: 9px;
+
+    margin-bottom: 11px;
+}
+
+.pago-checkin-grupo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+
+    min-width: 0;
+}
+
+.pago-checkin-label {
+    font-size: 9px;
+    color: #7a827d;
+}
+
+.pago-checkin-input-monto {
+    display: flex;
+    align-items: center;
+
+    height: 34px;
+
+    padding: 0 9px;
+
+    border: 1px solid #d9dedb;
+    border-radius: 8px;
+
+    background: #fafbfa;
+}
+
+.pago-checkin-input-monto > span {
+    margin-right: 4px;
+
+    font-size: 11px;
+    color: #626b65;
+}
+
+.pago-checkin-total {
+    width: 100%;
+    min-width: 0;
+
+    border: 0 !important;
+    outline: 0;
+
+    background: transparent !important;
+
+    font-family: inherit;
+    font-size: 11px;
+    color: #26322b;
+}
+
+
+/* SALDO DESTACADO */
+
+.pago-checkin-saldo-nuevo {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+
+    min-height: 34px;
+
+    padding: 6px 10px;
+
+    border-radius: 8px;
+
+    background: #f4f6f5;
+}
+
+.pago-checkin-saldo-nuevo span {
+    font-size: 9px;
+    color: #7a827d;
+}
+
+.pago-checkin-saldo-nuevo strong {
+    margin-top: 2px;
+
+    font-size: 14px;
+    color: #26322b;
+}
+
+
+/* MEDIO */
+
+.pago-checkin-bloque {
+    margin-bottom: 11px;
+}
+
+.pago-checkin-medio-fila {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        auto;
+
+    align-items: center;
+    gap: 8px;
+
+    margin-top: 4px;
+}
+
+.pago-checkin-medio-fila select {
+    width: 100%;
+    height: 34px;
+
+    padding: 0 8px;
+
+    border: 1px solid #d9dedb;
+    border-radius: 8px;
+
+    background: #fafbfa;
+
+    font-family: inherit;
+    font-size: 10px;
+    color: #26322b;
+}
+
+
+/* COBRADO */
+
+.pago-checkin-cobrado {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    font-size: 9px;
+    color: #626b65;
+
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.pago-checkin-cobrado input {
+    width: 15px;
+    height: 15px;
+
+    accent-color: #33815d;
+}
+
+
+/* DATOS ADMINISTRATIVOS */
+
+.pago-checkin-datos {
+    display: grid;
+
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+
+    gap: 9px;
+}
+
+.pago-checkin-datos input[type="text"] {
+    box-sizing: border-box;
+
+    width: 100%;
+    height: 34px;
+
+    padding: 0 9px;
+
+    border: 1px solid #d9dedb;
+    border-radius: 8px;
+
+    background: #fafbfa;
+
+    font-family: inherit;
+    font-size: 10px;
+    color: #26322b;
+}
+
+
+/* MANAGER */
+
+.pago-checkin-manager-nuevo {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.pago-checkin-manager-nuevo > div {
+    display: flex;
+    align-items: center;
+
+    height: 34px;
+
+    padding: 0 9px;
+
+    border: 1px solid #d9dedb;
+    border-radius: 8px;
+
+    background: #fafbfa;
+}
+
+.pago-checkin-manager-nuevo div span {
+    margin-left: 6px;
+
+    font-size: 9px;
+    color: #626b65;
+}
+
+.pago-checkin-manager-nuevo input {
+    width: 15px;
+    height: 15px;
+
+    accent-color: #33815d;
+}
+
+
+/* COMPLETADO */
+
+.pago-checkin-item.pago-checkin-completo {
+    border-color: #bcdac9;
+    background: #f5fbf7;
+}
+
+
+/* MÓVIL */
+
+@media (max-width: 700px) {
+
+    .pago-checkin-nuevo {
+        padding: 11px;
+    }
+
+    .pago-checkin-identidad strong {
+        font-size: 11px;
+    }
+
+    .pago-checkin-identidad span {
+        font-size: 10px;
+    }
+
+    .pago-checkin-resumen-nuevo {
+        gap: 7px;
+    }
+
+    .pago-checkin-datos {
+        gap: 7px;
+    }
+
+    .pago-checkin-saldo-nuevo strong {
+        font-size: 13px;
+    }
+}

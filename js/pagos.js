@@ -67,59 +67,111 @@ const montoAbono =
 const medioPago = cabana.medioPago || "";
 
 tarjeta.innerHTML = `
-    <div class="pago-abono-contenido">
 
-        <div class="pago-abono-linea-principal">
-            <strong>CAB ${numeroCabana}</strong>
-            <span>· ${titular}</span>
+    <div class="pago-abono-nuevo">
+
+        <div class="pago-abono-cabecera">
+
+            <div class="pago-abono-identidad">
+                <strong>CAB ${numeroCabana}</strong>
+                <span>· ${titular}</span>
+            </div>
+
+            <span class="pago-abono-estado">
+                ${
+                    cabana.abonoVerificado === true
+                        ? "✓ Verificado"
+                        : "Pendiente"
+                }
+            </span>
+
         </div>
 
-        <div class="pago-abono-linea-detalle">
 
-    <label class="pago-abono-campo">
-        <strong>Abono:</strong>
+        <div class="pago-abono-grid">
 
-        <div class="pago-abono-monto-wrap">
-            <span>$</span>
+            <label class="pago-abono-grupo">
+
+                <span class="pago-abono-label">
+                    Abono
+                </span>
+
+                <div class="pago-abono-monto-wrap">
+
+                    <span>$</span>
+
+                    <input
+                        type="number"
+                        class="pago-abono-monto"
+                        data-pago-cabana="${numeroCabana}"
+                        value="${montoAbono || ""}"
+                        min="0"
+                        step="1000"
+                        placeholder="0"
+                    >
+
+                </div>
+
+            </label>
+
+
+            <label class="pago-abono-grupo">
+
+                <span class="pago-abono-label">
+                    Medio
+                </span>
+
+                <select
+                    class="pago-abono-medio"
+                    data-pago-cabana="${numeroCabana}"
+                >
+                    <option value="" ${medioPago === "" ? "selected" : ""}>
+                        Seleccionar...
+                    </option>
+
+                    <option value="Transferencia" ${medioPago === "Transferencia" ? "selected" : ""}>
+                        Transferencia
+                    </option>
+
+                    <option value="WebPay Crédito" ${medioPago === "WebPay Crédito" ? "selected" : ""}>
+                        WebPay Crédito
+                    </option>
+
+                    <option value="WebPay Débito" ${medioPago === "WebPay Débito" ? "selected" : ""}>
+                        WebPay Débito
+                    </option>
+
+                    <option value="Tarjeta Crédito" ${medioPago === "Tarjeta Crédito" ? "selected" : ""}>
+                        Tarjeta Crédito
+                    </option>
+
+                    <option value="Tarjeta Débito" ${medioPago === "Tarjeta Débito" ? "selected" : ""}>
+                        Tarjeta Débito
+                    </option>
+
+                    <option value="Efectivo" ${medioPago === "Efectivo" ? "selected" : ""}>
+                        Efectivo
+                    </option>
+                </select>
+
+            </label>
+
+        </div>
+
+
+        <label class="pago-abono-verificacion">
 
             <input
-                type="number"
-                class="pago-abono-monto"
-                data-pago-cabana="${numeroCabana}"
-                value="${montoAbono || ""}"
-                min="0"
-                step="1000"
-                placeholder="0"
+                type="checkbox"
+                data-pago-abono="${numeroCabana}"
+                ${cabana.abonoVerificado === true ? "checked" : ""}
             >
-        </div>
-    </label>
 
-    <label class="pago-abono-campo">
-        <strong>Medio:</strong>
+            <span>
+                Confirmar abono
+            </span>
 
-        <select
-  class="pago-abono-medio"
-  data-pago-cabana="${numeroCabana}"
->
-  <option value="" ${medioPago === "" ? "selected" : ""}>Seleccionar...</option>
-  <option value="Transferencia" ${medioPago === "Transferencia" ? "selected" : ""}>Transferencia</option>
-  <option value="WebPay Crédito" ${medioPago === "WebPay Crédito" ? "selected" : ""}>WebPay Crédito</option>
-  <option value="WebPay Débito" ${medioPago === "WebPay Débito" ? "selected" : ""}>WebPay Débito</option>
-  <option value="Tarjeta Crédito" ${medioPago === "Tarjeta Crédito" ? "selected" : ""}>Tarjeta Crédito</option>
-  <option value="Tarjeta Débito" ${medioPago === "Tarjeta Débito" ? "selected" : ""}>Tarjeta Débito</option>
-  <option value="Efectivo" ${medioPago === "Efectivo" ? "selected" : ""}>Efectivo</option>
-</select>
-    </label>
-
-    <label class="pago-abono-check">
-        <input
-    type="checkbox"
-    data-pago-abono="${numeroCabana}"
-    ${cabana.abonoVerificado === true ? "checked" : ""}
->
-    </label>
-
-</div>
+        </label>
 
     </div>
 `;
@@ -762,91 +814,192 @@ const abono = Number(
 tarjeta.className = "pago-checkin-item";
 
 tarjeta.innerHTML = `
-    <div class="pago-checkin-contenido">
 
-        <div class="pago-checkin-titulo">
-            <strong>CAB ${numeroCabana}</strong>
-            <span> · ${titular}</span>
+    <div class="pago-checkin-nuevo">
+
+        <!-- CABECERA -->
+        <div class="pago-checkin-cabecera">
+
+            <div class="pago-checkin-identidad">
+                <strong>CAB ${numeroCabana}</strong>
+                <span>· ${titular}</span>
+            </div>
+
+            <span class="pago-checkin-estado">
+                Pendiente
+            </span>
+
         </div>
 
-        <div class="pago-checkin-resumen">
-            <label>
-                <span>Total:</span>
-                <div class="pago-checkin-total-wrap">
+
+        <!-- TOTAL Y SALDO -->
+        <div class="pago-checkin-resumen-nuevo">
+
+            <label class="pago-checkin-grupo">
+
+                <span class="pago-checkin-label">
+                    Total reserva
+                </span>
+
+                <div class="pago-checkin-input-monto">
+
                     <span>$</span>
+
                     <input
                         type="number"
                         class="pago-checkin-total"
                         data-pago-checkin-total="${numeroCabana}"
                         placeholder="300000"
                     >
+
                 </div>
+
             </label>
 
-            <div class="pago-checkin-saldo-bloque">
-                <span>Saldo:</span>
-                <strong class="pago-checkin-saldo">$0</strong>
+
+            <div class="pago-checkin-saldo-nuevo">
+
+                <span>
+                    Saldo pendiente
+                </span>
+
+                <strong class="pago-checkin-saldo">
+                    $0
+                </strong>
+
             </div>
+
         </div>
 
-        <div class="pago-checkin-fila pago-checkin-fila-medio">
-            <label>
-                <span>Medio:</span>
-                <select data-pago-checkin-medio="${numeroCabana}">
-    <option value="">Seleccionar...</option>
-    <option value="WebPay Débito">WebPay Débito</option>
-    <option value="WebPay Crédito">WebPay Crédito</option>
-    <option value="Tarjeta Débito">Tarjeta Débito</option>
-    <option value="Tarjeta Crédito">Tarjeta Crédito</option>
-    <option value="Transferencia">Transferencia</option>
-    <option value="Efectivo">Efectivo</option>
-</select>
-            </label>
 
-            <input
-                type="checkbox"
-                class="pago-checkin-check"
-                data-pago-checkin-cobrado="${numeroCabana}"
-            >
+        <!-- MEDIO DE PAGO -->
+        <div class="pago-checkin-bloque">
+
+            <span class="pago-checkin-label">
+                Medio de pago
+            </span>
+
+            <div class="pago-checkin-medio-fila">
+
+                <select
+                    data-pago-checkin-medio="${numeroCabana}"
+                >
+                    <option value="">
+                        Seleccionar...
+                    </option>
+
+                    <option value="WebPay Débito">
+                        WebPay Débito
+                    </option>
+
+                    <option value="WebPay Crédito">
+                        WebPay Crédito
+                    </option>
+
+                    <option value="Tarjeta Débito">
+                        Tarjeta Débito
+                    </option>
+
+                    <option value="Tarjeta Crédito">
+                        Tarjeta Crédito
+                    </option>
+
+                    <option value="Transferencia">
+                        Transferencia
+                    </option>
+
+                    <option value="Efectivo">
+                        Efectivo
+                    </option>
+                </select>
+
+
+                <label class="pago-checkin-cobrado">
+
+                    <input
+                        type="checkbox"
+                        class="pago-checkin-check"
+                        data-pago-checkin-cobrado="${numeroCabana}"
+                    >
+
+                    <span>
+                        Cobrado
+                    </span>
+
+                </label>
+
+            </div>
+
         </div>
 
-        <div class="pago-checkin-fila">
-            <label>
-                <span>Folio:</span>
+
+        <!-- DATOS ADMINISTRATIVOS -->
+        <div class="pago-checkin-datos">
+
+            <label class="pago-checkin-grupo">
+
+                <span class="pago-checkin-label">
+                    Folio
+                </span>
+
                 <input
                     type="text"
                     data-pago-checkin-folio="${numeroCabana}"
                     placeholder="Rellenar"
                 >
+
             </label>
 
-            <label>
-                <span>CodAut:</span>
+
+            <label class="pago-checkin-grupo">
+
+                <span class="pago-checkin-label">
+                    CodAut
+                </span>
+
                 <input
                     type="text"
                     data-pago-checkin-codaut="${numeroCabana}"
                     placeholder="Rellenar"
                 >
-            </label>
-        </div>
 
-        <div class="pago-checkin-fila">
-            <label>
-                <span>Bove:</span>
+            </label>
+
+
+            <label class="pago-checkin-grupo">
+
+                <span class="pago-checkin-label">
+                    Bove
+                </span>
+
                 <input
                     type="text"
                     data-pago-checkin-bove="${numeroCabana}"
                     placeholder="Rellenar"
                 >
+
             </label>
 
-            <label class="pago-checkin-manager">
-                <span>Manager:</span>
-                <input
-                    type="checkbox"
-                    data-pago-checkin-manager="${numeroCabana}"
-                >
+
+            <label class="pago-checkin-manager-nuevo">
+
+                <span class="pago-checkin-label">
+                    Manager
+                </span>
+
+                <div>
+                    <input
+                        type="checkbox"
+                        data-pago-checkin-manager="${numeroCabana}"
+                    >
+
+                    <span>
+                        Revisado
+                    </span>
+                </div>
+
             </label>
+
         </div>
 
     </div>
