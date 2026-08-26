@@ -6355,4 +6355,42 @@ tr.cabana-libre .info-cabana {
         width: 100% !important;
     }
 
+    /* =========================================
+   MENÚ MÁS COMPACTO EN CELULAR
+   ========================================= */
+
+.menu {
+    margin-top: 8px !important;
+    gap: 6px !important;
+}
+
+.menu-item {
+    padding: 8px 10px !important;
+    min-height: 34px !important;
+
+    font-size: 12px !important;
+
+    border-radius: 8px !important;
+}
+
+.menu-item img,
+.menu-item svg {
+    width: 14px !important;
+    height: 14px !important;
+}
+
+.sidebar .menu {
+    padding-top: 0 !important;
+    padding-bottom: 4px !important;
+}
+
+/* Subir el corte entre cabecera oscura y contenido */
+.sidebar {
+    padding-bottom: 8px !important;
+}
+
+.menu {
+    margin-bottom: 0 !important;
+}
+
 }
