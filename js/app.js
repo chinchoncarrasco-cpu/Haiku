@@ -1127,3 +1127,362 @@ document.addEventListener(
 
     }
 );
+
+// ========================================
+// PANEL DE NOTIFICACIONES
+// ========================================
+
+const botonNotificaciones =
+    document.getElementById(
+        "boton-notificaciones"
+    );
+
+const panelNotificaciones =
+    document.getElementById(
+        "panel-notificaciones"
+    );
+
+const cerrarNotificaciones =
+    document.getElementById(
+        "cerrar-notificaciones"
+    );
+
+const contenidoNotificaciones =
+    document.getElementById(
+        "notificaciones-contenido"
+    );
+
+// ========================================
+// CHECK-IN PENDIENTES REALES
+// ========================================
+
+function obtenerCheckinsPendientes() {
+
+    if (!fechaSeleccionada) {
+        return [];
+    }
+
+    const datos =
+        datosPorFecha[fechaSeleccionada];
+
+    if (!datos?.cabanas) {
+        return [];
+    }
+
+    return Object.entries(datos.cabanas)
+        .filter(([numeroCabana, cabana]) => {
+
+            if (!cabana) {
+                return false;
+            }
+
+            const ingresaHoy =
+                cabana.estado === "libre-ingresa" ||
+                cabana.estado === "sale-ingresa";
+
+            const faltaCheckin =
+                cabana.checkinRealizado !== true;
+
+            return (
+                ingresaHoy &&
+                faltaCheckin
+            );
+        })
+        .map(([numeroCabana, cabana]) => ({
+            numeroCabana,
+            reservaId:
+                cabana.reservaId || "",
+            titular:
+                cabana.titular || "Sin titular",
+            hora:
+                cabana.ingreso || ""
+        }));
+}
+
+function actualizarNotificaciones() {
+
+    if (!contenidoNotificaciones) {
+        return;
+    }
+
+    const checkinsPendientes =
+        obtenerCheckinsPendientes();
+
+    contenidoNotificaciones.innerHTML = "";
+
+
+    // ============================
+    // SIN AVISOS
+    // ============================
+
+    if (checkinsPendientes.length === 0) {
+
+        contenidoNotificaciones.innerHTML = `
+            <div class="notificaciones-vacias">
+                <span>✓</span>
+                <strong>Todo al día</strong>
+                <small>No hay check-in pendientes.</small>
+            </div>
+        `;
+
+        return;
+    }
+
+
+    // ============================
+    // AHORA
+    // ============================
+
+    const seccion =
+        document.createElement("div");
+
+    seccion.className =
+        "notificaciones-seccion";
+
+
+    const titulo =
+        document.createElement("div");
+
+    titulo.className =
+        "notificaciones-seccion-titulo";
+
+    titulo.textContent = "Ahora";
+
+    seccion.appendChild(titulo);
+
+
+    // ============================
+    // RESUMEN CHECK-IN
+    // ============================
+
+    const resumen =
+        document.createElement("button");
+
+    resumen.type = "button";
+
+    resumen.className =
+        "notificacion-item";
+
+    resumen.innerHTML = `
+        <span class="notificacion-icono">
+            ⚠️
+        </span>
+
+        <span class="notificacion-contenido">
+            <strong>
+                ${checkinsPendientes.length}
+                ${
+                    checkinsPendientes.length === 1
+                        ? "check-in pendiente"
+                        : "check-in pendientes"
+                }
+            </strong>
+
+            <small>
+                Ver reservas
+            </small>
+        </span>
+
+        <span class="notificacion-flecha">
+            ›
+        </span>
+    `;
+
+
+    // Contenedor desplegable
+    const detalle =
+        document.createElement("div");
+
+    detalle.className =
+        "notificacion-detalle";
+
+    detalle.hidden = true;
+
+
+    checkinsPendientes.forEach(reserva => {
+
+        const item =
+            document.createElement("button");
+
+        item.type = "button";
+
+        item.className =
+            "notificacion-reserva";
+
+        item.dataset.cabana =
+            reserva.numeroCabana;
+
+        item.innerHTML = `
+            <strong>
+                CAB ${reserva.numeroCabana}
+                ·
+                ${reserva.titular}
+            </strong>
+
+            <span>
+                ${
+                    reserva.hora
+                        ? `Ingreso ${reserva.hora}`
+                        : "Check-in pendiente"
+                }
+            </span>
+        `;
+
+        detalle.appendChild(item);
+    });
+
+
+    resumen.addEventListener(
+        "click",
+        () => {
+
+            detalle.hidden =
+                !detalle.hidden;
+
+            const flecha =
+                resumen.querySelector(
+                    ".notificacion-flecha"
+                );
+
+            if (flecha) {
+                flecha.textContent =
+                    detalle.hidden
+                        ? "›"
+                        : "⌄";
+            }
+        }
+    );
+
+
+    detalle.addEventListener(
+        "click",
+        evento => {
+
+            const reserva =
+                evento.target.closest(
+                    ".notificacion-reserva"
+                );
+
+            if (!reserva) {
+                return;
+            }
+
+            const numeroCabana =
+                reserva.dataset.cabana;
+
+            const botonCabana =
+                document.querySelector(
+                    `[data-ficha-cabana="${numeroCabana}"]`
+                );
+
+            if (botonCabana) {
+
+                cerrarPanelNotificaciones();
+
+                botonCabana.click();
+            }
+        }
+    );
+
+
+    seccion.appendChild(resumen);
+    seccion.appendChild(detalle);
+
+    contenidoNotificaciones.appendChild(
+        seccion
+    );
+}
+
+
+function abrirPanelNotificaciones() {
+
+    if (!panelNotificaciones) {
+        return;
+    }
+
+    actualizarNotificaciones();
+
+    panelNotificaciones.hidden = false;
+}
+
+
+function cerrarPanelNotificaciones() {
+
+    if (!panelNotificaciones) {
+        return;
+    }
+
+    panelNotificaciones.hidden = true;
+}
+
+
+if (botonNotificaciones) {
+
+    botonNotificaciones.addEventListener(
+        "click",
+        evento => {
+
+            evento.stopPropagation();
+
+            if (!panelNotificaciones) {
+                return;
+            }
+
+
+            if (panelNotificaciones.hidden) {
+
+                actualizarNotificaciones();
+
+                panelNotificaciones.hidden = false;
+
+            } else {
+
+                panelNotificaciones.hidden = true;
+            }
+
+        }
+    );
+}
+        
+
+
+if (cerrarNotificaciones) {
+
+    cerrarNotificaciones.addEventListener(
+        "click",
+        cerrarPanelNotificaciones
+    );
+}
+
+
+// Cerrar al tocar fuera
+document.addEventListener(
+    "click",
+    evento => {
+
+        if (
+            !panelNotificaciones ||
+            panelNotificaciones.hidden
+        ) {
+            return;
+        }
+
+        if (
+            evento.target.closest(
+                "#panel-notificaciones"
+            )
+        ) {
+            return;
+        }
+
+        if (
+            evento.target.closest(
+                "#boton-notificaciones"
+            )
+        ) {
+            return;
+        }
+
+        cerrarPanelNotificaciones();
+    }
+);
