@@ -438,6 +438,62 @@ td small {
     font-size: 10px;
 }
 
+/* =========================================
+   RESUMEN - FILAS DE CABAÑA TIPO TARJETA
+   ========================================= */
+
+.tabla-contenedor table {
+    border-collapse: separate;
+    border-spacing: 0 10px;
+}
+
+.tabla-contenedor tbody tr[data-cabana] {
+    background: #ffffff;
+    border-radius: 14px;
+    overflow: hidden;
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.04);
+
+    transition:
+        transform 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+.tabla-contenedor tbody tr[data-cabana] td {
+    background: inherit;
+    padding-top: 12px;
+    padding-bottom: 12px;
+
+    border-top: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.tabla-contenedor tbody tr[data-cabana] td:first-child {
+    border-left: 1px solid rgba(0, 0, 0, 0.05);
+
+    border-top-left-radius: 14px;
+    border-bottom-left-radius: 14px;
+
+    padding-left: 14px;
+}
+
+.tabla-contenedor tbody tr[data-cabana] td:last-child {
+    border-right: 1px solid rgba(0, 0, 0, 0.05);
+
+    border-top-right-radius: 14px;
+    border-bottom-right-radius: 14px;
+
+    padding-right: 14px;
+}
+
+.tabla-contenedor tbody tr[data-cabana]:hover {
+    transform: translateY(-1px);
+
+    box-shadow:
+        0 5px 14px rgba(0, 0, 0, 0.07);
+}
+
 
 /* ========================================
    ESTADOS
@@ -2960,14 +3016,26 @@ input[type="time"].campo-cabana {
     }
 
 
-    /* ===== COLUMNA CABAÑA ===== */
-
     .tabla-contenedor th:first-child,
-    .tabla-contenedor td.info-cabana {
-        width: 120px !important;
-        min-width: 120px !important;
-        max-width: 120px !important;
-    }
+.tabla-contenedor td.info-cabana {
+    width: 145px !important;
+    min-width: 145px !important;
+    max-width: 145px !important;
+}
+
+/* ===== ESTADO + CHECK-IN ===== */
+
+.tabla-contenedor td:nth-child(2) {
+    min-width: 125px !important;
+}
+
+.tabla-contenedor td:nth-child(2)
+.estado-reserva-con-checkin {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+}
 
 }
 
@@ -2976,6 +3044,7 @@ input[type="time"].campo-cabana {
     margin: 0 7px;
     color: #8a8a8a;
 }
+
 
 /* ========================================
    CABAÑAS - VERSIÓN CELULAR
@@ -5973,4 +6042,46 @@ tr.cabana-libre .info-cabana {
 .busqueda-palabra-wrap input::placeholder {
     color: rgba(255,255,255,0.55) !important;
     opacity: 1 !important;
+}
+
+/* =========================================
+   RESUMEN - AJUSTE MÓVIL SIN CAMBIAR ESTRUCTURA
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    .tabla-contenedor {
+        overflow-x: auto;
+        padding: 0 6px 8px;
+    }
+
+    .tabla-contenedor table {
+        min-width: 920px;
+        border-collapse: separate;
+        border-spacing: 0 8px;
+    }
+
+    .tabla-contenedor tbody tr[data-cabana] td {
+        padding-top: 10px;
+        padding-bottom: 10px;
+    }
+
+    .tabla-contenedor tbody tr[data-cabana] td:first-child {
+        padding-left: 12px;
+        border-top-left-radius: 12px;
+        border-bottom-left-radius: 12px;
+    }
+
+    .tabla-contenedor tbody tr[data-cabana] td:last-child {
+        padding-right: 12px;
+        border-top-right-radius: 12px;
+        border-bottom-right-radius: 12px;
+    }
+
+    .tabla-contenedor tbody tr[data-cabana] {
+        box-shadow:
+            0 2px 7px rgba(0,0,0,0.04);
+    }
+    
+
 }
