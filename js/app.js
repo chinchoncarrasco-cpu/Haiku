@@ -686,3 +686,444 @@ function actualizarTextoEstadoFinalResponsive() {
 actualizarTextoEstadoFinalResponsive();
 
 window.addEventListener('resize', actualizarTextoEstadoFinalResponsive);
+
+// ========================================
+// BUSCADOR GLOBAL POR PALABRA CLAVE
+// ========================================
+
+const buscadorPalabra =
+    document.getElementById("busqueda-palabra");
+
+const contadorBusquedaPalabra =
+    document.getElementById(
+        "contador-busqueda-palabra"
+    );
+
+const botonBusquedaAnterior =
+    document.getElementById(
+        "busqueda-palabra-anterior"
+    );
+
+const botonBusquedaSiguiente =
+    document.getElementById(
+        "busqueda-palabra-siguiente"
+    );
+
+let indiceBusquedaPalabra = -1;
+
+
+// Quitar resaltados anteriores
+function limpiarBusquedaPalabra() {
+
+    document
+        .querySelectorAll("mark.busqueda-palabra-marca")
+        .forEach(marca => {
+
+            const padre =
+                marca.parentNode;
+
+            const texto =
+                document.createTextNode(
+                    marca.textContent
+                );
+
+            marca.replaceWith(texto);
+
+            // Volver a unir los fragmentos de texto
+            if (padre) {
+                padre.normalize();
+            }
+
+        });
+
+}
+
+
+// Buscar dentro de la sección visible
+function buscarPalabraEnSeccion() {
+
+    if (!buscadorPalabra) {
+        return;
+    }
+
+    // Primero quitamos resultados anteriores
+    limpiarBusquedaPalabra();
+
+    indiceBusquedaPalabra = -1;
+
+
+    const termino =
+        buscadorPalabra.value.trim();
+
+    if (termino.length < 1) {
+    return;
+}
+
+
+    // Buscar la sección actualmente visible
+    const seccionActiva =
+        Array.from(
+            document.querySelectorAll(".seccion-app")
+        ).find(seccion => {
+
+            return (
+                !seccion.hidden &&
+                getComputedStyle(seccion).display !== "none"
+            );
+
+        });
+
+
+    if (!seccionActiva) {
+        return;
+    }
+
+
+    const terminoSeguro =
+    termino.replace(
+        /[.*+?^${}()|[\]\\]/g,
+        "\\$&"
+    );
+
+    const expresion =
+    new RegExp(
+        `(${terminoSeguro})`,
+        "gi"
+    );
+
+
+    const walker =
+        document.createTreeWalker(
+            seccionActiva,
+            NodeFilter.SHOW_TEXT
+        );
+
+
+    const nodosTexto = [];
+
+    let nodo;
+
+    while (
+        nodo = walker.nextNode()
+    ) {
+
+        const padre =
+            nodo.parentElement;
+
+        if (!padre) {
+            continue;
+        }
+
+
+        // No tocar controles ni elementos delicados
+        if (
+            padre.closest(
+                "input, textarea, select, option, script, style, button"
+            )
+        ) {
+            continue;
+        }
+
+
+        if (
+            nodo.textContent &&
+            expresion.test(nodo.textContent)
+        ) {
+            nodosTexto.push(nodo);
+        }
+
+        expresion.lastIndex = 0;
+    }
+
+
+    // Reemplazar coincidencias por MARK
+    nodosTexto.forEach(nodoTexto => {
+
+        const fragmento =
+            document.createDocumentFragment();
+
+        const partes =
+            nodoTexto.textContent.split(expresion);
+
+
+        partes.forEach(parte => {
+
+            if (
+                parte.toLowerCase() ===
+                termino.toLowerCase()
+            ) {
+
+                const marca =
+                    document.createElement("mark");
+
+                marca.className =
+                    "busqueda-palabra-marca";
+
+                marca.textContent =
+                    parte;
+
+                fragmento.appendChild(
+                    marca
+                );
+
+            } else {
+
+                fragmento.appendChild(
+                    document.createTextNode(parte)
+                );
+
+            }
+
+        });
+
+
+        nodoTexto.replaceWith(
+            fragmento
+        );
+
+    });
+
+
+    // Llevarnos a la primera coincidencia
+    const coincidencias =
+    seccionActiva.querySelectorAll(
+        ".busqueda-palabra-marca"
+    );
+
+if (contadorBusquedaPalabra) {
+
+    if (coincidencias.length > 0) {
+
+        contadorBusquedaPalabra.textContent =
+            `0/${coincidencias.length}`;
+
+        contadorBusquedaPalabra.hidden =
+            false;
+
+    if (botonBusquedaAnterior) {
+        botonBusquedaAnterior.hidden = false;
+}
+
+    if (botonBusquedaSiguiente) {
+        botonBusquedaSiguiente.hidden = false;
+}
+
+    } else {
+
+        contadorBusquedaPalabra.textContent =
+            "0/0";
+
+        contadorBusquedaPalabra.hidden =
+            termino.length === 0;
+
+        if (botonBusquedaAnterior) {
+        botonBusquedaAnterior.hidden = true;
+}
+
+        if (botonBusquedaSiguiente) {
+        botonBusquedaSiguiente.hidden = true;
+}
+    }
+}
+
+}
+
+
+// Mientras escribimos
+if (buscadorPalabra) {
+
+    buscadorPalabra.addEventListener(
+        "input",
+        buscarPalabraEnSeccion
+    );
+
+buscadorPalabra.addEventListener(
+    "keydown",
+    evento => {
+
+        if (evento.key !== "Enter") {
+            return;
+        }
+
+        evento.preventDefault();
+
+        const seccionActiva =
+            Array.from(
+                document.querySelectorAll(
+                    ".seccion-app"
+                )
+            ).find(seccion => {
+
+                return (
+                    !seccion.hidden &&
+                    getComputedStyle(seccion).display !== "none"
+                );
+
+            });
+
+        if (!seccionActiva) {
+            return;
+        }
+
+        const coincidencias =
+            Array.from(
+                seccionActiva.querySelectorAll(
+                    ".busqueda-palabra-marca"
+                )
+            );
+
+        if (coincidencias.length === 0) {
+            return;
+        }
+
+
+        // Pasar a la siguiente coincidencia
+        indiceBusquedaPalabra++;
+
+        // Si llegamos al final, volver a la primera
+        if (
+            indiceBusquedaPalabra >=
+            coincidencias.length
+        ) {
+            indiceBusquedaPalabra = 0;
+        }
+
+
+        // Quitar selección anterior
+        coincidencias.forEach(
+            marca => {
+                marca.classList.remove(
+                    "busqueda-palabra-activa"
+                );
+            }
+        );
+
+
+        const actual =
+            coincidencias[indiceBusquedaPalabra];
+
+        actual.classList.add(
+            "busqueda-palabra-activa"
+        );
+
+
+        actual.scrollIntoView({
+            behavior: "smooth",
+            block: "center"
+        });
+
+
+        if (contadorBusquedaPalabra) {
+
+            contadorBusquedaPalabra.textContent =
+                `${indiceBusquedaPalabra + 1}/${coincidencias.length}`;
+
+            contadorBusquedaPalabra.hidden =
+                false;
+        }
+
+    }
+);
+
+if (botonBusquedaSiguiente) {
+    botonBusquedaSiguiente.addEventListener(
+        "click",
+        () => {
+            buscadorPalabra.dispatchEvent(
+                new KeyboardEvent(
+                    "keydown",
+                    {
+                        key: "Enter",
+                        bubbles: true
+                    }
+                )
+            );
+        }
+    );
+}
+
+if (botonBusquedaAnterior) {
+
+    botonBusquedaAnterior.addEventListener(
+        "click",
+        () => {
+
+            const seccionActiva =
+                Array.from(
+                    document.querySelectorAll(
+                        ".seccion-app"
+                    )
+                ).find(seccion =>
+                    !seccion.hidden &&
+                    getComputedStyle(seccion).display !== "none"
+                );
+
+            if (!seccionActiva) return;
+
+            const coincidencias =
+                Array.from(
+                    seccionActiva.querySelectorAll(
+                        ".busqueda-palabra-marca"
+                    )
+                );
+
+            if (coincidencias.length === 0) return;
+
+            indiceBusquedaPalabra--;
+
+            if (indiceBusquedaPalabra < 0) {
+                indiceBusquedaPalabra =
+                    coincidencias.length - 1;
+            }
+
+            coincidencias.forEach(marca => {
+                marca.classList.remove(
+                    "busqueda-palabra-activa"
+                );
+            });
+
+            const actual =
+                coincidencias[indiceBusquedaPalabra];
+
+            actual.classList.add(
+                "busqueda-palabra-activa"
+            );
+
+            actual.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+
+            if (contadorBusquedaPalabra) {
+                contadorBusquedaPalabra.textContent =
+                    `${indiceBusquedaPalabra + 1}/${coincidencias.length}`;
+            }
+        }
+    );
+}
+
+}
+
+
+// Si cambiamos de sección,
+// repetir la búsqueda en la nueva sección
+document.addEventListener(
+    "click",
+    evento => {
+
+        const botonSeccion =
+            evento.target.closest(
+                "[data-seccion]"
+            );
+
+        if (!botonSeccion) {
+            return;
+        }
+
+        setTimeout(
+            buscarPalabraEnSeccion,
+            50
+        );
+
+    }
+);
