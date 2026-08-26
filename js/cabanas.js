@@ -1963,6 +1963,362 @@ function cargarNotasFichaReserva(reservaId) {
 }
 
 // ========================================
+// BUSCADOR GLOBAL DE RESERVAS
+// ========================================
+
+const buscadorReservas =
+    document.getElementById("busqueda-reservas");
+
+const resultadosBusquedaReservas =
+    document.getElementById(
+        "resultados-busqueda-reservas"
+    );
+
+
+// Normaliza texto para que la búsqueda sea más flexible
+function normalizarBusqueda(texto) {
+
+    return String(texto || "")
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .trim();
+}
+
+
+// ========================================
+// OBTENER RESERVAS ÚNICAS
+// ========================================
+
+function obtenerReservasParaBusqueda() {
+
+    const reservas = new Map();
+
+    const fichas =
+        JSON.parse(
+            localStorage.getItem("haikuFichaReservas")
+        ) || {};
+
+
+    Object.entries(datosPorFecha).forEach(
+        ([fecha, datosDia]) => {
+
+            if (!datosDia?.cabanas) {
+                return;
+            }
+
+            Object.entries(datosDia.cabanas).forEach(
+                ([numeroCabana, cabana]) => {
+
+                    if (!cabana?.reservaId) {
+                        return;
+                    }
+
+
+                    const reservaId =
+                        String(cabana.reservaId);
+
+                    const ficha =
+                        fichas[reservaId] || {};
+
+
+                    const fechaIngreso =
+                        cabana.fechaOrigenReserva ||
+                        fecha;
+
+
+                    // Evitamos repetir la misma reserva
+                    if (!reservas.has(reservaId)) {
+
+                        reservas.set(
+                            reservaId,
+                            {
+                                reservaId,
+                                numeroCabana,
+                                fechaIngreso,
+
+                                titular:
+                                    cabana.titular ||
+                                    "Sin titular",
+
+                                rut:
+                                    ficha.rut ||
+                                    cabana.rut ||
+                                    "",
+
+                                telefono:
+                                    ficha.telefono ||
+                                    cabana.telefono ||
+                                    "",
+
+                                correo:
+                                    ficha.correo ||
+                                    cabana.correo ||
+                                    cabana.email ||
+                                    "",
+
+                                acompanantes: [
+                                    ficha.acompanante1,
+                                    ficha.acompanante2,
+                                    ficha.acompanante3,
+                                    ficha.acompanante4,
+                                    ficha.acompanante5
+                                ]
+                                .filter(Boolean)
+                                .join(" ")
+                            }
+                        );
+                    }
+
+                }
+            );
+        }
+    );
+
+
+    return Array.from(
+        reservas.values()
+    );
+}
+
+
+// ========================================
+// MOSTRAR RESULTADOS
+// ========================================
+
+function buscarReservas(texto) {
+
+    if (
+        !resultadosBusquedaReservas ||
+        !buscadorReservas
+    ) {
+        return;
+    }
+
+
+    const termino =
+        normalizarBusqueda(texto);
+
+
+    resultadosBusquedaReservas.innerHTML = "";
+
+
+    if (termino.length < 2) {
+
+        resultadosBusquedaReservas.hidden = true;
+        return;
+    }
+
+
+    const reservas =
+        obtenerReservasParaBusqueda();
+
+
+    const coincidencias =
+        reservas.filter(reserva => {
+
+            const textoBusqueda =
+                normalizarBusqueda(
+                    [
+                        reserva.titular,
+                        reserva.reservaId,
+                        reserva.rut,
+                        reserva.telefono,
+                        reserva.correo,
+                        reserva.acompanantes
+                    ].join(" ")
+                );
+
+
+            return textoBusqueda.includes(
+                termino
+            );
+
+        });
+
+
+    if (coincidencias.length === 0) {
+
+        resultadosBusquedaReservas.innerHTML = `
+            <div class="busqueda-reserva-vacia">
+                Sin reservas encontradas
+            </div>
+        `;
+
+        resultadosBusquedaReservas.hidden = false;
+
+        return;
+    }
+
+
+    coincidencias
+        .slice(0, 8)
+        .forEach(reserva => {
+
+            const boton =
+                document.createElement("button");
+
+            boton.type = "button";
+
+            boton.className =
+                "resultado-reserva-item";
+
+            boton.dataset.reservaId =
+                reserva.reservaId;
+
+            boton.dataset.cabana =
+                reserva.numeroCabana;
+
+            boton.dataset.fecha =
+                reserva.fechaIngreso;
+
+
+            boton.innerHTML = `
+                <strong>
+                    ${reserva.titular}
+                </strong>
+
+                <span>
+                    CAB ${reserva.numeroCabana}
+                    ·
+                    ${reserva.reservaId}
+                </span>
+
+                ${
+                    reserva.rut ||
+                    reserva.telefono
+                        ? `
+                        <small>
+                            ${reserva.rut || ""}
+                            ${
+                                reserva.rut &&
+                                reserva.telefono
+                                    ? " · "
+                                    : ""
+                            }
+                            ${reserva.telefono || ""}
+                        </small>
+                        `
+                        : ""
+                }
+            `;
+
+
+            resultadosBusquedaReservas.appendChild(
+                boton
+            );
+
+        });
+
+
+    resultadosBusquedaReservas.hidden = false;
+}
+
+
+// ========================================
+// ESCRIBIR EN BUSCADOR
+// ========================================
+
+if (buscadorReservas) {
+
+    buscadorReservas.addEventListener(
+        "input",
+        () => {
+
+            buscarReservas(
+                buscadorReservas.value
+            );
+
+        }
+    );
+}
+
+
+// ========================================
+// CLICK EN UNA RESERVA ENCONTRADA
+// ========================================
+
+if (resultadosBusquedaReservas) {
+
+    resultadosBusquedaReservas.addEventListener(
+        "click",
+        evento => {
+
+            const resultado =
+                evento.target.closest(
+                    ".resultado-reserva-item"
+                );
+
+            if (!resultado) {
+                return;
+            }
+
+
+            const numeroCabana =
+                resultado.dataset.cabana;
+
+            const fechaReserva =
+                resultado.dataset.fecha;
+
+
+            const fechaAnterior =
+                fechaSeleccionada;
+
+
+            // El modal actual busca la reserva
+            // usando fechaSeleccionada.
+            fechaSeleccionada =
+                fechaReserva;
+
+
+            const botonCabana =
+                document.querySelector(
+                    `[data-ficha-cabana="${numeroCabana}"]`
+                );
+
+
+            if (botonCabana) {
+
+                botonCabana.click();
+
+            }
+
+
+            // Dejamos al usuario en el día
+            // que estaba mirando originalmente.
+            fechaSeleccionada =
+                fechaAnterior;
+
+
+            resultadosBusquedaReservas.hidden =
+                true;
+
+            buscadorReservas.value = "";
+
+        }
+    );
+}
+
+// ========================================
+// CERRAR BUSCADOR AL HACER CLICK AFUERA
+// ========================================
+
+document.addEventListener("click", (evento) => {
+
+    const dentroDelBuscador =
+        evento.target.closest(".busqueda-reservas-wrap");
+
+    if (dentroDelBuscador) {
+        return;
+    }
+
+    if (resultadosBusquedaReservas) {
+        resultadosBusquedaReservas.hidden = true;
+    }
+
+});
+
+// ========================================
 // ABRIR FICHA DE RESERVA
 // ========================================
 
