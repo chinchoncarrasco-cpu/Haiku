@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-    <title>Haiku | Panel de Turno</title>
+    <title>Haiku</title>
 
     <link rel="stylesheet" href="css/styles.css">
 </head>
@@ -17,10 +17,62 @@
     ========================== -->
     <aside class="sidebar">
 
-    <div class="logo">
-        <h1>HAIKU</h1>
-        <p>Panel de Turno</p>
+    <div class="sidebar-superior">
+
+    <div class="sidebar-fila-superior">
+
+        <div class="logo">
+            <h1>HAIKU</h1>
+        </div>
+
+        <button
+            type="button"
+            id="boton-notificaciones"
+            class="boton-notificaciones"
+            aria-label="Abrir notificaciones"
+        >
+            🔔
+
+            <span
+                id="contador-notificaciones"
+                class="contador-notificaciones"
+                hidden
+            >
+                0
+            </span>
+        </button>
+
     </div>
+
+
+    <div class="busquedas-globales">
+
+        <div class="busqueda-reservas-wrap">
+            <span>⌕</span>
+
+            <input
+                type="search"
+                id="busqueda-reservas"
+                placeholder="Buscar reserva..."
+                autocomplete="off"
+            >
+        </div>
+
+
+        <div class="busqueda-palabra-wrap">
+            <span>⌕</span>
+
+            <input
+                type="search"
+                id="busqueda-palabra"
+                placeholder="Palabra clave..."
+                autocomplete="off"
+            >
+        </div>
+
+    </div>
+
+</div>
 
     <nav class="menu">
 

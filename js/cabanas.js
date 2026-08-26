@@ -45,6 +45,24 @@ function guardarCampoCabana(elemento) {
 
 datos.cabanas[numeroCabana][campo] = valor;
 
+// CONTINÚA = huésped ya realizó check-in
+if (
+    campo === "estado" &&
+    valor === "continua"
+) {
+
+    datos.cabanas[numeroCabana].checkinRealizado = true;
+
+    const checkin =
+        fila.querySelector(
+            '[data-campo="checkinRealizado"]'
+        );
+
+    if (checkin) {
+        checkin.checked = true;
+    }
+}
+
 // Sincronizar ocupación en todos los días de la misma reserva
 const reservaIdActual = datos.cabanas[numeroCabana].reservaId;
 
@@ -206,6 +224,16 @@ function cargarCabanasDia(fecha) {
 
         const datosCabana =
             datos.cabanas[numeroCabana] || {};
+
+    // Si la reserva CONTINÚA, el huésped ya hizo check-in
+if (
+    datosCabana.estado === "continua" &&
+    datosCabana.checkinRealizado !== true
+) {
+
+    datosCabana.checkinRealizado = true;
+    guardarDatos();
+}
 
     // ========================================
     // SERVICIOS DEL DÍA POR CABAÑA

@@ -79,8 +79,14 @@ body {
 
 
 .logo h1 {
-    font-size: 26px;
+    font-size: 22px;
     letter-spacing: 4px;
+    margin: 0;
+}
+
+.sidebar-marca {
+    flex: 0 0 auto;
+    min-width: 120px;
 }
 
 
@@ -5842,4 +5848,129 @@ tr.cabana-libre .info-cabana {
         font-size: 13px;
     }
 
+}
+
+
+/* =========================================
+   CABECERA GLOBAL - DISEÑO FINAL
+   ========================================= */
+
+/* FILA HAIKU + CAMPANA */
+.sidebar-fila-superior {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 10px !important;
+
+    margin-bottom: 12px !important;
+}
+
+.sidebar-fila-superior .logo h1 {
+    margin: 0 !important;
+    font-size: 22px !important;
+    line-height: 1 !important;
+    letter-spacing: 4px !important;
+}
+
+
+/* CAMPANA */
+.sidebar-fila-superior .boton-notificaciones {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    width: 34px !important;
+    height: 34px !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: 1px solid rgba(255,255,255,0.15) !important;
+    border-radius: 8px !important;
+
+    background: rgba(255,255,255,0.08) !important;
+    color: #fff !important;
+
+    font-size: 15px !important;
+    cursor: pointer !important;
+}
+
+
+/* FILA DE LOS DOS BUSCADORES */
+.busquedas-globales {
+    display: grid !important;
+    grid-template-columns: 1.35fr 1fr !important;
+    gap: 8px !important;
+
+    width: 100% !important;
+}
+
+
+/* CAJAS DE BÚSQUEDA */
+.busqueda-reservas-wrap,
+.busqueda-palabra-wrap {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+
+    width: 100% !important;
+    height: 34px !important;
+
+    padding: 0 9px !important;
+    margin: 0 !important;
+
+    box-sizing: border-box !important;
+
+    background: rgba(255,255,255,0.08) !important;
+    border: 1px solid rgba(255,255,255,0.14) !important;
+    border-radius: 8px !important;
+}
+
+
+/* LUPA */
+.busqueda-reservas-wrap > span,
+.busqueda-palabra-wrap > span {
+    display: inline-flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+
+    margin: 0 !important;
+
+    color: rgba(255,255,255,0.8) !important;
+    font-size: 11px !important;
+    line-height: 1 !important;
+}
+
+
+/* INPUTS */
+.busqueda-reservas-wrap input,
+.busqueda-palabra-wrap input {
+    appearance: none !important;
+    -webkit-appearance: none !important;
+
+    width: 100% !important;
+    min-width: 0 !important;
+    height: 100% !important;
+
+    padding: 0 !important;
+    margin: 0 !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+
+    background: transparent !important;
+    color: #fff !important;
+
+    font-family: inherit !important;
+    font-size: 11px !important;
+}
+
+.busqueda-reservas-wrap input::placeholder,
+.busqueda-palabra-wrap input::placeholder {
+    color: rgba(255,255,255,0.55) !important;
+    opacity: 1 !important;
 }
