@@ -3725,8 +3725,81 @@ tr.cabana-checkin {
 }
 
 /* =========================================
+   COLORES SEGÚN ESTADO OPERATIVO
+   ========================================= */
+
+
+/* LIBRE / LIBRE */
+.tabla-contenedor tr[data-cabana]:has(
+    select[data-campo="estado"] option[value="libre-libre"]:checked
+) > td {
+    background-color: #F1F3F2;
+}
+
+
+/* SALE / LIBRE */
+.tabla-contenedor tr[data-cabana]:has(
+    select[data-campo="estado"] option[value="sale-libre"]:checked
+) > td {
+    background-color: #F6EBCF;
+}
+
+
+/* FULLDAY */
+.tabla-contenedor tr[data-cabana]:has(
+    select[data-campo="estado"] option[value="fullday"]:checked
+) > td {
+    background-color: #E9E2F3;
+}
+
+
+/* LIBRE / INGRESA */
+.tabla-contenedor tr[data-cabana]:has(
+    select[data-campo="estado"] option[value="libre-ingresa"]:checked
+) > td {
+    background-color: #F6D6D0;
+}
+
+
+/* SALE / INGRESA */
+.tabla-contenedor tr[data-cabana]:has(
+    select[data-campo="estado"] option[value="sale-ingresa"]:checked
+) > td {
+    background-color: #F8D7B8;
+}
+
+/* =========================================
    COLORES OPERATIVOS DE CABAÑAS
    ========================================= */
+
+   /* BLOQUEADA → ROJO SUAVE */
+.tabla-contenedor tr.cabana-bloqueada > td {
+    background-color: #fde2e2 !important;
+}
+
+.tabla-contenedor tr.cabana-bloqueada > td.info-cabana {
+    background-color: #fde2e2 !important;
+}
+
+   /* CHECK-OUT realizado → AZUL */
+.tabla-contenedor tr.cabana-checkout > td {
+    background-color: #eef6fb !important;
+}
+
+.tabla-contenedor tr.cabana-checkout > td.info-cabana {
+    background-color: #eef6fb !important;
+}
+
+
+/* CHECK-IN realizado → VERDE */
+/* Tiene prioridad porque JS aplica cabana-checkin antes que cabana-checkout */
+.tabla-contenedor tr.cabana-checkin > td {
+    background-color: #eef8f1 !important;
+}
+
+.tabla-contenedor tr.cabana-checkin > td.info-cabana {
+    background-color: #eef8f1 !important;
+}
 
 /* CHECK-OUT realizado → azul suave */
 tr.cabana-checkout > td {
