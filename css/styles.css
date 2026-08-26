@@ -7428,3 +7428,591 @@ tr.cabana-libre .info-cabana {
         font-size: 13px;
     }
 }
+
+/* =========================================
+   CABAÑAS · TARJETAS MODERNAS
+   ========================================= */
+
+.lista-revision-cabanas {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+/* TARJETA BASE */
+
+.cabana-revision {
+    width: 100%;
+    min-height: 0;
+
+    display: block;
+
+    padding: 0;
+
+    border: 1px solid #e1e5e2;
+    border-radius: 12px;
+
+    background: #ffffff;
+
+    overflow: hidden;
+
+    font-family: inherit;
+    text-align: left;
+    cursor: pointer;
+
+    box-shadow:
+        0 1px 2px rgba(20, 35, 27, 0.03);
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease,
+        transform 0.15s ease;
+}
+
+.cabana-revision:hover {
+    transform: translateY(-1px);
+
+    border-color: #c8d1cc;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 4px 12px rgba(20, 35, 27, 0.06);
+}
+
+
+/* CONTENIDO */
+
+.cabana-revision-info {
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+
+    gap: 0;
+
+    padding: 12px;
+}
+
+
+/* CABECERA */
+
+.cabana-revision-info > strong {
+    display: block;
+
+    padding-bottom: 8px;
+    margin-bottom: 8px;
+
+    border-bottom: 1px solid #edf0ee;
+
+    font-size: 12px;
+    font-weight: 700;
+    color: #26322b;
+}
+
+
+/* NOMBRE DEL TITULAR */
+
+.cabana-revision-info > strong span {
+    font-size: 11px;
+    font-weight: 400;
+    color: #68716c;
+}
+
+
+/* HUÉSPEDES */
+
+.cabana-huespedes {
+    display: block;
+
+    margin-bottom: 8px;
+
+    font-size: 10px;
+    color: #707973;
+}
+
+
+/* DATOS OPERATIVOS */
+
+.cabana-datos-operativos {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+
+    gap: 5px;
+
+    margin: 0;
+}
+
+
+/* ESTADO OPERATIVO */
+
+.cabana-estado-operativo:not(:empty) {
+    padding: 4px 7px;
+
+    border-radius: 999px;
+
+    background: #f1f3f2;
+
+    font-size: 9px;
+    font-weight: 600;
+    color: #59635d;
+}
+
+
+/* IN / OUT */
+
+.cabana-in:not(:empty),
+.cabana-out:not(:empty) {
+    padding: 4px 7px;
+
+    border-radius: 7px;
+
+    background: #f4f6f5;
+
+    font-size: 9px;
+    font-weight: 500;
+    color: #59635d;
+}
+
+
+/* ESTADO DE REVISIÓN */
+
+.cabana-estado {
+    margin-left: auto;
+
+    padding: 4px 8px;
+
+    border-radius: 999px;
+
+    font-size: 9px !important;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+}
+
+
+/* ASEO */
+
+.cabana-aseo:not(:empty) {
+    width: 100%;
+
+    margin-top: 7px;
+    padding-top: 7px;
+
+    border-top: 1px solid #edf0ee;
+
+    font-size: 9px;
+    color: #626b65;
+}
+
+
+/* NOTA OPERATIVA */
+
+.cabana-nota-operativa {
+    margin-top: 7px;
+    padding-top: 7px;
+
+    border-top: 1px solid #edf0ee;
+
+    font-size: 10px;
+    line-height: 1.4;
+    color: #525d57;
+}
+
+.cabana-nota-operativa:empty {
+    display: none;
+}
+
+
+/* OCULTAMOS EL TEXTO ANTIGUO
+   "VER REVISIÓN →"
+   TODA LA TARJETA YA ES CLICKEABLE */
+
+.cabana-abrir {
+    display: none;
+}
+
+
+/* =========================================
+   COLORES DE ESTADO
+   ========================================= */
+
+/* PENDIENTE */
+
+.cabana-revision.revision-pendiente {
+    background: #ffffff;
+    border-color: #ead7b2;
+}
+
+.cabana-estado[data-estado="pendiente"] {
+    background: #fff0d3;
+    color: #8b621e;
+}
+
+
+/* CON DETALLES */
+
+.cabana-revision.revision-con-detalles {
+    background: #fffdf8;
+    border-color: #dfcf8c;
+}
+
+.cabana-estado[data-estado="con-detalles"] {
+    background: #f7ecc1;
+    color: #71601c;
+}
+
+
+/* LISTA */
+
+.cabana-revision.revision-lista {
+    background: #f8fcf9;
+    border-color: #bfd8c8;
+}
+
+.cabana-estado[data-estado="lista"] {
+    background: #e2f1e7;
+    color: #31704b;
+}
+
+
+/* =========================================
+   MÓVIL
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    .lista-revision-cabanas {
+        gap: 9px;
+    }
+
+    .cabana-revision-info {
+        padding: 11px;
+    }
+
+    .cabana-revision-info > strong {
+        font-size: 11px;
+    }
+
+    .cabana-revision-info > strong span {
+        font-size: 10px;
+    }
+
+    .cabana-huespedes {
+        font-size: 9px;
+    }
+}
+
+/* =========================================
+   ASEO · TARJETAS MODERNAS
+   ========================================= */
+
+.aseo-resumen {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+/* TARJETA BASE */
+
+.aseo-resumen-cabana {
+    padding: 12px;
+
+    border: 1px solid #e1e5e2;
+    border-radius: 12px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 1px 2px rgba(20, 35, 27, 0.03);
+
+    transition:
+        border-color 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+
+/* CABECERA */
+
+.aseo-resumen-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding-bottom: 8px;
+    margin-bottom: 10px;
+
+    border-bottom: 1px solid #edf0ee;
+}
+
+.aseo-resumen-numero {
+    min-width: 0;
+
+    font-size: 11px;
+    font-weight: 700;
+    color: #26322b;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* SELECT ESTADO */
+
+.aseo-estado-select {
+    flex-shrink: 0;
+
+    width: auto;
+    min-width: 92px;
+    height: 27px;
+
+    padding: 0 25px 0 9px;
+
+    border: 1px solid #d9dedb;
+    border-radius: 999px;
+
+    background: #f4f6f5;
+
+    font-family: inherit;
+    font-size: 9px;
+    font-weight: 600;
+    color: #59635d;
+
+    cursor: pointer;
+}
+
+
+/* DATOS */
+
+.aseo-resumen-datos {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+
+/* ENCARGADO + REVISIÓN */
+
+.aseo-resumen-personal {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+
+    gap: 9px;
+}
+
+.aseo-resumen-encargado,
+.aseo-resumen-revision {
+    min-width: 0;
+}
+
+.aseo-resumen-encargado > span,
+.aseo-resumen-revision > span {
+    display: block;
+
+    margin-bottom: 4px;
+
+    font-size: 8px;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: #8a928d;
+}
+
+
+/* INPUTS ENCARGADO / REVISIÓN */
+
+.aseo-encargado-input,
+.aseo-revision-input {
+    box-sizing: border-box;
+
+    width: 100%;
+    height: 32px;
+
+    padding: 0 8px;
+
+    border: 1px solid #e1e5e2;
+    border-radius: 8px;
+
+    background: #fafbfa;
+
+    font-family: inherit;
+    font-size: 10px;
+    color: #26322b;
+
+    outline: none;
+}
+
+.aseo-encargado-input:focus,
+.aseo-revision-input:focus {
+    border-color: #afc5b8;
+    background: #ffffff;
+}
+
+
+/* HORARIOS */
+
+.aseo-resumen-horario {
+    display: grid;
+    grid-template-columns:
+        minmax(0, 1fr)
+        minmax(0, 1fr);
+
+    gap: 9px;
+}
+
+.aseo-resumen-horario > div {
+    padding: 7px 8px;
+
+    border-radius: 8px;
+
+    background: #f4f6f5;
+}
+
+.aseo-resumen-horario > div > span {
+    display: block;
+
+    margin-bottom: 2px;
+
+    font-size: 8px;
+    letter-spacing: 0.05em;
+    color: #8a928d;
+}
+
+
+/* INPUT HORA */
+
+.aseo-hora-input {
+    width: 100%;
+
+    padding: 0;
+
+    border: 0;
+    outline: 0;
+
+    background: transparent;
+
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+    color: #35413a;
+}
+
+
+/* NOTA */
+
+.aseo-resumen-nota {
+    margin-top: 8px;
+    padding-top: 8px;
+
+    border-top: 1px solid #edf0ee;
+
+    font-size: 9px;
+    line-height: 1.4;
+    color: #59635d;
+}
+
+
+/* SOLICITUD */
+
+.aseo-resumen-solicita {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+
+    margin-top: 8px;
+    padding: 7px 8px;
+
+    border-radius: 8px;
+
+    background: #f7f4ea;
+
+    font-size: 9px;
+    color: #665b39;
+}
+
+
+/* =========================================
+   COLORES SEGÚN ESTADO
+   ========================================= */
+
+/* PENDIENTE */
+
+.aseo-resumen-cabana.aseo-pendiente {
+    background: #ffffff;
+    border-color: #ead7b2;
+}
+
+.aseo-resumen-cabana.aseo-pendiente
+.aseo-estado-select {
+    background: #fff0d3;
+    border-color: #ecd39f;
+    color: #8b621e;
+}
+
+
+/* CON DETALLES */
+
+.aseo-resumen-cabana.aseo-detalles {
+    background: #fffdf8;
+    border-color: #dfcf8c;
+}
+
+.aseo-resumen-cabana.aseo-detalles
+.aseo-estado-select {
+    background: #f7ecc1;
+    border-color: #dfcf8c;
+    color: #71601c;
+}
+
+
+/* LISTA */
+
+.aseo-resumen-cabana.aseo-lista {
+    background: #f8fcf9;
+    border-color: #bfd8c8;
+}
+
+.aseo-resumen-cabana.aseo-lista
+.aseo-estado-select {
+    background: #e2f1e7;
+    border-color: #bfd8c8;
+    color: #31704b;
+}
+
+
+/* =========================================
+   MÓVIL
+   ========================================= */
+
+@media (max-width: 700px) {
+
+    .aseo-resumen {
+        gap: 9px;
+    }
+
+    .aseo-resumen-cabana {
+        padding: 11px;
+    }
+
+    .aseo-resumen-numero {
+        font-size: 10px;
+    }
+
+    .aseo-resumen-personal,
+    .aseo-resumen-horario {
+        gap: 7px;
+    }
+
+    .aseo-estado-select {
+        min-width: 88px;
+        font-size: 8px;
+    }
+}
