@@ -593,6 +593,7 @@ mostrarNotasOperativas(fechaSeleccionada);
 // Actualizar automáticamente las otras secciones
 actualizarTarjetasRevision(fechaSeleccionada);
 actualizarResumenAseo(fechaSeleccionada);
+generarResumenOperativo(fechaSeleccionada);
 
 textoNota.value = "";
 selectorNotaCabana.value = "";

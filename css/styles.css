@@ -8016,3 +8016,91 @@ tr.cabana-libre .info-cabana {
         font-size: 8px;
     }
 }
+
+/* =========================================
+   RESUMEN · NOTAS UNA SOLA LÍNEA
+   ========================================= */
+
+/* La columna deja de crecer por las notas */
+.tabla-contenedor > table th:nth-child(4),
+.tabla-contenedor > table td:nth-child(4) {
+    width: 118px;
+    min-width: 118px;
+    max-width: 118px;
+
+    padding-right: 8px !important;
+}
+
+
+/* Caja equivalente al campo Servicios */
+
+.nota-cabana {
+    box-sizing: border-box;
+
+    width: 110px !important;
+    min-width: 110px !important;
+    max-width: 110px !important;
+
+    height: 34px !important;
+    min-height: 34px !important;
+
+    padding: 7px 8px;
+
+    border: 1px solid #d9dedb;
+    border-radius: 8px;
+
+    background: #ffffff;
+
+    white-space: nowrap !important;
+
+    position: relative;
+
+    overflow: auto hidden !important;
+}
+
+
+/* Todo el contenido interno ocupa una sola tira horizontal */
+
+.nota-operativa-item {
+    display: inline-flex !important;
+    align-items: center;
+
+    width: max-content;
+    max-width: none;
+
+    white-space: nowrap !important;
+
+    margin-right: 6px;
+
+    vertical-align: middle;
+}
+
+
+/* La X forma parte de la tira y NO ensancha la caja */
+
+.nota-eliminar {
+    flex: 0 0 auto;
+
+    width: 15px;
+    min-width: 15px;
+    height: 18px;
+
+    padding: 0;
+    margin-left: 3px;
+}
+
+
+/* Scroll horizontal fino */
+
+.nota-cabana::-webkit-scrollbar {
+    height: 2px;
+}
+
+.nota-cabana::-webkit-scrollbar-thumb {
+    background: #bfc7c2;
+    border-radius: 999px;
+}
+
+.nota-cabana::-webkit-scrollbar-track {
+    background: transparent;
+}
