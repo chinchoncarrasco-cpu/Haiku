@@ -1199,6 +1199,43 @@ function obtenerCheckinsPendientes() {
         }));
 }
 
+// ========================================
+// SERVICIOS PRÓXIMOS REALES
+// ========================================
+
+function obtenerServiciosProximos() {
+
+    if (!fechaSeleccionada) {
+        return [];
+    }
+
+    const servicios =
+        JSON.parse(
+            localStorage.getItem("haikuServicios")
+        ) || [];
+
+    return servicios
+        .filter(servicio => {
+
+            const esDelDia =
+                servicio.fechaServicio ===
+                fechaSeleccionada;
+
+            const siguePendiente =
+                servicio.estadoServicio !==
+                "realizado";
+
+            return (
+                esDelDia &&
+                siguePendiente
+            );
+        })
+        .sort((a, b) =>
+            (a.hora || "")
+                .localeCompare(b.hora || "")
+        );
+}
+
 function actualizarNotificaciones() {
 
     if (!contenidoNotificaciones) {
@@ -1208,20 +1245,26 @@ function actualizarNotificaciones() {
     const checkinsPendientes =
         obtenerCheckinsPendientes();
 
+    const serviciosProximos =
+        obtenerServiciosProximos();
+
     contenidoNotificaciones.innerHTML = "";
 
 
-    // ============================
-    // SIN AVISOS
-    // ============================
+    // =====================================
+    // TODO AL DÍA
+    // =====================================
 
-    if (checkinsPendientes.length === 0) {
+    if (
+        checkinsPendientes.length === 0 &&
+        serviciosProximos.length === 0
+    ) {
 
         contenidoNotificaciones.innerHTML = `
             <div class="notificaciones-vacias">
                 <span>✓</span>
                 <strong>Todo al día</strong>
-                <small>No hay check-in pendientes.</small>
+                <small>No hay pendientes por ahora.</small>
             </div>
         `;
 
@@ -1229,9 +1272,9 @@ function actualizarNotificaciones() {
     }
 
 
-    // ============================
-    // AHORA
-    // ============================
+    // =====================================
+    // SECCIÓN AHORA
+    // =====================================
 
     const seccion =
         document.createElement("div");
@@ -1251,142 +1294,308 @@ function actualizarNotificaciones() {
     seccion.appendChild(titulo);
 
 
-    // ============================
-    // RESUMEN CHECK-IN
-    // ============================
+    // =====================================
+    // SERVICIOS PRÓXIMOS
+    // =====================================
 
-    const resumen =
-        document.createElement("button");
+    if (serviciosProximos.length > 0) {
 
-    resumen.type = "button";
-
-    resumen.className =
-        "notificacion-item";
-
-    resumen.innerHTML = `
-        <span class="notificacion-icono">
-            ⚠️
-        </span>
-
-        <span class="notificacion-contenido">
-            <strong>
-                ${checkinsPendientes.length}
-                ${
-                    checkinsPendientes.length === 1
-                        ? "check-in pendiente"
-                        : "check-in pendientes"
-                }
-            </strong>
-
-            <small>
-                Ver reservas
-            </small>
-        </span>
-
-        <span class="notificacion-flecha">
-            ›
-        </span>
-    `;
-
-
-    // Contenedor desplegable
-    const detalle =
-        document.createElement("div");
-
-    detalle.className =
-        "notificacion-detalle";
-
-    detalle.hidden = true;
-
-
-    checkinsPendientes.forEach(reserva => {
-
-        const item =
+        const resumenServicios =
             document.createElement("button");
 
-        item.type = "button";
+        resumenServicios.type = "button";
 
-        item.className =
-            "notificacion-reserva";
+        resumenServicios.className =
+            "notificacion-item";
 
-        item.dataset.cabana =
-            reserva.numeroCabana;
+        resumenServicios.innerHTML = `
+            <span class="notificacion-icono">
+                ⏰
+            </span>
 
-        item.innerHTML = `
-            <strong>
-                CAB ${reserva.numeroCabana}
-                ·
-                ${reserva.titular}
-            </strong>
+            <span class="notificacion-contenido">
+                <strong>
+                    ${serviciosProximos.length}
+                    ${
+                        serviciosProximos.length === 1
+                            ? "servicio próximo"
+                            : "servicios próximos"
+                    }
+                </strong>
 
-            <span>
-                ${
-                    reserva.hora
-                        ? `Ingreso ${reserva.hora}`
-                        : "Check-in pendiente"
-                }
+                <small>Ver servicios</small>
+            </span>
+
+            <span class="notificacion-flecha">
+                ›
             </span>
         `;
 
-        detalle.appendChild(item);
-    });
+
+        const detalleServicios =
+            document.createElement("div");
+
+        detalleServicios.className =
+            "notificacion-detalle";
+
+        detalleServicios.hidden = true;
 
 
-    resumen.addEventListener(
-        "click",
-        () => {
+        serviciosProximos.forEach(servicio => {
 
-            detalle.hidden =
-                !detalle.hidden;
+            const item =
+                document.createElement("button");
 
-            const flecha =
-                resumen.querySelector(
-                    ".notificacion-flecha"
-                );
+            item.type = "button";
 
-            if (flecha) {
-                flecha.textContent =
-                    detalle.hidden
-                        ? "›"
-                        : "⌄";
+            item.className =
+                "notificacion-reserva";
+
+            item.dataset.cabana =
+                servicio.numeroCabana || "";
+
+            item.dataset.fecha =
+                servicio.fechaServicio || "";
+
+            item.innerHTML = `
+                <strong>
+                    ${servicio.hora || "--:--"}
+                    ·
+                    ${servicio.nombre || "Servicio"}
+                </strong>
+
+                <span>
+                    CAB ${servicio.numeroCabana}
+                    ${
+                        servicio.titular
+                            ? ` · ${servicio.titular}`
+                            : ""
+                    }
+                </span>
+            `;
+
+            detalleServicios.appendChild(item);
+        });
+
+
+        resumenServicios.addEventListener(
+            "click",
+            () => {
+
+                detalleServicios.hidden =
+                    !detalleServicios.hidden;
+
+                const flecha =
+                    resumenServicios.querySelector(
+                        ".notificacion-flecha"
+                    );
+
+                if (flecha) {
+                    flecha.textContent =
+                        detalleServicios.hidden
+                            ? "›"
+                            : "⌄";
+                }
             }
-        }
-    );
+        );
 
 
-    detalle.addEventListener(
-        "click",
-        evento => {
+        detalleServicios.addEventListener(
+            "click",
+            evento => {
 
-            const reserva =
-                evento.target.closest(
-                    ".notificacion-reserva"
-                );
+                const servicio =
+                    evento.target.closest(
+                        ".notificacion-reserva"
+                    );
 
-            if (!reserva) {
-                return;
+                if (!servicio) {
+                    return;
+                }
+
+                const numeroCabana =
+                    servicio.dataset.cabana;
+
+                const fechaServicio =
+                    servicio.dataset.fecha;
+
+
+                const fechaAnterior =
+                    fechaSeleccionada;
+
+                if (fechaServicio) {
+                    fechaSeleccionada =
+                        fechaServicio;
+                }
+
+
+                const botonCabana =
+                    document.querySelector(
+                        `[data-ficha-cabana="${numeroCabana}"]`
+                    );
+
+
+                if (botonCabana) {
+
+                    cerrarPanelNotificaciones();
+
+                    botonCabana.click();
+                }
+
+
+                fechaSeleccionada =
+                    fechaAnterior;
             }
+        );
 
-            const numeroCabana =
-                reserva.dataset.cabana;
 
-            const botonCabana =
-                document.querySelector(
-                    `[data-ficha-cabana="${numeroCabana}"]`
-                );
+        seccion.appendChild(
+            resumenServicios
+        );
 
-            if (botonCabana) {
+        seccion.appendChild(
+            detalleServicios
+        );
+    }
 
-                cerrarPanelNotificaciones();
 
-                botonCabana.click();
+    // =====================================
+    // CHECK-IN PENDIENTES
+    // =====================================
+
+    if (checkinsPendientes.length > 0) {
+
+        const resumen =
+            document.createElement("button");
+
+        resumen.type = "button";
+
+        resumen.className =
+            "notificacion-item";
+
+        resumen.innerHTML = `
+            <span class="notificacion-icono">
+                ⚠️
+            </span>
+
+            <span class="notificacion-contenido">
+                <strong>
+                    ${checkinsPendientes.length}
+                    ${
+                        checkinsPendientes.length === 1
+                            ? "check-in pendiente"
+                            : "check-in pendientes"
+                    }
+                </strong>
+
+                <small>Ver reservas</small>
+            </span>
+
+            <span class="notificacion-flecha">
+                ›
+            </span>
+        `;
+
+
+        const detalle =
+            document.createElement("div");
+
+        detalle.className =
+            "notificacion-detalle";
+
+        detalle.hidden = true;
+
+
+        checkinsPendientes.forEach(reserva => {
+
+            const item =
+                document.createElement("button");
+
+            item.type = "button";
+
+            item.className =
+                "notificacion-reserva";
+
+            item.dataset.cabana =
+                reserva.numeroCabana;
+
+            item.innerHTML = `
+                <strong>
+                    CAB ${reserva.numeroCabana}
+                    ·
+                    ${reserva.titular}
+                </strong>
+
+                <span>
+                    ${
+                        reserva.hora
+                            ? `Ingreso ${reserva.hora}`
+                            : "Check-in pendiente"
+                    }
+                </span>
+            `;
+
+            detalle.appendChild(item);
+        });
+
+
+        resumen.addEventListener(
+            "click",
+            () => {
+
+                detalle.hidden =
+                    !detalle.hidden;
+
+                const flecha =
+                    resumen.querySelector(
+                        ".notificacion-flecha"
+                    );
+
+                if (flecha) {
+                    flecha.textContent =
+                        detalle.hidden
+                            ? "›"
+                            : "⌄";
+                }
             }
-        }
-    );
+        );
 
 
-    seccion.appendChild(resumen);
-    seccion.appendChild(detalle);
+        detalle.addEventListener(
+            "click",
+            evento => {
+
+                const reserva =
+                    evento.target.closest(
+                        ".notificacion-reserva"
+                    );
+
+                if (!reserva) {
+                    return;
+                }
+
+                const numeroCabana =
+                    reserva.dataset.cabana;
+
+                const botonCabana =
+                    document.querySelector(
+                        `[data-ficha-cabana="${numeroCabana}"]`
+                    );
+
+                if (botonCabana) {
+
+                    cerrarPanelNotificaciones();
+
+                    botonCabana.click();
+                }
+            }
+        );
+
+
+        seccion.appendChild(resumen);
+        seccion.appendChild(detalle);
+    }
+
 
     contenidoNotificaciones.appendChild(
         seccion
