@@ -6340,3 +6340,19 @@ tr.cabana-libre .info-cabana {
 .busqueda-palabra-nav[hidden] {
     display: none !important;
 }
+
+/* =========================================
+   CABECERA FIJA SOLO EN CELULAR
+   ========================================= */
+
+@media (max-width: 768px) {
+
+    .sidebar {
+        position: sticky !important;
+        top: 0 !important;
+        z-index: 1000 !important;
+
+        width: 100% !important;
+    }
+
+}
