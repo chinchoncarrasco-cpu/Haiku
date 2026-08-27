@@ -5495,6 +5495,16 @@ tr.cabana-libre .info-cabana {
     color: #8a6415;
 }
 
+.ficha-estado.ficha-estado-confirmada {
+    background: #2349b8;
+    color: #ffffff;
+}
+
+.ficha-estado.ficha-estado-confirmacion-pendiente {
+    background: #8ec2df;
+    color: #ffffff;
+}
+
 
 .ficha-estancia-id {
     text-align: center;

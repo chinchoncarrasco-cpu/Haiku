@@ -2664,6 +2664,7 @@ if (campoEstado) {
 
     let tieneCheckin = false;
     let tieneCheckout = false;
+    let tieneAbonoConfirmado = false;
 
     Object.values(datosPorFecha).forEach(dia => {
 
@@ -2686,44 +2687,62 @@ if (campoEstado) {
                 tieneCheckout = true;
             }
 
+            if (
+            cabanaDia.abonoVerificado === true &&
+            Number(cabanaDia.abono || 0) > 0
+            ) {
+                tieneAbonoConfirmado = true;
+            }
+
         });
 
     });
 
     campoEstado.classList.remove(
-        "ficha-estado-hospedado",
-        "ficha-estado-checkout",
-        "ficha-estado-pendiente"
-    );
+    "ficha-estado-hospedado",
+    "ficha-estado-checkout",
+    "ficha-estado-pendiente",
+    "ficha-estado-confirmada",
+    "ficha-estado-confirmacion-pendiente"
+);
 
     if (tieneCheckout) {
 
-        campoEstado.textContent =
-            "● Checked Out";
+    campoEstado.textContent =
+        "● Checked Out";
 
-        campoEstado.classList.add(
-            "ficha-estado-checkout"
-        );
+    campoEstado.classList.add(
+        "ficha-estado-checkout"
+    );
 
-    } else if (tieneCheckin) {
+} else if (tieneCheckin) {
 
-        campoEstado.textContent =
-            "● Hospedado";
+    campoEstado.textContent =
+        "● Hospedado";
 
-        campoEstado.classList.add(
-            "ficha-estado-hospedado"
-        );
+    campoEstado.classList.add(
+        "ficha-estado-hospedado"
+    );
 
-    } else {
+} else if (tieneAbonoConfirmado) {
 
-        campoEstado.textContent =
-            "● Pendiente";
+    campoEstado.textContent =
+        "● Confirmada";
 
-        campoEstado.classList.add(
-            "ficha-estado-pendiente"
-        );
+    campoEstado.classList.add(
+        "ficha-estado-confirmada"
+    );
 
-    }
+} else {
+
+    campoEstado.textContent =
+        "● Confirmación pendiente";
+
+    campoEstado.classList.add(
+        "ficha-estado-confirmacion-pendiente"
+    );
+
+}
 }
 
     // ====================================
