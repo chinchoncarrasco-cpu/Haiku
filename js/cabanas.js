@@ -2065,6 +2065,11 @@ function obtenerReservasParaBusqueda() {
             localStorage.getItem("haikuFichaReservas")
         ) || {};
 
+    const canceladas =
+    JSON.parse(
+        localStorage.getItem("haikuReservasCanceladas")
+    ) || [];
+
 
     Object.entries(datosPorFecha).forEach(
         ([fecha, datosDia]) => {
@@ -2141,6 +2146,68 @@ function obtenerReservasParaBusqueda() {
         }
     );
 
+    canceladas.forEach(cancelada => {
+
+    if (!cancelada?.reservaId) {
+        return;
+    }
+
+    const reservaId =
+        String(cancelada.reservaId);
+
+    const ficha =
+        fichas[reservaId] || {};
+
+    const datosReserva =
+        cancelada.datosReserva || {};
+
+    reservas.set(
+        reservaId,
+        {
+            reservaId,
+
+            numeroCabana:
+                cancelada.numeroCabana || "",
+
+            fechaIngreso:
+                cancelada.fechaIngreso || "",
+
+            titular:
+                cancelada.titular ||
+                datosReserva.titular ||
+                "Sin titular",
+
+            rut:
+                ficha.rut ||
+                datosReserva.rut ||
+                "",
+
+            telefono:
+                ficha.telefono ||
+                datosReserva.telefono ||
+                "",
+
+            correo:
+                ficha.correo ||
+                datosReserva.correo ||
+                datosReserva.email ||
+                "",
+
+            acompanantes: [
+                ficha.acompanante1,
+                ficha.acompanante2,
+                ficha.acompanante3,
+                ficha.acompanante4,
+                ficha.acompanante5
+            ]
+            .filter(Boolean)
+            .join(" "),
+
+            cancelada: true
+        }
+    );
+
+});
 
     return Array.from(
         reservas.values()
@@ -2238,6 +2305,11 @@ function buscarReservas(texto) {
             boton.dataset.fecha =
                 reserva.fechaIngreso;
 
+            boton.dataset.cancelada =
+            reserva.cancelada === true
+            ? "true"
+            : "false";
+
 
             boton.innerHTML = `
                 <strong>
@@ -2326,6 +2398,22 @@ if (resultadosBusquedaReservas) {
             const fechaReserva =
                 resultado.dataset.fecha;
 
+            const reservaId =
+                resultado.dataset.reservaId;
+
+            const esCancelada =
+                resultado.dataset.cancelada === "true";
+
+            if (esCancelada) {
+
+            abrirFichaReservaCancelada(reservaId);
+
+                resultadosBusquedaReservas.hidden = true;
+                buscadorReservas.value = "";
+
+            return;
+            }
+
 
             const fechaAnterior =
                 fechaSeleccionada;
@@ -2383,6 +2471,234 @@ document.addEventListener("click", (evento) => {
     }
 
 });
+
+function abrirFichaReservaCancelada(reservaId) {
+
+    const canceladas =
+        JSON.parse(
+            localStorage.getItem(
+                "haikuReservasCanceladas"
+            )
+        ) || [];
+
+    const registro =
+        canceladas.find(
+            item =>
+                String(item?.reservaId || "") ===
+                String(reservaId || "")
+        );
+
+    if (!registro) {
+        console.warn(
+            "No se encontró reserva cancelada:",
+            reservaId
+        );
+        return;
+    }
+
+    const datosReserva =
+    registro.datosReserva || {};
+
+    const fichas =
+    obtenerFichasReservas();
+
+    const ficha =
+    fichas[reservaId] || {};
+
+    console.log(
+        "FICHA CANCELADA ENCONTRADA:",
+        registro
+    );
+
+    const numeroCabana =
+    registro.numeroCabana || "";
+
+const titular =
+    registro.titular || "Sin titular";
+
+const fechaIngreso =
+    registro.fechaIngreso || "";
+
+const noches =
+    Number(registro.noches) || 0;
+
+const fechaSalida =
+    calcularSalidaReserva(
+        fechaIngreso,
+        noches
+    );
+
+const campoCabana =
+    document.getElementById(
+        "ficha-reserva-cabana"
+    );
+
+const campoTitular =
+    document.getElementById(
+        "ficha-reserva-titular"
+    );
+
+const campoReservaId =
+    document.getElementById(
+        "ficha-reserva-id"
+    );
+
+const campoIngreso =
+    document.getElementById(
+        "ficha-reserva-ingreso"
+    );
+
+const campoSalida =
+    document.getElementById(
+        "ficha-reserva-salida"
+    );
+
+const campoNoches =
+    document.getElementById(
+        "ficha-reserva-noches"
+    );
+
+const campoEstado =
+    document.getElementById(
+        "ficha-reserva-estado"
+    );
+
+if (campoCabana) {
+    campoCabana.textContent =
+        `CAB ${numeroCabana}`;
+}
+
+if (campoTitular) {
+    campoTitular.textContent =
+        titular;
+}
+
+if (campoReservaId) {
+    campoReservaId.textContent =
+        registro.reservaId || "Sin ID";
+}
+
+if (campoIngreso) {
+    campoIngreso.textContent =
+        formatearFechaFicha(fechaIngreso);
+}
+
+if (campoSalida) {
+    campoSalida.textContent =
+        fechaSalida
+            ? formatearFechaFicha(fechaSalida)
+            : "—";
+}
+
+if (campoNoches) {
+    campoNoches.textContent =
+        noches === 1
+            ? "1 noche"
+            : `${noches} noches`;
+}
+
+if (campoEstado) {
+
+    campoEstado.classList.remove(
+    "ficha-estado-hospedado",
+    "ficha-estado-checkout",
+    "ficha-estado-pendiente",
+    "ficha-estado-confirmada",
+    "ficha-estado-confirmacion-pendiente",
+    "ficha-estado-cancelada"
+);
+
+campoEstado.classList.add(
+    "ficha-estado-cancelada"
+);
+    campoEstado.textContent =
+        "• Cancelada";
+}
+
+fichaReservaModal.dataset.reservaId =
+    registro.reservaId || "";
+
+fichaReservaModal.dataset.numeroCabana =
+    numeroCabana;
+
+fichaReservaModal.dataset.reservaCancelada =
+    "true";
+
+const adultos =
+    Number(datosReserva.adultos) || 0;
+
+const ninos =
+    Number(datosReserva.ninos) || 0;
+
+const totalHuespedes =
+    adultos + ninos;
+
+const cantidadAcompanantes =
+    Math.max(0, totalHuespedes - 1);
+
+document
+    .querySelectorAll(".ficha-acompanante-fila")
+    .forEach(fila => {
+
+        const numero =
+            Number(fila.dataset.acompananteFila);
+
+        if (numero <= cantidadAcompanantes) {
+            fila.style.display = "";
+        } else {
+            fila.style.display = "none";
+        }
+    });
+
+const huespedTitular =
+    document.getElementById(
+        "ficha-huesped-titular"
+    );
+
+if (huespedTitular) {
+    huespedTitular.textContent =
+        registro.titular ||
+        datosReserva.titular ||
+        "Sin titular";
+}
+
+for (let i = 1; i <= 5; i++) {
+
+    const campo =
+        document.getElementById(
+            `ficha-acompanante-${i}`
+        );
+
+    if (!campo) {
+        continue;
+    }
+
+    campo.value =
+        ficha[`acompanante${i}`] || "";
+}
+
+const campoRut =
+    document.getElementById(
+        "ficha-reserva-rut"
+    );
+
+const campoTelefono =
+    document.getElementById(
+        "ficha-reserva-telefono"
+    );
+
+if (campoRut) {
+    campoRut.value =
+        ficha.rut || "";
+}
+
+if (campoTelefono) {
+    campoTelefono.value =
+        ficha.telefono || "";
+}
+
+fichaReservaModal.hidden = false;
+}
 
 // ========================================
 // ABRIR FICHA DE RESERVA
@@ -2927,7 +3243,11 @@ function guardarReservaCancelada(reservaId) {
         fechaCancelacion:
             new Date().toISOString(),
         estado:
-            "cancelada"
+            "cancelada",
+        datosReserva:
+    JSON.parse(
+        JSON.stringify(cabana)
+    )
     });
 
     localStorage.setItem(

@@ -5505,6 +5505,11 @@ tr.cabana-libre .info-cabana {
     color: #ffffff;
 }
 
+.ficha-estado-cancelada {
+    background: #fde2e2;
+    color: #b42318;
+}
+
 
 .ficha-estancia-id {
     text-align: center;
