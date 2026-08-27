@@ -8296,7 +8296,8 @@ tr.cabana-libre .info-cabana {
 
 
 /* BLOQUEADA */
-.calendario-reserva-barra.cal-reserva-bloqueada {
+.calendario-reserva-barra.cal-reserva-bloqueada,
+.calendario-panel-reserva.cal-reserva-bloqueada {
     background: #fde2e2;
 }
 
@@ -8308,8 +8309,23 @@ tr.cabana-libre .info-cabana {
 
 
 /* CHECK-OUT REALIZADO */
-.calendario-reserva-barra.cal-reserva-checkout {
+.calendario-reserva-barra.cal-reserva-checkout,
+.calendario-panel-reserva.cal-reserva-checkout {
     background: #eef6fb;
+}
+
+/* RESERVA CONFIRMADA */
+.calendario-reserva-barra.cal-reserva-confirmada,
+.calendario-panel-reserva.cal-reserva-confirmada {
+    background: #23a9b8;
+    color: #ffffff;
+}
+
+/* CONFIRMACIÓN PENDIENTE */
+.calendario-reserva-barra.cal-reserva-confirmacion-pendiente,
+.calendario-panel-reserva.cal-reserva-confirmacion-pendiente {
+    background: #8ec2df;
+    color: #ffffff;
 }
 
 /* =========================================

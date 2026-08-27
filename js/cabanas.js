@@ -172,6 +172,10 @@ if (campo === "estadoFinal") {
 
 guardarDatos();
 
+if (typeof generarCalendario === "function") {
+    generarCalendario();
+}
+
 actualizarResumenDia(fechaSeleccionada);
 actualizarTarjetasRevision(fechaSeleccionada);
 actualizarResumenAseo(fechaSeleccionada);

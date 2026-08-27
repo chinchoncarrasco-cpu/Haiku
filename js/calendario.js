@@ -121,7 +121,6 @@ function generarCalendario() {
             `${año}-${String(mes + 1).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
 
         elementoDia.dataset.fecha = fechaDia;
-
        
         // CLICK EN UN DÍA
 
@@ -261,10 +260,23 @@ calendarioGrid.appendChild(
 // ESTADO VISUAL REAL DE CADA RESERVA
 // ========================================
 
+const fichasReservas =
+    JSON.parse(
+        localStorage.getItem("haikuFichaReservas") || "{}"
+    );
+
 reservasUnicas.forEach(reserva => {
 
     let tieneCheckin = false;
-    let tieneCheckout = false;
+let tieneCheckout = false;
+let tieneAbonoConfirmado = false;
+
+const fichaReserva =
+    fichasReservas[reserva.reservaId] || {};
+
+if (fichaReserva.checkoutRealizado === true) {
+    tieneCheckout = true;
+}
 
     Object.values(datosCalendario).forEach(datosDia => {
 
@@ -288,11 +300,19 @@ reservasUnicas.forEach(reserva => {
             if (cabana.checkout === true) {
                 tieneCheckout = true;
             }
+
+            if (
+    cabana.abonoVerificado === true &&
+    Number(cabana.abono || 0) > 0
+) {
+    tieneAbonoConfirmado = true;
+}
         });
     });
 
     reserva.tieneCheckin = tieneCheckin;
     reserva.tieneCheckout = tieneCheckout;
+    reserva.tieneAbonoConfirmado = tieneAbonoConfirmado;
 });
 
  // ========================================
@@ -644,30 +664,32 @@ if (filaReserva >= MAX_FILAS_VISIBLES) {
             barra.className =
                 "calendario-reserva-barra";
 
-            let claseColor = "";
+let claseColor = "";
 
+// 1️⃣ CHECK-OUT tiene máxima prioridad
 if (reserva.tieneCheckout) {
 
     claseColor = "cal-reserva-checkout";
 
+// 2️⃣ Luego CHECK-IN / HOSPEDADO
 } else if (reserva.tieneCheckin) {
 
     claseColor = "cal-reserva-checkin";
 
+// 3️⃣ BLOQUEO siempre conserva su rojo
+} else if (reserva.estado === "bloqueada") {
+
+    claseColor = "cal-reserva-bloqueada";
+
+// 4️⃣ Reserva con abono confirmado
+} else if (reserva.tieneAbonoConfirmado) {
+
+    claseColor = "cal-reserva-confirmada";
+
+// 5️⃣ Reserva todavía sin confirmación
 } else {
 
-    const clasesEstado = {
-        "libre-libre": "cal-reserva-libre",
-        "libre-ingresa": "cal-reserva-ingresa",
-        "sale-libre": "cal-reserva-sale",
-        "sale-ingresa": "cal-reserva-ingresa",
-        "continua": "cal-reserva-continua",
-        "bloqueada": "cal-reserva-bloqueada",
-        "fullday": "cal-reserva-fullday"
-    };
-
-    claseColor =
-        clasesEstado[reserva.estado] || "";
+    claseColor = "cal-reserva-confirmacion-pendiente";
 }
 
 if (claseColor) {
@@ -859,30 +881,32 @@ function abrirPanelReservasDia(fecha) {
         item.className =
             "calendario-panel-reserva";
 
-        let claseColor = "";
+let claseColor = "";
 
+// 1️⃣ CHECK-OUT máxima prioridad
 if (reserva.tieneCheckout) {
 
     claseColor = "cal-reserva-checkout";
 
+// 2️⃣ CHECK-IN / HOSPEDADO
 } else if (reserva.tieneCheckin) {
 
     claseColor = "cal-reserva-checkin";
 
+// 3️⃣ BLOQUEADA
+} else if (reserva.estado === "bloqueada") {
+
+    claseColor = "cal-reserva-bloqueada";
+
+// 4️⃣ CONFIRMADA
+} else if (reserva.tieneAbonoConfirmado) {
+
+    claseColor = "cal-reserva-confirmada";
+
+// 5️⃣ CONFIRMACIÓN PENDIENTE
 } else {
 
-    const clasesEstado = {
-        "libre-libre": "cal-reserva-libre",
-        "libre-ingresa": "cal-reserva-ingresa",
-        "sale-libre": "cal-reserva-sale",
-        "sale-ingresa": "cal-reserva-ingresa",
-        "continua": "cal-reserva-continua",
-        "bloqueada": "cal-reserva-bloqueada",
-        "fullday": "cal-reserva-fullday"
-    };
-
-    claseColor =
-        clasesEstado[reserva.estado] || "";
+    claseColor = "cal-reserva-confirmacion-pendiente";
 }
 
 if (claseColor) {
