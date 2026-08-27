@@ -8345,6 +8345,192 @@ tr.cabana-libre .info-cabana {
     background: #edf0ee;
 }
 
+/* =========================================
+   CALENDARIO · PANEL +N
+   ========================================= */
+
+.calendario-panel-dia {
+    position: fixed;
+    z-index: 3000;
+
+    width: 220px;
+    max-width: calc(100vw - 24px);
+
+    padding: 12px;
+
+    background: #f3f6fb;
+
+    border: 1px solid #d9dee5;
+    border-radius: 18px;
+
+    box-shadow:
+        0 8px 24px rgba(0, 0, 0, 0.18),
+        0 2px 6px rgba(0, 0, 0, 0.10);
+
+    left: 50%;
+    top: 50%;
+
+    transform: translate(
+        -50%,
+        -50%
+    );
+
+    font-family: inherit;
+}
+
+
+/* CABECERA */
+
+.calendario-panel-cabecera {
+    position: relative;
+
+    display: flex;
+    justify-content: center;
+    align-items: flex-start;
+
+    min-height: 55px;
+
+    margin-bottom: 8px;
+}
+
+
+.calendario-panel-fecha {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+
+.calendario-panel-fecha small {
+    font-size: 9px;
+    font-weight: 500;
+
+    letter-spacing: 1px;
+
+    color: #5f6863;
+}
+
+
+.calendario-panel-fecha strong {
+    margin-top: 2px;
+
+    font-size: 26px;
+    font-weight: 500;
+
+    line-height: 1;
+
+    color: #222a26;
+}
+
+
+/* CERRAR */
+
+.calendario-panel-cerrar {
+    position: absolute;
+
+    top: -2px;
+    right: -2px;
+
+    width: 26px;
+    height: 26px;
+
+    padding: 0;
+
+    border: 0;
+    border-radius: 50%;
+
+    background: transparent;
+
+    font-size: 22px;
+    font-weight: 300;
+
+    line-height: 26px;
+
+    color: #5c6460;
+
+    cursor: pointer;
+}
+
+
+.calendario-panel-cerrar:hover {
+    background: rgba(0, 0, 0, 0.06);
+}
+
+
+/* LISTA */
+
+.calendario-panel-lista {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+
+/* RESERVA */
+
+.calendario-panel-reserva {
+    width: 100%;
+
+    min-height: 25px;
+
+    padding: 5px 9px;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: #ffffff;
+
+    color: #26302b;
+
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 600;
+
+    text-align: left;
+
+    white-space: nowrap;
+    overflow: hidden;
+
+    cursor: pointer;
+}
+
+
+.calendario-panel-reserva:hover {
+    filter: brightness(0.96);
+}
+
+.calendario-panel-reserva.cal-reserva-libre {
+    background: #F1F3F2;
+}
+
+.calendario-panel-reserva.cal-reserva-ingresa {
+    background: #F8D7B8;
+}
+
+.calendario-panel-reserva.cal-reserva-sale {
+    background: #F6EBCF;
+}
+
+.calendario-panel-reserva.cal-reserva-continua {
+    background: #eef8f1;
+}
+
+.calendario-panel-reserva.cal-reserva-fullday {
+    background: #E9E2F3;
+}
+
+.calendario-panel-reserva.cal-reserva-bloqueada {
+    background: #fde2e2;
+}
+
+.calendario-panel-reserva.cal-reserva-checkin {
+    background: #D8EEDF;
+}
+
+.calendario-panel-reserva.cal-reserva-checkout {
+    background: #eef6fb;
+}
 
 /* CELULAR */
 

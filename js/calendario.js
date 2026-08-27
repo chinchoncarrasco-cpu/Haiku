@@ -727,6 +727,203 @@ if (claseColor) {
 });
 
 // ========================================
+// PANEL DE RESERVAS DE UN DÍA
+// ========================================
+
+function abrirPanelReservasDia(fecha) {
+
+    // Si ya existe uno abierto, lo quitamos.
+    const panelAnterior =
+        document.querySelector(
+            ".calendario-panel-dia"
+        );
+
+    if (panelAnterior) {
+        panelAnterior.remove();
+    }
+
+
+    // Buscar todas las reservas
+    // que ocupan esta fecha.
+    const reservasDia =
+        reservasOrdenadas
+            .filter(reserva => {
+
+                const fechaSalida =
+                    sumarDiasCalendario(
+                        reserva.fechaIngreso,
+                        Number(reserva.noches) || 0
+                    );
+
+                return (
+                    fecha >= reserva.fechaIngreso &&
+                    fecha < fechaSalida
+                );
+            })
+            .sort(
+                (a, b) =>
+                    Number(a.numeroCabana) -
+                    Number(b.numeroCabana)
+            );
+
+
+    const [
+        anio,
+        mes,
+        dia
+    ] =
+        fecha
+            .split("-")
+            .map(Number);
+
+
+    const fechaPanel =
+        new Date(
+            anio,
+            mes - 1,
+            dia
+        );
+
+
+    const nombreDia =
+        new Intl.DateTimeFormat(
+            "es-CL",
+            {
+                weekday: "short"
+            }
+        )
+            .format(fechaPanel)
+            .replace(".", "")
+            .toUpperCase();
+
+
+    const panel =
+        document.createElement("div");
+
+    panel.className =
+        "calendario-panel-dia";
+
+
+    panel.innerHTML = `
+        <div class="calendario-panel-cabecera">
+
+            <div class="calendario-panel-fecha">
+                <small>${nombreDia}</small>
+                <strong>${dia}</strong>
+            </div>
+
+            <button
+                type="button"
+                class="calendario-panel-cerrar"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+        </div>
+
+        <div class="calendario-panel-lista"></div>
+    `;
+
+
+    const lista =
+        panel.querySelector(
+            ".calendario-panel-lista"
+        );
+
+
+    reservasDia.forEach(reserva => {
+
+        const item =
+            document.createElement(
+                "button"
+            );
+
+        item.type = "button";
+
+        item.className =
+            "calendario-panel-reserva";
+
+        let claseColor = "";
+
+if (reserva.tieneCheckout) {
+
+    claseColor = "cal-reserva-checkout";
+
+} else if (reserva.tieneCheckin) {
+
+    claseColor = "cal-reserva-checkin";
+
+} else {
+
+    const clasesEstado = {
+        "libre-libre": "cal-reserva-libre",
+        "libre-ingresa": "cal-reserva-ingresa",
+        "sale-libre": "cal-reserva-sale",
+        "sale-ingresa": "cal-reserva-ingresa",
+        "continua": "cal-reserva-continua",
+        "bloqueada": "cal-reserva-bloqueada",
+        "fullday": "cal-reserva-fullday"
+    };
+
+    claseColor =
+        clasesEstado[reserva.estado] || "";
+}
+
+if (claseColor) {
+    item.classList.add(claseColor);
+}
+
+        item.textContent =
+            `CAB ${reserva.numeroCabana} · ${reserva.titular}`;
+
+        item.dataset.reservaId =
+            reserva.reservaId;
+
+        item.dataset.cabana =
+            reserva.numeroCabana;
+
+
+        item.addEventListener(
+            "click",
+            evento => {
+
+                evento.stopPropagation();
+
+                console.log(
+                    "RESERVA PANEL:",
+                    reserva.reservaId,
+                    reserva.numeroCabana
+                );
+            }
+        );
+
+
+        lista.appendChild(item);
+    });
+
+
+    panel
+        .querySelector(
+            ".calendario-panel-cerrar"
+        )
+        .addEventListener(
+            "click",
+            evento => {
+
+                evento.stopPropagation();
+
+                panel.remove();
+            }
+        );
+
+
+    document.body.appendChild(
+        panel
+    );
+}
+
+// ========================================
 // DIBUJAR +N EN CADA DÍA
 // ========================================
 
@@ -786,18 +983,16 @@ reservasOcultasPorFecha.forEach(
 
 
         botonMas.addEventListener(
-            "click",
-            evento => {
+    "click",
+    evento => {
 
-                evento.stopPropagation();
+        evento.stopPropagation();
 
-                console.log(
-                    "MOSTRAR RESERVAS:",
-                    fecha,
-                    cantidad
-                );
-            }
+        abrirPanelReservasDia(
+            fecha
         );
+    }
+);
 
 
         capaReservas.appendChild(
