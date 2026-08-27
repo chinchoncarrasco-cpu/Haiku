@@ -1286,6 +1286,9 @@ const fichaReservaModal =
 const fichaReservaCerrar =
     document.getElementById("ficha-reserva-cerrar");
 
+const fichaReservaCancelar =
+    document.getElementById("ficha-reserva-cancelar");
+
 
 // ========================================
 // FORMATEAR FECHA PARA LA FICHA
@@ -2879,6 +2882,129 @@ if (fichaReservaCerrar) {
     fichaReservaCerrar.addEventListener("click", () => {
 
         fichaReservaModal.hidden = true;
+
+    });
+
+}
+
+function guardarReservaCancelada(reservaId) {
+
+    if (!reservaId) {
+        return;
+    }
+
+    const registroReserva =
+        buscarDatosReservaPorId(reservaId);
+
+    if (!registroReserva) {
+        return;
+    }
+
+    const cabana =
+        registroReserva.cabana || {};
+
+    const canceladas =
+        JSON.parse(
+            localStorage.getItem("haikuReservasCanceladas")
+        ) || [];
+
+    canceladas.push({
+        reservaId: reservaId,
+        numeroCabana:
+            registroReserva.numeroCabana || "",
+        fechaIngreso:
+            cabana.fechaOrigenReserva ||
+            registroReserva.fecha ||
+            "",
+        noches:
+            Number(cabana.noches) || 0,
+        titular:
+            cabana.titular || "",
+        totalReserva:
+            Number(cabana.totalReserva) || 0,
+        abono:
+            Number(cabana.abono) || 0,
+        fechaCancelacion:
+            new Date().toISOString(),
+        estado:
+            "cancelada"
+    });
+
+    localStorage.setItem(
+        "haikuReservasCanceladas",
+        JSON.stringify(canceladas)
+    );
+}
+
+function liberarReservaCancelada(reservaId) {
+
+    if (!reservaId) {
+        return;
+    }
+
+    Object.values(datosPorFecha).forEach(dia => {
+
+        if (!dia?.cabanas) {
+            return;
+        }
+
+        Object.values(dia.cabanas).forEach(cabana => {
+
+            if (
+                String(cabana?.reservaId || "") !==
+                String(reservaId)
+            ) {
+                return;
+            }
+
+            Object.keys(cabana).forEach(clave => {
+                delete cabana[clave];
+            });
+
+        });
+
+    });
+
+    guardarDatos();
+}
+
+if (fichaReservaCancelar) {
+
+    fichaReservaCancelar.addEventListener("click", () => {
+
+        const reservaId =
+            fichaReservaModal.dataset.reservaId;
+
+        if (!reservaId) {
+            return;
+        }
+
+        const confirmarCancelacion =
+    confirm(
+        "¿Seguro que deseas cancelar esta reserva?\n\n" +
+        "La reserva desaparecerá del Resumen y del Calendario."
+    );
+
+if (!confirmarCancelacion) {
+    return;
+}
+
+guardarReservaCancelada(reservaId);
+
+liberarReservaCancelada(reservaId);
+
+fichaReservaModal.hidden = true;
+
+cargarCabanasDia(fechaSeleccionada);
+
+if (typeof generarCalendario === "function") {
+    generarCalendario();
+}
+
+console.log(
+    "RESERVA CANCELADA GUARDADA:",
+    reservaId
+);
 
     });
 

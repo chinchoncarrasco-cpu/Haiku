@@ -8570,3 +8570,36 @@ tr.cabana-libre .info-cabana {
 .tabla-contenedor tr.cabana-ingresa > td.info-cabana {
     background-color: #F8D7B8 !important;
 }
+
+/* ========================================
+   ACCIONES DE LA FICHA DE RESERVA
+======================================== */
+
+.ficha-reserva-acciones {
+    margin-top: 10px;
+}
+
+.ficha-accion-cancelar {
+    width: 100%;
+
+    padding: 10px 12px;
+
+    border: 1px solid #e5b8b8;
+    border-radius: 9px;
+
+    background: #fff5f5;
+    color: #a63f3f;
+
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 600;
+
+    cursor: pointer;
+
+    transition: 0.15s;
+}
+
+.ficha-accion-cancelar:hover {
+    background: #fde8e8;
+    border-color: #d99999;
+}
