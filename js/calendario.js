@@ -262,27 +262,108 @@ calendarioGrid.appendChild(
 // DIBUJAR RESERVAS COMO BARRAS REALES
 // ========================================
 
+// ========================================
+// ORDEN DE FILAS POR NÚMERO DE CABAÑA
+// ========================================
+
+// CAB 1 siempre tiene prioridad sobre CAB 2,
+// CAB 2 sobre CAB 3, etc.
+// Si es la misma cabaña, ordenamos por fecha.
 const reservasOrdenadas =
     Array.from(reservasUnicas.values())
-        .sort(
-            (a, b) =>
+        .sort((a, b) => {
+
+            const diferenciaCabana =
                 Number(a.numeroCabana) -
-                Number(b.numeroCabana)
-        );
+                Number(b.numeroCabana);
+
+            if (diferenciaCabana !== 0) {
+                return diferenciaCabana;
+            }
+
+            return a.fechaIngreso.localeCompare(
+                b.fechaIngreso
+            );
+        });
 
 
-// Una línea vertical para cada reserva visible
 const filasReserva = new Map();
 
-reservasOrdenadas.forEach(
-    (reserva, indice) => {
 
-        filasReserva.set(
-            reserva.reservaId,
-            indice
+// Cada fila guarda las reservas que ya utiliza.
+// Así una fila puede reutilizarse cuando
+// las fechas NO se cruzan.
+const ocupacionFilas = [];
+
+
+reservasOrdenadas.forEach(reserva => {
+
+    const fechaInicio =
+        reserva.fechaIngreso;
+
+    const fechaSalida =
+        sumarDiasCalendario(
+            reserva.fechaIngreso,
+            Number(reserva.noches) || 1
         );
+
+
+    let filaEncontrada = -1;
+
+
+    // Buscar la primera fila donde
+    // esta reserva no choque con ninguna existente.
+    for (
+        let fila = 0;
+        fila < ocupacionFilas.length;
+        fila++
+    ) {
+
+        const hayCruce =
+            ocupacionFilas[fila].some(
+                existente => {
+
+                    return (
+                        fechaInicio <
+                            existente.fechaSalida &&
+                        fechaSalida >
+                            existente.fechaInicio
+                    );
+                }
+            );
+
+
+        if (!hayCruce) {
+            filaEncontrada = fila;
+            break;
+        }
     }
-);
+
+
+    // Si todas las filas están ocupadas,
+    // crear una nueva.
+    if (filaEncontrada === -1) {
+
+        filaEncontrada =
+            ocupacionFilas.length;
+
+        ocupacionFilas.push([]);
+    }
+
+
+    ocupacionFilas[
+        filaEncontrada
+    ].push({
+        fechaInicio,
+        fechaSalida
+    });
+
+
+    filasReserva.set(
+        reserva.reservaId,
+        filaEncontrada
+    );
+});
 
 
 // Datos del mes actualmente visible

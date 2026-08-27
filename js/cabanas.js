@@ -4187,6 +4187,10 @@ crearContinuidadesReserva(
     noches
 );
 
+if (typeof generarCalendario === "function") {
+    generarCalendario();
+}
+
 const valorNoches = boton.querySelector(".valor-noches");
 
 if (valorNoches) {

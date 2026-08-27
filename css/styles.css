@@ -8223,7 +8223,8 @@ tr.cabana-libre .info-cabana {
     text-align: left;
 
     white-space: nowrap;
-    overflow: visible;
+    overflow: hidden;
+    text-overflow: clip;
 
     cursor: pointer;
 
