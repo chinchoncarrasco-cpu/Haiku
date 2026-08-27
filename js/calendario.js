@@ -122,7 +122,7 @@ function generarCalendario() {
 
         elementoDia.dataset.fecha = fechaDia;
 
-
+       
         // CLICK EN UN DÍA
 
 elementoDia.addEventListener("click", () => {
@@ -137,9 +137,412 @@ elementoDia.addEventListener("click", () => {
 });
 
 
-        calendarioGrid.appendChild(elementoDia);
+calendarioGrid.appendChild(elementoDia);
+}
+
+
+// Ahora que todos los días existen,
+// dibujamos las reservas encima.
+dibujarReservasCalendario();
+
+}
+
+// ========================================
+// DIBUJAR RESERVAS EN CALENDARIO
+// ========================================
+
+function dibujarReservasCalendario() {
+
+    // Capa independiente para las reservas.
+// Así las barras NO alteran la cuadrícula de los días.
+const capaReservas =
+    document.createElement("div");
+
+capaReservas.className =
+    "calendario-reservas-capa";
+
+calendarioGrid.appendChild(
+    capaReservas
+);
+
+    const datosCalendario =
+        JSON.parse(
+            localStorage.getItem("haikuDatos")
+        ) || {};
+
+
+    const reservasUnicas =
+        new Map();
+
+
+    // ========================================
+    // REUNIR UNA SOLA VEZ CADA RESERVA
+    // ========================================
+
+    Object.entries(
+        datosCalendario
+    ).forEach(
+        ([fecha, datosDia]) => {
+
+            if (!datosDia?.cabanas) {
+                return;
+            }
+
+            Object.entries(
+                datosDia.cabanas
+            ).forEach(
+                ([numeroCabana, cabana]) => {
+
+                    if (
+                        !cabana ||
+                        !cabana.reservaId ||
+                        !cabana.titular
+                    ) {
+                        return;
+                    }
+
+
+                    // Preferimos el registro ORIGINAL
+                    // y no una continuidad automática.
+                    if (
+                        cabana.continuidadAutomatica === true
+                    ) {
+                        return;
+                    }
+
+
+                    if (
+                        reservasUnicas.has(
+                            cabana.reservaId
+                        )
+                    ) {
+                        return;
+                    }
+
+
+                    const noches =
+                        Number(
+                            cabana.noches
+                        ) || 0;
+
+
+                    if (noches < 1) {
+                        return;
+                    }
+
+
+                    reservasUnicas.set(
+                        cabana.reservaId,
+                        {
+                            reservaId:
+                                cabana.reservaId,
+
+                            numeroCabana,
+
+                            titular:
+                                cabana.titular,
+
+                            fechaIngreso:
+                                cabana.fechaOrigenReserva ||
+                                fecha,
+
+                            noches,
+
+                            estado:
+                                cabana.estado || ""
+                        }
+                    );
+                }
+            );
+        }
+    );
+
+
+ // ========================================
+// DIBUJAR RESERVAS COMO BARRAS REALES
+// ========================================
+
+const reservasOrdenadas =
+    Array.from(reservasUnicas.values())
+        .sort(
+            (a, b) =>
+                Number(a.numeroCabana) -
+                Number(b.numeroCabana)
+        );
+
+
+// Una línea vertical para cada reserva visible
+const filasReserva = new Map();
+
+reservasOrdenadas.forEach(
+    (reserva, indice) => {
+
+        filasReserva.set(
+            reserva.reservaId,
+            indice
+        );
+    }
+);
+
+
+// Datos del mes actualmente visible
+const anioCalendario =
+    fechaCalendario.getFullYear();
+
+const mesCalendario =
+    fechaCalendario.getMonth();
+
+const primerDiaMes =
+    new Date(
+        anioCalendario,
+        mesCalendario,
+        1
+    );
+
+let posicionPrimerDia =
+    primerDiaMes.getDay() - 1;
+
+if (posicionPrimerDia === -1) {
+    posicionPrimerDia = 6;
+}
+
+
+reservasOrdenadas.forEach(reserva => {
+
+    const totalNoches =
+        Number(reserva.noches) || 0;
+
+    if (totalNoches < 1) {
+        return;
     }
 
+
+    // ========================================
+    // OBTENER LAS NOCHES VISIBLES DE LA RESERVA
+    // ========================================
+
+    const nochesVisibles = [];
+
+    for (
+        let indice = 0;
+        indice < totalNoches;
+        indice++
+    ) {
+
+        const fechaNoche =
+            sumarDiasCalendario(
+                reserva.fechaIngreso,
+                indice
+            );
+
+        const [
+            anioNoche,
+            mesNoche,
+            diaNoche
+        ] =
+            fechaNoche
+                .split("-")
+                .map(Number);
+
+
+        // Solo dibujamos noches
+        // pertenecientes al mes visible
+        if (
+            anioNoche !== anioCalendario ||
+            mesNoche - 1 !== mesCalendario
+        ) {
+            continue;
+        }
+
+
+        const indiceCelda =
+            posicionPrimerDia +
+            diaNoche - 1;
+
+
+        const filaSemana =
+            Math.floor(
+                indiceCelda / 7
+            ) + 1;
+
+
+        const columna =
+            (indiceCelda % 7) + 1;
+
+
+        nochesVisibles.push({
+            fecha: fechaNoche,
+            filaSemana,
+            columna
+        });
+    }
+
+
+    if (nochesVisibles.length === 0) {
+        return;
+    }
+
+
+    // ========================================
+    // DIVIDIR SI LA RESERVA CRUZA DE SEMANA
+    // ========================================
+
+    const segmentos = [];
+
+    nochesVisibles.forEach(noche => {
+
+        const ultimo =
+            segmentos[
+                segmentos.length - 1
+            ];
+
+
+        if (
+            ultimo &&
+            ultimo.filaSemana ===
+                noche.filaSemana &&
+            noche.columna ===
+                ultimo.columnaFin + 1
+        ) {
+
+            ultimo.columnaFin =
+                noche.columna;
+
+        } else {
+
+            segmentos.push({
+                filaSemana:
+                    noche.filaSemana,
+
+                columnaInicio:
+                    noche.columna,
+
+                columnaFin:
+                    noche.columna
+            });
+        }
+    });
+
+
+    // ========================================
+    // CREAR UNA BARRA POR TRAMO SEMANAL
+    // ========================================
+
+    segmentos.forEach(
+        (segmento, indiceSegmento) => {
+
+            const barra =
+                document.createElement(
+                    "button"
+                );
+
+            barra.type = "button";
+
+            barra.className =
+                "calendario-reserva-barra";
+
+
+            barra.style.gridColumn =
+                `${segmento.columnaInicio} / ${segmento.columnaFin + 1}`;
+
+            barra.style.gridRow =
+                `${segmento.filaSemana}`;
+
+
+            barra.style.setProperty(
+                "--fila-reserva",
+                filasReserva.get(
+                    reserva.reservaId
+                )
+            );
+
+
+            // El nombre aparece solo
+            // en el primer tramo visible
+            barra.textContent =
+                indiceSegmento === 0
+                    ? `CAB ${reserva.numeroCabana} · ${reserva.titular}`
+                    : "";
+
+
+            barra.dataset.cabana =
+                reserva.numeroCabana;
+
+            barra.dataset.reservaId =
+                reserva.reservaId || "";
+
+
+            barra.addEventListener(
+                "click",
+                evento => {
+
+                    evento.stopPropagation();
+
+                    console.log(
+                        "RESERVA CALENDARIO:",
+                        reserva.reservaId,
+                        "CAB",
+                        reserva.numeroCabana
+                    );
+                }
+            );
+
+
+            capaReservas.appendChild(
+    barra
+);
+        }
+    );
+});
+
+}
+
+
+// ========================================
+// SUMAR DÍAS SIN DEPENDER DE app.js
+// ========================================
+
+function sumarDiasCalendario(
+    fecha,
+    cantidad
+) {
+
+    const [
+        anio,
+        mes,
+        dia
+    ] =
+        fecha
+            .split("-")
+            .map(Number);
+
+
+    const resultado =
+        new Date(
+            anio,
+            mes - 1,
+            dia
+        );
+
+
+    resultado.setDate(
+        resultado.getDate() +
+        cantidad
+    );
+
+
+    return [
+        resultado.getFullYear(),
+
+        String(
+            resultado.getMonth() + 1
+        ).padStart(2, "0"),
+
+        String(
+            resultado.getDate()
+        ).padStart(2, "0")
+
+    ].join("-");
 }
 
 

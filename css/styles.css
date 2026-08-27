@@ -8104,3 +8104,151 @@ tr.cabana-libre .info-cabana {
 .nota-cabana::-webkit-scrollbar-track {
     background: transparent;
 }
+
+/* =========================================
+   CALENDARIO · RESERVAS REALES
+   PRIMERA PRUEBA
+   ========================================= */
+
+.dia-calendario {
+    position: relative;
+}
+
+.calendario-reserva {
+    box-sizing: border-box;
+
+    display: block;
+
+    width: calc(100% - 8px);
+
+    margin: 3px 4px 0;
+    padding: 3px 6px;
+
+    border: 0;
+    border-radius: 5px;
+
+    background: #e9f3ed;
+
+    font-family: inherit;
+    font-size: 9px;
+    font-weight: 600;
+
+    color: #315b47;
+
+    text-align: left;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    cursor: pointer;
+}
+
+.calendario-reserva:hover {
+    background: #dcece2;
+}
+
+/* =========================================
+   CALENDARIO · BARRAS DE RESERVAS
+   ========================================= */
+
+.dia-calendario {
+    overflow: visible;
+}
+
+
+/* =========================================
+   CALENDARIO · CAPA DE RESERVAS
+   ========================================= */
+
+.calendario-grid {
+    position: relative;
+}
+
+
+/* Esta capa está encima del calendario,
+   pero NO participa en la cuadrícula de los días */
+
+.calendario-reservas-capa {
+    position: absolute;
+
+    inset: 0;
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(7, minmax(0, 1fr));
+
+    grid-auto-rows: 110px;
+
+    pointer-events: none;
+
+    z-index: 5;
+}
+
+
+/* =========================================
+   BARRAS DE RESERVA
+   ========================================= */
+
+.calendario-reserva-barra {
+    box-sizing: border-box;
+
+    align-self: start;
+
+    height: 19px;
+
+    margin-top:
+        calc(
+            42px +
+            (var(--fila-reserva) * 22px)
+        );
+
+    margin-left: 3px;
+    margin-right: 3px;
+
+    padding: 2px 6px;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: #2f8c64;
+
+    font-family: inherit;
+    font-size: 8px;
+    font-weight: 600;
+
+    color: #ffffff;
+
+    text-align: left;
+
+    white-space: nowrap;
+    overflow: visible;
+
+    cursor: pointer;
+
+    pointer-events: auto;
+
+    z-index: 6;
+}
+
+
+/* CELULAR */
+
+@media (max-width: 600px) {
+
+    .calendario-reservas-capa {
+        grid-auto-rows: 110px;
+    }
+
+    .calendario-reserva-barra {
+        margin-top:
+            calc(
+                38px +
+                (var(--fila-reserva) * 22px)
+            );
+
+        margin-left: 2px;
+        margin-right: 2px;
+    }
+}
