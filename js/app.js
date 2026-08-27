@@ -304,6 +304,21 @@ function crearContinuidadesReserva(fechaInicio, numeroCabana, noches) {
         return;
     }
 
+    // Recordar de qué tipo de ingreso nació la reserva
+const estadoIngresoReserva =
+    cabanaInicio.estadoIngresoReserva ||
+    (
+        cabanaInicio.estado === "libre-ingresa" ||
+        cabanaInicio.estado === "sale-ingresa"
+            ? cabanaInicio.estado
+            : ""
+    );
+
+if (estadoIngresoReserva) {
+    cabanaInicio.estadoIngresoReserva =
+        estadoIngresoReserva;
+}
+
     for (let i = 1; i <= noches; i++) {
 
         const fechaContinuidad = sumarDiasFecha(fechaInicio, i);
@@ -349,6 +364,10 @@ destino.titular = cabanaInicio.titular || "";
 destino.adultos = cabanaInicio.adultos || "";
 destino.ninos = cabanaInicio.ninos || "";
 destino.mascotas = cabanaInicio.mascotas || "";
+
+// Heredar el tipo de ingreso original de la reserva
+destino.estadoIngresoReserva =
+    estadoIngresoReserva;
 
         // Estado según el día de la reserva
         if (i < noches) {

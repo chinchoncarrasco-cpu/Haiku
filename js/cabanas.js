@@ -163,6 +163,39 @@ function reservaTieneCheckinManual(reservaId) {
     });
 }
 
+function obtenerEstadoIngresoReserva(reservaId) {
+
+    if (!reservaId) {
+        return "";
+    }
+
+    for (const dia of Object.values(datosPorFecha)) {
+
+        if (!dia?.cabanas) {
+            continue;
+        }
+
+        for (const cabana of Object.values(dia.cabanas)) {
+
+            if (
+                String(cabana?.reservaId || "") !==
+                String(reservaId)
+            ) {
+                continue;
+            }
+
+            if (
+                cabana.estado === "libre-ingresa" ||
+                cabana.estado === "sale-ingresa"
+            ) {
+                return cabana.estado;
+            }
+        }
+    }
+
+    return "";
+}
+
 function actualizarColorCabana(fila) {
 
     if (!fila || !fechaSeleccionada) {
@@ -209,6 +242,36 @@ if (
 ) {
     fila.classList.add("cabana-ingresa");
     return;
+}
+
+// CONTINÚA sin CHECK-IN:
+// busca cómo comenzó realmente esta reserva
+if (
+    datosCabana.estado === "continua" &&
+    datosCabana.checkinRealizado !== true
+) {
+
+    const estadoIngreso =
+        obtenerEstadoIngresoReserva(
+            datosCabana.reservaId
+        );
+
+    console.log(
+    "DEBUG CONT",
+    {
+        reservaId: datosCabana.reservaId,
+        estadoActual: datosCabana.estado,
+        estadoIngreso
+    }
+);
+
+    if (
+        estadoIngreso === "libre-ingresa" ||
+        estadoIngreso === "sale-ingresa"
+    ) {
+        fila.classList.add("cabana-ingresa");
+        return;
+    }
 }
 
 // PRIORIDAD 5: RESTO DE ESTADOS OPERATIVOS → GRIS CLARO

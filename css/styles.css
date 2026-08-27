@@ -3847,12 +3847,12 @@ tr.cabana-libre {
 
 /* L/IN y S/IN - ingreso pendiente */
 tr.cabana-ingresa {
-    background-color: #eceeef;
+    background-color: #F8D7B8;
 }
 
 /* L/IN y S/IN - cubrir también la columna CAB */
 tr.cabana-ingresa .info-cabana {
-    background-color: #eceeef;
+    background-color: #F8D7B8;
 }
 
 /* El encabezado/nombre de la cabaña hereda el color de la fila */
@@ -8550,4 +8550,13 @@ tr.cabana-libre .info-cabana {
         margin-left: 2px;
         margin-right: 2px;
     }
+}
+
+/* CONT pendiente heredado de L/IN o S/IN */
+.tabla-contenedor tr.cabana-ingresa > td {
+    background-color: #F8D7B8 !important;
+}
+
+.tabla-contenedor tr.cabana-ingresa > td.info-cabana {
+    background-color: #F8D7B8 !important;
 }
