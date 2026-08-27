@@ -3605,7 +3605,7 @@ input[type="time"].campo-cabana {
 }
 
 .pago-checkin-item.pago-checkin-completo {
-    background-color: #eef8f1;
+    background-color: #D8EEDF;
     border-color: #8fc9a3;
 }
 
@@ -3721,7 +3721,7 @@ tr.cabana-checkout {
 
 /* Nuevo huésped realizó check-in */
 tr.cabana-checkin {
-    background-color: #eef8f1;
+    background-color: #D8EEDF;
 }
 
 /* =========================================
@@ -3794,11 +3794,11 @@ tr.cabana-checkin {
 /* CHECK-IN realizado → VERDE */
 /* Tiene prioridad porque JS aplica cabana-checkin antes que cabana-checkout */
 .tabla-contenedor tr.cabana-checkin > td {
-    background-color: #eef8f1 !important;
+    background-color: #D8EEDF !important;
 }
 
 .tabla-contenedor tr.cabana-checkin > td.info-cabana {
-    background-color: #eef8f1 !important;
+    background-color: #D8EEDF !important;
 }
 
 /* CHECK-OUT realizado → azul suave */
@@ -3808,7 +3808,7 @@ tr.cabana-checkout > td {
 
 /* CHECK-IN realizado → verde */
 tr.cabana-checkin > td {
-    background-color: #eef8f1;
+    background-color: #D8EEDF
 }
 
 /* LIBRE / LIBRE → gris suave */
@@ -3831,7 +3831,7 @@ tr.cabana-checkout {
 }
 
 tr.cabana-checkin {
-    background-color: #eef8f1;
+    background-color: #D8EEDF;
 }
 
 tr.cabana-libre {
@@ -3854,7 +3854,7 @@ tr.cabana-checkout .info-cabana {
 }
 
 tr.cabana-checkin .info-cabana {
-    background-color: #eef8f1;
+    background-color: #D8EEDF;
 }
 
 tr.cabana-libre .info-cabana {
@@ -8231,6 +8231,63 @@ tr.cabana-libre .info-cabana {
     pointer-events: auto;
 
     z-index: 6;
+}
+
+/* =========================================
+   CALENDARIO · COLORES OPERATIVOS
+   mismos colores del Resumen
+   ========================================= */
+
+.calendario-reserva-barra {
+    color: #26302b;
+}
+
+
+/* LIBRE / LIBRE */
+.calendario-reserva-barra.cal-reserva-libre {
+    background: #F1F3F2;
+}
+
+
+/* LIBRE / INGRESA + SALE / INGRESA */
+.calendario-reserva-barra.cal-reserva-ingresa {
+    background: #F8D7B8;
+}
+
+
+/* SALE / LIBRE */
+.calendario-reserva-barra.cal-reserva-sale {
+    background: #F6EBCF;
+}
+
+
+/* CONTINÚA */
+.calendario-reserva-barra.cal-reserva-continua {
+    background: #D8EEDF;
+}
+
+
+/* FULLDAY */
+.calendario-reserva-barra.cal-reserva-fullday {
+    background: #E9E2F3;
+}
+
+
+/* BLOQUEADA */
+.calendario-reserva-barra.cal-reserva-bloqueada {
+    background: #fde2e2;
+}
+
+
+/* CHECK-IN REALIZADO */
+.calendario-reserva-barra.cal-reserva-checkin {
+    background: #D8EEDF;
+}
+
+
+/* CHECK-OUT REALIZADO */
+.calendario-reserva-barra.cal-reserva-checkout {
+    background: #eef6fb;
 }
 
 

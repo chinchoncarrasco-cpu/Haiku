@@ -257,6 +257,43 @@ calendarioGrid.appendChild(
         }
     );
 
+    // ========================================
+// ESTADO VISUAL REAL DE CADA RESERVA
+// ========================================
+
+reservasUnicas.forEach(reserva => {
+
+    let tieneCheckin = false;
+    let tieneCheckout = false;
+
+    Object.values(datosCalendario).forEach(datosDia => {
+
+        if (!datosDia?.cabanas) {
+            return;
+        }
+
+        Object.values(datosDia.cabanas).forEach(cabana => {
+
+            if (
+                String(cabana?.reservaId || "") !==
+                String(reserva.reservaId)
+            ) {
+                return;
+            }
+
+            if (cabana.checkinRealizado === true) {
+                tieneCheckin = true;
+            }
+
+            if (cabana.checkout === true) {
+                tieneCheckout = true;
+            }
+        });
+    });
+
+    reserva.tieneCheckin = tieneCheckin;
+    reserva.tieneCheckout = tieneCheckout;
+});
 
  // ========================================
 // DIBUJAR RESERVAS COMO BARRAS REALES
@@ -521,6 +558,36 @@ reservasOrdenadas.forEach(reserva => {
 
             barra.className =
                 "calendario-reserva-barra";
+
+            let claseColor = "";
+
+if (reserva.tieneCheckout) {
+
+    claseColor = "cal-reserva-checkout";
+
+} else if (reserva.tieneCheckin) {
+
+    claseColor = "cal-reserva-checkin";
+
+} else {
+
+    const clasesEstado = {
+        "libre-libre": "cal-reserva-libre",
+        "libre-ingresa": "cal-reserva-ingresa",
+        "sale-libre": "cal-reserva-sale",
+        "sale-ingresa": "cal-reserva-ingresa",
+        "continua": "cal-reserva-continua",
+        "bloqueada": "cal-reserva-bloqueada",
+        "fullday": "cal-reserva-fullday"
+    };
+
+    claseColor =
+        clasesEstado[reserva.estado] || "";
+}
+
+if (claseColor) {
+    barra.classList.add(claseColor);
+}
 
 
             barra.style.gridColumn =
