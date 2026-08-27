@@ -424,6 +424,76 @@ if (posicionPrimerDia === -1) {
     posicionPrimerDia = 6;
 }
 
+// ========================================
+// MÁXIMO 3 FILAS VISIBLES + CONTADOR +N
+// ========================================
+
+const MAX_FILAS_VISIBLES = 3;
+
+const reservasOcultasPorFecha =
+    new Map();
+
+
+reservasOrdenadas.forEach(reserva => {
+
+    const filaReserva =
+        filasReserva.get(
+            reserva.reservaId
+        );
+
+    // Filas 0, 1 y 2 se muestran normalmente.
+    if (filaReserva < MAX_FILAS_VISIBLES) {
+        return;
+    }
+
+
+    const totalNoches =
+        Number(reserva.noches) || 0;
+
+
+    for (
+        let indice = 0;
+        indice < totalNoches;
+        indice++
+    ) {
+
+        const fechaNoche =
+            sumarDiasCalendario(
+                reserva.fechaIngreso,
+                indice
+            );
+
+
+        const [
+            anioNoche,
+            mesNoche
+        ] =
+            fechaNoche
+                .split("-")
+                .map(Number);
+
+
+        // Solo contamos fechas del mes visible.
+        if (
+            anioNoche !== anioCalendario ||
+            mesNoche - 1 !== mesCalendario
+        ) {
+            continue;
+        }
+
+
+        const cantidad =
+            reservasOcultasPorFecha.get(
+                fechaNoche
+            ) || 0;
+
+
+        reservasOcultasPorFecha.set(
+            fechaNoche,
+            cantidad + 1
+        );
+    }
+});
 
 reservasOrdenadas.forEach(reserva => {
 
@@ -433,6 +503,17 @@ reservasOrdenadas.forEach(reserva => {
     if (totalNoches < 1) {
         return;
     }
+
+    const filaReserva =
+    filasReserva.get(
+        reserva.reservaId
+    );
+
+// Las reservas desde la cuarta fila
+// quedan representadas por el botón +N.
+if (filaReserva >= MAX_FILAS_VISIBLES) {
+    return;
+}
 
 
     // ========================================
@@ -452,6 +533,7 @@ reservasOrdenadas.forEach(reserva => {
                 reserva.fechaIngreso,
                 indice
             );
+
 
         const [
             anioNoche,
@@ -489,10 +571,10 @@ reservasOrdenadas.forEach(reserva => {
 
 
         nochesVisibles.push({
-            fecha: fechaNoche,
-            filaSemana,
-            columna
-        });
+    fecha: fechaNoche,
+    filaSemana,
+    columna
+});
     }
 
 
@@ -514,13 +596,12 @@ reservasOrdenadas.forEach(reserva => {
                 segmentos.length - 1
             ];
 
-
         if (
             ultimo &&
             ultimo.filaSemana ===
-                noche.filaSemana &&
+            noche.filaSemana &&
             noche.columna ===
-                ultimo.columnaFin + 1
+            ultimo.columnaFin + 1
         ) {
 
             ultimo.columnaFin =
@@ -529,6 +610,10 @@ reservasOrdenadas.forEach(reserva => {
         } else {
 
             segmentos.push({
+
+                filaReserva:
+                    noche.filaReserva,
+
                 filaSemana:
                     noche.filaSemana,
 
@@ -598,11 +683,9 @@ if (claseColor) {
 
 
             barra.style.setProperty(
-                "--fila-reserva",
-                filasReserva.get(
-                    reserva.reservaId
-                )
-            );
+    "--fila-reserva",
+    filaReserva
+);
 
 
             // El nombre aparece solo
@@ -642,6 +725,86 @@ if (claseColor) {
         }
     );
 });
+
+// ========================================
+// DIBUJAR +N EN CADA DÍA
+// ========================================
+
+reservasOcultasPorFecha.forEach(
+    (cantidad, fecha) => {
+
+        const [
+            anio,
+            mes,
+            dia
+        ] =
+            fecha
+                .split("-")
+                .map(Number);
+
+
+        const indiceCelda =
+            posicionPrimerDia +
+            dia - 1;
+
+
+        const filaSemana =
+            Math.floor(
+                indiceCelda / 7
+            ) + 1;
+
+
+        const columna =
+            (indiceCelda % 7) + 1;
+
+
+        const botonMas =
+            document.createElement(
+                "button"
+            );
+
+
+        botonMas.type = "button";
+
+        botonMas.className =
+            "calendario-mas-reservas";
+
+
+        botonMas.textContent =
+            `+${cantidad}`;
+
+
+        botonMas.dataset.fecha =
+            fecha;
+
+
+        botonMas.style.gridColumn =
+            `${columna}`;
+
+        botonMas.style.gridRow =
+            `${filaSemana}`;
+
+
+        botonMas.addEventListener(
+            "click",
+            evento => {
+
+                evento.stopPropagation();
+
+                console.log(
+                    "MOSTRAR RESERVAS:",
+                    fecha,
+                    cantidad
+                );
+            }
+        );
+
+
+        capaReservas.appendChild(
+            botonMas
+        );
+    }
+);
 
 }
 
@@ -722,6 +885,27 @@ botonSiguiente.addEventListener("click", () => {
 
 // Generar calendario al cargar
 generarCalendario();
+
+// ========================================
+// ACTUALIZAR CALENDARIO AL ABRIR LA SECCIÓN
+// ========================================
+
+const botonMenuCalendario =
+    document.querySelector(
+        '.menu-item[data-seccion="calendario"]'
+    );
+
+if (botonMenuCalendario) {
+
+    botonMenuCalendario.addEventListener(
+        "click",
+        () => {
+
+            generarCalendario();
+
+        }
+    );
+}
 
 // ========================================
 // SELECCIONAR DÍA OPERATIVO

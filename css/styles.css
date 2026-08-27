@@ -715,9 +715,16 @@ input[type="checkbox"] {
 
 /* DÍA ACTUAL */
 
-.dia-calendario.hoy .numero-dia {
-    background: var(--verde);
+.dia-calendario.hoy .numero-dia { 
+    background: var(--verde); 
     color: white;
+
+    width: 24px !important;
+    height: 24px !important;
+    min-width: 24px !important;
+    min-height: 24px !important;
+
+    font-size: 11px;
 }
 
 @media (max-width: 600px) {
@@ -8290,6 +8297,54 @@ tr.cabana-libre .info-cabana {
     background: #eef6fb;
 }
 
+/* =========================================
+   CALENDARIO · BOTÓN +N
+   ========================================= */
+
+.calendario-mas-reservas {
+    box-sizing: border-box;
+
+    align-self: start;
+
+    /* Debajo de las 3 reservas visibles */
+    margin-top: calc(
+    34px + (3 * 20px)
+);
+
+    margin-left: 3px;
+    margin-right: 3px;
+
+    height: 16px;
+
+    padding: 0 4px;
+
+    border: 0;
+    border-radius: 4px;
+
+    background: transparent;
+
+    color: #4f5752;
+
+    font-family: inherit;
+    font-size: 8px;
+    font-weight: 700;
+
+    line-height: 16px;
+    text-align: left;
+
+    white-space: nowrap;
+
+    cursor: pointer;
+
+    pointer-events: auto;
+
+    z-index: 8;
+}
+
+.calendario-mas-reservas:hover {
+    background: #edf0ee;
+}
+
 
 /* CELULAR */
 
@@ -8301,10 +8356,10 @@ tr.cabana-libre .info-cabana {
 
     .calendario-reserva-barra {
         margin-top:
-            calc(
-                38px +
-                (var(--fila-reserva) * 22px)
-            );
+    calc(
+        34px +
+        (var(--fila-reserva) * 20px)
+    );
 
         margin-left: 2px;
         margin-right: 2px;
