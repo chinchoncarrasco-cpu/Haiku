@@ -1808,20 +1808,22 @@ function cargarSolicitudesFichaReserva(reservaId) {
 
 
                     const solicitud =
-                        String(
-                            cabana.solicitudAseoExpress || ""
-                        ).trim();
+    String(
+        cabana.solicitudAseoExpress || ""
+    ).trim();
 
+const solicitudLista =
+    String(cabana.estadoFinal || "").trim().toUpperCase() === "LISTA";
 
-                    if (!solicitud) {
-                        return;
-                    }
+if (!solicitud) {
+    return;
+}
 
-
-                    solicitudes.push({
-                        fecha,
-                        texto: solicitud
-                    });
+solicitudes.push({
+    fecha,
+    texto: solicitud,
+    lista: solicitudLista
+});
 
                 }
             );
@@ -1842,11 +1844,26 @@ function cargarSolicitudesFichaReserva(reservaId) {
         );
 
 
-    contador.textContent =
-        `${solicitudesUnicas.length} pendientes`;
+    const cantidadPendientes =
+    solicitudesUnicas.filter(
+        solicitud => solicitud.lista !== true
+    ).length;
 
 
     contenedor.innerHTML = "";
+
+    const solicitudesPendientes =
+    solicitudesUnicas.filter(
+        solicitud => solicitud.lista !== true
+    );
+
+const solicitudesListas =
+    solicitudesUnicas.filter(
+        solicitud => solicitud.lista === true
+    );
+
+contador.textContent = "";
+contador.hidden = true;
 
 
     if (solicitudesUnicas.length === 0) {
@@ -1858,7 +1875,24 @@ function cargarSolicitudesFichaReserva(reservaId) {
     }
 
 
-    solicitudesUnicas.forEach(solicitud => {
+    function pintarGrupoSolicitudes(titulo, solicitudes) {
+
+    if (solicitudes.length === 0) {
+        return;
+    }
+
+    const encabezado =
+        document.createElement("div");
+
+    encabezado.className =
+        "ficha-solicitud-grupo-titulo";
+
+    encabezado.textContent =
+        `${titulo} ${solicitudes.length}`;
+
+    contenedor.appendChild(encabezado);
+
+    solicitudes.forEach(solicitud => {
 
         const fila =
             document.createElement("div");
@@ -1866,13 +1900,11 @@ function cargarSolicitudesFichaReserva(reservaId) {
         fila.className =
             "ficha-solicitud-item";
 
-
         const fecha =
             document.createElement("strong");
 
         fecha.textContent =
-    `${formatearFechaFicha(solicitud.fecha)} ·`;
-
+            `${formatearFechaFicha(solicitud.fecha)} ·`;
 
         const texto =
             document.createElement("span");
@@ -1880,13 +1912,22 @@ function cargarSolicitudesFichaReserva(reservaId) {
         texto.textContent =
             solicitud.texto;
 
-
         fila.appendChild(fecha);
         fila.appendChild(texto);
 
         contenedor.appendChild(fila);
-
     });
+}
+
+pintarGrupoSolicitudes(
+    "PENDIENTES",
+    solicitudesPendientes
+);
+
+pintarGrupoSolicitudes(
+    "LISTAS",
+    solicitudesListas
+);
 
 }
 
@@ -3471,18 +3512,14 @@ let precioUnitario = servicio.precio || 0;
 
 if (esJacuzzi) {
 
-    // Si todavía no hay precio manual, usar precio base
-    if (!campoPrecioManual.value) {
-        campoPrecioManual.value = precioUnitario;
-    }
-
     precioUnitario =
-        Number(campoPrecioManual.value) || 0;
+        campoPrecioManual.value === ""
+            ? 0
+            : Number(campoPrecioManual.value);
 
 } else {
 
     campoPrecioManual.value = "";
-
 }
 
 const total =
@@ -3616,6 +3653,11 @@ if (btnGuardarServicioResumen) {
 
             personas:
                 cantidad,
+
+            precioManual:
+                idServicio === "tinajaJacuzzi"
+            ? Number(campoPrecioManual.value)
+                : null,
 
             tipoCobro:
                 tipoCobro,

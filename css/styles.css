@@ -8608,3 +8608,53 @@ tr.cabana-libre .info-cabana {
     background: #fde8e8;
     border-color: #d99999;
 }
+
+/* =========================================
+   FICHA RESERVA · SOLICITUDES
+   ========================================= */
+
+/* El antiguo contador ya no se usa */
+#ficha-solicitudes-contador {
+    display: none !important;
+}
+
+/* Títulos PENDIENTES / LISTAS */
+.ficha-solicitud-grupo-titulo {
+    display: inline-flex;
+    align-items: center;
+    width: fit-content;
+    margin: 7px 0 5px;
+    padding: 3px 7px;
+
+    border-radius: 999px;
+
+    font-size: 9px;
+    font-weight: 600;
+    letter-spacing: .04em;
+}
+
+/* Cada solicitud */
+.ficha-solicitud-item {
+    display: flex;
+    align-items: baseline;
+    gap: 3px;
+
+    padding: 5px 7px;
+    margin-bottom: 4px;
+
+    border: 1px solid #e1e4e1;
+    border-radius: 7px;
+    background: #fafbf9;
+
+    font-size: 10px;
+    line-height: 1.3;
+}
+
+.ficha-solicitud-item strong {
+    flex-shrink: 0;
+    font-size: 10px;
+}
+
+.ficha-solicitud-item span {
+    min-width: 0;
+}

@@ -642,6 +642,20 @@ if (typeof generarResumenOperativo === "function") {
     generarResumenOperativo(fechaSeleccionada);
 }
 
+if (
+    typeof cargarServiciosFichaReserva === "function" &&
+    typeof fichaReservaModal !== "undefined" &&
+    fichaReservaModal &&
+    fichaReservaModal.hidden === false
+) {
+    const reservaIdAbierta =
+        fichaReservaModal.dataset.reservaId;
+
+    if (reservaIdAbierta) {
+        cargarServiciosFichaReserva(reservaIdAbierta);
+    }
+}
+
     console.log("SERVICIO ELIMINADO:", servicio);
 }
 
@@ -758,7 +772,19 @@ inputPrecioManual.value = "";
 
 selectProducto.addEventListener("change", actualizarPrecioServicio);
 inputCantidad.addEventListener("input", actualizarPrecioServicio);
-inputPrecioManual.addEventListener("input", actualizarPrecioServicio);
+inputPrecioManual.addEventListener("input", () => {
+    const valorManual = inputPrecioManual.value;
+
+    if (valorManual === "") {
+        textoPrecio.textContent = "$0";
+        return;
+    }
+
+    const valor = Number(valorManual);
+
+    textoPrecio.textContent =
+        `$${valor.toLocaleString("es-CL")}`;
+});
 
 // ==========================================
 // MOSTRAR FECHA Y HORA SOLO TINAJAS / MASAJES
@@ -884,6 +910,12 @@ const precioManual =
     idServicio === "tinajaJacuzzi"
         ? Number(inputPrecioManual.value) || 30000
         : null;
+
+console.log("DEBUG PRECIO JACUZZI", {
+    idServicio,
+    valorInput: inputPrecioManual.value,
+    precioManual
+});
 
     // Validar que exista cabaña y servicio
     if (!cabana || !idServicio) {
