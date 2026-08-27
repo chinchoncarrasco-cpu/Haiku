@@ -704,19 +704,34 @@ if (claseColor) {
 
 
             barra.addEventListener(
-                "click",
-                evento => {
+    "click",
+    evento => {
 
-                    evento.stopPropagation();
+        evento.stopPropagation();
 
-                    console.log(
-                        "RESERVA CALENDARIO:",
-                        reserva.reservaId,
-                        "CAB",
-                        reserva.numeroCabana
-                    );
-                }
+        const fechaAnterior =
+            fechaSeleccionada;
+
+        // El modal de reserva necesita mirar
+        // el día de origen de esta reserva
+        fechaSeleccionada =
+            reserva.fechaIngreso;
+
+        const botonCabana =
+            document.querySelector(
+                `[data-ficha-cabana="${reserva.numeroCabana}"]`
             );
+
+        if (botonCabana) {
+            botonCabana.click();
+        }
+
+        // Volvemos a dejar seleccionada
+        // la fecha que el usuario estaba mirando
+        fechaSeleccionada =
+            fechaAnterior;
+    }
+);
 
 
             capaReservas.appendChild(
@@ -885,18 +900,38 @@ if (claseColor) {
 
 
         item.addEventListener(
-            "click",
-            evento => {
+    "click",
+    evento => {
 
-                evento.stopPropagation();
+        evento.stopPropagation();
 
-                console.log(
-                    "RESERVA PANEL:",
-                    reserva.reservaId,
-                    reserva.numeroCabana
-                );
-            }
-        );
+        const fechaAnterior =
+            fechaSeleccionada;
+
+        // Para abrir la ficha usamos
+        // el día que corresponde a este panel
+        fechaSeleccionada =
+            fecha;
+
+        const botonCabana =
+            document.querySelector(
+                `[data-ficha-cabana="${reserva.numeroCabana}"]`
+            );
+
+        if (botonCabana) {
+
+            // Cerramos el panel +N
+            panel.remove();
+
+            // Abrimos la ficha rápida existente
+            botonCabana.click();
+        }
+
+        // Restauramos la fecha que estaba seleccionada
+        fechaSeleccionada =
+            fechaAnterior;
+    }
+);
 
 
         lista.appendChild(item);
