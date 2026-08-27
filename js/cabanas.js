@@ -50,6 +50,49 @@ if (campo === "checkinRealizado") {
     datos.cabanas[numeroCabana].checkinManual = valor;
 }
 
+// Recordar el CHECK-OUT en la reserva que SALE este día
+if (campo === "checkout") {
+
+    let reservaIdCheckout = "";
+
+Object.entries(datosPorFecha).forEach(([fechaDia, dia]) => {
+
+    if (!dia?.cabanas) return;
+
+    const cabanaDia = dia.cabanas[numeroCabana];
+
+    if (!cabanaDia?.reservaId) return;
+
+    const fechaIngreso =
+        cabanaDia.fechaOrigenReserva ||
+        cabanaDia.fechaIngresoReserva ||
+        fechaDia;
+
+    const noches =
+        Number(cabanaDia.noches) || 0;
+
+    const fechaSalida =
+        calcularSalidaReserva(fechaIngreso, noches);
+
+    if (fechaSalida === fechaSeleccionada) {
+        reservaIdCheckout = cabanaDia.reservaId;
+    }
+});
+
+    if (reservaIdCheckout) {
+
+        const fichas = obtenerFichasReservas();
+
+        if (!fichas[reservaIdCheckout]) {
+            fichas[reservaIdCheckout] = {};
+        }
+
+        fichas[reservaIdCheckout].checkoutRealizado = Boolean(valor);
+
+        guardarFichasReservas(fichas);
+    }
+}
+
 // CONTINÚA solo hereda CHECK-IN si esta reserva
 // tuvo un check-in marcado manualmente
 if (
@@ -3024,6 +3067,14 @@ if (campoEstado) {
 
     let tieneCheckin = false;
     let tieneCheckout = false;
+
+    const fichasEstado = obtenerFichasReservas();
+    const fichaEstado = fichasEstado[reservaId] || {};
+
+    if (fichaEstado.checkoutRealizado === true) {
+    tieneCheckout = true;
+    }
+
     let tieneAbonoConfirmado = false;
 
     Object.values(datosPorFecha).forEach(dia => {
@@ -3041,10 +3092,6 @@ if (campoEstado) {
 
             if (cabanaDia.checkinRealizado === true) {
                 tieneCheckin = true;
-            }
-
-            if (cabanaDia.checkout) {
-                tieneCheckout = true;
             }
 
             if (
