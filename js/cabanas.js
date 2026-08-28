@@ -1344,9 +1344,6 @@ const fichaReservaModal =
 const fichaReservaCerrar =
     document.getElementById("ficha-reserva-cerrar");
 
-const fichaReservaCancelar =
-    document.getElementById("ficha-reserva-cancelar");
-
 
 // ========================================
 // FORMATEAR FECHA PARA LA FICHA
@@ -2879,21 +2876,36 @@ function actualizarTextoOcupacionResumen(
         );
 
 
-    const adultos =
-        Number(
-            datosCabana?.adultos ??
+    const usarDatosCabana =
+    datosCabana !== null;
+
+
+const adultos =
+    usarDatosCabana
+        ? Number(
+            datosCabana.adultos
+        ) || 0
+        : Number(
             campoAdultos?.value
         ) || 0;
 
-    const ninos =
-        Number(
-            datosCabana?.ninos ??
+
+const ninos =
+    usarDatosCabana
+        ? Number(
+            datosCabana.ninos
+        ) || 0
+        : Number(
             campoNinos?.value
         ) || 0;
 
-    const mascotas =
-        Number(
-            datosCabana?.mascotas ??
+
+const mascotas =
+    usarDatosCabana
+        ? Number(
+            datosCabana.mascotas
+        ) || 0
+        : Number(
             campoMascotas?.value
         ) || 0;
 
@@ -3590,46 +3602,62 @@ function liberarReservaCancelada(reservaId) {
     guardarDatos();
 }
 
-if (fichaReservaCancelar) {
+function cancelarReservaDesdeFicha() {
 
-    fichaReservaCancelar.addEventListener("click", () => {
+    const reservaId =
+        fichaReservaModal
+            ?.dataset.reservaId;
 
-        const reservaId =
-            fichaReservaModal.dataset.reservaId;
+    if (!reservaId) {
+        return false;
+    }
 
-        if (!reservaId) {
-            return;
-        }
 
-        const confirmarCancelacion =
-    confirm(
-        "¿Seguro que deseas cancelar esta reserva?\n\n" +
-        "La reserva desaparecerá del Resumen y del Calendario."
+    const confirmarCancelacion =
+        confirm(
+            "¿Seguro que deseas cancelar esta reserva?\n\n" +
+            "La reserva desaparecerá del Resumen y del Calendario."
+        );
+
+
+    if (!confirmarCancelacion) {
+        return false;
+    }
+
+
+    guardarReservaCancelada(
+        reservaId
     );
 
-if (!confirmarCancelacion) {
-    return;
-}
+    liberarReservaCancelada(
+        reservaId
+    );
 
-guardarReservaCancelada(reservaId);
 
-liberarReservaCancelada(reservaId);
+    fichaReservaModal.hidden =
+        true;
 
-fichaReservaModal.hidden = true;
 
-cargarCabanasDia(fechaSeleccionada);
+    cargarCabanasDia(
+        fechaSeleccionada
+    );
 
-if (typeof generarCalendario === "function") {
-    generarCalendario();
-}
 
-console.log(
-    "RESERVA CANCELADA GUARDADA:",
-    reservaId
-);
+    if (
+        typeof generarCalendario ===
+        "function"
+    ) {
+        generarCalendario();
+    }
 
-    });
 
+    console.log(
+        "RESERVA CANCELADA GUARDADA:",
+        reservaId
+    );
+
+
+    return true;
 }
 
 
@@ -5047,6 +5075,17 @@ if (menuEstadoFicha) {
                 opcion.dataset
                     .fichaEstadoOpcion;
 
+            if (
+                estadoElegido ===
+                "cancelada"
+            ) {
+
+            cerrarMenuEstadoFicha();
+
+            cancelarReservaDesdeFicha();
+
+            return;
+        }
 
             // Por ahora, las demás opciones
             // solamente cierran el menú.
