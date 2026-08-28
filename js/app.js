@@ -2484,6 +2484,46 @@ const reservaAcompanantes =
         "reserva-acompanantes"
     );
 
+const botonCrearNuevaReserva =
+    document.getElementById(
+        "crear-nueva-reserva"
+    );
+
+const pasoConfirmacionReserva =
+    document.getElementById(
+        "reserva-paso-confirmacion"
+    );
+
+const resumenConfirmacionReserva =
+    document.getElementById(
+        "reserva-confirmacion-resumen"
+    );
+
+const campoNuevoTitular =
+    document.getElementById(
+        "reserva-nuevo-titular"
+    );
+
+const campoNuevoTelefono =
+    document.getElementById(
+        "reserva-nuevo-telefono"
+    );
+
+const campoNuevoRut =
+    document.getElementById(
+        "reserva-nuevo-rut"
+    );
+
+const campoNuevoCorreo =
+    document.getElementById(
+        "reserva-nuevo-correo"
+    );
+
+const campoNuevaObservacion =
+    document.getElementById(
+        "reserva-nueva-observacion"
+    );
+
 const catalogoCabanasReserva = {
 
     "1": {
@@ -2556,6 +2596,7 @@ const catalogoCabanasReserva = {
 
 let cabanaSeleccionadaReserva = "";
 let tarifasNochesReserva = {};
+let reservaCreadaId = "";
 
 
 let mesReservaBase = new Date();
@@ -3614,6 +3655,379 @@ for (
         });
 }
 
+function crearReservaDesdeFormulario() {
+
+    const titular =
+        campoNuevoTitular.value.trim();
+
+
+    if (!titular) {
+
+        alert(
+            "Ingresa el nombre del titular de la reserva."
+        );
+
+        campoNuevoTitular.focus();
+        return;
+    }
+
+
+    if (
+        campoNuevoCorreo.value.trim() &&
+        !campoNuevoCorreo.checkValidity()
+    ) {
+
+        alert(
+            "Revisa que el correo esté escrito correctamente."
+        );
+
+        campoNuevoCorreo.focus();
+        return;
+    }
+
+
+    const numeroCabana =
+        cabanaSeleccionadaReserva;
+
+    const cabana =
+        catalogoCabanasReserva[
+            numeroCabana
+        ];
+
+    if (!cabana) {
+        return;
+    }
+
+
+    const noches =
+        calcularNochesReserva(
+            fechaLlegadaReserva,
+            fechaSalidaReserva
+        );
+
+
+    const acompanantes =
+        Array.from(
+            document.querySelectorAll(
+                ".reserva-nuevo-acompanante"
+            )
+        ).map(
+            campo => campo.value.trim()
+        );
+
+
+    const cantidadHuespedes =
+        1 +
+        acompanantes.filter(Boolean).length;
+
+
+    const tarifasFinales = {};
+
+    for (
+        let indice = 0;
+        indice < noches;
+        indice++
+    ) {
+
+        const fechaNoche =
+            sumarDiasNuevaReserva(
+                fechaLlegadaReserva,
+                indice
+            );
+
+        tarifasFinales[fechaNoche] =
+            tarifasNochesReserva[fechaNoche]
+            ?? cabana.precio;
+    }
+
+
+    const totalReserva =
+        Object.values(
+            tarifasFinales
+        ).reduce(
+            (suma, tarifa) =>
+                suma + Number(tarifa),
+            0
+        );
+
+
+    const reservaId =
+        generarReservaId(
+            fechaLlegadaReserva,
+            numeroCabana
+        );
+
+
+    const datosIngreso =
+        obtenerDatosDia(
+            fechaLlegadaReserva
+        );
+
+
+    if (!datosIngreso.cabanas) {
+        datosIngreso.cabanas = {};
+    }
+
+
+    const registroAnterior =
+        datosIngreso.cabanas[
+            numeroCabana
+        ] || {};
+
+
+    const tieneSalidaEseDia =
+        registroAnterior.estado ===
+            "sale-libre" ||
+        Boolean(
+            registroAnterior.reservaId &&
+            registroAnterior.titular
+        );
+
+
+    const estadoIngreso =
+        tieneSalidaEseDia
+            ? "sale-ingresa"
+            : "libre-ingresa";
+
+
+    datosIngreso.cabanas[
+        numeroCabana
+    ] = {
+
+        ...registroAnterior,
+
+        reservaId,
+        titular,
+
+        adultos: String(
+            cantidadHuespedes
+        ),
+
+        ninos: "0",
+        mascotas: "0",
+
+        noches,
+
+        fechaOrigenReserva:
+            fechaLlegadaReserva,
+
+        fechaIngresoReserva:
+            fechaLlegadaReserva,
+
+        estado: estadoIngreso,
+
+        estadoIngresoReserva:
+            estadoIngreso,
+
+        continuidadAutomatica: false,
+        editadoManual: true,
+        borradoManual: false,
+
+        correo:
+            campoNuevoCorreo.value.trim(),
+
+        telefono:
+            campoNuevoTelefono.value.trim(),
+
+        rut:
+            campoNuevoRut.value.trim(),
+
+        observaciones:
+            campoNuevaObservacion.value.trim(),
+
+        tarifasNoches:
+            tarifasFinales,
+
+        totalReserva,
+
+        abono: "",
+        montoAbono: "",
+        abonoVerificado: false,
+        medioPago: "",
+
+        checkinRealizado: false,
+        checkinManual: false,
+        checkout: false
+    };
+
+
+    guardarDatos();
+
+
+    crearContinuidadesReserva(
+        fechaLlegadaReserva,
+        numeroCabana,
+        noches
+    );
+
+
+    const fichasReservas =
+        JSON.parse(
+            localStorage.getItem(
+                "haikuFichaReservas"
+            ) || "{}"
+        );
+
+
+    const fichaNueva = {
+
+        titular,
+
+        rut:
+            campoNuevoRut.value.trim(),
+
+        telefono:
+            campoNuevoTelefono.value.trim(),
+
+        correo:
+            campoNuevoCorreo.value.trim(),
+
+        observaciones:
+            campoNuevaObservacion.value.trim(),
+
+        totalReserva,
+
+        tarifasNoches:
+            tarifasFinales
+    };
+
+
+    for (
+        let indice = 0;
+        indice < 5;
+        indice++
+    ) {
+
+        fichaNueva[
+            `acompanante${indice + 1}`
+        ] = acompanantes[indice] || "";
+    }
+
+
+    fichasReservas[reservaId] =
+        fichaNueva;
+
+
+    localStorage.setItem(
+        "haikuFichaReservas",
+        JSON.stringify(
+            fichasReservas
+        )
+    );
+
+
+    reservaCreadaId =
+        reservaId;
+
+
+    if (
+        typeof generarCalendario ===
+        "function"
+    ) {
+        generarCalendario();
+    }
+
+
+    if (
+        fechaSeleccionada ===
+        fechaLlegadaReserva
+    ) {
+
+        if (
+            typeof cargarCabanasDia ===
+            "function"
+        ) {
+            cargarCabanasDia(
+                fechaSeleccionada
+            );
+        }
+
+        if (
+            typeof actualizarResumenDia ===
+            "function"
+        ) {
+            actualizarResumenDia(
+                fechaSeleccionada
+            );
+        }
+
+        if (
+            typeof generarResumenOperativo ===
+            "function"
+        ) {
+            generarResumenOperativo(
+                fechaSeleccionada
+            );
+        }
+    }
+
+
+    resumenConfirmacionReserva.innerHTML = `
+        <div class="reserva-confirmacion-fila">
+            <span>Cabaña</span>
+            <strong>
+                CAB ${numeroCabana}
+                ·
+                ${cabana.nombre}
+            </strong>
+        </div>
+
+        <div class="reserva-confirmacion-fila">
+            <span>Fechas</span>
+            <strong>
+                ${formatearFechaReserva(
+                    fechaLlegadaReserva
+                )}
+                →
+                ${formatearFechaReserva(
+                    fechaSalidaReserva
+                )}
+            </strong>
+        </div>
+
+        <div class="reserva-confirmacion-fila">
+            <span>Titular</span>
+            <strong>${titular}</strong>
+        </div>
+
+        <div class="reserva-confirmacion-fila">
+            <span>Huéspedes</span>
+            <strong>
+                ${cantidadHuespedes}
+            </strong>
+        </div>
+
+        <div class="reserva-confirmacion-fila">
+            <span>Total</span>
+            <strong class="reserva-confirmacion-total">
+                ${formatearPrecioReserva(
+                    totalReserva
+                )}
+            </strong>
+        </div>
+
+        <div class="reserva-confirmacion-id">
+            ${reservaId}
+        </div>
+    `;
+
+
+    pasoDetallesReserva.hidden = true;
+    pasoConfirmacionReserva.hidden = false;
+
+
+    document
+        .querySelectorAll(".reserva-paso")
+        .forEach(paso => {
+
+            paso.classList.toggle(
+                "activo",
+                paso.dataset.paso === "4"
+            );
+
+        });
+}
+
 // ========================================
 // NUEVA RESERVA · NAVEGACIÓN ENTRE PASOS
 // ========================================
@@ -3684,6 +4098,15 @@ if (volverReservaCabana) {
                 });
 
         }
+    );
+
+}
+
+if (botonCrearNuevaReserva) {
+
+    botonCrearNuevaReserva.addEventListener(
+        "click",
+        crearReservaDesdeFormulario
     );
 
 }

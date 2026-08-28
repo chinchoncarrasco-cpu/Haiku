@@ -9798,3 +9798,97 @@ tr.cabana-libre .info-cabana {
         grid-template-columns: 1fr;
     }
 }
+
+/* =========================================
+   NUEVA RESERVA · PASO 4 · CONFIRMACIÓN
+========================================= */
+
+.reserva-confirmacion-icono {
+    width: 44px;
+    height: 44px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    margin: 4px auto 10px;
+
+    border-radius: 50%;
+
+    background: #35a762;
+    color: #ffffff;
+
+    font-size: 25px;
+    font-weight: 700;
+}
+
+.reserva-confirmacion-titulo {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+
+    gap: 3px;
+    margin-bottom: 14px;
+
+    text-align: center;
+}
+
+.reserva-confirmacion-titulo strong {
+    font-size: 16px;
+    color: #202923;
+}
+
+.reserva-confirmacion-titulo span {
+    font-size: 9px;
+    color: #7a827d;
+}
+
+.reserva-confirmacion-resumen {
+    padding: 4px 11px;
+
+    border: 1px solid #dce3df;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+.reserva-confirmacion-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 9px 0;
+
+    border-bottom: 1px solid #e8ece9;
+}
+
+.reserva-confirmacion-fila span {
+    flex-shrink: 0;
+
+    font-size: 8px;
+    color: #6f7872;
+}
+
+.reserva-confirmacion-fila strong {
+    text-align: right;
+
+    font-size: 9px;
+    color: #29332d;
+}
+
+.reserva-confirmacion-fila
+.reserva-confirmacion-total {
+    font-size: 11px;
+    color: #278052;
+}
+
+.reserva-confirmacion-id {
+    padding: 7px 0;
+
+    text-align: center;
+
+    font-size: 7px;
+    color: #99a19c;
+}
