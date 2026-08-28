@@ -2377,6 +2377,16 @@ function abrirModalNuevaReserva() {
 
     modalNuevaReserva.hidden = false;
 
+    fechaLlegadaReserva = "";
+fechaSalidaReserva = "";
+
+fechaLlegadaTexto.textContent = "Seleccionar";
+fechaSalidaTexto.textContent = "Seleccionar";
+
+continuarFechasReserva.disabled = true;
+
+    renderizarCalendarioNuevaReserva();
+
     document.body.style.overflow = "hidden";
 }
 
@@ -2423,4 +2433,441 @@ if (modalNuevaReserva) {
         }
 
     });
+}
+
+// ========================================
+// NUEVA RESERVA · CALENDARIO DE FECHAS
+// ========================================
+
+const reservaCalendario =
+    document.getElementById("reserva-calendario");
+
+const fechaLlegadaTexto =
+    document.getElementById("reserva-fecha-llegada");
+
+const fechaSalidaTexto =
+    document.getElementById("reserva-fecha-salida");
+
+const continuarFechasReserva =
+    document.getElementById("continuar-fechas-reserva");
+
+
+let mesReservaBase = new Date();
+mesReservaBase.setDate(1);
+
+let fechaLlegadaReserva = "";
+let fechaSalidaReserva = "";
+
+
+function nombreMesReserva(fecha) {
+    return fecha.toLocaleDateString("es-CL", {
+        month: "long",
+        year: "numeric"
+    });
+}
+
+function sumarDiasNuevaReserva(fechaISO, cantidad) {
+    const [anio, mes, dia] =
+        fechaISO.split("-").map(Number);
+
+    const fecha =
+        new Date(anio, mes - 1, dia);
+
+    fecha.setDate(
+        fecha.getDate() + cantidad
+    );
+
+    return [
+        fecha.getFullYear(),
+        String(fecha.getMonth() + 1).padStart(2, "0"),
+        String(fecha.getDate()).padStart(2, "0")
+    ].join("-");
+}
+
+
+function cabanaOcupadaEnNoche(numeroCabana, fechaISO) {
+
+    let ocupada = false;
+
+    Object.entries(datosPorFecha).forEach(
+        ([fechaDia, datosDia]) => {
+
+            if (ocupada) return;
+            if (!datosDia?.cabanas) return;
+
+            const cabana =
+                datosDia.cabanas[numeroCabana];
+
+            if (!cabana) return;
+
+
+            // BLOQUEO operativo
+            if (
+                fechaDia === fechaISO &&
+                cabana.estado === "bloqueada"
+            ) {
+                ocupada = true;
+                return;
+            }
+
+
+            // No hay reserva real
+            if (!cabana.reservaId) return;
+
+
+            const fechaIngreso =
+                cabana.fechaOrigenReserva ||
+                cabana.fechaIngresoReserva ||
+                fechaDia;
+
+            const noches =
+                Number(cabana.noches) || 0;
+
+            if (noches <= 0) return;
+
+
+            const fechaSalida =
+                sumarDiasNuevaReserva(
+                    fechaIngreso,
+                    noches
+                );
+
+
+            // Una reserva ocupa las NOCHES:
+            // ingreso incluido
+            // salida excluida
+            if (
+                fechaISO >= fechaIngreso &&
+                fechaISO < fechaSalida
+            ) {
+                ocupada = true;
+            }
+        }
+    );
+
+    return ocupada;
+}
+
+
+function fechaTieneDisponibilidad(fechaISO) {
+
+    for (
+        let numeroCabana = 1;
+        numeroCabana <= 11;
+        numeroCabana++
+    ) {
+
+        const ocupada =
+            cabanaOcupadaEnNoche(
+                String(numeroCabana),
+                fechaISO
+            );
+
+        if (!ocupada) {
+            return true;
+        }
+    }
+
+    return false;
+}
+
+
+function crearMesReserva(fechaMes) {
+
+    const contenedorMes = document.createElement("div");
+    contenedorMes.className = "reserva-mes";
+
+    const titulo = document.createElement("strong");
+    titulo.className = "reserva-mes-titulo";
+
+    const nombreMes = nombreMesReserva(fechaMes);
+
+    titulo.textContent =
+        nombreMes.charAt(0).toUpperCase() +
+        nombreMes.slice(1);
+
+    contenedorMes.appendChild(titulo);
+
+
+    const diasSemana = document.createElement("div");
+    diasSemana.className = "reserva-dias-semana";
+
+    ["L", "M", "M", "J", "V", "S", "D"].forEach(dia => {
+
+        const span = document.createElement("span");
+        span.textContent = dia;
+
+        diasSemana.appendChild(span);
+    });
+
+    contenedorMes.appendChild(diasSemana);
+
+
+    const grilla = document.createElement("div");
+    grilla.className = "reserva-mes-grilla";
+
+
+    const año = fechaMes.getFullYear();
+    const mes = fechaMes.getMonth();
+
+    const primerDia = new Date(año, mes, 1);
+
+    // JS: domingo = 0
+    // Nosotros: lunes = primera columna
+    const desplazamiento =
+        (primerDia.getDay() + 6) % 7;
+
+
+    for (let i = 0; i < desplazamiento; i++) {
+
+        const vacio = document.createElement("span");
+        vacio.className = "reserva-dia-vacio";
+
+        grilla.appendChild(vacio);
+    }
+
+
+    const totalDias =
+        new Date(año, mes + 1, 0).getDate();
+
+
+    for (let dia = 1; dia <= totalDias; dia++) {
+
+        const botonDia = document.createElement("button");
+
+        botonDia.type = "button";
+        botonDia.className = "reserva-dia";
+
+        botonDia.textContent = dia;
+
+        const fecha =
+            `${año}-${String(mes + 1).padStart(2, "0")}-${String(dia).padStart(2, "0")}`;
+
+botonDia.dataset.fecha = fecha;
+
+const disponible =
+    fechaTieneDisponibilidad(fecha);
+
+if (!disponible) {
+
+    botonDia.classList.add("ocupado");
+    botonDia.disabled = true;
+
+}
+
+if (!botonDia.disabled) {
+    botonDia.addEventListener("click", () => {
+        seleccionarFechaNuevaReserva(fecha);
+    });
+}
+
+grilla.appendChild(botonDia);
+    }
+
+
+    contenedorMes.appendChild(grilla);
+
+    return contenedorMes;
+}
+
+function formatearFechaReserva(fechaISO) {
+    const [anio, mes, dia] = fechaISO.split("-");
+
+    return `${dia}-${mes}-${anio}`;
+}
+
+
+function obtenerCabanasDisponiblesEnRango(fechaInicio, fechaFin) {
+
+    const disponibles = [];
+
+    for (let numeroCabana = 1; numeroCabana <= 11; numeroCabana++) {
+
+        let disponibleTodoElRango = true;
+
+        let fechaActual = fechaInicio;
+
+        while (fechaActual < fechaFin) {
+
+            if (
+                cabanaOcupadaEnNoche(
+                    String(numeroCabana),
+                    fechaActual
+                )
+            ) {
+                disponibleTodoElRango = false;
+                break;
+            }
+
+            fechaActual =
+                sumarDiasNuevaReserva(
+                    fechaActual,
+                    1
+                );
+        }
+
+        if (disponibleTodoElRango) {
+            disponibles.push(
+                String(numeroCabana)
+            );
+        }
+    }
+
+    return disponibles;
+}
+
+
+function seleccionarFechaNuevaReserva(fecha) {
+
+    // Sin llegada todavía
+    if (!fechaLlegadaReserva) {
+
+        fechaLlegadaReserva = fecha;
+        fechaSalidaReserva = "";
+
+    }
+
+    // Ya había rango completo → comenzar nuevamente
+    else if (fechaLlegadaReserva && fechaSalidaReserva) {
+
+        fechaLlegadaReserva = fecha;
+        fechaSalidaReserva = "";
+
+    }
+
+    // Elegir salida
+    else {
+
+        // Si toca una fecha anterior o igual,
+        // esa fecha pasa a ser la nueva llegada
+        if (fecha <= fechaLlegadaReserva) {
+
+            fechaLlegadaReserva = fecha;
+            fechaSalidaReserva = "";
+
+        } else {
+
+            const cabanasDisponibles =
+                obtenerCabanasDisponiblesEnRango(
+                    fechaLlegadaReserva,
+                    fecha
+                );
+
+            // El rango completo no sirve
+            if (cabanasDisponibles.length === 0) {
+
+                alert(
+                    "No hay una misma cabaña disponible durante todo ese rango."
+                );
+
+                fechaSalidaReserva = "";
+
+            } else {
+
+                fechaSalidaReserva = fecha;
+            }
+        }
+    }
+
+    actualizarSeleccionCalendarioReserva();
+}
+
+function actualizarSeleccionCalendarioReserva() {
+
+    const botones =
+        reservaCalendario.querySelectorAll(
+            ".reserva-dia"
+        );
+
+
+    botones.forEach(boton => {
+
+        boton.classList.remove(
+            "seleccionado",
+            "en-rango"
+        );
+
+        const fecha =
+            boton.dataset.fecha;
+
+
+        if (
+            fecha === fechaLlegadaReserva ||
+            fecha === fechaSalidaReserva
+        ) {
+            boton.classList.add(
+                "seleccionado"
+            );
+        }
+
+
+        if (
+            fechaLlegadaReserva &&
+            fechaSalidaReserva &&
+            fecha > fechaLlegadaReserva &&
+            fecha < fechaSalidaReserva
+        ) {
+            boton.classList.add(
+                "en-rango"
+            );
+        }
+    });
+
+
+    fechaLlegadaTexto.textContent =
+        fechaLlegadaReserva
+            ? formatearFechaReserva(fechaLlegadaReserva)
+            : "Seleccionar";
+
+
+    fechaSalidaTexto.textContent =
+        fechaSalidaReserva
+            ? formatearFechaReserva(fechaSalidaReserva)
+            : "Seleccionar";
+
+
+    continuarFechasReserva.disabled =
+        !(
+            fechaLlegadaReserva &&
+            fechaSalidaReserva
+        );
+}
+
+
+function renderizarCalendarioNuevaReserva() {
+
+    if (!reservaCalendario) return;
+
+    reservaCalendario.innerHTML = "";
+
+
+    const meses = document.createElement("div");
+    meses.className = "reserva-calendario-meses";
+
+
+    const primerMes =
+        new Date(
+            mesReservaBase.getFullYear(),
+            mesReservaBase.getMonth(),
+            1
+        );
+
+    const segundoMes =
+        new Date(
+            mesReservaBase.getFullYear(),
+            mesReservaBase.getMonth() + 1,
+            1
+        );
+
+
+    meses.appendChild(
+        crearMesReserva(primerMes)
+    );
+
+    meses.appendChild(
+        crearMesReserva(segundoMes)
+    );
+
+
+    reservaCalendario.appendChild(meses);
 }

@@ -9107,3 +9107,179 @@ tr.cabana-libre .info-cabana {
         font-size: 20px;
     }
 }
+
+/* =========================================
+   NUEVA RESERVA · CALENDARIO DOS MESES
+========================================= */
+
+.reserva-calendario {
+    padding: 12px;
+
+    min-height: auto;
+
+    background: #ffffff;
+
+    border: 1px solid #e1e5e3;
+    border-radius: 10px;
+}
+
+
+.reserva-calendario-meses {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 14px;
+}
+
+
+.reserva-mes {
+    min-width: 0;
+}
+
+
+.reserva-mes-titulo {
+    display: block;
+
+    margin-bottom: 9px;
+
+    text-align: center;
+
+    font-size: 10px;
+    font-weight: 700;
+
+    color: #28312c;
+}
+
+
+.reserva-dias-semana,
+.reserva-mes-grilla {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+
+    gap: 2px;
+}
+
+
+.reserva-dias-semana {
+    margin-bottom: 5px;
+}
+
+
+.reserva-dias-semana span {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    height: 16px;
+
+    font-size: 7px;
+    font-weight: 600;
+
+    color: #87908a;
+}
+
+
+.reserva-dia-vacio {
+    display: block;
+    height: 22px;
+}
+
+
+.reserva-dia {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 0;
+    border-radius: 50%;
+
+    background: transparent;
+
+    font-family: inherit;
+    font-size: 8px;
+    font-weight: 500;
+
+    color: #303733;
+
+    cursor: pointer;
+
+    transition:
+        background 0.12s,
+        color 0.12s;
+}
+
+
+.reserva-dia:hover {
+    background: #edf6f1;
+}
+
+
+/* Estado que después usaremos para días ocupados */
+
+.reserva-dia.ocupado {
+    color: #c4c9c6;
+    background: #f3f4f3;
+
+    text-decoration: line-through;
+
+    cursor: not-allowed;
+    opacity: 0.75;
+}
+
+.reserva-dia.ocupado:hover {
+    background: #f3f4f3;
+}
+
+/* Llegada / salida */
+
+.reserva-dia.seleccionado {
+    background: #2d8a61;
+    color: #ffffff;
+
+    font-weight: 700;
+}
+
+
+/* Días intermedios del rango */
+
+.reserva-dia.en-rango {
+    border-radius: 5px;
+
+    background: #cfe9da;
+    color: #235a40;
+}
+
+
+/* =========================================
+   AJUSTE MÓVIL DEL CALENDARIO
+========================================= */
+
+@media (max-width: 768px) {
+
+    .reserva-calendario {
+    padding: 12px 10px;
+}
+
+    .reserva-calendario-meses {
+    gap: 12px;
+}
+
+    .reserva-mes-titulo {
+        font-size: 9px;
+    }
+
+    .reserva-dia {
+        font-size: 7px;
+    }
+
+    .reserva-dia-vacio {
+        height: 20px;
+    }
+}
