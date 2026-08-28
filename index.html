@@ -6465,6 +6465,335 @@ Terraza:
 
 </main>
 
+<!-- =========================================
+     NUEVA RESERVA
+========================================== -->
+
+<div id="modal-nueva-reserva" class="modal-nueva-reserva" hidden>
+
+    <div class="nueva-reserva-card">
+
+        <!-- CABECERA -->
+        <div class="nueva-reserva-header">
+
+            <div>
+                <span class="nueva-reserva-mini">RESERVAS</span>
+                <h2>Nueva reserva</h2>
+            </div>
+
+            <button
+                type="button"
+                id="cerrar-nueva-reserva"
+                class="cerrar-nueva-reserva"
+                aria-label="Cerrar"
+            >
+                ×
+            </button>
+
+        </div>
+
+
+        <!-- PASOS -->
+        <div class="nueva-reserva-pasos">
+
+            <div class="reserva-paso activo" data-paso="1">
+                <span>1</span>
+                <small>Fechas</small>
+            </div>
+
+            <div class="reserva-paso" data-paso="2">
+                <span>2</span>
+                <small>Cabaña</small>
+            </div>
+
+            <div class="reserva-paso" data-paso="3">
+                <span>3</span>
+                <small>Detalles</small>
+            </div>
+
+            <div class="reserva-paso" data-paso="4">
+                <span>4</span>
+                <small>Confirmación</small>
+            </div>
+
+        </div>
+
+
+        <!-- ================================
+             PASO 1 · FECHAS
+        ================================= -->
+
+        <section
+            id="reserva-paso-fechas"
+            class="nueva-reserva-seccion activa"
+        >
+
+            <div class="nueva-reserva-titulo">
+                <strong>Selecciona las fechas</strong>
+                <span>Elige llegada y salida</span>
+            </div>
+
+            <div class="reserva-fechas-resumen">
+
+                <div>
+                    <small>Llegada</small>
+                    <strong id="reserva-fecha-llegada">
+                        Seleccionar
+                    </strong>
+                    <span>Desde las 15:00</span>
+                </div>
+
+                <span class="reserva-fechas-flecha">→</span>
+
+                <div>
+                    <small>Salida</small>
+                    <strong id="reserva-fecha-salida">
+                        Seleccionar
+                    </strong>
+                    <span>Hasta las 12:00</span>
+                </div>
+
+            </div>
+
+
+            <!-- AQUÍ CONSTRUIREMOS EL CALENDARIO -->
+            <div
+                id="reserva-calendario"
+                class="reserva-calendario"
+            >
+            </div>
+
+
+            <div class="reserva-calendario-leyenda">
+
+                <span>
+                    <i class="leyenda-disponible"></i>
+                    Disponible
+                </span>
+
+                <span>
+                    <i class="leyenda-ocupada"></i>
+                    Ocupada
+                </span>
+
+                <span>
+                    <i class="leyenda-seleccionada"></i>
+                    Seleccionada
+                </span>
+
+            </div>
+
+
+            <div class="nueva-reserva-acciones">
+
+                <button
+                    type="button"
+                    id="cancelar-nueva-reserva"
+                    class="reserva-btn-secundario"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="button"
+                    id="continuar-fechas-reserva"
+                    class="reserva-btn-principal"
+                    disabled
+                >
+                    Continuar
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================
+             PASO 2 · CABAÑA
+        ================================= -->
+
+        <section
+            id="reserva-paso-cabana"
+            class="nueva-reserva-seccion"
+            hidden
+        >
+
+            <div class="nueva-reserva-titulo">
+                <strong>Selecciona una cabaña</strong>
+                <span>Solo mostramos alojamientos disponibles</span>
+            </div>
+
+            <div
+                id="lista-cabanas-disponibles"
+                class="lista-cabanas-disponibles"
+            >
+            </div>
+
+            <div class="nueva-reserva-acciones">
+
+                <button
+                    type="button"
+                    id="volver-reserva-fechas"
+                    class="reserva-btn-secundario"
+                >
+                    Atrás
+                </button>
+
+                <button
+                    type="button"
+                    id="continuar-reserva-detalles"
+                    class="reserva-btn-principal"
+                    disabled
+                >
+                    Continuar
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================
+             PASO 3 · DETALLES
+        ================================= -->
+
+        <section
+            id="reserva-paso-detalles"
+            class="nueva-reserva-seccion"
+            hidden
+        >
+
+            <div class="nueva-reserva-titulo">
+                <strong>Datos de la reserva</strong>
+                <span>Información del titular y huéspedes</span>
+            </div>
+
+            <div id="reserva-cabana-seleccionada"></div>
+
+            <div class="reserva-formulario">
+
+                <label>
+                    Titular *
+                    <input
+                        type="text"
+                        id="reserva-nuevo-titular"
+                        placeholder="Nombre completo"
+                    >
+                </label>
+
+                <div
+                    id="reserva-acompanantes"
+                    class="reserva-acompanantes"
+                >
+                </div>
+
+                <div class="reserva-form-doble">
+
+                    <label>
+                        Teléfono
+                        <input
+                            type="tel"
+                            id="reserva-nuevo-telefono"
+                            placeholder="+56 9..."
+                        >
+                    </label>
+
+                    <label>
+                        RUT
+                        <input
+                            type="text"
+                            id="reserva-nuevo-rut"
+                            placeholder="12.345.678-9"
+                        >
+                    </label>
+
+                </div>
+
+                <label>
+                    Correo
+                    <input
+                        type="email"
+                        id="reserva-nuevo-correo"
+                        placeholder="correo@ejemplo.com"
+                    >
+                </label>
+
+            </div>
+
+
+            <div class="nueva-reserva-acciones">
+
+                <button
+                    type="button"
+                    id="volver-reserva-cabana"
+                    class="reserva-btn-secundario"
+                >
+                    Atrás
+                </button>
+
+                <button
+                    type="button"
+                    id="crear-nueva-reserva"
+                    class="reserva-btn-principal"
+                >
+                    Crear reserva
+                </button>
+
+            </div>
+
+        </section>
+
+
+        <!-- ================================
+             PASO 4 · CONFIRMACIÓN
+        ================================= -->
+
+        <section
+            id="reserva-paso-confirmacion"
+            class="nueva-reserva-seccion"
+            hidden
+        >
+
+            <div class="reserva-confirmacion-icono">
+                ✓
+            </div>
+
+            <div class="reserva-confirmacion-titulo">
+                <strong>¡Reserva creada!</strong>
+                <span>La reserva fue registrada correctamente.</span>
+            </div>
+
+            <div
+                id="reserva-confirmacion-resumen"
+                class="reserva-confirmacion-resumen"
+            >
+            </div>
+
+            <div class="nueva-reserva-acciones">
+
+                <button
+                    type="button"
+                    id="crear-otra-reserva"
+                    class="reserva-btn-secundario"
+                >
+                    Nueva reserva
+                </button>
+
+                <button
+                    type="button"
+                    id="ver-reserva-creada"
+                    class="reserva-btn-principal"
+                >
+                    Ver reserva
+                </button>
+
+            </div>
+
+        </section>
+
+    </div>
+
+</div>
 
     <!-- JAVASCRIPT -->
     <script src="js/calendario.js"></script>

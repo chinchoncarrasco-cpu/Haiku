@@ -8725,3 +8725,385 @@ tr.cabana-libre .info-cabana {
         margin-left: auto !important;
     }
 }
+
+/* =========================================
+   NUEVA RESERVA · MODAL
+========================================= */
+
+.modal-nueva-reserva[hidden] {
+    display: none !important;
+}
+
+.modal-nueva-reserva {
+    position: fixed;
+    inset: 0;
+    z-index: 10000;
+
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+
+    padding: 18px 12px;
+
+    background: rgba(18, 25, 21, 0.48);
+
+    overflow-y: auto;
+}
+
+
+.nueva-reserva-card {
+    width: min(100%, 420px);
+
+    background: #fbfaf7;
+
+    border: 1px solid #e3e7e5;
+    border-radius: 16px;
+
+    box-shadow:
+        0 18px 45px rgba(0, 0, 0, 0.22);
+
+    padding: 16px;
+
+    margin: auto;
+}
+
+
+/* CABECERA */
+
+.nueva-reserva-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    margin-bottom: 16px;
+}
+
+.nueva-reserva-mini {
+    display: block;
+
+    margin-bottom: 3px;
+
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.4px;
+
+    color: #2f7653;
+}
+
+.nueva-reserva-header h2 {
+    margin: 0;
+
+    font-size: 22px;
+    color: #202723;
+}
+
+
+.cerrar-nueva-reserva {
+    width: 30px;
+    height: 30px;
+
+    flex: 0 0 30px;
+
+    border: 1px solid #ddd8cf;
+    border-radius: 50%;
+
+    background: transparent;
+
+    font-size: 18px;
+    line-height: 1;
+
+    color: #59615d;
+
+    cursor: pointer;
+}
+
+/* =========================================
+   NUEVA RESERVA · PASOS
+========================================= */
+
+.nueva-reserva-pasos {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+
+    gap: 6px;
+
+    margin-bottom: 18px;
+}
+
+.reserva-paso {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    min-width: 0;
+
+    color: #a5aaa7;
+}
+
+.reserva-paso span {
+    width: 18px;
+    height: 18px;
+
+    flex: 0 0 18px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    border-radius: 50%;
+
+    background: #e5e7e6;
+
+    font-size: 9px;
+    font-weight: 700;
+
+    color: #858b87;
+}
+
+.reserva-paso small {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+
+    font-size: 8px;
+}
+
+.reserva-paso.activo {
+    color: #225f43;
+}
+
+.reserva-paso.activo span {
+    background: #225f43;
+    color: #ffffff;
+}
+
+
+/* =========================================
+   NUEVA RESERVA · CONTENIDO
+========================================= */
+
+.nueva-reserva-seccion[hidden] {
+    display: none !important;
+}
+
+.nueva-reserva-titulo {
+    display: flex;
+    flex-direction: column;
+
+    margin-bottom: 12px;
+}
+
+.nueva-reserva-titulo strong {
+    font-size: 13px;
+    color: #222a26;
+}
+
+.nueva-reserva-titulo span {
+    margin-top: 2px;
+
+    font-size: 9px;
+    color: #7a817d;
+}
+
+
+/* =========================================
+   FECHAS · RESUMEN
+========================================= */
+
+.reserva-fechas-resumen {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+
+    align-items: center;
+
+    gap: 8px;
+
+    padding: 10px 12px;
+
+    margin-bottom: 12px;
+
+    border: 1px solid #dfe4e1;
+    border-radius: 9px;
+
+    background: #ffffff;
+}
+
+.reserva-fechas-resumen > div {
+    display: flex;
+    flex-direction: column;
+}
+
+.reserva-fechas-resumen > div:last-child {
+    text-align: right;
+}
+
+.reserva-fechas-resumen small {
+    font-size: 8px;
+    color: #7d847f;
+}
+
+.reserva-fechas-resumen strong {
+    margin-top: 2px;
+
+    font-size: 11px;
+    color: #252c28;
+}
+
+.reserva-fechas-resumen span {
+    margin-top: 2px;
+
+    font-size: 8px;
+    color: #929793;
+}
+
+.reserva-fechas-flecha {
+    font-size: 14px !important;
+    color: #7a817d !important;
+}
+
+
+/* =========================================
+   CALENDARIO · CONTENEDOR
+========================================= */
+
+.reserva-calendario {
+    min-height: 210px;
+
+    margin-bottom: 10px;
+
+    border: 1px solid #e1e5e3;
+    border-radius: 10px;
+
+    background: #ffffff;
+}
+
+
+/* =========================================
+   LEYENDA
+========================================= */
+
+.reserva-calendario-leyenda {
+    display: flex;
+    align-items: center;
+
+    gap: 14px;
+
+    margin: 10px 2px 16px;
+
+    font-size: 8px;
+    color: #6f7772;
+}
+
+.reserva-calendario-leyenda span {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+.reserva-calendario-leyenda i {
+    width: 7px;
+    height: 7px;
+
+    display: block;
+
+    border-radius: 50%;
+}
+
+.leyenda-disponible {
+    background: #2d8a61;
+}
+
+.leyenda-ocupada {
+    background: #cfd4d1;
+}
+
+.leyenda-seleccionada {
+    background: #b8dfca;
+}
+
+
+/* =========================================
+   BOTONES
+========================================= */
+
+.nueva-reserva-acciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    margin-top: 10px;
+}
+
+.reserva-btn-secundario,
+.reserva-btn-principal {
+    min-height: 34px;
+
+    padding: 8px 14px;
+
+    border-radius: 8px;
+
+    font-family: inherit;
+    font-size: 10px;
+    font-weight: 600;
+
+    cursor: pointer;
+}
+
+.reserva-btn-secundario {
+    border: 1px solid #d9dedb;
+
+    background: #ffffff;
+    color: #424a45;
+}
+
+.reserva-btn-principal {
+    margin-left: auto;
+
+    border: 1px solid #286b4b;
+
+    background: #286b4b;
+    color: #ffffff;
+}
+
+.reserva-btn-principal:disabled {
+    border-color: #d9ddda;
+
+    background: #e9ecea;
+    color: #a1a7a3;
+
+    cursor: default;
+}
+
+
+/* =========================================
+   AJUSTE CELULAR
+========================================= */
+
+@media (max-width: 768px) {
+
+    .modal-nueva-reserva {
+        padding: 10px;
+    }
+
+    .nueva-reserva-card {
+        width: 100%;
+        max-width: 340px;
+
+        padding: 14px;
+
+        border-radius: 14px;
+    }
+
+    .nueva-reserva-header {
+        margin-bottom: 14px;
+    }
+
+    .nueva-reserva-header h2 {
+        font-size: 20px;
+    }
+}

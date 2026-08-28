@@ -2354,3 +2354,73 @@ document.addEventListener(
         cerrarPanelNotificaciones();
     }
 );
+
+// ========================================
+// NUEVA RESERVA · ABRIR / CERRAR MODAL
+// ========================================
+
+const botonNuevaReserva =
+    document.getElementById("boton-nueva-reserva");
+
+const modalNuevaReserva =
+    document.getElementById("modal-nueva-reserva");
+
+const cerrarNuevaReserva =
+    document.getElementById("cerrar-nueva-reserva");
+
+const cancelarNuevaReserva =
+    document.getElementById("cancelar-nueva-reserva");
+
+
+function abrirModalNuevaReserva() {
+    if (!modalNuevaReserva) return;
+
+    modalNuevaReserva.hidden = false;
+
+    document.body.style.overflow = "hidden";
+}
+
+
+function cerrarModalNuevaReserva() {
+    if (!modalNuevaReserva) return;
+
+    modalNuevaReserva.hidden = true;
+
+    document.body.style.overflow = "";
+}
+
+
+if (botonNuevaReserva) {
+    botonNuevaReserva.addEventListener(
+        "click",
+        abrirModalNuevaReserva
+    );
+}
+
+
+if (cerrarNuevaReserva) {
+    cerrarNuevaReserva.addEventListener(
+        "click",
+        cerrarModalNuevaReserva
+    );
+}
+
+
+if (cancelarNuevaReserva) {
+    cancelarNuevaReserva.addEventListener(
+        "click",
+        cerrarModalNuevaReserva
+    );
+}
+
+
+// Cerrar tocando fuera de la tarjeta
+if (modalNuevaReserva) {
+    modalNuevaReserva.addEventListener("click", evento => {
+
+        if (evento.target === modalNuevaReserva) {
+            cerrarModalNuevaReserva();
+        }
+
+    });
+}
