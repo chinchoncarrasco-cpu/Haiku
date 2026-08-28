@@ -2401,6 +2401,21 @@ if (tituloModalReserva) {
         "Nueva reserva";
 }
 
+if (pasoConfirmacionReserva) {
+    const titulo = pasoConfirmacionReserva.querySelector(
+        ".reserva-confirmacion-titulo strong"
+    );
+    const texto = pasoConfirmacionReserva.querySelector(
+        ".reserva-confirmacion-titulo span"
+    );
+
+    if (titulo) titulo.textContent = "¡Reserva creada!";
+    if (texto) {
+        texto.textContent =
+            "La reserva fue registrada correctamente.";
+    }
+}
+
 
 if (botonCrearNuevaReserva) {
 
@@ -3966,6 +3981,7 @@ document
             );
 
         });
+
 }
 
 
@@ -4300,6 +4316,578 @@ numeroAcompanante <
             );
 
         });
+
+    if (
+        modoFormularioReserva === "editar" &&
+        botonCrearNuevaReserva
+    ) {
+        botonCrearNuevaReserva.disabled = false;
+    }
+}
+
+// ========================================
+// EDITAR RESERVA · GUARDADO DEFINITIVO
+// ========================================
+
+const camposReservaEdicion = [
+    "reservaId", "titular", "adultos", "ninos", "mascotas",
+    "estado", "estadoIngresoReserva", "noches",
+    "continuidadAutomatica", "fechaOrigenReserva",
+    "fechaIngresoReserva", "correo", "telefono", "rut",
+    "observaciones", "tarifasNoches", "totalReserva",
+    "abono", "montoAbono", "abonoVerificado", "medioPago",
+    "checkinRealizado", "checkinManual", "checkout",
+    "checkinCobrado", "checkinMedio", "checkinFolio",
+    "checkinCodAut", "checkinBove", "checkinManager",
+    "checkinCompleto", "borradoManual", "editadoManual"
+];
+
+function copiarDatosReservaEdicion(registro) {
+    const copia = {};
+
+    camposReservaEdicion.forEach(campo => {
+        if (
+            Object.prototype.hasOwnProperty.call(
+                registro || {},
+                campo
+            )
+        ) {
+            copia[campo] = registro[campo];
+        }
+    });
+
+    return copia;
+}
+
+function copiarDatosOperativosEdicion(registro) {
+    const copia = { ...(registro || {}) };
+
+    camposReservaEdicion.forEach(
+        campo => delete copia[campo]
+    );
+
+    return copia;
+}
+
+function retirarReservaParaEdicion(
+    reservaId,
+    fechaIngresoOriginal
+) {
+    const vinculados = {
+        solicitudes: [],
+        notas: []
+    };
+
+    Object.entries(datosPorFecha).forEach(
+        ([fechaDia, datosDia]) => {
+            if (!datosDia?.cabanas) return;
+
+            Object.entries(datosDia.cabanas).forEach(
+                ([numeroCabana, registro]) => {
+                    if (
+                        String(registro?.reservaId || "") !==
+                        String(reservaId)
+                    ) {
+                        return;
+                    }
+
+                    const desplazamiento = Math.max(
+                        0,
+                        calcularNochesReserva(
+                            fechaIngresoOriginal,
+                            fechaDia
+                        )
+                    );
+
+                    const solicitud = String(
+                        registro.solicitudAseoExpress || ""
+                    ).trim();
+
+                    if (solicitud) {
+                        vinculados.solicitudes.push({
+                            desplazamiento,
+                            texto: solicitud,
+                            estadoFinal: registro.estadoFinal || ""
+                        });
+
+                        delete registro.solicitudAseoExpress;
+                        delete registro.estadoFinal;
+                    }
+
+                    if (Array.isArray(datosDia.notasOperativas)) {
+                        const notasRestantes = [];
+
+                        datosDia.notasOperativas.forEach(nota => {
+                            if (
+                                String(nota?.cabana || "") ===
+                                String(numeroCabana)
+                            ) {
+                                vinculados.notas.push({
+                                    desplazamiento,
+                                    nota: JSON.parse(
+                                        JSON.stringify(nota)
+                                    )
+                                });
+                            } else {
+                                notasRestantes.push(nota);
+                            }
+                        });
+
+                        datosDia.notasOperativas = notasRestantes;
+                    }
+
+                    const estadoRestante =
+                        registro.estado === "sale-ingresa"
+                            ? "sale-libre"
+                            : "libre-libre";
+
+                    camposReservaEdicion.forEach(
+                        campo => delete registro[campo]
+                    );
+
+                    if (Object.keys(registro).length === 0) {
+                        if (estadoRestante === "sale-libre") {
+                            datosDia.cabanas[numeroCabana] = {
+                                estado: "sale-libre"
+                            };
+                        } else {
+                            delete datosDia.cabanas[numeroCabana];
+                        }
+                    } else {
+                        registro.estado = estadoRestante;
+                    }
+                }
+            );
+        }
+    );
+
+    return vinculados;
+}
+
+function obtenerRegistroDestinoVinculo(
+    reservaId,
+    numeroCabana,
+    fechaIngreso,
+    noches,
+    desplazamiento
+) {
+    const ultimoDia = Math.max(0, noches - 1);
+    const fechaDestino = sumarDiasNuevaReserva(
+        fechaIngreso,
+        Math.min(desplazamiento, ultimoDia)
+    );
+    const datosDestino = obtenerDatosDia(fechaDestino);
+    const registroDestino =
+        datosDestino.cabanas?.[numeroCabana];
+
+    if (
+        !registroDestino ||
+        String(registroDestino.reservaId || "") !==
+            String(reservaId)
+    ) {
+        return null;
+    }
+
+    return {
+        fechaDestino,
+        datosDestino,
+        registroDestino
+    };
+}
+
+function restaurarVinculosReservaEditada(
+    vinculados,
+    reservaId,
+    numeroCabana,
+    fechaIngreso,
+    noches
+) {
+    vinculados.solicitudes.forEach(solicitud => {
+        const destino = obtenerRegistroDestinoVinculo(
+            reservaId,
+            numeroCabana,
+            fechaIngreso,
+            noches,
+            solicitud.desplazamiento
+        );
+
+        if (!destino) return;
+
+        const anterior = String(
+            destino.registroDestino.solicitudAseoExpress || ""
+        ).trim();
+
+        destino.registroDestino.solicitudAseoExpress = anterior
+            ? `${anterior} · ${solicitud.texto}`
+            : solicitud.texto;
+
+        if (solicitud.estadoFinal) {
+            destino.registroDestino.estadoFinal =
+                solicitud.estadoFinal;
+        }
+    });
+
+    vinculados.notas.forEach(elemento => {
+        const destino = obtenerRegistroDestinoVinculo(
+            reservaId,
+            numeroCabana,
+            fechaIngreso,
+            noches,
+            elemento.desplazamiento
+        );
+
+        if (!destino) return;
+
+        if (!Array.isArray(destino.datosDestino.notasOperativas)) {
+            destino.datosDestino.notasOperativas = [];
+        }
+
+        const nota = {
+            ...elemento.nota,
+            cabana: String(numeroCabana)
+        };
+
+        if (
+            Object.prototype.hasOwnProperty.call(
+                nota,
+                "fecha"
+            )
+        ) {
+            nota.fecha = destino.fechaDestino;
+        }
+
+        destino.datosDestino.notasOperativas.push(nota);
+    });
+}
+
+function reaplicarHospedajeReservaEditada(
+    reservaId,
+    fechaIngreso,
+    estabaHospedada
+) {
+    if (!estabaHospedada) return;
+
+    Object.entries(datosPorFecha).forEach(
+        ([fechaDia, datosDia]) => {
+            Object.values(datosDia?.cabanas || {}).forEach(
+                registro => {
+                    if (
+                        String(registro?.reservaId || "") !==
+                        String(reservaId)
+                    ) {
+                        return;
+                    }
+
+                    registro.checkinRealizado =
+                        registro.estado !== "sale-libre";
+
+                    if (fechaDia === fechaIngreso) {
+                        registro.checkinManual = true;
+                    }
+                }
+            );
+        }
+    );
+}
+
+function mostrarConfirmacionReservaEditada({
+    reservaId,
+    numeroCabana,
+    nombreCabana,
+    titular,
+    totalReserva
+}) {
+    const titulo = pasoConfirmacionReserva.querySelector(
+        ".reserva-confirmacion-titulo strong"
+    );
+    const texto = pasoConfirmacionReserva.querySelector(
+        ".reserva-confirmacion-titulo span"
+    );
+
+    if (titulo) titulo.textContent = "¡Reserva actualizada!";
+    if (texto) {
+        texto.textContent =
+            "Los cambios fueron guardados correctamente.";
+    }
+
+    resumenConfirmacionReserva.innerHTML = `
+        <div class="reserva-confirmacion-fila">
+            <span>Cabaña</span>
+            <strong>CAB ${numeroCabana} · ${nombreCabana}</strong>
+        </div>
+
+        <div class="reserva-confirmacion-fila">
+            <span>Fechas</span>
+            <strong>
+                ${formatearFechaReserva(fechaLlegadaReserva)}
+                →
+                ${formatearFechaReserva(fechaSalidaReserva)}
+            </strong>
+        </div>
+
+        <div class="reserva-confirmacion-fila">
+            <span>Titular</span>
+            <strong>${titular}</strong>
+        </div>
+
+        <div class="reserva-confirmacion-fila">
+            <span>Total</span>
+            <strong class="reserva-confirmacion-total">
+                ${formatearPrecioReserva(totalReserva)}
+            </strong>
+        </div>
+
+        <div class="reserva-confirmacion-id">
+            ${reservaId}
+        </div>
+    `;
+
+    pasoDetallesReserva.hidden = true;
+    pasoConfirmacionReserva.hidden = false;
+
+    document.querySelectorAll(".reserva-paso").forEach(paso => {
+        paso.classList.toggle(
+            "activo",
+            paso.dataset.paso === "4"
+        );
+    });
+}
+
+function guardarCambiosReservaEditada() {
+    if (
+        modoFormularioReserva !== "editar" ||
+        !reservaEditandoId ||
+        !reservaEditandoOriginal
+    ) {
+        return;
+    }
+
+    const titular = campoNuevoTitular.value.trim();
+
+    if (!titular) {
+        alert("Ingresa el nombre del titular de la reserva.");
+        campoNuevoTitular.focus();
+        return;
+    }
+
+    if (
+        campoNuevoCorreo.value.trim() &&
+        !campoNuevoCorreo.checkValidity()
+    ) {
+        alert("Revisa que el correo esté escrito correctamente.");
+        campoNuevoCorreo.focus();
+        return;
+    }
+
+    const reservaId = String(reservaEditandoId);
+    const numeroCabana = String(cabanaSeleccionadaReserva);
+    const cabana = catalogoCabanasReserva[numeroCabana];
+    const noches = calcularNochesReserva(
+        fechaLlegadaReserva,
+        fechaSalidaReserva
+    );
+
+    if (!cabana || noches < 1) {
+        alert("Selecciona una cabaña y fechas válidas.");
+        return;
+    }
+
+    const disponibles = obtenerCabanasDisponiblesEnRango(
+        fechaLlegadaReserva,
+        fechaSalidaReserva
+    );
+
+    if (!disponibles.includes(numeroCabana)) {
+        alert(
+            "La cabaña seleccionada ya no está disponible durante todo ese rango."
+        );
+        return;
+    }
+
+    const acompanantes = Array.from(
+        document.querySelectorAll(
+            ".reserva-nuevo-acompanante"
+        )
+    ).map(campo => campo.value.trim());
+
+    const tarifasFinales = {};
+
+    for (let indice = 0; indice < noches; indice++) {
+        const fechaNoche = sumarDiasNuevaReserva(
+            fechaLlegadaReserva,
+            indice
+        );
+
+        tarifasFinales[fechaNoche] =
+            tarifasNochesReserva[fechaNoche] ?? cabana.precio;
+    }
+
+    const totalReserva = Object.values(tarifasFinales).reduce(
+        (suma, tarifa) => suma + Number(tarifa),
+        0
+    );
+
+    const originales = copiarDatosReservaEdicion(
+        reservaEditandoOriginal.cabana
+    );
+    const estabaHospedada =
+        originales.checkinManual === true ||
+        originales.checkinRealizado === true;
+
+    const respaldoDatos = JSON.parse(
+        JSON.stringify(datosPorFecha)
+    );
+    const respaldoFichas = localStorage.getItem(
+        "haikuFichaReservas"
+    );
+
+    try {
+        const vinculados = retirarReservaParaEdicion(
+            reservaId,
+            reservaEditandoOriginal.fechaIngreso
+        );
+        const datosIngreso = obtenerDatosDia(fechaLlegadaReserva);
+        const registroDestino =
+            datosIngreso.cabanas?.[numeroCabana] || {};
+        const tieneSalidaEseDia =
+            registroDestino.estado === "sale-libre" ||
+            Boolean(
+                registroDestino.reservaId &&
+                registroDestino.titular
+            );
+        const estadoIngreso = tieneSalidaEseDia
+            ? "sale-ingresa"
+            : "libre-ingresa";
+
+        if (!datosIngreso.cabanas) datosIngreso.cabanas = {};
+
+        datosIngreso.cabanas[numeroCabana] = {
+            ...copiarDatosOperativosEdicion(registroDestino),
+            ...originales,
+            reservaId,
+            titular,
+            adultos: String(adultosReserva),
+            ninos: String(ninosReserva),
+            mascotas: String(mascotasReserva),
+            noches,
+            fechaOrigenReserva: fechaLlegadaReserva,
+            fechaIngresoReserva: fechaLlegadaReserva,
+            estado: estadoIngreso,
+            estadoIngresoReserva: estadoIngreso,
+            continuidadAutomatica: false,
+            editadoManual: true,
+            borradoManual: false,
+            correo: campoNuevoCorreo.value.trim(),
+            telefono: campoNuevoTelefono.value.trim(),
+            rut: campoNuevoRut.value.trim(),
+            observaciones: campoNuevaObservacion.value.trim(),
+            tarifasNoches: tarifasFinales,
+            totalReserva
+        };
+
+        guardarDatos();
+        crearContinuidadesReserva(
+            fechaLlegadaReserva,
+            numeroCabana,
+            noches
+        );
+        reaplicarHospedajeReservaEditada(
+            reservaId,
+            fechaLlegadaReserva,
+            estabaHospedada
+        );
+        restaurarVinculosReservaEditada(
+            vinculados,
+            reservaId,
+            numeroCabana,
+            fechaLlegadaReserva,
+            noches
+        );
+        guardarDatos();
+
+        const fichas = JSON.parse(
+            localStorage.getItem("haikuFichaReservas") || "{}"
+        );
+        const ficha = {
+            ...(fichas[reservaId] ||
+                reservaEditandoFichaOriginal || {}),
+            titular,
+            rut: campoNuevoRut.value.trim(),
+            telefono: campoNuevoTelefono.value.trim(),
+            correo: campoNuevoCorreo.value.trim(),
+            observaciones: campoNuevaObservacion.value.trim(),
+            numeroCabana,
+            fechaIngreso: fechaLlegadaReserva,
+            noches,
+            adultos: Number(adultosReserva),
+            ninos: Number(ninosReserva),
+            mascotas: Number(mascotasReserva),
+            totalReserva,
+            tarifasNoches: tarifasFinales
+        };
+
+        for (let indice = 0; indice < 5; indice++) {
+            ficha[`acompanante${indice + 1}`] =
+                acompanantes[indice] || "";
+        }
+
+        fichas[reservaId] = ficha;
+        localStorage.setItem(
+            "haikuFichaReservas",
+            JSON.stringify(fichas)
+        );
+    } catch (error) {
+        datosPorFecha = respaldoDatos;
+        guardarDatos();
+
+        if (respaldoFichas === null) {
+            localStorage.removeItem("haikuFichaReservas");
+        } else {
+            localStorage.setItem(
+                "haikuFichaReservas",
+                respaldoFichas
+            );
+        }
+
+        console.error("NO SE PUDO EDITAR LA RESERVA:", error);
+        alert(
+            "No se pudieron guardar los cambios. La reserva original fue restaurada."
+        );
+        return;
+    }
+
+    if (
+        typeof actualizarServiciosReservaEditada === "function"
+    ) {
+        actualizarServiciosReservaEditada(
+            reservaId,
+            numeroCabana,
+            titular
+        );
+    }
+
+    reservaCreadaId = reservaId;
+
+    if (typeof generarCalendario === "function") {
+        generarCalendario();
+    }
+    if (typeof cargarCabanasDia === "function") {
+        cargarCabanasDia(fechaSeleccionada);
+    }
+    if (typeof actualizarResumenDia === "function") {
+        actualizarResumenDia(fechaSeleccionada);
+    }
+    if (typeof generarResumenOperativo === "function") {
+        generarResumenOperativo(fechaSeleccionada);
+    }
+
+    mostrarConfirmacionReservaEditada({
+        reservaId,
+        numeroCabana,
+        nombreCabana: cabana.nombre,
+        titular,
+        totalReserva
+    });
 }
 
 function crearReservaDesdeFormulario() {
@@ -4753,7 +5341,14 @@ if (botonCrearNuevaReserva) {
 
     botonCrearNuevaReserva.addEventListener(
         "click",
-        crearReservaDesdeFormulario
+        () => {
+            if (modoFormularioReserva === "editar") {
+                guardarCambiosReservaEditada();
+                return;
+            }
+
+            crearReservaDesdeFormulario();
+        }
     );
 
 }

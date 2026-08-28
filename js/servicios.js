@@ -172,6 +172,73 @@ function guardarServicios() {
 
 
 // =========================================
+// ACTUALIZAR SERVICIOS AL EDITAR RESERVA
+// =========================================
+
+function actualizarServiciosReservaEditada(
+    reservaId,
+    numeroCabana,
+    titular
+) {
+
+    try {
+
+        let cantidadActualizada = 0;
+
+
+        serviciosRegistrados.forEach(
+            servicio => {
+
+                if (
+                    String(
+                        servicio?.reservaId ||
+                        ""
+                    ) !== String(reservaId)
+                ) {
+                    return;
+                }
+
+
+                servicio.numeroCabana =
+                    String(numeroCabana);
+
+                servicio.titular =
+                    titular;
+
+                cantidadActualizada++;
+            }
+        );
+
+
+        if (cantidadActualizada > 0) {
+
+            guardarServicios();
+
+
+            if (
+                typeof renderizarAgendaServicios ===
+                "function"
+            ) {
+                renderizarAgendaServicios();
+            }
+        }
+
+
+        return cantidadActualizada;
+
+    } catch (error) {
+
+        console.error(
+            "NO SE PUDIERON ACTUALIZAR LOS SERVICIOS:",
+            error
+        );
+
+        return 0;
+    }
+}
+
+
+// =========================================
 // GENERAR ID DE SERVICIO
 // =========================================
 
