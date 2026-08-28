@@ -2451,6 +2451,94 @@ const fechaSalidaTexto =
 const continuarFechasReserva =
     document.getElementById("continuar-fechas-reserva");
 
+const pasoFechasReserva =
+    document.getElementById("reserva-paso-fechas");
+
+const pasoCabanaReserva =
+    document.getElementById("reserva-paso-cabana");
+
+const listaCabanasDisponibles =
+    document.getElementById("lista-cabanas-disponibles");
+
+const volverReservaFechas =
+    document.getElementById("volver-reserva-fechas");
+
+const continuarReservaDetalles =
+    document.getElementById("continuar-reserva-detalles");
+
+const catalogoCabanasReserva = {
+
+    "1": {
+        nombre: "Loft Clásico 1",
+        capacidad: 3,
+        precio: 160000
+    },
+
+    "2": {
+        nombre: "Loft Clásico 2",
+        capacidad: 3,
+        precio: 160000
+    },
+
+    "3": {
+        nombre: "Loft Clásico 3",
+        capacidad: 3,
+        precio: 160000
+    },
+
+    "4": {
+        nombre: "Loft Clásico 4",
+        capacidad: 3,
+        precio: 160000
+    },
+
+    "5": {
+        nombre: "Deluxe",
+        capacidad: 3,
+        precio: 170000
+    },
+
+    "6": {
+        nombre: "Loft Clásico 6",
+        capacidad: 3,
+        precio: 160000
+    },
+
+    "7": {
+        nombre: "Dos Ambientes 7",
+        capacidad: 5,
+        precio: 180000
+    },
+
+    "8": {
+        nombre: "Dos Ambientes 8",
+        capacidad: 5,
+        precio: 180000
+    },
+
+    "9": {
+        nombre: "Dos Ambientes 9",
+        capacidad: 5,
+        precio: 180000
+    },
+
+    "10": {
+        nombre: "Mini Loft",
+        capacidad: 2,
+        precio: 150000
+    },
+
+    "11": {
+        nombre: "Maxi Loft",
+        capacidad: 4,
+        precio: 180000
+    }
+
+};
+
+let cabanaSeleccionadaReserva = "";
+let tarifasNochesReserva = {};
+
 
 let mesReservaBase = new Date();
 mesReservaBase.setDate(1);
@@ -2681,7 +2769,11 @@ function obtenerCabanasDisponiblesEnRango(fechaInicio, fechaFin) {
 
     const disponibles = [];
 
-    for (let numeroCabana = 1; numeroCabana <= 11; numeroCabana++) {
+    for (
+        let numeroCabana = 1;
+        numeroCabana <= 11;
+        numeroCabana++
+    ) {
 
         let disponibleTodoElRango = true;
 
@@ -2695,6 +2787,7 @@ function obtenerCabanasDisponiblesEnRango(fechaInicio, fechaFin) {
                     fechaActual
                 )
             ) {
+
                 disponibleTodoElRango = false;
                 break;
             }
@@ -2707,6 +2800,7 @@ function obtenerCabanasDisponiblesEnRango(fechaInicio, fechaFin) {
         }
 
         if (disponibleTodoElRango) {
+
             disponibles.push(
                 String(numeroCabana)
             );
@@ -2714,6 +2808,477 @@ function obtenerCabanasDisponiblesEnRango(fechaInicio, fechaFin) {
     }
 
     return disponibles;
+}
+
+
+function formatearPrecioReserva(valor) {
+
+    return new Intl.NumberFormat(
+        "es-CL",
+        {
+            style: "currency",
+            currency: "CLP",
+            maximumFractionDigits: 0
+        }
+    ).format(valor);
+}
+
+
+function calcularNochesReserva(fechaInicio, fechaFin) {
+
+    const inicio =
+        new Date(`${fechaInicio}T12:00:00`);
+
+    const fin =
+        new Date(`${fechaFin}T12:00:00`);
+
+    return Math.round(
+        (fin - inicio) / 86400000
+    );
+}
+
+function mostrarEditorTarifasReserva(
+    tarjeta,
+    cabana,
+    noches
+) {
+
+    const panelAbierto =
+        tarjeta.nextElementSibling;
+
+    if (
+        panelAbierto &&
+        panelAbierto.classList.contains(
+            "reserva-tarifas-panel"
+        )
+    ) {
+        panelAbierto.remove();
+        return;
+    }
+
+
+    document
+        .querySelectorAll(".reserva-tarifas-panel")
+        .forEach(panel => panel.remove());
+
+
+    const tarifasTemporales = {};
+
+    let filasTarifas = "";
+
+
+    for (let indice = 0; indice < noches; indice++) {
+
+        const fechaNoche =
+            sumarDiasNuevaReserva(
+                fechaLlegadaReserva,
+                indice
+            );
+
+        const fechaSiguiente =
+            sumarDiasNuevaReserva(
+                fechaNoche,
+                1
+            );
+
+        const tarifaGuardada =
+            tarifasNochesReserva[fechaNoche];
+
+        const tarifa =
+            tarifaGuardada ?? cabana.precio;
+
+        tarifasTemporales[fechaNoche] =
+            tarifa;
+
+
+        filasTarifas += `
+            <label class="reserva-tarifa-fila">
+
+                <span>
+                    ${formatearFechaReserva(fechaNoche)}
+                    →
+                    ${formatearFechaReserva(fechaSiguiente)}
+                </span>
+
+                <div class="reserva-tarifa-campo">
+                    <span>$</span>
+
+                    <input
+                        type="number"
+                        min="1"
+                        step="1000"
+                        value="${tarifa}"
+                        data-tarifa-fecha="${fechaNoche}"
+                    >
+                </div>
+
+            </label>
+        `;
+    }
+
+
+    const panel =
+        document.createElement("div");
+
+    panel.className =
+        "reserva-tarifas-panel";
+
+
+    panel.innerHTML = `
+        <div class="reserva-tarifas-encabezado">
+
+            <strong>Tarifas por noche</strong>
+
+            <span>
+                Puedes modificar solamente las noches con oferta
+            </span>
+
+        </div>
+
+        <div class="reserva-tarifas-lista">
+            ${filasTarifas}
+        </div>
+
+        <div class="reserva-tarifas-total">
+
+            <span>Total estancia</span>
+
+            <strong>
+                ${formatearPrecioReserva(
+                    Object.values(
+                        tarifasTemporales
+                    ).reduce(
+                        (suma, tarifa) =>
+                            suma + tarifa,
+                        0
+                    )
+                )}
+            </strong>
+
+        </div>
+
+        <div class="reserva-tarifas-acciones">
+
+            <button
+                type="button"
+                class="reserva-tarifas-cancelar"
+            >
+                Cancelar
+            </button>
+
+            <button
+                type="button"
+                class="reserva-tarifas-aplicar"
+            >
+                Aplicar tarifas
+            </button>
+
+        </div>
+    `;
+
+
+    tarjeta.insertAdjacentElement(
+        "afterend",
+        panel
+    );
+
+
+    const totalEditor =
+        panel.querySelector(
+            ".reserva-tarifas-total strong"
+        );
+
+
+    panel
+        .querySelectorAll(
+            "[data-tarifa-fecha]"
+        )
+        .forEach(input => {
+
+            input.addEventListener(
+                "input",
+                () => {
+
+                    tarifasTemporales[
+                        input.dataset.tarifaFecha
+                    ] = Number(input.value) || 0;
+
+
+                    const nuevoTotal =
+                        Object.values(
+                            tarifasTemporales
+                        ).reduce(
+                            (suma, tarifa) =>
+                                suma + tarifa,
+                            0
+                        );
+
+
+                    totalEditor.textContent =
+                        formatearPrecioReserva(
+                            nuevoTotal
+                        );
+                }
+            );
+
+        });
+
+
+    panel
+        .querySelector(
+            ".reserva-tarifas-cancelar"
+        )
+        .addEventListener(
+            "click",
+            () => panel.remove()
+        );
+
+
+    panel
+        .querySelector(
+            ".reserva-tarifas-aplicar"
+        )
+        .addEventListener(
+            "click",
+            () => {
+
+                const tarifasInvalidas =
+                    Object.values(
+                        tarifasTemporales
+                    ).some(
+                        tarifa => tarifa <= 0
+                    );
+
+                if (tarifasInvalidas) {
+
+                    alert(
+                        "Cada noche debe tener una tarifa válida."
+                    );
+
+                    return;
+                }
+
+
+                tarifasNochesReserva = {
+                    ...tarifasTemporales
+                };
+
+
+                const totalFinal =
+                    Object.values(
+                        tarifasNochesReserva
+                    ).reduce(
+                        (suma, tarifa) =>
+                            suma + tarifa,
+                        0
+                    );
+
+
+                const resumen =
+                    tarjeta.querySelector(
+                        ".reserva-cabana-info small"
+                    );
+
+
+                resumen.textContent =
+                    `${noches} ${
+                        noches === 1
+                            ? "noche"
+                            : "noches"
+                    } · ${
+                        formatearPrecioReserva(
+                            totalFinal
+                        )
+                    }`;
+
+
+                panel.remove();
+            }
+        );
+}
+
+function mostrarPasoCabanasReserva() {
+
+    if (
+        !fechaLlegadaReserva ||
+        !fechaSalidaReserva
+    ) {
+        return;
+    }
+
+
+    const disponibles =
+        obtenerCabanasDisponiblesEnRango(
+            fechaLlegadaReserva,
+            fechaSalidaReserva
+        );
+
+
+    const noches =
+        calcularNochesReserva(
+            fechaLlegadaReserva,
+            fechaSalidaReserva
+        );
+
+
+    cabanaSeleccionadaReserva = "";
+
+    continuarReservaDetalles.disabled = true;
+
+    listaCabanasDisponibles.innerHTML = "";
+
+
+    disponibles.forEach(numeroCabana => {
+
+        const cabana =
+            catalogoCabanasReserva[numeroCabana];
+
+        if (!cabana) return;
+
+
+        const total =
+            cabana.precio * noches;
+
+
+        const tarjeta =
+            document.createElement("button");
+
+        tarjeta.type = "button";
+
+        tarjeta.className =
+            "reserva-cabana-opcion";
+
+        tarjeta.dataset.cabana =
+            numeroCabana;
+
+
+        tarjeta.innerHTML = `
+            <div class="reserva-cabana-info">
+
+                <strong>
+                    CAB ${numeroCabana} · ${cabana.nombre}
+                </strong>
+
+                <span>
+                    Hasta ${cabana.capacidad} ${
+                        cabana.capacidad === 1
+                            ? "persona"
+                            : "personas"
+                    }
+                </span>
+
+                <small>
+                    ${noches} ${
+                        noches === 1
+                            ? "noche"
+                            : "noches"
+                    } · ${formatearPrecioReserva(total)}
+                </small>
+
+                <span class="reserva-editar-tarifas">
+                    Editar tarifas por noche
+                </span>
+
+            </div>
+
+            <div class="reserva-cabana-lateral">
+
+                <span class="reserva-cabana-disponible">
+                    DISPONIBLE
+                </span>
+
+                <i class="reserva-cabana-radio"></i>
+
+            </div>
+        `;
+
+        const enlaceEditarTarifas =
+    tarjeta.querySelector(
+        ".reserva-editar-tarifas"
+    );
+
+
+enlaceEditarTarifas.addEventListener(
+    "click",
+    evento => {
+
+        evento.stopPropagation();
+
+        mostrarEditorTarifasReserva(
+            tarjeta,
+            cabana,
+            noches
+        );
+    }
+);
+
+
+        tarjeta.addEventListener(
+            "click",
+            () => {
+
+                const cambioDeCabana =
+    cabanaSeleccionadaReserva !==
+    numeroCabana;
+
+
+if (cambioDeCabana) {
+    tarifasNochesReserva = {};
+}
+
+
+cabanaSeleccionadaReserva =
+    numeroCabana;
+
+
+document
+    .querySelectorAll(
+        ".reserva-tarifas-panel"
+    )
+    .forEach(panel => panel.remove());
+
+
+                listaCabanasDisponibles
+                    .querySelectorAll(
+                        ".reserva-cabana-opcion"
+                    )
+                    .forEach(item => {
+
+                        item.classList.toggle(
+                            "seleccionada",
+                            item === tarjeta
+                        );
+
+                    });
+
+
+                continuarReservaDetalles.disabled =
+                    false;
+            }
+        );
+
+
+        listaCabanasDisponibles.appendChild(
+            tarjeta
+        );
+
+    });
+
+
+    pasoFechasReserva.hidden = true;
+    pasoCabanaReserva.hidden = false;
+
+
+    document
+        .querySelectorAll(".reserva-paso")
+        .forEach(paso => {
+
+            paso.classList.toggle(
+                "activo",
+                paso.dataset.paso === "2"
+            );
+
+        });
 }
 
 
@@ -2870,4 +3435,43 @@ function renderizarCalendarioNuevaReserva() {
 
 
     reservaCalendario.appendChild(meses);
+}
+
+// ========================================
+// NUEVA RESERVA · NAVEGACIÓN ENTRE PASOS
+// ========================================
+
+if (continuarFechasReserva) {
+
+    continuarFechasReserva.addEventListener(
+        "click",
+        mostrarPasoCabanasReserva
+    );
+
+}
+
+
+if (volverReservaFechas) {
+
+    volverReservaFechas.addEventListener(
+        "click",
+        () => {
+
+            pasoCabanaReserva.hidden = true;
+            pasoFechasReserva.hidden = false;
+
+            document
+                .querySelectorAll(".reserva-paso")
+                .forEach(paso => {
+
+                    paso.classList.toggle(
+                        "activo",
+                        paso.dataset.paso === "1"
+                    );
+
+                });
+
+        }
+    );
+
 }

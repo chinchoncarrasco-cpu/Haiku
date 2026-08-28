@@ -9283,3 +9283,351 @@ tr.cabana-libre .info-cabana {
         height: 20px;
     }
 }
+
+/* =========================================
+   NUEVA RESERVA · PASO 2 · CABAÑAS
+========================================= */
+
+#lista-cabanas-disponibles {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+
+    margin-top: 10px;
+}
+
+
+/* Tarjeta de cada cabaña */
+
+.reserva-cabana-opcion {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 10px 11px;
+
+    border: 1px solid #dde4df;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    text-align: left;
+
+    font-family: inherit;
+    color: #27302b;
+
+    cursor: pointer;
+
+    transition:
+        border-color 0.15s,
+        background 0.15s,
+        box-shadow 0.15s;
+}
+
+
+.reserva-cabana-opcion:hover {
+    background: #f7faf8;
+    border-color: #bfd3c7;
+}
+
+
+/* Cabaña seleccionada */
+
+.reserva-cabana-opcion.seleccionada {
+    background: #eef8f2;
+    border-color: #4d9b73;
+
+    box-shadow:
+        0 0 0 1px rgba(77, 155, 115, 0.08);
+}
+
+
+/* Información izquierda */
+
+.reserva-cabana-info {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+
+.reserva-cabana-info strong {
+    font-size: 11px;
+    font-weight: 700;
+
+    color: #202a24;
+}
+
+
+.reserva-cabana-info span {
+    font-size: 9px;
+
+    color: #737c76;
+}
+
+
+.reserva-cabana-info small {
+    font-size: 9px;
+    font-weight: 600;
+
+    color: #37423b;
+}
+
+/* Enlace para editar las tarifas de cada noche */
+
+.reserva-editar-tarifas {
+    display: none;
+
+    width: fit-content;
+    margin-top: 2px;
+
+    font-size: 8px !important;
+    font-weight: 700;
+
+    color: #2d7f5a !important;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+}
+
+.reserva-cabana-opcion.seleccionada
+.reserva-editar-tarifas {
+    display: inline-block;
+}
+
+/* Editor de tarifas por noche */
+
+.reserva-tarifas-panel {
+    padding: 10px 11px;
+    margin-top: -3px;
+
+    border: 1px solid #c9ddd1;
+    border-radius: 9px;
+
+    background: #f8fbf9;
+}
+
+.reserva-tarifas-encabezado {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+    margin-bottom: 9px;
+}
+
+.reserva-tarifas-encabezado strong {
+    font-size: 10px;
+    color: #25342c;
+}
+
+.reserva-tarifas-encabezado span {
+    font-size: 8px;
+    color: #768079;
+}
+
+.reserva-tarifas-lista {
+    display: flex;
+    flex-direction: column;
+
+    gap: 6px;
+}
+
+.reserva-tarifa-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+}
+
+.reserva-tarifa-fila > span {
+    font-size: 8px;
+    color: #4e5952;
+}
+
+.reserva-tarifa-campo {
+    width: 105px;
+
+    display: flex;
+    align-items: center;
+
+    border: 1px solid #d2dbd5;
+    border-radius: 6px;
+
+    background: #ffffff;
+}
+
+.reserva-tarifa-campo span {
+    padding-left: 7px;
+
+    font-size: 9px;
+    color: #657069;
+}
+
+.reserva-tarifa-campo input {
+    width: 100%;
+    min-width: 0;
+
+    padding: 6px;
+
+    border: 0;
+    outline: none;
+
+    background: transparent;
+
+    font-family: inherit;
+    font-size: 9px;
+    color: #26342c;
+}
+
+.reserva-tarifas-total {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    margin-top: 9px;
+    padding-top: 8px;
+
+    border-top: 1px solid #dce6e0;
+}
+
+.reserva-tarifas-total span {
+    font-size: 9px;
+    font-weight: 600;
+
+    color: #536059;
+}
+
+.reserva-tarifas-total strong {
+    font-size: 10px;
+    color: #277752;
+}
+
+.reserva-tarifas-acciones {
+    display: flex;
+    justify-content: flex-end;
+
+    gap: 6px;
+    margin-top: 9px;
+}
+
+.reserva-tarifas-acciones button {
+    padding: 6px 9px;
+
+    border-radius: 6px;
+
+    font-family: inherit;
+    font-size: 8px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+.reserva-tarifas-cancelar {
+    border: 1px solid #d1d9d4;
+    background: #ffffff;
+    color: #57625b;
+}
+
+.reserva-tarifas-aplicar {
+    border: 1px solid #2d7f5a;
+    background: #2d7f5a;
+    color: #ffffff;
+}
+
+/* Lado derecho */
+
+.reserva-cabana-lateral {
+    flex-shrink: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+}
+
+
+.reserva-cabana-disponible {
+    font-size: 7px;
+    font-weight: 700;
+
+    letter-spacing: 0.45px;
+
+    color: #2d8a61;
+}
+
+
+/* Radio visual */
+
+.reserva-cabana-radio {
+    width: 14px;
+    height: 14px;
+
+    flex: 0 0 14px;
+
+    border: 1.5px solid #aab4ae;
+    border-radius: 50%;
+
+    background: #ffffff;
+
+    position: relative;
+}
+
+
+.reserva-cabana-opcion.seleccionada
+.reserva-cabana-radio {
+    border-color: #2d8a61;
+}
+
+
+.reserva-cabana-opcion.seleccionada
+.reserva-cabana-radio::after {
+    content: "";
+
+    position: absolute;
+
+    width: 6px;
+    height: 6px;
+
+    top: 50%;
+    left: 50%;
+
+    transform: translate(-50%, -50%);
+
+    border-radius: 50%;
+
+    background: #2d8a61;
+}
+
+
+/* =========================================
+   AJUSTE MÓVIL
+========================================= */
+
+@media (max-width: 768px) {
+
+    .reserva-cabana-opcion {
+        padding: 9px 10px;
+        gap: 8px;
+    }
+
+    .reserva-cabana-info strong {
+        font-size: 10px;
+    }
+
+    .reserva-cabana-info span,
+    .reserva-cabana-info small {
+        font-size: 8px;
+    }
+
+    .reserva-cabana-disponible {
+        font-size: 6px;
+    }
+}
