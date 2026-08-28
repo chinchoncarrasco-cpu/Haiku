@@ -1344,6 +1344,11 @@ const fichaReservaModal =
 const fichaReservaCerrar =
     document.getElementById("ficha-reserva-cerrar");
 
+const fichaReservaEditar =
+    document.getElementById(
+        "ficha-reserva-editar"
+    );
+
 
 // ========================================
 // FORMATEAR FECHA PARA LA FICHA
@@ -2720,6 +2725,11 @@ fichaReservaModal.dataset.numeroCabana =
 fichaReservaModal.dataset.reservaCancelada =
     "true";
 
+if (fichaReservaEditar) {
+    fichaReservaEditar.hidden =
+        true;
+}
+
 const adultos =
     Number(datosReserva.adultos) || 0;
 
@@ -3105,6 +3115,15 @@ document
 
     fichaReservaModal.dataset.reservaId =
         reservaId;
+
+    fichaReservaModal.dataset.reservaCancelada =
+    "false";
+
+
+if (fichaReservaEditar) {
+    fichaReservaEditar.hidden =
+        false;
+}
 
 
     // ====================================
@@ -3505,6 +3524,40 @@ document.addEventListener("change", (evento) => {
 
 });
 
+if (fichaReservaEditar) {
+
+    fichaReservaEditar.addEventListener(
+        "click",
+        () => {
+
+            const reservaId =
+                fichaReservaModal
+                    ?.dataset.reservaId;
+
+
+            if (
+                !reservaId ||
+                typeof abrirModalEditarReserva !==
+                    "function"
+            ) {
+                return;
+            }
+
+
+            const abierta =
+                abrirModalEditarReserva(
+                    reservaId
+                );
+
+
+            if (abierta) {
+
+                fichaReservaModal.hidden =
+                    true;
+            }
+        }
+    );
+}
 
 // CERRAR CON X
 if (fichaReservaCerrar) {

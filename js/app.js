@@ -2365,6 +2365,11 @@ const botonNuevaReserva =
 const modalNuevaReserva =
     document.getElementById("modal-nueva-reserva");
 
+const tituloModalReserva =
+    document.getElementById(
+        "reserva-modal-titulo"
+    );
+
 const cerrarNuevaReserva =
     document.getElementById("cerrar-nueva-reserva");
 
@@ -2377,6 +2382,43 @@ function abrirModalNuevaReserva() {
     if (!modalNuevaReserva) {
         return;
     }
+
+modoFormularioReserva =
+    "crear";
+
+reservaEditandoId =
+    "";
+
+reservaEditandoOriginal =
+    null;
+
+reservaEditandoFichaOriginal =
+    {};
+
+
+if (tituloModalReserva) {
+    tituloModalReserva.textContent =
+        "Nueva reserva";
+}
+
+
+if (botonCrearNuevaReserva) {
+
+    botonCrearNuevaReserva.textContent =
+        "Crear reserva";
+
+    botonCrearNuevaReserva.disabled =
+        false;
+}
+
+
+mascotasReserva = 0;
+
+
+mesReservaBase =
+    new Date();
+
+mesReservaBase.setDate(1);
 
 
     modalNuevaReserva.hidden = false;
@@ -2665,12 +2707,25 @@ const catalogoCabanasReserva = {
 
 };
 
+let modoFormularioReserva =
+    "crear";
+
+let reservaEditandoId =
+    "";
+
+let reservaEditandoOriginal =
+    null;
+
+let reservaEditandoFichaOriginal =
+    {};
+
 let cabanaSeleccionadaReserva = "";
 let tarifasNochesReserva = {};
 let reservaCreadaId = "";
 
 let adultosReserva = 1;
 let ninosReserva = 0;
+let mascotasReserva = 0;
 
 
 let mesReservaBase = new Date();
@@ -2679,6 +2734,264 @@ mesReservaBase.setDate(1);
 let fechaLlegadaReserva = "";
 let fechaSalidaReserva = "";
 
+function abrirModalEditarReserva(
+    reservaId
+) {
+
+    if (
+        !modalNuevaReserva ||
+        !reservaId ||
+        typeof buscarDatosReservaPorId !==
+            "function"
+    ) {
+        return false;
+    }
+
+
+    const registro =
+        buscarDatosReservaPorId(
+            reservaId
+        );
+
+
+    if (!registro?.cabana) {
+
+        alert(
+            "No se encontraron los datos de esta reserva."
+        );
+
+        return false;
+    }
+
+
+    const cabana =
+        registro.cabana;
+
+
+    const fichasReservas =
+        JSON.parse(
+            localStorage.getItem(
+                "haikuFichaReservas"
+            ) || "{}"
+        );
+
+
+    const ficha =
+        fichasReservas[reservaId] ||
+        {};
+
+
+    const fechaIngreso =
+        cabana.fechaOrigenReserva ||
+        cabana.fechaIngresoReserva ||
+        registro.fecha;
+
+
+    const noches =
+        Number(cabana.noches) || 1;
+
+
+    modoFormularioReserva =
+        "editar";
+
+    reservaEditandoId =
+        String(reservaId);
+
+
+    reservaEditandoOriginal = {
+
+        reservaId:
+            String(reservaId),
+
+        numeroCabana:
+            String(
+                registro.numeroCabana
+            ),
+
+        fechaIngreso,
+
+        noches,
+
+        cabana:
+            JSON.parse(
+                JSON.stringify(cabana)
+            )
+    };
+
+
+    reservaEditandoFichaOriginal =
+        JSON.parse(
+            JSON.stringify(ficha)
+        );
+
+
+    fechaLlegadaReserva =
+        fechaIngreso;
+
+    fechaSalidaReserva =
+        sumarDiasNuevaReserva(
+            fechaIngreso,
+            noches
+        );
+
+
+    cabanaSeleccionadaReserva =
+        String(
+            registro.numeroCabana
+        );
+
+
+    tarifasNochesReserva = {
+        ...(
+            cabana.tarifasNoches ||
+            ficha.tarifasNoches ||
+            {}
+        )
+    };
+
+
+    adultosReserva =
+        Number(cabana.adultos) || 1;
+
+    ninosReserva =
+        Number(cabana.ninos) || 0;
+
+    mascotasReserva =
+        Number(cabana.mascotas) || 0;
+
+
+    const [
+        anioIngreso,
+        mesIngreso
+    ] = fechaIngreso
+        .split("-")
+        .map(Number);
+
+
+    mesReservaBase =
+        new Date(
+            anioIngreso,
+            mesIngreso - 1,
+            1
+        );
+
+
+    if (tituloModalReserva) {
+
+        tituloModalReserva.textContent =
+            "Editar reserva";
+    }
+
+
+    if (botonCrearNuevaReserva) {
+
+        botonCrearNuevaReserva.textContent =
+            "Guardar cambios";
+
+        // Se habilitará cuando conectemos
+        // el guardado definitivo.
+        botonCrearNuevaReserva.disabled =
+            true;
+    }
+
+
+    fechaLlegadaTexto.textContent =
+        formatearFechaReserva(
+            fechaLlegadaReserva
+        );
+
+    fechaSalidaTexto.textContent =
+        formatearFechaReserva(
+            fechaSalidaReserva
+        );
+
+
+    continuarFechasReserva.disabled =
+        false;
+
+    continuarReservaDetalles.disabled =
+        true;
+
+
+    listaCabanasDisponibles.innerHTML =
+        "";
+
+    resumenCabanaSeleccionada.innerHTML =
+        "";
+
+    reservaAcompanantes.innerHTML =
+        "";
+
+    resumenConfirmacionReserva.innerHTML =
+        "";
+
+
+    campoNuevoTitular.value =
+        ficha.titular ||
+        cabana.titular ||
+        "";
+
+    campoNuevoTelefono.value =
+        ficha.telefono ||
+        cabana.telefono ||
+        "";
+
+    campoNuevoRut.value =
+        ficha.rut ||
+        cabana.rut ||
+        "";
+
+    campoNuevoCorreo.value =
+        ficha.correo ||
+        cabana.correo ||
+        "";
+
+    campoNuevaObservacion.value =
+        ficha.observaciones ||
+        cabana.observaciones ||
+        "";
+
+
+    pasoFechasReserva.hidden =
+        false;
+
+    pasoCabanaReserva.hidden =
+        true;
+
+    pasoDetallesReserva.hidden =
+        true;
+
+    pasoConfirmacionReserva.hidden =
+        true;
+
+
+    document
+        .querySelectorAll(
+            ".reserva-paso"
+        )
+        .forEach(paso => {
+
+            paso.classList.toggle(
+                "activo",
+                paso.dataset.paso === "1"
+            );
+        });
+
+
+    renderizarCalendarioNuevaReserva();
+
+    actualizarSeleccionCalendarioReserva();
+
+
+    modalNuevaReserva.hidden =
+        false;
+
+    document.body.style.overflow =
+        "hidden";
+
+
+    return true;
+}
 
 function nombreMesReserva(fecha) {
     return fecha.toLocaleDateString("es-CL", {
@@ -2720,6 +3033,19 @@ function cabanaOcupadaEnNoche(numeroCabana, fechaISO) {
                 datosDia.cabanas[numeroCabana];
 
             if (!cabana) return;
+
+            if (
+    modoFormularioReserva ===
+        "editar" &&
+    reservaEditandoId &&
+    String(
+        cabana.reservaId || ""
+    ) === String(
+        reservaEditandoId
+    )
+) {
+    return;
+}
 
 
             // BLOQUEO operativo
@@ -3438,9 +3764,23 @@ function mostrarPasoCabanasReserva() {
         );
 
 
-    cabanaSeleccionadaReserva = "";
+    const cabanaActualEdicion =
+    modoFormularioReserva === "editar"
+        ? String(
+            cabanaSeleccionadaReserva ||
+            reservaEditandoOriginal
+                ?.numeroCabana ||
+            ""
+        )
+        : "";
 
-    continuarReservaDetalles.disabled = true;
+
+cabanaSeleccionadaReserva =
+    cabanaActualEdicion;
+
+
+continuarReservaDetalles.disabled =
+    true;
 
     listaCabanasDisponibles.innerHTML = "";
 
@@ -3543,8 +3883,15 @@ if (cambioDeCabana) {
 
     tarifasNochesReserva = {};
 
-    adultosReserva = 1;
-    ninosReserva = 0;
+
+    if (
+        modoFormularioReserva !==
+        "editar"
+    ) {
+        adultosReserva = 1;
+        ninosReserva = 0;
+        mascotasReserva = 0;
+    }
 }
 
 
@@ -3583,11 +3930,26 @@ document
         );
 
 
-        listaCabanasDisponibles.appendChild(
+                listaCabanasDisponibles.appendChild(
             tarjeta
         );
 
     });
+
+
+    if (cabanaActualEdicion) {
+
+        const tarjetaActual =
+            listaCabanasDisponibles
+                .querySelector(
+                    `[data-cabana="${cabanaActualEdicion}"]`
+                );
+
+
+        if (tarjetaActual) {
+            tarjetaActual.click();
+        }
+    }
 
 
     pasoFechasReserva.hidden = true;
@@ -3826,7 +4188,7 @@ numeroAcompanante <
     const campoAcompanante =
         document.createElement("label");
 
-    campoAcompanante.innerHTML = `
+        campoAcompanante.innerHTML = `
         Acompañante ${numeroAcompanante}
 
         <input
@@ -3836,6 +4198,24 @@ numeroAcompanante <
             placeholder="Nombre completo (opcional)"
         >
     `;
+
+
+    const inputAcompanante =
+        campoAcompanante.querySelector(
+            ".reserva-nuevo-acompanante"
+        );
+
+
+    if (
+        modoFormularioReserva ===
+            "editar" &&
+        inputAcompanante
+    ) {
+        inputAcompanante.value =
+            reservaEditandoFichaOriginal[
+                `acompanante${numeroAcompanante}`
+            ] || "";
+    }
 
 
     reservaAcompanantes.appendChild(

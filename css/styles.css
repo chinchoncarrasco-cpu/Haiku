@@ -10417,3 +10417,37 @@ label:nth-of-type(3)::after {
     padding: 5px 8px;
     font-size: 10px;
 }
+
+/* =========================================
+   FICHA · BOTÓN EDITAR RESERVA
+========================================= */
+
+.ficha-accion-editar {
+    width: 100%;
+
+    padding: 11px 14px;
+
+    border: 1px solid #236c4b;
+    border-radius: 10px;
+
+    background: #277752;
+    color: #ffffff;
+
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    transition:
+        background 0.15s,
+        transform 0.15s;
+}
+
+.ficha-accion-editar:hover {
+    background: #1f6745;
+}
+
+.ficha-accion-editar:active {
+    transform: scale(0.99);
+}
