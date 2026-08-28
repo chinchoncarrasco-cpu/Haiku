@@ -2373,21 +2373,82 @@ const cancelarNuevaReserva =
 
 
 function abrirModalNuevaReserva() {
-    if (!modalNuevaReserva) return;
+
+    if (!modalNuevaReserva) {
+        return;
+    }
+
 
     modalNuevaReserva.hidden = false;
 
+
     fechaLlegadaReserva = "";
-fechaSalidaReserva = "";
+    fechaSalidaReserva = "";
 
-fechaLlegadaTexto.textContent = "Seleccionar";
-fechaSalidaTexto.textContent = "Seleccionar";
+    cabanaSeleccionadaReserva = "";
+    tarifasNochesReserva = {};
+    reservaCreadaId = "";
 
-continuarFechasReserva.disabled = true;
+    adultosReserva = 1;
+    ninosReserva = 0;
+
+
+    fechaLlegadaTexto.textContent =
+        "Seleccionar";
+
+    fechaSalidaTexto.textContent =
+        "Seleccionar";
+
+
+    continuarFechasReserva.disabled =
+        true;
+
+    continuarReservaDetalles.disabled =
+        true;
+
+
+    listaCabanasDisponibles.innerHTML =
+        "";
+
+    resumenCabanaSeleccionada.innerHTML =
+        "";
+
+    reservaAcompanantes.innerHTML =
+        "";
+
+    resumenConfirmacionReserva.innerHTML =
+        "";
+
+
+    campoNuevoTitular.value = "";
+    campoNuevoTelefono.value = "";
+    campoNuevoRut.value = "";
+    campoNuevoCorreo.value = "";
+    campoNuevaObservacion.value = "";
+
+
+    pasoFechasReserva.hidden = false;
+    pasoCabanaReserva.hidden = true;
+    pasoDetallesReserva.hidden = true;
+    pasoConfirmacionReserva.hidden = true;
+
+
+    document
+        .querySelectorAll(".reserva-paso")
+        .forEach(paso => {
+
+            paso.classList.toggle(
+                "activo",
+                paso.dataset.paso === "1"
+            );
+
+        });
+
 
     renderizarCalendarioNuevaReserva();
 
-    document.body.style.overflow = "hidden";
+    document.body.style.overflow =
+        "hidden";
 }
 
 
@@ -2524,6 +2585,16 @@ const campoNuevaObservacion =
         "reserva-nueva-observacion"
     );
 
+const botonCrearOtraReserva =
+    document.getElementById(
+        "crear-otra-reserva"
+    );
+
+const botonVerReservaCreada =
+    document.getElementById(
+        "ver-reserva-creada"
+    );
+
 const catalogoCabanasReserva = {
 
     "1": {
@@ -2597,6 +2668,9 @@ const catalogoCabanasReserva = {
 let cabanaSeleccionadaReserva = "";
 let tarifasNochesReserva = {};
 let reservaCreadaId = "";
+
+let adultosReserva = 1;
+let ninosReserva = 0;
 
 
 let mesReservaBase = new Date();
@@ -2896,6 +2970,176 @@ function calcularNochesReserva(fechaInicio, fechaFin) {
     );
 }
 
+function mostrarSelectorOcupacionReserva(
+    tarjeta,
+    cabana
+) {
+
+    const panel =
+        document.createElement("div");
+
+    panel.className =
+        "reserva-ocupacion-panel";
+
+
+    const opcionesAdultos =
+        Array.from(
+            {
+                length:
+                    cabana.capacidad
+            },
+            (_, indice) =>
+                indice + 1
+        )
+        .map(cantidad => `
+            <option
+                value="${cantidad}"
+                ${
+                    cantidad === adultosReserva
+                        ? "selected"
+                        : ""
+                }
+            >
+                ${cantidad}
+            </option>
+        `)
+        .join("");
+
+
+    const opcionesNinos =
+        Array.from(
+            {
+                length:
+                    cabana.capacidad
+            },
+            (_, indice) => indice
+        )
+        .map(cantidad => `
+            <option
+                value="${cantidad}"
+                ${
+                    cantidad === ninosReserva
+                        ? "selected"
+                        : ""
+                }
+            >
+                ${cantidad}
+            </option>
+        `)
+        .join("");
+
+
+    panel.innerHTML = `
+        <div class="reserva-ocupacion-titulo">
+
+            <strong>Huéspedes</strong>
+
+            <span>
+                Máximo ${cabana.capacidad}
+                ${
+                    cabana.capacidad === 1
+                        ? "persona"
+                        : "personas"
+                }
+            </span>
+
+        </div>
+
+        <label>
+            Adultos
+
+            <select class="reserva-ocupacion-adultos">
+                ${opcionesAdultos}
+            </select>
+        </label>
+
+        <label>
+            Niños
+
+            <select class="reserva-ocupacion-ninos">
+                ${opcionesNinos}
+            </select>
+        </label>
+    `;
+
+
+    tarjeta.insertAdjacentElement(
+        "afterend",
+        panel
+    );
+
+
+    const selectorAdultos =
+        panel.querySelector(
+            ".reserva-ocupacion-adultos"
+        );
+
+    const selectorNinos =
+        panel.querySelector(
+            ".reserva-ocupacion-ninos"
+        );
+
+
+    selectorAdultos.addEventListener(
+        "change",
+        () => {
+
+            adultosReserva =
+                Number(
+                    selectorAdultos.value
+                );
+
+
+            if (
+                adultosReserva +
+                ninosReserva >
+                cabana.capacidad
+            ) {
+
+                ninosReserva =
+                    Math.max(
+                        0,
+                        cabana.capacidad -
+                        adultosReserva
+                    );
+
+                selectorNinos.value =
+                    String(ninosReserva);
+            }
+        }
+    );
+
+
+    selectorNinos.addEventListener(
+        "change",
+        () => {
+
+            ninosReserva =
+                Number(
+                    selectorNinos.value
+                );
+
+
+            if (
+                adultosReserva +
+                ninosReserva >
+                cabana.capacidad
+            ) {
+
+                adultosReserva =
+                    Math.max(
+                        1,
+                        cabana.capacidad -
+                        ninosReserva
+                    );
+
+                selectorAdultos.value =
+                    String(adultosReserva);
+            }
+        }
+    );
+}
+
 function mostrarEditorTarifasReserva(
     tarjeta,
     cabana,
@@ -3036,10 +3280,24 @@ function mostrarEditorTarifasReserva(
     `;
 
 
-    tarjeta.insertAdjacentElement(
-        "afterend",
-        panel
-    );
+const panelOcupacion =
+    tarjeta.nextElementSibling &&
+    tarjeta.nextElementSibling
+        .classList.contains(
+            "reserva-ocupacion-panel"
+        )
+        ? tarjeta.nextElementSibling
+        : null;
+
+
+const puntoInsercion =
+    panelOcupacion || tarjeta;
+
+
+puntoInsercion.insertAdjacentElement(
+    "afterend",
+    panel
+);
 
 
     const totalEditor =
@@ -3282,7 +3540,11 @@ enlaceEditarTarifas.addEventListener(
 
 
 if (cambioDeCabana) {
+
     tarifasNochesReserva = {};
+
+    adultosReserva = 1;
+    ninosReserva = 0;
 }
 
 
@@ -3292,7 +3554,7 @@ cabanaSeleccionadaReserva =
 
 document
     .querySelectorAll(
-        ".reserva-tarifas-panel"
+        ".reserva-tarifas-panel, .reserva-ocupacion-panel"
     )
     .forEach(panel => panel.remove());
 
@@ -3310,6 +3572,10 @@ document
 
                     });
 
+                    mostrarSelectorOcupacionReserva(
+                        tarjeta,
+                        cabana
+                    );  
 
                 continuarReservaDetalles.disabled =
                     false;
@@ -3552,7 +3818,8 @@ function mostrarPasoDetallesReserva() {
 
 for (
     let numeroAcompanante = 1;
-    numeroAcompanante < cabana.capacidad;
+numeroAcompanante <
+    adultosReserva + ninosReserva;
     numeroAcompanante++
 ) {
 
@@ -3717,8 +3984,8 @@ function crearReservaDesdeFormulario() {
 
 
     const cantidadHuespedes =
-        1 +
-        acompanantes.filter(Boolean).length;
+    adultosReserva +
+    ninosReserva;
 
 
     const tarifasFinales = {};
@@ -3799,11 +4066,11 @@ function crearReservaDesdeFormulario() {
         reservaId,
         titular,
 
-        adultos: String(
-            cantidadHuespedes
-        ),
+        adultos:
+    String(adultosReserva),
 
-        ninos: "0",
+ninos:
+    String(ninosReserva),
         mascotas: "0",
 
         noches,
@@ -4107,6 +4374,74 @@ if (botonCrearNuevaReserva) {
     botonCrearNuevaReserva.addEventListener(
         "click",
         crearReservaDesdeFormulario
+    );
+
+}
+
+if (botonCrearOtraReserva) {
+
+    botonCrearOtraReserva.addEventListener(
+        "click",
+        abrirModalNuevaReserva
+    );
+
+}
+
+
+if (botonVerReservaCreada) {
+
+    botonVerReservaCreada.addEventListener(
+        "click",
+        () => {
+
+            if (
+                !reservaCreadaId ||
+                !cabanaSeleccionadaReserva ||
+                !fechaLlegadaReserva
+            ) {
+                return;
+            }
+
+
+            const numeroCabana =
+                cabanaSeleccionadaReserva;
+
+            const fechaReserva =
+                fechaLlegadaReserva;
+
+
+            cerrarModalNuevaReserva();
+
+
+            const fechaAnterior =
+                fechaSeleccionada;
+
+
+            fechaSeleccionada =
+                fechaReserva;
+
+
+            const botonFicha =
+                document.querySelector(
+                    `[data-ficha-cabana="${numeroCabana}"]`
+                );
+
+
+            if (botonFicha) {
+
+                botonFicha.click();
+
+            } else {
+
+                alert(
+                    "La reserva fue creada, pero no se encontró el acceso a su ficha."
+                );
+            }
+
+
+            fechaSeleccionada =
+                fechaAnterior;
+        }
     );
 
 }

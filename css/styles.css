@@ -9892,3 +9892,74 @@ tr.cabana-libre .info-cabana {
     font-size: 7px;
     color: #99a19c;
 }
+
+/* =========================================
+   NUEVA RESERVA · OCUPACIÓN
+========================================= */
+
+.reserva-ocupacion-panel {
+    display: grid;
+    grid-template-columns: 1fr 78px 78px;
+
+    align-items: end;
+
+    gap: 8px;
+
+    padding: 9px 11px;
+    margin-top: -3px;
+
+    border: 1px solid #d7e2db;
+    border-radius: 9px;
+
+    background: #f8fbf9;
+}
+
+.reserva-ocupacion-titulo {
+    display: flex;
+    flex-direction: column;
+
+    gap: 2px;
+}
+
+.reserva-ocupacion-titulo strong {
+    font-size: 10px;
+    color: #27332c;
+}
+
+.reserva-ocupacion-titulo span {
+    font-size: 7px;
+    color: #7b847f;
+}
+
+.reserva-ocupacion-panel label {
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+
+    font-size: 7px;
+    font-weight: 700;
+
+    color: #59635d;
+}
+
+.reserva-ocupacion-panel select {
+    width: 100%;
+
+    padding: 6px;
+
+    border: 1px solid #d5ddd8;
+    border-radius: 6px;
+
+    outline: none;
+    background: #ffffff;
+
+    font-family: inherit;
+    font-size: 9px;
+
+    color: #26312b;
+}
+
+.reserva-ocupacion-panel select:focus {
+    border-color: #4d9b73;
+}
