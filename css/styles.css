@@ -9631,3 +9631,170 @@ tr.cabana-libre .info-cabana {
         font-size: 6px;
     }
 }
+
+/* =========================================
+   NUEVA RESERVA · PASO 3 · RESUMEN
+========================================= */
+
+.reserva-detalles-resumen {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 12px;
+
+    padding: 10px 11px;
+    margin-bottom: 12px;
+
+    border: 1px solid #d7e2db;
+    border-radius: 9px;
+
+    background: #f7faf8;
+}
+
+.reserva-detalles-cabana {
+    min-width: 0;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 3px;
+}
+
+.reserva-detalles-cabana strong {
+    font-size: 10px;
+    color: #253129;
+}
+
+.reserva-detalles-cabana span {
+    font-size: 8px;
+    color: #69736d;
+}
+
+.reserva-detalles-cabana small {
+    width: fit-content;
+
+    padding: 2px 5px;
+
+    border-radius: 4px;
+
+    background: #e0f1e7;
+
+    font-size: 7px;
+    font-weight: 700;
+
+    color: #287550;
+}
+
+.reserva-detalles-total {
+    flex-shrink: 0;
+
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+
+    gap: 2px;
+}
+
+.reserva-detalles-total span {
+    font-size: 7px;
+    color: #7b847f;
+}
+
+.reserva-detalles-total strong {
+    font-size: 11px;
+    color: #277752;
+}
+
+/* =========================================
+   NUEVA RESERVA · PASO 3 · FORMULARIO
+========================================= */
+
+.reserva-formulario {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.reserva-formulario label {
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+
+    font-size: 8px;
+    font-weight: 700;
+
+    color: #445048;
+}
+
+.reserva-formulario input,
+.reserva-formulario textarea {
+    width: 100%;
+    box-sizing: border-box;
+
+    padding: 8px 9px;
+
+    border: 1px solid #d9dfdb;
+    border-radius: 7px;
+
+    outline: none;
+    background: #ffffff;
+
+    font-family: inherit;
+    font-size: 9px;
+    font-weight: 400;
+
+    color: #27312b;
+
+    transition:
+        border-color 0.15s,
+        box-shadow 0.15s;
+}
+
+.reserva-formulario textarea {
+    min-height: 54px;
+
+    resize: vertical;
+    line-height: 1.4;
+}
+
+.reserva-formulario input::placeholder,
+.reserva-formulario textarea::placeholder {
+    color: #a2aaa5;
+}
+
+.reserva-formulario input:focus,
+.reserva-formulario textarea:focus {
+    border-color: #4d9b73;
+
+    box-shadow:
+        0 0 0 2px rgba(77, 155, 115, 0.10);
+}
+
+.reserva-acompanantes {
+    display: flex;
+    flex-direction: column;
+
+    gap: 8px;
+}
+
+.reserva-form-doble {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+
+    gap: 8px;
+}
+
+#reserva-paso-detalles
+.nueva-reserva-acciones {
+    margin-top: 14px;
+}
+
+@media (max-width: 380px) {
+
+    .reserva-form-doble {
+        grid-template-columns: 1fr;
+    }
+}

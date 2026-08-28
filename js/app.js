@@ -2466,6 +2466,24 @@ const volverReservaFechas =
 const continuarReservaDetalles =
     document.getElementById("continuar-reserva-detalles");
 
+const pasoDetallesReserva =
+    document.getElementById("reserva-paso-detalles");
+
+const resumenCabanaSeleccionada =
+    document.getElementById(
+        "reserva-cabana-seleccionada"
+    );
+
+const volverReservaCabana =
+    document.getElementById(
+        "volver-reserva-cabana"
+    );
+
+const reservaAcompanantes =
+    document.getElementById(
+        "reserva-acompanantes"
+    );
+
 const catalogoCabanasReserva = {
 
     "1": {
@@ -3437,6 +3455,165 @@ function renderizarCalendarioNuevaReserva() {
     reservaCalendario.appendChild(meses);
 }
 
+function mostrarPasoDetallesReserva() {
+
+    if (!cabanaSeleccionadaReserva) {
+        return;
+    }
+
+
+    const cabana =
+        catalogoCabanasReserva[
+            cabanaSeleccionadaReserva
+        ];
+
+    if (!cabana) {
+        return;
+    }
+
+
+    const noches =
+        calcularNochesReserva(
+            fechaLlegadaReserva,
+            fechaSalidaReserva
+        );
+
+
+    const tarifasGuardadas =
+        Object.values(
+            tarifasNochesReserva
+        );
+
+
+    const tieneTarifasPorNoche =
+        tarifasGuardadas.length === noches;
+
+
+    const totalReserva =
+        tieneTarifasPorNoche
+            ? tarifasGuardadas.reduce(
+                (suma, tarifa) =>
+                    suma + tarifa,
+                0
+            )
+            : cabana.precio * noches;
+
+
+    const tarifaModificada =
+        tieneTarifasPorNoche &&
+        tarifasGuardadas.some(
+            tarifa =>
+                tarifa !== cabana.precio
+        );
+
+    reservaAcompanantes.innerHTML = "";
+
+
+for (
+    let numeroAcompanante = 1;
+    numeroAcompanante < cabana.capacidad;
+    numeroAcompanante++
+) {
+
+    const campoAcompanante =
+        document.createElement("label");
+
+    campoAcompanante.innerHTML = `
+        Acompañante ${numeroAcompanante}
+
+        <input
+            type="text"
+            class="reserva-nuevo-acompanante"
+            data-acompanante="${numeroAcompanante}"
+            placeholder="Nombre completo (opcional)"
+        >
+    `;
+
+
+    reservaAcompanantes.appendChild(
+        campoAcompanante
+    );
+}
+
+
+    resumenCabanaSeleccionada.innerHTML = `
+        <div class="reserva-detalles-resumen">
+
+            <div class="reserva-detalles-cabana">
+
+                <strong>
+                    CAB ${cabanaSeleccionadaReserva}
+                    ·
+                    ${cabana.nombre}
+                </strong>
+
+                <span>
+                    ${formatearFechaReserva(
+                        fechaLlegadaReserva
+                    )}
+                    →
+                    ${formatearFechaReserva(
+                        fechaSalidaReserva
+                    )}
+                    ·
+                    ${noches} ${
+                        noches === 1
+                            ? "noche"
+                            : "noches"
+                    }
+                </span>
+
+                ${
+                    tarifaModificada
+                        ? `
+                            <small>
+                                Tarifa personalizada
+                            </small>
+                        `
+                        : ""
+                }
+
+            </div>
+
+            <div class="reserva-detalles-total">
+
+                <span>Total</span>
+
+                <strong>
+                    ${formatearPrecioReserva(
+                        totalReserva
+                    )}
+                </strong>
+
+            </div>
+
+        </div>
+    `;
+
+
+    document
+        .querySelectorAll(
+            ".reserva-tarifas-panel"
+        )
+        .forEach(panel => panel.remove());
+
+
+    pasoCabanaReserva.hidden = true;
+    pasoDetallesReserva.hidden = false;
+
+
+    document
+        .querySelectorAll(".reserva-paso")
+        .forEach(paso => {
+
+            paso.classList.toggle(
+                "activo",
+                paso.dataset.paso === "3"
+            );
+
+        });
+}
+
 // ========================================
 // NUEVA RESERVA · NAVEGACIÓN ENTRE PASOS
 // ========================================
@@ -3467,6 +3644,41 @@ if (volverReservaFechas) {
                     paso.classList.toggle(
                         "activo",
                         paso.dataset.paso === "1"
+                    );
+
+                });
+
+        }
+    );
+
+}
+
+if (continuarReservaDetalles) {
+
+    continuarReservaDetalles.addEventListener(
+        "click",
+        mostrarPasoDetallesReserva
+    );
+
+}
+
+
+if (volverReservaCabana) {
+
+    volverReservaCabana.addEventListener(
+        "click",
+        () => {
+
+            pasoDetallesReserva.hidden = true;
+            pasoCabanaReserva.hidden = false;
+
+            document
+                .querySelectorAll(".reserva-paso")
+                .forEach(paso => {
+
+                    paso.classList.toggle(
+                        "activo",
+                        paso.dataset.paso === "2"
                     );
 
                 });
