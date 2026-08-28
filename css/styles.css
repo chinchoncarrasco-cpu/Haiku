@@ -10434,3 +10434,21 @@ label:nth-of-type(3)::after {
     }
 
 }
+
+/* =========================================
+   FICHA · ESTADO SIEMPRE EN UNA SOLA LÍNEA
+========================================= */
+
+.ficha-estado-control {
+    flex: 0 0 auto;
+}
+
+.ficha-estado {
+    white-space: nowrap;
+    line-height: 1;
+}
+
+.ficha-estado.ficha-estado-confirmacion-pendiente {
+    padding: 5px 8px;
+    font-size: 10px;
+}
