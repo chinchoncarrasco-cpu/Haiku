@@ -9963,3 +9963,81 @@ tr.cabana-libre .info-cabana {
 .reserva-ocupacion-panel select:focus {
     border-color: #4d9b73;
 }
+
+/* =========================================
+   FICHA · EDICIÓN DE TITULAR
+========================================= */
+
+/* El lápiz anterior deja de verse en Resumen */
+.cabana-titular-linea > .editar-titular {
+    display: none;
+}
+
+/* Nombre y lápiz dentro de la ficha */
+.ficha-dato-con-edicion {
+    min-width: 0;
+
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+.ficha-dato-con-edicion span {
+    min-width: 0;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.ficha-editar-boton {
+    width: 18px;
+    height: 18px;
+
+    flex: 0 0 18px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 0;
+    border-radius: 50%;
+
+    background: #edf4ef;
+    color: #286746;
+
+    font-family: inherit;
+    font-size: 11px;
+    line-height: 1;
+
+    cursor: pointer;
+}
+
+.ficha-editar-boton:hover {
+    background: #dcebe1;
+    color: #184f34;
+}
+
+/* =========================================
+   FICHA · EDICIÓN DE NOCHES
+========================================= */
+
+.ficha-noches-con-edicion {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+/* Las noches siguen visibles en Resumen,
+   pero dejan de comportarse como botón */
+.cabana-titular-linea .editar-noches {
+    pointer-events: none;
+    cursor: default;
+}
+
+.cabana-titular-linea .editar-noches:hover {
+    opacity: 1;
+}
