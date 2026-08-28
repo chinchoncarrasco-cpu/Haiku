@@ -10041,3 +10041,211 @@ tr.cabana-libre .info-cabana {
 .cabana-titular-linea .editar-noches:hover {
     opacity: 1;
 }
+
+/* =========================================
+   FICHA · OCUPACIÓN DE LA RESERVA
+========================================= */
+
+.ficha-bloque-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+    margin-bottom: 12px;
+}
+
+.ficha-bloque-cabecera
+.ficha-bloque-titulo {
+    margin-bottom: 0;
+}
+
+.ficha-ocupacion-resumen {
+    display: flex;
+    align-items: center;
+
+    gap: 5px;
+}
+
+#ficha-reserva-ocupacion {
+    padding: 4px 7px;
+
+    border-radius: 999px;
+
+    background: #edf4ef;
+    color: #286746;
+
+    font-size: 8px;
+    font-weight: 700;
+
+    white-space: nowrap;
+}
+
+
+/* Ocupación visible pero no editable en Resumen */
+
+.campo-ocupacion-solo-lectura {
+    pointer-events: none;
+
+    appearance: textfield;
+    -moz-appearance: textfield;
+
+    cursor: default;
+}
+
+.campo-ocupacion-solo-lectura::-webkit-inner-spin-button,
+.campo-ocupacion-solo-lectura::-webkit-outer-spin-button {
+    margin: 0;
+
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+/* =========================================
+   RESUMEN · OCUPACIÓN COMO INFORMACIÓN
+========================================= */
+
+.info-cabana .ocupacion-cabana {
+    display: flex !important;
+    align-items: center !important;
+
+    gap: 0 !important;
+
+    margin-bottom: 7px;
+}
+
+
+/* Cada cantidad */
+
+.info-cabana
+.ocupacion-cabana
+label {
+    position: relative;
+
+    display: inline-flex !important;
+    align-items: center !important;
+
+    gap: 1px !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+
+    color: #737d77;
+
+    font-size: 8px !important;
+    font-weight: 600;
+    line-height: 1;
+}
+
+
+/* Números sin apariencia de input */
+
+.info-cabana
+.ocupacion-cabana
+.campo-ocupacion-solo-lectura {
+    width: 13px !important;
+    min-width: 13px !important;
+    height: auto !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+
+    background: transparent !important;
+
+    text-align: right;
+
+    font-family: inherit;
+    font-size: 9px !important;
+    font-weight: 700;
+
+    color: #28342d;
+
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+
+/* Etiquetas */
+
+.info-cabana
+.ocupacion-cabana
+label:nth-of-type(1)::after {
+    content: "ADL";
+}
+
+.info-cabana
+.ocupacion-cabana
+label:nth-of-type(2)::after {
+    content: "NIÑ";
+}
+
+.info-cabana
+.ocupacion-cabana
+label:nth-of-type(3)::after {
+    content: "MASC";
+}
+
+/* Separador real de ocupación */
+
+.info-cabana
+.ocupacion-cabana
+.ocupacion-separador {
+    width: 4px;
+    height: 4px;
+
+    flex: 0 0 4px;
+    align-self: center;
+
+    margin: 0 4px;
+
+    border-radius: 50%;
+
+    background: #59665f;
+
+    opacity: 0.9;
+}
+
+/* =========================================
+   OCUPACIÓN COMO UNA SOLA LÍNEA DE TEXTO
+========================================= */
+
+/* Los inputs continúan existiendo para el sistema,
+   pero ya no forman parte del diseño visible */
+
+.info-cabana
+.ocupacion-cabana
+> label {
+    display: none !important;
+}
+
+.info-cabana
+.ocupacion-cabana
+.ocupacion-separador {
+    display: none !important;
+}
+
+
+/* Texto definitivo */
+
+.info-cabana
+.ocupacion-cabana
+.ocupacion-resumen-texto {
+    display: inline-block;
+
+    margin: 0;
+    padding: 0;
+
+    color: #59645e;
+
+    font-family: inherit;
+    font-size: 8px;
+    font-weight: 600;
+    line-height: 1;
+
+    white-space: nowrap;
+}

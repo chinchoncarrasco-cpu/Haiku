@@ -372,6 +372,17 @@ function cargarCabanasDia(fecha) {
         const datosCabana =
             datos.cabanas[numeroCabana] || {};
 
+        const contenedorOcupacion =
+    fila.querySelector(
+        ".ocupacion-cabana"
+    );
+
+
+actualizarTextoOcupacionResumen(
+    contenedorOcupacion,
+    datosCabana
+);
+
 // CONTINÚA solo aparece con CHECK-IN si
 // esta misma reserva tuvo IN manual
 if (datosCabana.estado === "continua") {
@@ -2738,6 +2749,11 @@ document
         }
     });
 
+actualizarOcupacionFicha(
+    datosReserva,
+    false
+);
+
 const huespedTitular =
     document.getElementById(
         "ficha-huesped-titular"
@@ -2786,6 +2802,195 @@ if (campoTelefono) {
 }
 
 fichaReservaModal.hidden = false;
+}
+
+// ==========================================
+// OCUPACIÓN SOLO LECTURA EN RESUMEN
+// ==========================================
+
+document
+    .querySelectorAll(
+        `
+        [data-campo="adultos"],
+        [data-campo="ninos"],
+        [data-campo="mascotas"]
+        `
+    )
+    .forEach(campo => {
+
+        campo.readOnly = true;
+        campo.tabIndex = -1;
+
+        campo.classList.add(
+            "campo-ocupacion-solo-lectura"
+        );
+    });
+
+
+// ==========================================
+// TEXTO COMPACTO DE OCUPACIÓN EN RESUMEN
+// ==========================================
+
+function actualizarTextoOcupacionResumen(
+    contenedor,
+    datosCabana = null
+) {
+
+    if (!contenedor) {
+        return;
+    }
+
+
+    let texto =
+        contenedor.querySelector(
+            ".ocupacion-resumen-texto"
+        );
+
+
+    if (!texto) {
+
+        texto =
+            document.createElement(
+                "span"
+            );
+
+        texto.className =
+            "ocupacion-resumen-texto";
+
+        contenedor.appendChild(
+            texto
+        );
+    }
+
+
+    const campoAdultos =
+        contenedor.querySelector(
+            '[data-campo="adultos"]'
+        );
+
+    const campoNinos =
+        contenedor.querySelector(
+            '[data-campo="ninos"]'
+        );
+
+    const campoMascotas =
+        contenedor.querySelector(
+            '[data-campo="mascotas"]'
+        );
+
+
+    const adultos =
+        Number(
+            datosCabana?.adultos ??
+            campoAdultos?.value
+        ) || 0;
+
+    const ninos =
+        Number(
+            datosCabana?.ninos ??
+            campoNinos?.value
+        ) || 0;
+
+    const mascotas =
+        Number(
+            datosCabana?.mascotas ??
+            campoMascotas?.value
+        ) || 0;
+
+
+    texto.textContent =
+        `${adultos} ADL · ` +
+        `${ninos} NIÑ · ` +
+        `${mascotas} MASC`;
+}
+
+
+// Crear inicialmente el texto en las 11 cabañas
+
+document
+    .querySelectorAll(
+        ".ocupacion-cabana"
+    )
+    .forEach(contenedor => {
+
+        actualizarTextoOcupacionResumen(
+            contenedor
+        );
+    });
+
+// ==========================================
+// MOSTRAR OCUPACIÓN EN LA FICHA
+// ==========================================
+
+function actualizarOcupacionFicha(
+    cabana,
+    permitirEdicion = true
+) {
+
+    const adultos =
+        Number(cabana?.adultos) || 0;
+
+    const ninos =
+        Number(cabana?.ninos) || 0;
+
+    const mascotas =
+        Number(cabana?.mascotas) || 0;
+
+
+    const resumen =
+        document.getElementById(
+            "ficha-reserva-ocupacion"
+        );
+
+
+    if (resumen) {
+
+        resumen.textContent =
+            `${adultos} ADL · ` +
+            `${ninos} NIÑ · ` +
+            `${mascotas} MASC`;
+    }
+
+
+    const botonEditar =
+        document.querySelector(
+            ".ficha-editar-ocupacion"
+        );
+
+
+    if (botonEditar) {
+
+        botonEditar.hidden =
+            !permitirEdicion;
+    }
+
+
+    const cantidadAcompanantes =
+        Math.max(
+            0,
+            adultos + ninos - 1
+        );
+
+
+    document
+        .querySelectorAll(
+            ".ficha-acompanante-fila"
+        )
+        .forEach(fila => {
+
+            const numero =
+                Number(
+                    fila.dataset
+                        .acompananteFila
+                );
+
+
+            fila.style.display =
+                numero <=
+                cantidadAcompanantes
+                    ? ""
+                    : "none";
+        });
 }
 
 // ========================================
@@ -2848,6 +3053,11 @@ document
         }
 
     });
+
+    actualizarOcupacionFicha(
+    cabana,
+    true
+);
 
 
     // ====================================
@@ -4639,6 +4849,307 @@ actualizarNombresEstadosResponsive();
 window.addEventListener(
     "resize",
     actualizarNombresEstadosResponsive
+);
+
+// ==========================================
+// EDITAR OCUPACIÓN DESDE LA FICHA
+// ==========================================
+
+document.addEventListener(
+    "click",
+    evento => {
+
+        const boton =
+            evento.target.closest(
+                ".ficha-editar-ocupacion"
+            );
+
+
+        if (!boton) {
+            return;
+        }
+
+
+        const reservaId =
+            fichaReservaModal
+                ?.dataset.reservaId;
+
+        const numeroCabana =
+            fichaReservaModal
+                ?.dataset.numeroCabana;
+
+
+        if (
+            !reservaId ||
+            !numeroCabana
+        ) {
+            return;
+        }
+
+
+        const registro =
+            buscarDatosReservaPorId(
+                reservaId
+            );
+
+
+        if (!registro?.cabana) {
+            return;
+        }
+
+
+        const cabana =
+            registro.cabana;
+
+
+        const adultosActuales =
+            Number(cabana.adultos) || 1;
+
+        const ninosActuales =
+            Number(cabana.ninos) || 0;
+
+        const mascotasActuales =
+            Number(cabana.mascotas) || 0;
+
+
+        const respuestaAdultos =
+            prompt(
+                "Cantidad de adultos:",
+                adultosActuales
+            );
+
+
+        if (respuestaAdultos === null) {
+            return;
+        }
+
+
+        const respuestaNinos =
+            prompt(
+                "Cantidad de niños:",
+                ninosActuales
+            );
+
+
+        if (respuestaNinos === null) {
+            return;
+        }
+
+
+        const respuestaMascotas =
+            prompt(
+                "Cantidad de mascotas:",
+                mascotasActuales
+            );
+
+
+        if (respuestaMascotas === null) {
+            return;
+        }
+
+
+        const adultos =
+            Number(respuestaAdultos);
+
+        const ninos =
+            Number(respuestaNinos);
+
+        const mascotas =
+            Number(respuestaMascotas);
+
+
+        const cantidadesValidas =
+
+            Number.isInteger(adultos) &&
+            Number.isInteger(ninos) &&
+            Number.isInteger(mascotas) &&
+
+            adultos >= 1 &&
+            ninos >= 0 &&
+            mascotas >= 0;
+
+
+        if (!cantidadesValidas) {
+
+            alert(
+                "Ingresa cantidades válidas. Debe existir al menos un adulto."
+            );
+
+            return;
+        }
+
+
+        let capacidadMaxima = 5;
+
+
+        if (
+            typeof catalogoCabanasReserva !==
+                "undefined"
+        ) {
+
+            capacidadMaxima =
+                Number(
+                    catalogoCabanasReserva[
+                        numeroCabana
+                    ]?.capacidad
+                ) || 5;
+        }
+
+
+        if (
+            adultos + ninos >
+            capacidadMaxima
+        ) {
+
+            alert(
+                `La cabaña admite un máximo de ${capacidadMaxima} personas entre adultos y niños.`
+            );
+
+            return;
+        }
+
+
+        sincronizarDatosReserva(
+            reservaId,
+            numeroCabana,
+            "adultos",
+            String(adultos)
+        );
+
+
+        sincronizarDatosReserva(
+            reservaId,
+            numeroCabana,
+            "ninos",
+            String(ninos)
+        );
+
+
+        sincronizarDatosReserva(
+            reservaId,
+            numeroCabana,
+            "mascotas",
+            String(mascotas)
+        );
+
+
+        cabana.adultos =
+            String(adultos);
+
+        cabana.ninos =
+            String(ninos);
+
+        cabana.mascotas =
+            String(mascotas);
+
+
+        const cantidadAcompanantes =
+            Math.max(
+                0,
+                adultos + ninos - 1
+            );
+
+
+        const fichas =
+            obtenerFichasReservas();
+
+
+        if (!fichas[reservaId]) {
+            fichas[reservaId] = {};
+        }
+
+
+        const ficha =
+            fichas[reservaId];
+
+
+        for (
+            let numero = 1;
+            numero <= 5;
+            numero++
+        ) {
+
+            const campo =
+                document.getElementById(
+                    `ficha-acompanante-${numero}`
+                );
+
+
+            if (
+                numero >
+                cantidadAcompanantes
+            ) {
+
+                ficha[
+                    `acompanante${numero}`
+                ] = "";
+
+                if (campo) {
+                    campo.value = "";
+                }
+            }
+        }
+
+
+        guardarFichasReservas(
+            fichas
+        );
+
+
+        actualizarOcupacionFicha(
+            cabana,
+            true
+        );
+
+
+        const acompanantePrincipal =
+            document.getElementById(
+                "ficha-reserva-acompanante-principal"
+            );
+
+
+        if (
+            acompanantePrincipal &&
+            cantidadAcompanantes === 0
+        ) {
+
+            acompanantePrincipal.textContent =
+                "";
+
+            acompanantePrincipal.hidden =
+                true;
+        }
+
+
+        if (
+            typeof cargarCabanasDia ===
+            "function"
+        ) {
+            cargarCabanasDia(
+                fechaSeleccionada
+            );
+        }
+
+
+        if (
+            typeof actualizarResumenDia ===
+            "function"
+        ) {
+            actualizarResumenDia(
+                fechaSeleccionada
+            );
+        }
+
+
+        if (
+            typeof generarResumenOperativo ===
+            "function"
+        ) {
+            generarResumenOperativo(
+                fechaSeleccionada
+            );
+        }
+    }
 );
 
 // ==========================================
