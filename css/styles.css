@@ -191,35 +191,6 @@ body {
 }
 
 
-.turno {
-    background: var(--panel);
-
-    border: 1px solid var(--borde);
-
-    border-radius: var(--radio);
-
-    padding: 13px 20px;
-
-    display: flex;
-    flex-direction: column;
-
-    min-width: 180px;
-}
-
-
-.turno span {
-    color: var(--texto-suave);
-    font-size: 11px;
-
-    margin-bottom: 5px;
-}
-
-
-.turno strong {
-    font-size: 14px;
-}
-
-
 /* ========================================
    TARJETAS RESUMEN
 ======================================== */
@@ -1387,12 +1358,6 @@ input[type="time"].campo-cabana {
 
         gap: 18px;
     }
-
-
-    .turno {
-        width: 100%;
-    }
-
 
     .resumen {
         grid-template-columns: repeat(2, 1fr);
