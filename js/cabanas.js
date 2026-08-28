@@ -4852,6 +4852,340 @@ window.addEventListener(
 );
 
 // ==========================================
+// MENÚ DE ESTADO DE LA FICHA
+// ==========================================
+
+const botonDesplegarEstadoFicha =
+    document.getElementById(
+        "ficha-estado-desplegar"
+    );
+
+const menuEstadoFicha =
+    document.getElementById(
+        "ficha-estado-menu"
+    );
+
+
+function cerrarMenuEstadoFicha() {
+
+    if (
+        !menuEstadoFicha ||
+        !botonDesplegarEstadoFicha
+    ) {
+        return;
+    }
+
+
+    menuEstadoFicha.hidden = true;
+
+    botonDesplegarEstadoFicha.setAttribute(
+        "aria-expanded",
+        "false"
+    );
+}
+
+
+if (
+    botonDesplegarEstadoFicha &&
+    menuEstadoFicha
+) {
+
+    botonDesplegarEstadoFicha.addEventListener(
+        "click",
+        evento => {
+
+            evento.stopPropagation();
+
+            const abrir =
+                menuEstadoFicha.hidden;
+
+
+            menuEstadoFicha.hidden =
+                !abrir;
+
+
+            botonDesplegarEstadoFicha.setAttribute(
+                "aria-expanded",
+                String(abrir)
+            );
+        }
+    );
+}
+
+
+// Cerrar tocando fuera
+
+document.addEventListener(
+    "click",
+    evento => {
+
+        if (
+            evento.target.closest(
+                ".ficha-estado-control"
+            )
+        ) {
+            return;
+        }
+
+
+        cerrarMenuEstadoFicha();
+    }
+);
+
+
+// Cerrar con Escape
+
+document.addEventListener(
+    "keydown",
+    evento => {
+
+        if (evento.key === "Escape") {
+            cerrarMenuEstadoFicha();
+        }
+    }
+);
+
+
+// ==========================================
+// MARCAR LA RESERVA COMO HOSPEDADA
+// ==========================================
+
+function marcarReservaComoHospedada(
+    reservaId,
+    numeroCabana
+) {
+
+    let reservaEncontrada = false;
+
+
+    Object.entries(
+        datosPorFecha
+    ).forEach(
+        ([fechaDia, datosDia]) => {
+
+            const cabana =
+                datosDia?.cabanas?.[
+                    numeroCabana
+                ];
+
+
+            if (
+                !cabana ||
+                String(cabana.reservaId) !==
+                    String(reservaId)
+            ) {
+                return;
+            }
+
+
+            reservaEncontrada = true;
+
+
+            const esDiaSalida =
+                cabana.estado ===
+                "sale-libre";
+
+
+            if (!esDiaSalida) {
+
+                cabana.checkinRealizado =
+                    true;
+            }
+
+
+            const esRegistroOrigen =
+
+                cabana.continuidadAutomatica !==
+                    true ||
+
+                cabana.fechaOrigenReserva ===
+                    fechaDia;
+
+
+            if (esRegistroOrigen) {
+
+                cabana.checkinManual =
+                    true;
+            }
+        }
+    );
+
+
+    if (!reservaEncontrada) {
+        return false;
+    }
+
+
+    guardarDatos();
+
+    return true;
+}
+
+
+// ==========================================
+// OPCIONES DEL MENÚ
+// ==========================================
+
+if (menuEstadoFicha) {
+
+    menuEstadoFicha.addEventListener(
+        "click",
+        evento => {
+
+            const opcion =
+                evento.target.closest(
+                    "[data-ficha-estado-opcion]"
+                );
+
+
+            if (!opcion) {
+                return;
+            }
+
+
+            const estadoElegido =
+                opcion.dataset
+                    .fichaEstadoOpcion;
+
+
+            // Por ahora, las demás opciones
+            // solamente cierran el menú.
+
+            if (
+                estadoElegido !==
+                "hospedado"
+            ) {
+
+                cerrarMenuEstadoFicha();
+                return;
+            }
+
+
+            const reservaId =
+                fichaReservaModal
+                    ?.dataset.reservaId;
+
+            const numeroCabana =
+                fichaReservaModal
+                    ?.dataset.numeroCabana;
+
+
+            if (
+                !reservaId ||
+                !numeroCabana
+            ) {
+                return;
+            }
+
+
+            const actualizado =
+                marcarReservaComoHospedada(
+                    reservaId,
+                    numeroCabana
+                );
+
+
+            if (!actualizado) {
+                return;
+            }
+
+
+            const campoEstado =
+                document.getElementById(
+                    "ficha-reserva-estado"
+                );
+
+
+            if (campoEstado) {
+
+                campoEstado.classList.remove(
+                    "ficha-estado-checkout",
+                    "ficha-estado-pendiente",
+                    "ficha-estado-confirmada",
+                    "ficha-estado-confirmacion-pendiente",
+                    "ficha-estado-cancelada"
+                );
+
+
+                campoEstado.classList.add(
+                    "ficha-estado-hospedado"
+                );
+
+
+                campoEstado.textContent =
+                    "● Hospedado";
+            }
+
+
+            cerrarMenuEstadoFicha();
+
+
+            if (
+                typeof cargarCabanasDia ===
+                "function"
+            ) {
+
+                cargarCabanasDia(
+                    fechaSeleccionada
+                );
+            }
+
+
+            if (
+                typeof generarCalendario ===
+                "function"
+            ) {
+                generarCalendario();
+            }
+
+
+            if (
+                typeof actualizarResumenDia ===
+                "function"
+            ) {
+
+                actualizarResumenDia(
+                    fechaSeleccionada
+                );
+            }
+
+
+            if (
+                typeof actualizarTarjetasRevision ===
+                "function"
+            ) {
+
+                actualizarTarjetasRevision(
+                    fechaSeleccionada
+                );
+            }
+
+
+            if (
+                typeof actualizarResumenAseo ===
+                "function"
+            ) {
+
+                actualizarResumenAseo(
+                    fechaSeleccionada
+                );
+            }
+
+
+            if (
+                typeof generarResumenOperativo ===
+                "function"
+            ) {
+
+                generarResumenOperativo(
+                    fechaSeleccionada
+                );
+            }
+        }
+    );
+}
+
+// ==========================================
 // EDITAR OCUPACIÓN DESDE LA FICHA
 // ==========================================
 

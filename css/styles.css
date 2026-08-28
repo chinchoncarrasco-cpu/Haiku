@@ -10249,3 +10249,188 @@ label:nth-of-type(3)::after {
 
     white-space: nowrap;
 }
+
+/* =========================================
+   CHECK-IN DESDE LA FICHA
+========================================= */
+
+/* El checkbox continúa existiendo para el sistema,
+   pero desaparece del Resumen */
+
+.estado-reserva-con-checkin
+.checkin-cabana {
+    display: none !important;
+}
+
+
+/* Estado y flecha */
+
+.ficha-estado-control {
+    position: relative;
+
+    display: inline-flex;
+    align-items: center;
+
+    gap: 4px;
+}
+
+.ficha-estado-desplegar {
+    width: 20px;
+    height: 20px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 0;
+
+    border: 1px solid #d9dfdb;
+    border-radius: 50%;
+
+    background: #ffffff;
+
+    cursor: pointer;
+}
+
+.ficha-estado-desplegar:hover {
+    background: #f1f6f3;
+    border-color: #bfcfc5;
+}
+
+
+/* Flecha simple */
+
+.ficha-estado-flecha {
+    width: 5px;
+    height: 5px;
+
+    display: block;
+
+    border-right: 1.5px solid #536159;
+    border-bottom: 1.5px solid #536159;
+
+    transform:
+        translateY(-1px)
+        rotate(45deg);
+
+    transition:
+        transform 0.15s;
+}
+
+.ficha-estado-desplegar[aria-expanded="true"]
+.ficha-estado-flecha {
+    transform:
+        translateY(1px)
+        rotate(225deg);
+}
+
+
+/* Menú desplegable */
+
+.ficha-estado-menu {
+    position: absolute;
+
+    top: calc(100% + 6px);
+    right: 0;
+
+    z-index: 80;
+
+    width: 170px;
+
+    padding: 5px;
+
+    border: 1px solid #d9dfdb;
+    border-radius: 9px;
+
+    background: #ffffff;
+
+    box-shadow:
+        0 8px 22px rgba(25, 40, 31, 0.16);
+}
+
+.ficha-estado-menu[hidden] {
+    display: none !important;
+}
+
+.ficha-estado-menu button {
+    width: 100%;
+
+    display: flex;
+    align-items: center;
+
+    padding: 8px 9px;
+
+    border: 0;
+    border-radius: 6px;
+
+    background: transparent;
+
+    text-align: left;
+
+    font-family: inherit;
+    font-size: 10px;
+
+    color: #354139;
+
+    cursor: pointer;
+}
+
+.ficha-estado-menu button:hover {
+    background: #f2f6f3;
+}
+
+.ficha-estado-menu
+.ficha-estado-opcion-funcional {
+    color: #1f754c;
+    font-weight: 700;
+}
+
+.ficha-estado-menu
+.ficha-estado-opcion-funcional::before {
+    content: "●";
+
+    margin-right: 6px;
+
+    font-size: 7px;
+    color: #35a762;
+}
+
+/* =========================================
+   RESUMEN · COLUMNA ESTADO MÁS COMPACTA
+========================================= */
+
+@media (max-width: 768px) {
+
+    .tabla-contenedor th:nth-child(2),
+    .tabla-contenedor td:nth-child(2) {
+        width: 90px !important;
+        min-width: 90px !important;
+        max-width: 90px !important;
+
+        padding-left: 7px !important;
+        padding-right: 7px !important;
+
+        box-sizing: border-box;
+    }
+
+    .tabla-contenedor
+    .estado-reserva-con-checkin {
+        width: 74px !important;
+        min-width: 74px !important;
+
+        margin: 0 auto;
+        gap: 0 !important;
+
+        transform: translateX(4px);
+    }
+
+    .tabla-contenedor
+    .estado-reserva-con-checkin > select {
+        width: 74px !important;
+        min-width: 74px !important;
+        max-width: 74px !important;
+
+        flex: 0 0 74px !important;
+    }
+
+}

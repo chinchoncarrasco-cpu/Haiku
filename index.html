@@ -2984,12 +2984,79 @@
 
 </div>
 
-        <span
-            id="ficha-reserva-estado"
-            class="ficha-estado"
+        <div class="ficha-estado-control">
+
+    <span
+        id="ficha-reserva-estado"
+        class="ficha-estado"
+    >
+        ● Pendiente
+    </span>
+
+    <button
+        type="button"
+        id="ficha-estado-desplegar"
+        class="ficha-estado-desplegar"
+        aria-label="Cambiar estado de la reserva"
+        aria-expanded="false"
+        title="Cambiar estado"
+    >
+        <span class="ficha-estado-flecha"></span>
+    </button>
+
+
+    <div
+        id="ficha-estado-menu"
+        class="ficha-estado-menu"
+        hidden
+    >
+
+        <button
+            type="button"
+            data-ficha-estado-opcion="confirmada"
         >
-            ● Pendiente
-        </span>
+            Confirmada
+        </button>
+
+        <button
+            type="button"
+            data-ficha-estado-opcion="confirmacion-pendiente"
+        >
+            Confirmación pendiente
+        </button>
+
+        <button
+            type="button"
+            data-ficha-estado-opcion="cancelada"
+        >
+            Cancelada
+        </button>
+
+        <button
+            type="button"
+            data-ficha-estado-opcion="hospedado"
+            class="ficha-estado-opcion-funcional"
+        >
+            Hospedado
+        </button>
+
+        <button
+            type="button"
+            data-ficha-estado-opcion="checked-out"
+        >
+            Checked Out
+        </button>
+
+        <button
+            type="button"
+            data-ficha-estado-opcion="no-show"
+        >
+            No-Show
+        </button>
+
+    </div>
+
+</div>
 
     </div>
 
