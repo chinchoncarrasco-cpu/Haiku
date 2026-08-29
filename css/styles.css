@@ -2572,16 +2572,16 @@ input[type="time"].campo-cabana {
     min-width: 145px;
 }
 
-/* NOTAS */
+/* INGRESO */
 .tabla-contenedor > table th:nth-child(4),
 .tabla-contenedor > table td:nth-child(4) {
-    min-width: 90px;
+    min-width: 105px;
 }
 
-/* INGRESO */
+/* NOTAS */
 .tabla-contenedor > table th:nth-child(5),
 .tabla-contenedor > table td:nth-child(5) {
-    min-width: 105px;
+    min-width: 135px;
 }
 
 /* SERVICIOS */
@@ -2644,18 +2644,17 @@ input[type="time"].campo-cabana {
         min-width: 125px;
     }
 
-    /* Notas */
-    .tabla-contenedor > table th:nth-child(4),
-    .tabla-contenedor > table td:nth-child(4) {
-        min-width: 62px;
-        text-align: center;
-    }
-
     /* Ingreso */
-    .tabla-contenedor > table th:nth-child(5),
-    .tabla-contenedor > table td:nth-child(5) {
-        min-width: 82px;
-    }
+.tabla-contenedor > table th:nth-child(4),
+.tabla-contenedor > table td:nth-child(4) {
+    min-width: 82px;
+}
+
+/* Notas */
+.tabla-contenedor > table th:nth-child(5),
+.tabla-contenedor > table td:nth-child(5) {
+    min-width: 100px;
+}
 
     /* Servicios */
     .tabla-contenedor > table th:nth-child(6),
@@ -2873,22 +2872,23 @@ input[type="time"].campo-cabana {
 
 @media (max-width: 700px) {
 
+/* INGRESO */
+.tabla-contenedor th:nth-child(4),
+.tabla-contenedor td:nth-child(4) {
+    min-width: 88px;
+    width: 88px;
+}
+
+.tabla-contenedor td:nth-child(4) input[type="time"] {
+    width: 78px;
+    min-width: 78px;
+    box-sizing: border-box;
+    padding-left: 5px;
+    padding-right: 3px;
+}
+
+
     /* NOTAS */
-    .tabla-contenedor th:nth-child(4),
-    .tabla-contenedor td:nth-child(4) {
-        min-width: 75px;
-        width: 75px;
-    }
-
-    .tabla-contenedor td:nth-child(4) input,
-    .tabla-contenedor td:nth-child(4) textarea {
-        width: 65px;
-        min-width: 65px;
-        box-sizing: border-box;
-    }
-
-
-    /* INGRESO */
     .tabla-contenedor th:nth-child(5),
     .tabla-contenedor td:nth-child(5) {
         min-width: 105px;
@@ -8033,13 +8033,19 @@ tr.cabana-libre .info-cabana {
    ========================================= */
 
 /* La columna deja de crecer por las notas */
-.tabla-contenedor > table th:nth-child(4),
-.tabla-contenedor > table td:nth-child(4) {
-    width: 118px;
-    min-width: 118px;
-    max-width: 118px;
+.tabla-contenedor > table th:nth-child(5),
+.tabla-contenedor > table td:nth-child(5) {
+    width: 145px;
+    min-width: 145px;
+    max-width: 145px;
 
     padding-right: 8px !important;
+}
+
+.nota-resumen-wrap {
+    display: flex;
+    align-items: center;
+    gap: 6px;
 }
 
 
@@ -8048,9 +8054,10 @@ tr.cabana-libre .info-cabana {
 .nota-cabana {
     box-sizing: border-box;
 
-    width: 110px !important;
-    min-width: 110px !important;
-    max-width: 110px !important;
+    flex: 1;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: none !important;
 
     height: 34px !important;
     min-height: 34px !important;

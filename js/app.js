@@ -9,9 +9,6 @@ const seccionesApp = document.querySelectorAll(".seccion-app");
 // PANEL AGREGAR NOTA
 // ========================================
 
-const botonAgregarNota =
-    document.getElementById("agregar-nota");
-
 const panelAgregarNota =
     document.getElementById("panel-agregar-nota");
 
@@ -481,14 +478,158 @@ resumenLavanderia.addEventListener("input", () => {
 cargarDatosDia(fechaSeleccionada);
 
 // ========================================
-// ABRIR PANEL AGREGAR NOTA
+// NOTAS EN RESUMEN · BOTÓN + POR CABAÑA
 // ========================================
 
-botonAgregarNota.addEventListener("click", () => {
+function prepararNotasResumenPorCabana() {
 
-    panelAgregarNota.classList.add("activo");
+    document
+        .querySelectorAll(
+            ".tabla-contenedor tbody tr[data-cabana]"
+        )
+        .forEach(fila => {
 
-});
+            const numeroCabana =
+                fila.dataset.cabana;
+
+            const celdaNotas =
+                fila.querySelector(".celda-notas");
+
+            const campoIngreso =
+                fila.querySelector(
+                    '[data-campo="ingreso"]'
+                );
+
+            const celdaIngreso =
+                campoIngreso?.closest("td");
+
+            if (!celdaNotas || !celdaIngreso) {
+                return;
+            }
+
+            // INGRESO debe quedar antes de NOTAS
+            fila.insertBefore(
+                celdaIngreso,
+                celdaNotas
+            );
+
+
+            // Evitar crear dos veces el botón
+            if (
+                celdaNotas.querySelector(
+                    ".nota-resumen-wrap"
+                )
+            ) {
+                return;
+            }
+
+
+            const cajaNota =
+                celdaNotas.querySelector(
+                    ".nota-cabana"
+                );
+
+            if (!cajaNota) {
+                return;
+            }
+
+
+            const contenedor =
+                document.createElement("div");
+
+            contenedor.className =
+                "nota-resumen-wrap";
+
+
+            celdaNotas.insertBefore(
+                contenedor,
+                cajaNota
+            );
+
+            contenedor.appendChild(
+                cajaNota
+            );
+
+
+            const boton =
+                document.createElement("button");
+
+            boton.type = "button";
+
+            boton.className =
+                "servicio-resumen-agregar nota-resumen-agregar";
+
+            boton.dataset.agregarNotaCabana =
+                numeroCabana;
+
+            boton.title = "Agregar nota";
+
+            boton.textContent = "+";
+
+            contenedor.appendChild(
+                boton
+            );
+
+        });
+
+}
+
+
+prepararNotasResumenPorCabana();
+
+
+// ========================================
+// ABRIR NOTA DESDE BOTÓN +
+// ========================================
+
+document.addEventListener(
+    "click",
+    evento => {
+
+        const boton =
+            evento.target.closest(
+                "[data-agregar-nota-cabana]"
+            );
+
+        if (!boton) {
+            return;
+        }
+
+
+        const numeroCabana =
+            boton.dataset.agregarNotaCabana;
+
+
+        const selectorCabana =
+            document.getElementById(
+                "nota-cabana"
+            );
+
+        const campoTexto =
+            document.getElementById(
+                "nota-texto"
+            );
+
+
+        if (selectorCabana) {
+            selectorCabana.value =
+                numeroCabana;
+        }
+
+
+        if (campoTexto) {
+            campoTexto.value = "";
+        }
+
+
+        if (panelAgregarNota) {
+            panelAgregarNota.classList.add(
+                "activo"
+            );
+        }
+
+    }
+);
 
 // ========================================
 // CERRAR PANEL AGREGAR NOTA
