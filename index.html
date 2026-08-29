@@ -3572,7 +3572,7 @@
 
     <section id="seccion-calendario" class="seccion-app">
 
-        <header class="cabecera">
+        <header class="cabecera calendario-cabecera-principal">
 
             <div>
                 <p class="subtitulo">Planificación</p>
@@ -3582,7 +3582,24 @@
                 </p>
             </div>
 
+            <button
+                type="button"
+                id="activar-bloqueo-calendario"
+                class="calendario-bloqueo-boton"
+                aria-pressed="false"
+            >
+                Bloquear fechas
+            </button>
+
         </header>
+
+        <div
+            id="calendario-bloqueo-ayuda"
+            class="calendario-bloqueo-ayuda"
+            hidden
+        >
+            Selecciona la fecha inicial del bloqueo.
+        </div>
 
         <section class="panel calendario-panel">
 
@@ -3619,6 +3636,133 @@
         </section>
 
     </section>
+
+    <!-- =========================
+         CALENDARIO · SELECCIÓN DE BLOQUEO
+    ========================== -->
+
+    <div
+        id="modal-bloqueo-calendario"
+        class="modal-bloqueo-calendario"
+        hidden
+    >
+
+        <section
+            class="bloqueo-calendario-card"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="bloqueo-calendario-titulo"
+        >
+
+            <header class="bloqueo-calendario-header">
+
+                <div>
+                    <span>CALENDARIO</span>
+                    <h3 id="bloqueo-calendario-titulo">
+                        Bloquear fechas
+                    </h3>
+                </div>
+
+                <button
+                    type="button"
+                    id="cerrar-bloqueo-calendario"
+                    class="cerrar-bloqueo-calendario"
+                    aria-label="Cerrar"
+                >
+                    ×
+                </button>
+
+            </header>
+
+            <div class="bloqueo-calendario-rango">
+
+                <div>
+                    <small>Desde</small>
+                    <strong id="bloqueo-fecha-desde">—</strong>
+                </div>
+
+                <span aria-hidden="true">→</span>
+
+                <div>
+                    <small>Hasta</small>
+                    <strong id="bloqueo-fecha-hasta">—</strong>
+                </div>
+
+                <div>
+                    <small>Noches</small>
+                    <strong id="bloqueo-noches">0</strong>
+                </div>
+
+            </div>
+
+            <section class="bloqueo-calendario-seleccion">
+
+                <div class="bloqueo-calendario-seleccion-cabecera">
+
+                    <div>
+                        <h4>Alojamientos disponibles</h4>
+                        <p id="bloqueo-disponibilidad-resumen"></p>
+                    </div>
+
+                    <label class="bloqueo-seleccionar-todas">
+                        <input
+                            type="checkbox"
+                            id="bloqueo-seleccionar-todas"
+                        >
+                        <span>Seleccionar todas</span>
+                    </label>
+
+                </div>
+
+                <div
+                    id="bloqueo-lista-cabanas"
+                    class="bloqueo-lista-cabanas"
+                ></div>
+
+            </section>
+
+            <label class="bloqueo-calendario-motivo">
+                <span>
+                    Motivo
+                    <small>(opcional)</small>
+                </span>
+                <textarea
+                    id="bloqueo-motivo"
+                    rows="3"
+                    placeholder="Ej: mantención, reparación o uso interno"
+                ></textarea>
+            </label>
+
+            <p
+                id="bloqueo-calendario-prueba"
+                class="bloqueo-calendario-prueba"
+                hidden
+            ></p>
+
+            <footer class="bloqueo-calendario-acciones">
+
+                <button
+                    type="button"
+                    id="cancelar-bloqueo-calendario"
+                    class="bloqueo-accion-secundaria"
+                >
+                    Cancelar
+                </button>
+
+                <button
+                    type="button"
+                    id="confirmar-bloqueo-calendario"
+                    class="bloqueo-accion-principal"
+                    disabled
+                >
+                    Bloquear seleccionadas
+                </button>
+
+            </footer>
+
+        </section>
+
+    </div>
 
     <!-- =========================
      SECCIÓN CABAÑAS

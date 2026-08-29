@@ -29,6 +29,67 @@ const botonSiguiente = document.getElementById("mes-siguiente");
 
 let fechaCalendario = new Date();
 
+const seccionCalendario =
+    document.getElementById("seccion-calendario");
+
+const botonBloqueoCalendario =
+    document.getElementById(
+        "activar-bloqueo-calendario"
+    );
+
+const ayudaBloqueoCalendario =
+    document.getElementById(
+        "calendario-bloqueo-ayuda"
+    );
+
+const modalBloqueoCalendario =
+    document.getElementById(
+        "modal-bloqueo-calendario"
+    );
+
+const cerrarBloqueoCalendario =
+    document.getElementById(
+        "cerrar-bloqueo-calendario"
+    );
+
+const cancelarBloqueoCalendario =
+    document.getElementById(
+        "cancelar-bloqueo-calendario"
+    );
+
+const confirmarBloqueoCalendario =
+    document.getElementById(
+        "confirmar-bloqueo-calendario"
+    );
+
+const seleccionarTodasBloqueo =
+    document.getElementById(
+        "bloqueo-seleccionar-todas"
+    );
+
+const listaCabanasBloqueo =
+    document.getElementById(
+        "bloqueo-lista-cabanas"
+    );
+
+const catalogoCabanasBloqueo = {
+    "1": "Loft Clásico 1",
+    "2": "Loft Clásico 2",
+    "3": "Loft Clásico 3",
+    "4": "Loft Clásico 4",
+    "5": "Deluxe",
+    "6": "Loft Clásico 6",
+    "7": "Dos Ambientes 7",
+    "8": "Dos Ambientes 8",
+    "9": "Dos Ambientes 9",
+    "10": "Mini Loft",
+    "11": "Maxi Loft"
+};
+
+let modoBloqueoCalendario = false;
+let fechaInicioBloqueoCalendario = "";
+let fechaFinBloqueoCalendario = "";
+
 
 function generarCalendario() {
 
@@ -126,6 +187,13 @@ function generarCalendario() {
 
 elementoDia.addEventListener("click", () => {
 
+    if (modoBloqueoCalendario) {
+        seleccionarFechaBloqueoCalendario(
+            elementoDia.dataset.fecha
+        );
+        return;
+    }
+
     seleccionarDia(
         año,
         mes,
@@ -143,6 +211,10 @@ calendarioGrid.appendChild(elementoDia);
 // Ahora que todos los días existen,
 // dibujamos las reservas encima.
 dibujarReservasCalendario();
+
+// Si cambiamos de mes durante el modo bloqueo,
+// conservamos visualmente el rango seleccionado.
+pintarRangoBloqueoCalendario();
 
 }
 
@@ -191,6 +263,65 @@ calendarioGrid.appendChild(
                 datosDia.cabanas
             ).forEach(
                 ([numeroCabana, cabana]) => {
+
+                    // Los bloqueos utilizan la misma barra
+                    // que una reserva, pero cada cabaña
+                    // conserva su propio número.
+                    if (
+                        cabana &&
+                        String(
+                            cabana.estado || ""
+                        ).toLowerCase() === "bloqueada"
+                    ) {
+                        const fechaInicioBloqueo =
+                            cabana.bloqueoFechaInicio ||
+                            fecha;
+
+                        const fechaFinBloqueo =
+                            cabana.bloqueoFechaFin ||
+                            sumarDiasCalendario(fecha, 1);
+
+                        const nochesBloqueo =
+                            calcularNochesBloqueoCalendario(
+                                fechaInicioBloqueo,
+                                fechaFinBloqueo
+                            );
+
+                        const bloqueoVisualId =
+                            `${
+                                cabana.bloqueoId ||
+                                `BLQ-MANUAL-${fecha}`
+                            }-CAB-${numeroCabana}`;
+
+                        if (
+                            nochesBloqueo > 0 &&
+                            !reservasUnicas.has(
+                                bloqueoVisualId
+                            )
+                        ) {
+                            reservasUnicas.set(
+                                bloqueoVisualId,
+                                {
+                                    reservaId:
+                                        bloqueoVisualId,
+                                    numeroCabana,
+                                    titular: "Bloqueada",
+                                    fechaIngreso:
+                                        fechaInicioBloqueo,
+                                    noches:
+                                        nochesBloqueo,
+                                    estado: "bloqueada",
+                                    esBloqueo: true,
+                                    bloqueoId:
+                                        cabana.bloqueoId || "",
+                                    motivoBloqueo:
+                                        cabana.bloqueoMotivo || ""
+                                }
+                            );
+                        }
+
+                        return;
+                    }
 
                     if (
                         !cabana ||
@@ -664,6 +795,12 @@ if (filaReserva >= MAX_FILAS_VISIBLES) {
             barra.className =
                 "calendario-reserva-barra";
 
+            if (reserva.esBloqueo) {
+                barra.classList.add(
+                    "calendario-bloqueo-barra"
+                );
+            }
+
 let claseColor = "";
 
 // 1️⃣ CHECK-OUT tiene máxima prioridad
@@ -880,6 +1017,12 @@ function abrirPanelReservasDia(fecha) {
 
         item.className =
             "calendario-panel-reserva";
+
+        if (reserva.esBloqueo) {
+            item.classList.add(
+                "calendario-bloqueo-barra"
+            );
+        }
 
 let claseColor = "";
 
@@ -1109,6 +1252,802 @@ function sumarDiasCalendario(
 
     ].join("-");
 }
+
+
+
+
+// ========================================
+// CALENDARIO · MODO BLOQUEO
+// PRIMERA ETAPA: SELECCIÓN VISUAL
+// ========================================
+
+function formatearFechaBloqueoCalendario(
+    fechaISO
+) {
+    const [anio, mes, dia] =
+        fechaISO.split("-").map(Number);
+
+    return new Intl.DateTimeFormat(
+        "es-CL",
+        {
+            day: "numeric",
+            month: "short"
+        }
+    ).format(
+        new Date(anio, mes - 1, dia)
+    );
+}
+
+
+function calcularNochesBloqueoCalendario(
+    fechaInicio,
+    fechaFin
+) {
+    const inicio =
+        new Date(`${fechaInicio}T12:00:00`);
+
+    const fin =
+        new Date(`${fechaFin}T12:00:00`);
+
+    return Math.round(
+        (fin - inicio) / 86400000
+    );
+}
+
+
+function cabanaDisponibleParaBloqueo(
+    numeroCabana,
+    fechaInicio,
+    fechaFin
+) {
+    const datosCalendario =
+        JSON.parse(
+            localStorage.getItem("haikuDatos") || "{}"
+        );
+
+    let disponible = true;
+
+    Object.entries(datosCalendario).some(
+        ([fechaRegistro, datosDia]) => {
+            const cabana =
+                datosDia?.cabanas?.[numeroCabana];
+
+            if (!cabana) return false;
+
+            const estado = String(
+                cabana.estado || ""
+            ).toLowerCase();
+
+            if (
+                estado === "bloqueada" &&
+                fechaRegistro >= fechaInicio &&
+                fechaRegistro < fechaFin
+            ) {
+                disponible = false;
+                return true;
+            }
+
+            if (
+                !cabana.reservaId ||
+                cabana.continuidadAutomatica === true
+            ) {
+                return false;
+            }
+
+            const noches =
+                Number(cabana.noches) || 0;
+
+            if (noches < 1) return false;
+
+            const ingreso =
+                cabana.fechaOrigenReserva ||
+                cabana.fechaIngresoReserva ||
+                fechaRegistro;
+
+            const salida =
+                sumarDiasCalendario(
+                    ingreso,
+                    noches
+                );
+
+            const hayCruce =
+                ingreso < fechaFin &&
+                salida > fechaInicio;
+
+            if (hayCruce) {
+                disponible = false;
+                return true;
+            }
+
+            return false;
+        }
+    );
+
+    return disponible;
+}
+
+
+function obtenerCabanasDisponiblesBloqueo() {
+    return Object.keys(
+        catalogoCabanasBloqueo
+    ).filter(numeroCabana =>
+        cabanaDisponibleParaBloqueo(
+            numeroCabana,
+            fechaInicioBloqueoCalendario,
+            fechaFinBloqueoCalendario
+        )
+    );
+}
+
+
+function obtenerCheckboxesBloqueo() {
+    if (!listaCabanasBloqueo) return [];
+
+    return Array.from(
+        listaCabanasBloqueo.querySelectorAll(
+            "input[data-bloqueo-cabana]"
+        )
+    );
+}
+
+
+function actualizarSeleccionCabanasBloqueo() {
+    const checkboxes =
+        obtenerCheckboxesBloqueo();
+
+    const seleccionadas =
+        checkboxes.filter(
+            checkbox => checkbox.checked
+        );
+
+    if (seleccionarTodasBloqueo) {
+        seleccionarTodasBloqueo.checked =
+            checkboxes.length > 0 &&
+            seleccionadas.length === checkboxes.length;
+
+        seleccionarTodasBloqueo.indeterminate =
+            seleccionadas.length > 0 &&
+            seleccionadas.length < checkboxes.length;
+
+        seleccionarTodasBloqueo.disabled =
+            checkboxes.length === 0;
+    }
+
+    if (confirmarBloqueoCalendario) {
+        confirmarBloqueoCalendario.disabled =
+            seleccionadas.length === 0;
+
+        confirmarBloqueoCalendario.textContent =
+            seleccionadas.length > 0
+                ? `Bloquear ${seleccionadas.length} ${
+                    seleccionadas.length === 1
+                        ? "cabaña"
+                        : "cabañas"
+                }`
+                : "Bloquear seleccionadas";
+    }
+
+    const mensajePrueba =
+        document.getElementById(
+            "bloqueo-calendario-prueba"
+        );
+
+    if (mensajePrueba) {
+        mensajePrueba.hidden = true;
+    }
+}
+
+
+function renderizarCabanasDisponiblesBloqueo() {
+    if (!listaCabanasBloqueo) return;
+
+    const disponibles =
+        obtenerCabanasDisponiblesBloqueo();
+
+    const totalCabanas =
+        Object.keys(catalogoCabanasBloqueo).length;
+
+    const noDisponibles =
+        totalCabanas - disponibles.length;
+
+    const resumen =
+        document.getElementById(
+            "bloqueo-disponibilidad-resumen"
+        );
+
+    if (resumen) {
+        resumen.textContent =
+            `${disponibles.length} de ${totalCabanas} disponibles` +
+            (
+                noDisponibles > 0
+                    ? ` · ${noDisponibles} con reserva o bloqueo`
+                    : ""
+            );
+    }
+
+    listaCabanasBloqueo.innerHTML = "";
+
+    if (disponibles.length === 0) {
+        const mensaje =
+            document.createElement("p");
+
+        mensaje.className =
+            "bloqueo-sin-cabanas";
+
+        mensaje.textContent =
+            "No hay alojamientos libres durante todo este rango.";
+
+        listaCabanasBloqueo.appendChild(
+            mensaje
+        );
+
+        actualizarSeleccionCabanasBloqueo();
+        return;
+    }
+
+    disponibles.forEach(numeroCabana => {
+        const opcion =
+            document.createElement("label");
+
+        opcion.className =
+            "bloqueo-cabana-opcion";
+
+        opcion.innerHTML = `
+            <input
+                type="checkbox"
+                data-bloqueo-cabana="${numeroCabana}"
+            >
+            <span>
+                <strong>
+                    CAB ${numeroCabana}
+                </strong>
+                <small>
+                    ${catalogoCabanasBloqueo[numeroCabana]}
+                </small>
+            </span>
+            <em>Disponible</em>
+        `;
+
+        const checkbox =
+            opcion.querySelector("input");
+
+        checkbox.addEventListener(
+            "change",
+            actualizarSeleccionCabanasBloqueo
+        );
+
+        listaCabanasBloqueo.appendChild(
+            opcion
+        );
+    });
+
+    actualizarSeleccionCabanasBloqueo();
+}
+
+
+function abrirModalSeleccionBloqueoCalendario() {
+    if (
+        !modalBloqueoCalendario ||
+        !fechaInicioBloqueoCalendario ||
+        !fechaFinBloqueoCalendario
+    ) {
+        return;
+    }
+
+    const desde =
+        document.getElementById(
+            "bloqueo-fecha-desde"
+        );
+
+    const hasta =
+        document.getElementById(
+            "bloqueo-fecha-hasta"
+        );
+
+    const noches =
+        document.getElementById(
+            "bloqueo-noches"
+        );
+
+    const motivo =
+        document.getElementById(
+            "bloqueo-motivo"
+        );
+
+    if (desde) {
+        desde.textContent =
+            formatearFechaBloqueoCalendario(
+                fechaInicioBloqueoCalendario
+            );
+    }
+
+    if (hasta) {
+        hasta.textContent =
+            formatearFechaBloqueoCalendario(
+                fechaFinBloqueoCalendario
+            );
+    }
+
+    if (noches) {
+        noches.textContent =
+            calcularNochesBloqueoCalendario(
+                fechaInicioBloqueoCalendario,
+                fechaFinBloqueoCalendario
+            );
+    }
+
+    if (motivo) motivo.value = "";
+
+    renderizarCabanasDisponiblesBloqueo();
+
+    modalBloqueoCalendario.hidden = false;
+    document.body.classList.add(
+        "bloqueo-modal-abierto"
+    );
+}
+
+
+function cerrarModalSeleccionBloqueoCalendario() {
+    if (!modalBloqueoCalendario) return;
+
+    modalBloqueoCalendario.hidden = true;
+    document.body.classList.remove(
+        "bloqueo-modal-abierto"
+    );
+}
+
+
+function crearDiaVacioParaBloqueo() {
+    return {
+        encargado: "",
+        notas: "",
+        notasOperativas: [],
+        cabanas: {},
+        servicios: [],
+        pagos: [],
+        mantencion: [],
+        lavanderia: []
+    };
+}
+
+
+function generarIdBloqueoCalendario() {
+    if (
+        typeof crypto !== "undefined" &&
+        typeof crypto.randomUUID === "function"
+    ) {
+        return `BLQ-${crypto.randomUUID()}`;
+    }
+
+    return `BLQ-${Date.now()}-${
+        Math.random().toString(36).slice(2, 9)
+    }`;
+}
+
+
+function guardarBloqueoSeleccionadoCalendario() {
+    const seleccionadas =
+        obtenerCheckboxesBloqueo()
+            .filter(checkbox => checkbox.checked)
+            .map(
+                checkbox =>
+                    checkbox.dataset.bloqueoCabana
+            );
+
+    if (
+        seleccionadas.length === 0 ||
+        !fechaInicioBloqueoCalendario ||
+        !fechaFinBloqueoCalendario
+    ) {
+        return;
+    }
+
+    const dejaronDeEstarDisponibles =
+        seleccionadas.filter(numeroCabana =>
+            !cabanaDisponibleParaBloqueo(
+                numeroCabana,
+                fechaInicioBloqueoCalendario,
+                fechaFinBloqueoCalendario
+            )
+        );
+
+    if (dejaronDeEstarDisponibles.length > 0) {
+        alert(
+            "La disponibilidad cambió antes de guardar. " +
+            "Revisaremos nuevamente las cabañas libres."
+        );
+
+        renderizarCabanasDisponiblesBloqueo();
+        return;
+    }
+
+    const noches =
+        calcularNochesBloqueoCalendario(
+            fechaInicioBloqueoCalendario,
+            fechaFinBloqueoCalendario
+        );
+
+    const confirmado = confirm(
+        `Se bloquearán ${seleccionadas.length} ${
+            seleccionadas.length === 1
+                ? "cabaña"
+                : "cabañas"
+        } desde ${formatearFechaBloqueoCalendario(
+            fechaInicioBloqueoCalendario
+        )} hasta ${formatearFechaBloqueoCalendario(
+            fechaFinBloqueoCalendario
+        )} (${noches} ${
+            noches === 1 ? "noche" : "noches"
+        }). ¿Confirmar?`
+    );
+
+    if (!confirmado) return;
+
+    const datosCalendario =
+        JSON.parse(
+            localStorage.getItem("haikuDatos") || "{}"
+        );
+
+    const bloqueoId =
+        generarIdBloqueoCalendario();
+
+    const motivo =
+        document.getElementById(
+            "bloqueo-motivo"
+        )?.value.trim() || "";
+
+    const creadoEn =
+        new Date().toISOString();
+
+    let fecha =
+        fechaInicioBloqueoCalendario;
+
+    while (fecha < fechaFinBloqueoCalendario) {
+        if (!datosCalendario[fecha]) {
+            datosCalendario[fecha] =
+                crearDiaVacioParaBloqueo();
+        }
+
+        if (!datosCalendario[fecha].cabanas) {
+            datosCalendario[fecha].cabanas = {};
+        }
+
+        seleccionadas.forEach(numeroCabana => {
+            const anterior =
+                datosCalendario[fecha]
+                    .cabanas[numeroCabana] || {};
+
+            datosCalendario[fecha]
+                .cabanas[numeroCabana] = {
+                    ...anterior,
+                    estado: "bloqueada",
+                    bloqueoId,
+                    bloqueoAutomatico: true,
+                    bloqueoFechaInicio:
+                        fechaInicioBloqueoCalendario,
+                    bloqueoFechaFin:
+                        fechaFinBloqueoCalendario,
+                    bloqueoMotivo: motivo,
+                    bloqueoCreadoEn: creadoEn,
+                    bloqueoEstadoAnterior:
+                        anterior.estado || ""
+                };
+        });
+
+        fecha =
+            sumarDiasCalendario(fecha, 1);
+    }
+
+    localStorage.setItem(
+        "haikuDatos",
+        JSON.stringify(datosCalendario)
+    );
+
+    if (typeof datosPorFecha !== "undefined") {
+        datosPorFecha = datosCalendario;
+    }
+
+    cambiarModoBloqueoCalendario(false);
+    generarCalendario();
+
+    if (
+        typeof cargarCabanasDia === "function" &&
+        typeof fechaSeleccionada !== "undefined" &&
+        fechaSeleccionada
+    ) {
+        cargarCabanasDia(fechaSeleccionada);
+    }
+
+    if (
+        typeof actualizarResumenDia === "function" &&
+        typeof fechaSeleccionada !== "undefined" &&
+        fechaSeleccionada
+    ) {
+        actualizarResumenDia(fechaSeleccionada);
+    }
+
+    if (
+        typeof actualizarTarjetasRevision === "function" &&
+        typeof fechaSeleccionada !== "undefined" &&
+        fechaSeleccionada
+    ) {
+        actualizarTarjetasRevision(fechaSeleccionada);
+    }
+
+    if (
+        typeof actualizarResumenAseo === "function" &&
+        typeof fechaSeleccionada !== "undefined" &&
+        fechaSeleccionada
+    ) {
+        actualizarResumenAseo(fechaSeleccionada);
+    }
+
+    alert(
+        `Bloqueo guardado correctamente para ${
+            seleccionadas.length
+        } ${
+            seleccionadas.length === 1
+                ? "cabaña"
+                : "cabañas"
+        }.`
+    );
+}
+
+
+function actualizarAyudaBloqueoCalendario() {
+    if (!ayudaBloqueoCalendario) return;
+
+    if (!modoBloqueoCalendario) {
+        ayudaBloqueoCalendario.hidden = true;
+        return;
+    }
+
+    ayudaBloqueoCalendario.hidden = false;
+
+    if (!fechaInicioBloqueoCalendario) {
+        ayudaBloqueoCalendario.textContent =
+            "Selecciona la fecha inicial del bloqueo.";
+        return;
+    }
+
+    if (!fechaFinBloqueoCalendario) {
+        ayudaBloqueoCalendario.textContent =
+            `Inicio: ${formatearFechaBloqueoCalendario(
+                fechaInicioBloqueoCalendario
+            )} · Ahora selecciona la fecha de término.`;
+        return;
+    }
+
+    const noches =
+        calcularNochesBloqueoCalendario(
+            fechaInicioBloqueoCalendario,
+            fechaFinBloqueoCalendario
+        );
+
+    ayudaBloqueoCalendario.textContent =
+        `${formatearFechaBloqueoCalendario(
+            fechaInicioBloqueoCalendario
+        )} → ${formatearFechaBloqueoCalendario(
+            fechaFinBloqueoCalendario
+        )} · ${noches} ${
+            noches === 1 ? "noche" : "noches"
+        } · Rango listo para elegir cabañas.`;
+}
+
+
+function pintarRangoBloqueoCalendario() {
+    document
+        .querySelectorAll(
+            "#calendario-grid .dia-calendario[data-fecha]"
+        )
+        .forEach(elementoDia => {
+            const fecha = elementoDia.dataset.fecha;
+
+            elementoDia.classList.remove(
+                "bloqueo-inicio",
+                "bloqueo-rango",
+                "bloqueo-fin"
+            );
+
+            if (
+                !modoBloqueoCalendario ||
+                !fechaInicioBloqueoCalendario
+            ) {
+                return;
+            }
+
+            if (
+                fecha === fechaInicioBloqueoCalendario
+            ) {
+                elementoDia.classList.add(
+                    "bloqueo-inicio"
+                );
+            }
+
+            if (
+                fechaFinBloqueoCalendario &&
+                fecha >= fechaInicioBloqueoCalendario &&
+                fecha < fechaFinBloqueoCalendario
+            ) {
+                elementoDia.classList.add(
+                    "bloqueo-rango"
+                );
+            }
+
+            if (
+                fechaFinBloqueoCalendario &&
+                fecha === fechaFinBloqueoCalendario
+            ) {
+                elementoDia.classList.add(
+                    "bloqueo-fin"
+                );
+            }
+        });
+}
+
+
+function seleccionarFechaBloqueoCalendario(
+    fechaISO
+) {
+    if (
+        !fechaInicioBloqueoCalendario ||
+        fechaFinBloqueoCalendario
+    ) {
+        fechaInicioBloqueoCalendario = fechaISO;
+        fechaFinBloqueoCalendario = "";
+    } else if (
+        fechaISO <= fechaInicioBloqueoCalendario
+    ) {
+        fechaInicioBloqueoCalendario = fechaISO;
+        fechaFinBloqueoCalendario = "";
+    } else {
+        fechaFinBloqueoCalendario = fechaISO;
+    }
+
+    pintarRangoBloqueoCalendario();
+    actualizarAyudaBloqueoCalendario();
+
+    if (fechaFinBloqueoCalendario) {
+        abrirModalSeleccionBloqueoCalendario();
+    }
+}
+
+
+function cambiarModoBloqueoCalendario(
+    activar
+) {
+    cerrarModalSeleccionBloqueoCalendario();
+
+    modoBloqueoCalendario = Boolean(activar);
+    fechaInicioBloqueoCalendario = "";
+    fechaFinBloqueoCalendario = "";
+
+    const panelDia = document.querySelector(
+        ".calendario-panel-dia"
+    );
+
+    if (panelDia) panelDia.remove();
+
+    if (seccionCalendario) {
+        seccionCalendario.classList.toggle(
+            "modo-bloqueo",
+            modoBloqueoCalendario
+        );
+    }
+
+    if (botonBloqueoCalendario) {
+        botonBloqueoCalendario.classList.toggle(
+            "activo",
+            modoBloqueoCalendario
+        );
+
+        botonBloqueoCalendario.setAttribute(
+            "aria-pressed",
+            String(modoBloqueoCalendario)
+        );
+
+        botonBloqueoCalendario.textContent =
+            modoBloqueoCalendario
+                ? "× Cancelar bloqueo"
+                : "Bloquear fechas";
+    }
+
+    pintarRangoBloqueoCalendario();
+    actualizarAyudaBloqueoCalendario();
+}
+
+
+if (botonBloqueoCalendario) {
+    botonBloqueoCalendario.addEventListener(
+        "click",
+        () => {
+            cambiarModoBloqueoCalendario(
+                !modoBloqueoCalendario
+            );
+        }
+    );
+}
+
+
+if (seleccionarTodasBloqueo) {
+    seleccionarTodasBloqueo.addEventListener(
+        "change",
+        () => {
+            obtenerCheckboxesBloqueo()
+                .forEach(checkbox => {
+                    checkbox.checked =
+                        seleccionarTodasBloqueo.checked;
+                });
+
+            actualizarSeleccionCabanasBloqueo();
+        }
+    );
+}
+
+
+[cerrarBloqueoCalendario,
+ cancelarBloqueoCalendario]
+    .filter(Boolean)
+    .forEach(boton => {
+        boton.addEventListener(
+            "click",
+            cerrarModalSeleccionBloqueoCalendario
+        );
+    });
+
+
+if (modalBloqueoCalendario) {
+    modalBloqueoCalendario.addEventListener(
+        "click",
+        evento => {
+            if (
+                evento.target ===
+                modalBloqueoCalendario
+            ) {
+                cerrarModalSeleccionBloqueoCalendario();
+            }
+        }
+    );
+}
+
+
+if (confirmarBloqueoCalendario) {
+    confirmarBloqueoCalendario.addEventListener(
+        "click",
+        guardarBloqueoSeleccionadoCalendario
+    );
+}
+
+
+document.addEventListener("keydown", evento => {
+    if (evento.key !== "Escape") return;
+
+    if (
+        modalBloqueoCalendario &&
+        !modalBloqueoCalendario.hidden
+    ) {
+        cerrarModalSeleccionBloqueoCalendario();
+        return;
+    }
+
+    if (modoBloqueoCalendario) {
+        cambiarModoBloqueoCalendario(false);
+    }
+});
+
+
+document
+    .querySelectorAll(".menu-item")
+    .forEach(botonMenu => {
+        botonMenu.addEventListener("click", () => {
+            if (
+                botonMenu.dataset.seccion !== "calendario" &&
+                modoBloqueoCalendario
+            ) {
+                cambiarModoBloqueoCalendario(false);
+            }
+        });
+    });
 
 
 // ========================================
