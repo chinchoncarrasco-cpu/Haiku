@@ -5475,6 +5475,11 @@ tr.cabana-libre .info-cabana {
     color: #b42318;
 }
 
+.ficha-estado.ficha-estado-no-show {
+    background: #eee9e4;
+    color: #694b3b;
+}
+
 
 .ficha-estancia-id {
     text-align: center;
@@ -6245,6 +6250,25 @@ tr.cabana-libre .info-cabana {
     color: #879089;
 
     font-size: 9px;
+}
+
+.resultado-reserva-estado {
+    display: inline-flex;
+    align-items: center;
+
+    margin-top: 4px;
+    padding: 3px 6px;
+
+    border-radius: 999px;
+
+    font-size: 8px;
+    font-style: normal;
+    font-weight: 700;
+}
+
+.resultado-reserva-no-show {
+    color: #694b3b;
+    background: #eee9e4;
 }
 
 
@@ -10358,6 +10382,44 @@ label:nth-of-type(3)::after {
 
     font-size: 7px;
     color: #35a762;
+}
+
+.ficha-estado-menu
+.ficha-estado-opcion-bloqueada {
+    color: #a4aaa6;
+    background: #f7f8f7;
+    cursor: not-allowed;
+}
+
+.ficha-estado-menu
+.ficha-estado-opcion-bloqueada:hover {
+    background: #f7f8f7;
+}
+
+.ficha-estado-menu
+.ficha-estado-opcion-no-show-activa {
+    color: #694b3b;
+    font-weight: 700;
+}
+
+.ficha-estado-menu
+.ficha-estado-opcion-no-show-activa::before {
+    content: "●";
+
+    margin-right: 6px;
+
+    color: #9a6a4f;
+    font-size: 7px;
+}
+
+.ficha-reserva-modal[data-reserva-no-show="true"]
+.ficha-editar-boton {
+    display: none !important;
+}
+
+.ficha-reserva-modal[data-reserva-no-show="true"]
+.ficha-dato-editable {
+    cursor: default;
 }
 
 /* =========================================

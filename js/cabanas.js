@@ -1473,11 +1473,26 @@ function cargarServiciosFichaReserva(reservaId) {
 
 
     // SOLO servicios pertenecientes a esta reserva
-    const serviciosReserva =
+    let serviciosReserva =
         servicios.filter(servicio =>
             String(servicio.reservaId || "") ===
             String(reservaId)
         );
+
+    // Si la reserva ya fue archivada, usamos también
+    // la copia histórica guardada al marcarla.
+    if (serviciosReserva.length === 0) {
+
+        const registroArchivado =
+            buscarReservaArchivadaPorId(reservaId);
+
+        serviciosReserva =
+            Array.isArray(
+                registroArchivado?.serviciosReserva
+            )
+                ? registroArchivado.serviciosReserva
+                : [];
+    }
 
 
     // ====================================
@@ -1706,6 +1721,49 @@ function buscarDatosReservaPorId(reservaId) {
 }
 
 
+function buscarReservaArchivadaPorId(reservaId) {
+
+    if (!reservaId) {
+        return null;
+    }
+
+    const fuentes = [
+        {
+            clave: "haikuReservasNoShow",
+            estado: "no-show"
+        },
+        {
+            clave: "haikuReservasCanceladas",
+            estado: "cancelada"
+        }
+    ];
+
+    for (const fuente of fuentes) {
+
+        const registros =
+            JSON.parse(
+                localStorage.getItem(fuente.clave)
+            ) || [];
+
+        const registro =
+            registros.find(item =>
+                String(item?.reservaId || "") ===
+                String(reservaId)
+            );
+
+        if (registro) {
+            return {
+                ...registro,
+                estadoArchivo:
+                    registro.estado || fuente.estado
+            };
+        }
+    }
+
+    return null;
+}
+
+
 function cargarPagosFichaReserva(reservaId) {
 
     const campoTotal =
@@ -1746,8 +1804,15 @@ function cargarPagosFichaReserva(reservaId) {
     const registroReserva =
         buscarDatosReservaPorId(reservaId);
 
+    const registroArchivado =
+        buscarReservaArchivadaPorId(
+            reservaId
+        );
+
     const cabanaReserva =
-        registroReserva?.cabana || {};
+        registroReserva?.cabana ||
+        registroArchivado?.datosReserva ||
+        {};
 
 
     const totalReserva =
@@ -1890,6 +1955,39 @@ solicitudes.push({
 
         }
     );
+
+    // Si la reserva ya salió de la operación diaria,
+    // recuperamos sus solicitudes desde el archivo histórico.
+    if (solicitudes.length === 0) {
+
+        const archivo =
+            buscarReservaArchivadaPorId(
+                reservaId
+            );
+
+        (archivo?.registrosReserva || [])
+            .forEach(registro => {
+
+                const cabana =
+                    registro.cabana || {};
+
+                const solicitud =
+                    String(
+                        cabana.solicitudAseoExpress || ""
+                    ).trim();
+
+                if (!solicitud) return;
+
+                solicitudes.push({
+                    fecha: registro.fecha || "",
+                    texto: solicitud,
+                    lista:
+                        String(
+                            cabana.estadoFinal || ""
+                        ).trim().toUpperCase() === "LISTA"
+                });
+            });
+    }
 
 
     // Evitar repetir exactamente la misma solicitud
@@ -2072,6 +2170,32 @@ function cargarNotasFichaReserva(reservaId) {
         }
     );
 
+    // Las notas del registro histórico permanecen visibles
+    // aunque la reserva ya no esté en Resumen ni Calendario.
+    if (notasReserva.length === 0) {
+
+        const archivo =
+            buscarReservaArchivadaPorId(
+                reservaId
+            );
+
+        (archivo?.notasReserva || [])
+            .forEach(nota => {
+
+                const texto =
+                    String(
+                        nota?.texto || ""
+                    ).trim();
+
+                if (!texto) return;
+
+                notasReserva.push({
+                    fecha: nota.fecha || "",
+                    texto
+                });
+            });
+    }
+
 
     // Evitar duplicados
     const notasUnicas =
@@ -2169,6 +2293,11 @@ function obtenerReservasParaBusqueda() {
     const canceladas =
     JSON.parse(
         localStorage.getItem("haikuReservasCanceladas")
+    ) || [];
+
+    const noShows =
+    JSON.parse(
+        localStorage.getItem("haikuReservasNoShow")
     ) || [];
 
 
@@ -2310,6 +2439,70 @@ function obtenerReservasParaBusqueda() {
 
 });
 
+    noShows.forEach(noShow => {
+
+        if (!noShow?.reservaId) {
+            return;
+        }
+
+        const reservaId =
+            String(noShow.reservaId);
+
+        const ficha =
+            noShow.datosFicha ||
+            fichas[reservaId] ||
+            {};
+
+        const datosReserva =
+            noShow.datosReserva || {};
+
+        reservas.set(
+            reservaId,
+            {
+                reservaId,
+
+                numeroCabana:
+                    noShow.numeroCabana || "",
+
+                fechaIngreso:
+                    noShow.fechaIngreso || "",
+
+                titular:
+                    noShow.titular ||
+                    datosReserva.titular ||
+                    "Sin titular",
+
+                rut:
+                    ficha.rut ||
+                    datosReserva.rut ||
+                    "",
+
+                telefono:
+                    ficha.telefono ||
+                    datosReserva.telefono ||
+                    "",
+
+                correo:
+                    ficha.correo ||
+                    datosReserva.correo ||
+                    datosReserva.email ||
+                    "",
+
+                acompanantes: [
+                    ficha.acompanante1,
+                    ficha.acompanante2,
+                    ficha.acompanante3,
+                    ficha.acompanante4,
+                    ficha.acompanante5
+                ]
+                .filter(Boolean)
+                .join(" "),
+
+                noShow: true
+            }
+        );
+    });
+
     return Array.from(
         reservas.values()
     );
@@ -2411,6 +2604,11 @@ function buscarReservas(texto) {
             ? "true"
             : "false";
 
+            boton.dataset.noShow =
+            reserva.noShow === true
+            ? "true"
+            : "false";
+
 
             boton.innerHTML = `
                 <strong>
@@ -2422,6 +2620,16 @@ function buscarReservas(texto) {
                     ·
                     ${reserva.reservaId}
                 </span>
+
+                ${
+                    reserva.noShow === true
+                    ? `
+                        <em class="resultado-reserva-estado resultado-reserva-no-show">
+                            ● No-Show
+                        </em>
+                    `
+                    : ""
+                }
 
                 ${
                     reserva.rut ||
@@ -2505,6 +2713,21 @@ if (resultadosBusquedaReservas) {
             const esCancelada =
                 resultado.dataset.cancelada === "true";
 
+            const esNoShow =
+                resultado.dataset.noShow === "true";
+
+            if (esNoShow) {
+
+                abrirFichaReservaNoShow(
+                    reservaId
+                );
+
+                resultadosBusquedaReservas.hidden = true;
+                buscadorReservas.value = "";
+
+                return;
+            }
+
             if (esCancelada) {
 
             abrirFichaReservaCancelada(reservaId);
@@ -2572,6 +2795,196 @@ document.addEventListener("click", (evento) => {
     }
 
 });
+
+function abrirFichaReservaNoShow(reservaId) {
+
+    const noShows =
+        JSON.parse(
+            localStorage.getItem(
+                "haikuReservasNoShow"
+            )
+        ) || [];
+
+    const registro =
+        noShows.find(item =>
+            String(item?.reservaId || "") ===
+            String(reservaId || "")
+        );
+
+    if (!registro || !fichaReservaModal) {
+        console.warn(
+            "No se encontró reserva No-Show:",
+            reservaId
+        );
+        return;
+    }
+
+    const datosReserva =
+        registro.datosReserva || {};
+
+    const fichas =
+        obtenerFichasReservas();
+
+    const ficha =
+        registro.datosFicha ||
+        fichas[reservaId] ||
+        {};
+
+    const numeroCabana =
+        registro.numeroCabana || "";
+
+    const titular =
+        registro.titular ||
+        datosReserva.titular ||
+        "Sin titular";
+
+    const fechaIngreso =
+        registro.fechaIngreso || "";
+
+    const noches =
+        Number(registro.noches) || 0;
+
+    const fechaSalida =
+        calcularSalidaReserva(
+            fechaIngreso,
+            noches
+        );
+
+    const textos = {
+        "ficha-reserva-cabana":
+            `CAB ${numeroCabana}`,
+        "ficha-reserva-titular":
+            titular,
+        "ficha-reserva-id":
+            registro.reservaId || "Sin ID",
+        "ficha-reserva-ingreso":
+            formatearFechaFicha(fechaIngreso),
+        "ficha-reserva-salida":
+            fechaSalida
+                ? formatearFechaFicha(fechaSalida)
+                : "—",
+        "ficha-reserva-noches":
+            noches === 1
+                ? "1 noche"
+                : `${noches} noches`
+    };
+
+    Object.entries(textos)
+        .forEach(([id, valor]) => {
+            const campo =
+                document.getElementById(id);
+
+            if (campo) {
+                campo.textContent = valor;
+            }
+        });
+
+    const campoEstado =
+        document.getElementById(
+            "ficha-reserva-estado"
+        );
+
+    if (campoEstado) {
+        campoEstado.classList.remove(
+            "ficha-estado-hospedado",
+            "ficha-estado-checkout",
+            "ficha-estado-pendiente",
+            "ficha-estado-confirmada",
+            "ficha-estado-confirmacion-pendiente",
+            "ficha-estado-cancelada",
+            "ficha-estado-no-show"
+        );
+
+        campoEstado.classList.add(
+            "ficha-estado-no-show"
+        );
+
+        campoEstado.textContent =
+            "● No-Show";
+    }
+
+    fichaReservaModal.dataset.reservaId =
+        registro.reservaId || "";
+
+    fichaReservaModal.dataset.numeroCabana =
+        numeroCabana;
+
+    fichaReservaModal.dataset.reservaCancelada =
+        "false";
+
+    fichaReservaModal.dataset.reservaNoShow =
+        "true";
+
+    if (fichaReservaEditar) {
+        fichaReservaEditar.hidden = true;
+    }
+
+    if (botonDesplegarEstadoFicha) {
+        botonDesplegarEstadoFicha.hidden = true;
+    }
+
+    fichaReservaModal
+        .querySelectorAll(
+            ".ficha-dato-editable"
+        )
+        .forEach(campo => {
+            campo.readOnly = true;
+            campo.tabIndex = -1;
+        });
+
+    actualizarOcupacionFicha(
+        datosReserva,
+        false
+    );
+
+    const huespedTitular =
+        document.getElementById(
+            "ficha-huesped-titular"
+        );
+
+    if (huespedTitular) {
+        huespedTitular.textContent =
+            titular;
+    }
+
+    for (let i = 1; i <= 5; i++) {
+        const campo =
+            document.getElementById(
+                `ficha-acompanante-${i}`
+            );
+
+        if (campo) {
+            campo.value =
+                ficha[`acompanante${i}`] || "";
+        }
+    }
+
+    const campoRut =
+        document.getElementById(
+            "ficha-reserva-rut"
+        );
+
+    const campoTelefono =
+        document.getElementById(
+            "ficha-reserva-telefono"
+        );
+
+    if (campoRut) {
+        campoRut.value = ficha.rut || "";
+    }
+
+    if (campoTelefono) {
+        campoTelefono.value =
+            ficha.telefono || "";
+    }
+
+    cargarServiciosFichaReserva(reservaId);
+    cargarPagosFichaReserva(reservaId);
+    cargarSolicitudesFichaReserva(reservaId);
+    cargarNotasFichaReserva(reservaId);
+
+    fichaReservaModal.hidden = false;
+}
 
 function abrirFichaReservaCancelada(reservaId) {
 
@@ -2706,7 +3119,8 @@ if (campoEstado) {
     "ficha-estado-pendiente",
     "ficha-estado-confirmada",
     "ficha-estado-confirmacion-pendiente",
-    "ficha-estado-cancelada"
+    "ficha-estado-cancelada",
+    "ficha-estado-no-show"
 );
 
 campoEstado.classList.add(
@@ -2725,8 +3139,16 @@ fichaReservaModal.dataset.numeroCabana =
 fichaReservaModal.dataset.reservaCancelada =
     "true";
 
+fichaReservaModal.dataset.reservaNoShow =
+    "false";
+
 if (fichaReservaEditar) {
     fichaReservaEditar.hidden =
+        true;
+}
+
+if (botonDesplegarEstadoFicha) {
+    botonDesplegarEstadoFicha.hidden =
         true;
 }
 
@@ -3119,6 +3541,22 @@ document
     fichaReservaModal.dataset.reservaCancelada =
     "false";
 
+    fichaReservaModal.dataset.reservaNoShow =
+    "false";
+
+    if (botonDesplegarEstadoFicha) {
+        botonDesplegarEstadoFicha.hidden = false;
+    }
+
+    fichaReservaModal
+        .querySelectorAll(
+            ".ficha-dato-editable"
+        )
+        .forEach(campo => {
+            campo.readOnly = false;
+            campo.removeAttribute("tabindex");
+        });
+
 
 if (fichaReservaEditar) {
     fichaReservaEditar.hidden =
@@ -3355,7 +3793,9 @@ if (campoEstado) {
     "ficha-estado-checkout",
     "ficha-estado-pendiente",
     "ficha-estado-confirmada",
-    "ficha-estado-confirmacion-pendiente"
+    "ficha-estado-confirmacion-pendiente",
+    "ficha-estado-cancelada",
+    "ficha-estado-no-show"
 );
 
     if (tieneCheckout) {
@@ -3623,6 +4063,288 @@ function guardarReservaCancelada(reservaId) {
     );
 }
 
+
+function obtenerRespaldoCompletoReserva(
+    reservaId
+) {
+    const registrosReserva = [];
+    const notasReserva = [];
+
+    Object.entries(datosPorFecha)
+        .forEach(([fecha, datosDia]) => {
+
+            if (!datosDia?.cabanas) return;
+
+            Object.entries(datosDia.cabanas)
+                .forEach(
+                    ([numeroCabana, cabana]) => {
+
+                        if (
+                            String(cabana?.reservaId || "") !==
+                            String(reservaId)
+                        ) {
+                            return;
+                        }
+
+                        registrosReserva.push({
+                            fecha,
+                            numeroCabana,
+                            cabana:
+                                JSON.parse(
+                                    JSON.stringify(cabana)
+                                )
+                        });
+
+                        (datosDia.notasOperativas || [])
+                            .forEach(nota => {
+
+                                if (
+                                    String(nota?.cabana || "") !==
+                                    String(numeroCabana)
+                                ) {
+                                    return;
+                                }
+
+                                const texto =
+                                    String(
+                                        nota.texto ||
+                                        nota.nota ||
+                                        ""
+                                    ).trim();
+
+                                if (!texto) return;
+
+                                notasReserva.push({
+                                    fecha,
+                                    texto
+                                });
+                            });
+                    }
+                );
+        });
+
+    const fichas =
+        obtenerFichasReservas();
+
+    const servicios =
+        JSON.parse(
+            localStorage.getItem("haikuServicios")
+        ) || [];
+
+    return {
+        registrosReserva,
+        notasReserva,
+        datosFicha:
+            JSON.parse(
+                JSON.stringify(
+                    fichas[reservaId] || {}
+                )
+            ),
+        serviciosReserva:
+            servicios
+                .filter(servicio =>
+                    String(servicio?.reservaId || "") ===
+                    String(reservaId)
+                )
+                .map(servicio =>
+                    JSON.parse(
+                        JSON.stringify(servicio)
+                    )
+                )
+    };
+}
+
+
+function validarNoShowReserva(reservaId) {
+
+    const registro =
+        buscarDatosReservaPorId(reservaId);
+
+    if (!registro?.cabana) {
+        return {
+            permitido: false,
+            mensaje:
+                "No se encontraron los datos activos de esta reserva."
+        };
+    }
+
+    const cabanaOrigen =
+        registro.cabana;
+
+    const fechaIngreso =
+        cabanaOrigen.fechaOrigenReserva ||
+        registro.fecha ||
+        "";
+
+    const partes =
+        fechaIngreso
+            .split("-")
+            .map(Number);
+
+    if (
+        partes.length !== 3 ||
+        partes.some(numero => !numero)
+    ) {
+        return {
+            permitido: false,
+            mensaje:
+                "La reserva no tiene una fecha de ingreso válida."
+        };
+    }
+
+    const [anio, mes, dia] = partes;
+
+    // Se habilita al terminar completamente
+    // el día agendado para el ingreso.
+    const habilitadoDesde =
+        new Date(
+            anio,
+            mes - 1,
+            dia + 1,
+            0,
+            0,
+            0,
+            0
+        );
+
+    if (new Date() < habilitadoDesde) {
+        const fechaDisponible =
+            habilitadoDesde.toLocaleDateString(
+                "es-CL"
+            );
+
+        return {
+            permitido: false,
+            mensaje:
+                "La reserva debe respetarse durante todo " +
+                "el día de ingreso. No-Show estará disponible " +
+                `desde las 00:00 del ${fechaDisponible}.`,
+            habilitadoDesde
+        };
+    }
+
+    let tieneCheckin = false;
+    let tieneCheckout = false;
+
+    Object.values(datosPorFecha)
+        .forEach(datosDia => {
+            Object.values(
+                datosDia?.cabanas || {}
+            ).forEach(cabana => {
+
+                if (
+                    String(cabana?.reservaId || "") !==
+                    String(reservaId)
+                ) {
+                    return;
+                }
+
+                if (
+                    cabana.checkinRealizado === true ||
+                    cabana.checkinManual === true
+                ) {
+                    tieneCheckin = true;
+                }
+
+                if (cabana.checkout === true) {
+                    tieneCheckout = true;
+                }
+            });
+        });
+
+    const ficha =
+        obtenerFichasReservas()[reservaId] || {};
+
+    if (ficha.checkoutRealizado === true) {
+        tieneCheckout = true;
+    }
+
+    if (tieneCheckin || tieneCheckout) {
+        return {
+            permitido: false,
+            mensaje:
+                tieneCheckout
+                    ? "Una reserva con Checked Out no puede marcarse como No-Show."
+                    : "Una reserva hospedada no puede marcarse como No-Show."
+        };
+    }
+
+    return {
+        permitido: true,
+        registro,
+        fechaIngreso,
+        habilitadoDesde
+    };
+}
+
+
+function guardarReservaNoShow(reservaId) {
+
+    const validacion =
+        validarNoShowReserva(reservaId);
+
+    if (!validacion.permitido) {
+        return false;
+    }
+
+    const registroReserva =
+        validacion.registro;
+
+    const cabana =
+        registroReserva.cabana || {};
+
+    const respaldo =
+        obtenerRespaldoCompletoReserva(
+            reservaId
+        );
+
+    const noShows =
+        JSON.parse(
+            localStorage.getItem(
+                "haikuReservasNoShow"
+            )
+        ) || [];
+
+    const registroNoShow = {
+        reservaId,
+        numeroCabana:
+            registroReserva.numeroCabana || "",
+        fechaIngreso:
+            validacion.fechaIngreso,
+        noches:
+            Number(cabana.noches) || 0,
+        titular:
+            cabana.titular || "",
+        totalReserva:
+            Number(cabana.totalReserva) || 0,
+        abono:
+            Number(cabana.abono) || 0,
+        fechaNoShow:
+            new Date().toISOString(),
+        estado: "no-show",
+        datosReserva:
+            JSON.parse(
+                JSON.stringify(cabana)
+            ),
+        ...respaldo
+    };
+
+    const sinDuplicado =
+        noShows.filter(item =>
+            String(item?.reservaId || "") !==
+            String(reservaId)
+        );
+
+    sinDuplicado.push(registroNoShow);
+
+    localStorage.setItem(
+        "haikuReservasNoShow",
+        JSON.stringify(sinDuplicado)
+    );
+
+    return true;
+}
+
 function liberarReservaCancelada(reservaId) {
 
     if (!reservaId) {
@@ -3709,6 +4431,110 @@ function cancelarReservaDesdeFicha() {
         reservaId
     );
 
+
+    return true;
+}
+
+
+function marcarReservaComoNoShowDesdeFicha() {
+
+    const reservaId =
+        fichaReservaModal
+            ?.dataset.reservaId;
+
+    if (!reservaId) {
+        return false;
+    }
+
+    const validacion =
+        validarNoShowReserva(reservaId);
+
+    if (!validacion.permitido) {
+        alert(validacion.mensaje);
+        return false;
+    }
+
+    const confirmarNoShow =
+        confirm(
+            "¿Seguro que deseas marcar esta reserva como No-Show?\n\n" +
+            "Se retirará del Resumen y del Calendario, " +
+            "pero toda su información quedará guardada " +
+            "en el buscador de reservas."
+        );
+
+    if (!confirmarNoShow) {
+        return false;
+    }
+
+    const guardada =
+        guardarReservaNoShow(
+            reservaId
+        );
+
+    if (!guardada) {
+        alert(
+            "No fue posible guardar el registro No-Show. " +
+            "La reserva no fue modificada."
+        );
+        return false;
+    }
+
+    liberarReservaCancelada(
+        reservaId
+    );
+
+    fichaReservaModal.hidden = true;
+
+    if (
+        typeof cargarCabanasDia === "function"
+    ) {
+        cargarCabanasDia(
+            fechaSeleccionada
+        );
+    }
+
+    if (
+        typeof generarCalendario === "function"
+    ) {
+        generarCalendario();
+    }
+
+    if (
+        typeof actualizarResumenDia === "function"
+    ) {
+        actualizarResumenDia(
+            fechaSeleccionada
+        );
+    }
+
+    if (
+        typeof actualizarTarjetasRevision === "function"
+    ) {
+        actualizarTarjetasRevision(
+            fechaSeleccionada
+        );
+    }
+
+    if (
+        typeof actualizarResumenAseo === "function"
+    ) {
+        actualizarResumenAseo(
+            fechaSeleccionada
+        );
+    }
+
+    if (
+        typeof generarResumenOperativo === "function"
+    ) {
+        generarResumenOperativo(
+            fechaSeleccionada
+        );
+    }
+
+    console.log(
+        "RESERVA NO-SHOW GUARDADA:",
+        reservaId
+    );
 
     return true;
 }
@@ -4946,6 +5772,59 @@ const menuEstadoFicha =
         "ficha-estado-menu"
     );
 
+const opcionNoShowFicha =
+    menuEstadoFicha
+        ?.querySelector(
+            '[data-ficha-estado-opcion="no-show"]'
+        );
+
+
+function actualizarDisponibilidadNoShowFicha() {
+
+    if (!opcionNoShowFicha) return;
+
+    const reservaId =
+        fichaReservaModal
+            ?.dataset.reservaId;
+
+    const esRegistroHistorico =
+        fichaReservaModal
+            ?.dataset.reservaCancelada === "true" ||
+        fichaReservaModal
+            ?.dataset.reservaNoShow === "true";
+
+    const validacion =
+        !reservaId || esRegistroHistorico
+            ? {
+                permitido: false,
+                mensaje:
+                    "Este registro ya no pertenece a una reserva activa."
+            }
+            : validarNoShowReserva(
+                reservaId
+            );
+
+    opcionNoShowFicha.classList.toggle(
+        "ficha-estado-opcion-bloqueada",
+        !validacion.permitido
+    );
+
+    opcionNoShowFicha.classList.toggle(
+        "ficha-estado-opcion-no-show-activa",
+        validacion.permitido
+    );
+
+    opcionNoShowFicha.setAttribute(
+        "aria-disabled",
+        String(!validacion.permitido)
+    );
+
+    opcionNoShowFicha.title =
+        validacion.permitido
+            ? "Marcar como No-Show"
+            : validacion.mensaje;
+}
+
 
 function cerrarMenuEstadoFicha() {
 
@@ -4976,6 +5855,8 @@ if (
         evento => {
 
             evento.stopPropagation();
+
+            actualizarDisponibilidadNoShowFicha();
 
             const abrir =
                 menuEstadoFicha.hidden;
@@ -5130,6 +6011,18 @@ if (menuEstadoFicha) {
 
             if (
                 estadoElegido ===
+                "no-show"
+            ) {
+
+                cerrarMenuEstadoFicha();
+
+                marcarReservaComoNoShowDesdeFicha();
+
+                return;
+            }
+
+            if (
+                estadoElegido ===
                 "cancelada"
             ) {
 
@@ -5195,7 +6088,8 @@ if (menuEstadoFicha) {
                     "ficha-estado-pendiente",
                     "ficha-estado-confirmada",
                     "ficha-estado-confirmacion-pendiente",
-                    "ficha-estado-cancelada"
+                    "ficha-estado-cancelada",
+                    "ficha-estado-no-show"
                 );
 
 
