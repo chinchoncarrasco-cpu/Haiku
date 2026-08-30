@@ -253,6 +253,38 @@ function generarIdServicio() {
 
 }
 
+function registrarHistorialServicio(
+    servicio,
+    accion,
+    detalle = "",
+    cambios = []
+) {
+    if (
+        !servicio ||
+        typeof registrarActividadHaiku !==
+            "function"
+    ) {
+        return;
+    }
+
+    registrarActividadHaiku({
+        tipo: "servicio",
+        accion,
+        reservaId:
+            servicio.reservaId || "",
+        numeroCabana:
+            servicio.numeroCabana || "",
+        titular:
+            servicio.titular || "",
+        fechaOperacion:
+            servicio.fechaServicio ||
+            servicio.fecha ||
+            "",
+        detalle,
+        cambios
+    });
+}
+
 // =========================================
 // REGISTRAR NUEVO SERVICIO
 // =========================================
@@ -357,6 +389,17 @@ if (
     serviciosRegistrados.push(nuevoServicio);
 
     guardarServicios();
+    registrarHistorialServicio(
+        nuevoServicio,
+        "Servicio agregado",
+        `${nuevoServicio.nombre} · Cantidad ${nuevoServicio.cantidad} · Total $${Number(
+            nuevoServicio.total || 0
+        ).toLocaleString("es-CL")}${
+            nuevoServicio.hora
+                ? ` · ${nuevoServicio.hora}`
+                : ""
+        }`
+    );
 renderizarAgendaServicios();
 
 if (typeof cargarCobrosCheckout === "function") {
@@ -582,6 +625,18 @@ function marcarServicioRealizado(idServicio) {
     servicio.estadoServicio = "realizado";
 
     guardarServicios();
+    registrarHistorialServicio(
+        servicio,
+        "Servicio realizado",
+        servicio.nombre,
+        [
+            {
+                campo: "Estado del servicio",
+                anterior: "Pendiente",
+                nuevo: "Realizado"
+            }
+        ]
+    );
     renderizarAgendaServicios();
 
     console.log("SERVICIO REALIZADO:", servicio);
@@ -605,6 +660,18 @@ function deshacerServicioRealizado(idServicio) {
     servicio.estadoServicio = "pendiente";
 
     guardarServicios();
+    registrarHistorialServicio(
+        servicio,
+        "Servicio devuelto a pendiente",
+        servicio.nombre,
+        [
+            {
+                campo: "Estado del servicio",
+                anterior: "Realizado",
+                nuevo: "Pendiente"
+            }
+        ]
+    );
     renderizarAgendaServicios();
 
     console.log("SERVICIO REALIZADO DESHECHO:", servicio);
@@ -628,6 +695,18 @@ function marcarServicioPagado(idServicio) {
     servicio.estadoPago = "pagado";
 
     guardarServicios();
+    registrarHistorialServicio(
+        servicio,
+        "Pago de servicio registrado",
+        servicio.nombre,
+        [
+            {
+                campo: "Estado de pago",
+                anterior: "Pendiente",
+                nuevo: "Pagado"
+            }
+        ]
+    );
     renderizarAgendaServicios();
 
     if (typeof cargarCobrosCheckout === "function") {
@@ -655,6 +734,18 @@ function deshacerServicioPagado(idServicio) {
     servicio.estadoPago = "pendiente";
 
     guardarServicios();
+    registrarHistorialServicio(
+        servicio,
+        "Pago de servicio deshecho",
+        servicio.nombre,
+        [
+            {
+                campo: "Estado de pago",
+                anterior: "Pagado",
+                nuevo: "Pendiente"
+            }
+        ]
+    );
     renderizarAgendaServicios();
 
     if (typeof cargarCobrosCheckout === "function") {
@@ -690,6 +781,13 @@ function eliminarServicio(idServicio) {
     );
 
     guardarServicios();
+    registrarHistorialServicio(
+        servicio,
+        "Servicio eliminado",
+        `${servicio.nombre} · Total $${Number(
+            servicio.total || 0
+        ).toLocaleString("es-CL")}`
+    );
     renderizarAgendaServicios();
 
     if (typeof cargarCobrosCheckout === "function") {

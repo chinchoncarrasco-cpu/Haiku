@@ -33,6 +33,9 @@ function guardarCampoCabana(elemento) {
         datos.cabanas[numeroCabana] = {};
     }
 
+    const valorAnterior =
+        datos.cabanas[numeroCabana][campo];
+
 
     // Checkbox usa true / false
     // Los demás usan su valor normal
@@ -49,6 +52,8 @@ datos.cabanas[numeroCabana][campo] = valor;
 if (campo === "checkinRealizado") {
     datos.cabanas[numeroCabana].checkinManual = valor;
 }
+
+let reservaIdCheckoutHistorial = "";
 
 // Recordar el CHECK-OUT en la reserva que SALE este día
 if (campo === "checkout") {
@@ -80,6 +85,9 @@ Object.entries(datosPorFecha).forEach(([fechaDia, dia]) => {
 });
 
     if (reservaIdCheckout) {
+
+        reservaIdCheckoutHistorial =
+            reservaIdCheckout;
 
         const fichas = obtenerFichasReservas();
 
@@ -171,6 +179,70 @@ if (campo === "estadoFinal") {
 }
 
 guardarDatos();
+
+if (
+    typeof registrarActividadHaiku === "function" &&
+    ["estado", "checkinRealizado", "checkout"]
+        .includes(campo) &&
+    String(valorAnterior) !== String(valor)
+) {
+    const cabanaHistorial =
+        datos.cabanas[numeroCabana];
+
+    const reservaIdHistorial =
+        campo === "checkout"
+            ? reservaIdCheckoutHistorial
+            : cabanaHistorial.reservaId || "";
+
+    const registroReservaHistorial =
+        reservaIdHistorial &&
+        typeof buscarDatosReservaPorId ===
+            "function"
+            ? buscarDatosReservaPorId(
+                reservaIdHistorial
+            )
+            : null;
+
+    const acciones = {
+        estado: "Estado operativo modificado",
+        checkinRealizado:
+            valor
+                ? "Check-in registrado"
+                : "Check-in anulado",
+        checkout:
+            valor
+                ? "Checked Out registrado"
+                : "Checked Out anulado"
+    };
+
+    registrarActividadHaiku({
+        tipo:
+            campo === "estado"
+                ? "cabana"
+                : "estado",
+        accion: acciones[campo],
+        reservaId: reservaIdHistorial,
+        numeroCabana,
+        titular:
+            registroReservaHistorial?.cabana
+                ?.titular ||
+            cabanaHistorial.titular ||
+            "",
+        fechaOperacion: fechaSeleccionada,
+        cambios: [
+            {
+                campo:
+                    campo === "estado"
+                        ? "Estado"
+                        : campo === "checkout"
+                            ? "Checked Out"
+                            : "Check-in",
+                anterior: valorAnterior,
+                nuevo: valor
+            }
+        ]
+    });
+}
 
 if (typeof generarCalendario === "function") {
     generarCalendario();
@@ -4303,7 +4375,9 @@ function guardarFichasReservas(fichas) {
 }
 
 
-function guardarDatosEditablesFicha() {
+function guardarDatosEditablesFicha(
+    campoModificado = null
+) {
 
     if (!fichaReservaModal) return;
 
@@ -4324,6 +4398,40 @@ function guardarDatosEditablesFicha() {
 
     const ficha =
         fichas[reservaId];
+
+    let nombreCampoHistorial = "";
+    let claveCampoHistorial = "";
+
+    if (
+        campoModificado?.id?.startsWith(
+            "ficha-acompanante-"
+        )
+    ) {
+        const numero =
+            campoModificado.id.split("-").pop();
+
+        claveCampoHistorial =
+            `acompanante${numero}`;
+        nombreCampoHistorial =
+            `Acompañante ${numero}`;
+    } else if (
+        campoModificado?.id ===
+        "ficha-reserva-rut"
+    ) {
+        claveCampoHistorial = "rut";
+        nombreCampoHistorial = "RUT";
+    } else if (
+        campoModificado?.id ===
+        "ficha-reserva-telefono"
+    ) {
+        claveCampoHistorial = "telefono";
+        nombreCampoHistorial = "Teléfono";
+    }
+
+    const valorAnteriorHistorial =
+        claveCampoHistorial
+            ? ficha[claveCampoHistorial] || ""
+            : "";
 
 
     for (let i = 1; i <= 5; i++) {
@@ -4364,6 +4472,32 @@ function guardarDatosEditablesFicha() {
 
     guardarFichasReservas(fichas);
 
+    if (
+        nombreCampoHistorial &&
+        typeof registrarActividadHaiku ===
+            "function"
+    ) {
+        registrarActividadHaiku({
+            tipo: "reserva",
+            accion: "Datos del huésped actualizados",
+            reservaId,
+            numeroCabana:
+                fichaReservaModal.dataset.numeroCabana ||
+                "",
+            titular:
+                document.getElementById(
+                    "ficha-reserva-titular"
+                )?.textContent.trim() || "",
+            cambios: [
+                {
+                    campo: nombreCampoHistorial,
+                    anterior: valorAnteriorHistorial,
+                    nuevo: campoModificado?.value || ""
+                }
+            ]
+        });
+    }
+
 }
 
 document.addEventListener("change", (evento) => {
@@ -4376,7 +4510,9 @@ document.addEventListener("change", (evento) => {
         return;
     }
 
-    guardarDatosEditablesFicha();
+    guardarDatosEditablesFicha(
+        evento.target
+    );
 
 });
 
@@ -4803,6 +4939,9 @@ function cancelarReservaDesdeFicha() {
         return false;
     }
 
+    const registroHistorial =
+        buscarDatosReservaPorId(reservaId);
+
 
     const confirmarCancelacion =
         confirm(
@@ -4819,6 +4958,35 @@ function cancelarReservaDesdeFicha() {
     guardarReservaCancelada(
         reservaId
     );
+
+    if (
+        typeof registrarActividadHaiku ===
+        "function"
+    ) {
+        registrarActividadHaiku({
+            tipo: "estado",
+            accion: "Reserva cancelada",
+            reservaId,
+            numeroCabana:
+                registroHistorial?.numeroCabana || "",
+            titular:
+                registroHistorial?.cabana?.titular || "",
+            fechaOperacion:
+                registroHistorial?.cabana
+                    ?.fechaOrigenReserva ||
+                registroHistorial?.fecha ||
+                "",
+            detalle:
+                "La reserva fue retirada del Resumen y del Calendario, conservando su registro histórico.",
+            cambios: [
+                {
+                    campo: "Estado",
+                    anterior: "Activa",
+                    nuevo: "Cancelada"
+                }
+            ]
+        });
+    }
 
     liberarReservaCancelada(
         reservaId
@@ -4893,6 +5061,31 @@ function marcarReservaComoNoShowDesdeFicha() {
             "La reserva no fue modificada."
         );
         return false;
+    }
+
+    if (
+        typeof registrarActividadHaiku ===
+        "function"
+    ) {
+        registrarActividadHaiku({
+            tipo: "estado",
+            accion: "Reserva marcada No-Show",
+            reservaId,
+            numeroCabana:
+                validacion.registro?.numeroCabana || "",
+            titular:
+                validacion.registro?.cabana?.titular || "",
+            fechaOperacion: validacion.fechaIngreso || "",
+            detalle:
+                "El huésped no se presentó. La reserva fue retirada de la operación activa y quedó archivada.",
+            cambios: [
+                {
+                    campo: "Estado",
+                    anterior: "Activa",
+                    nuevo: "No-Show"
+                }
+            ]
+        });
     }
 
     liberarReservaCancelada(
@@ -5577,11 +5770,33 @@ document.querySelectorAll(".aseo-solicita-eliminar").forEach(boton => {
             return;
         }
 
+        const cabana =
+            datos.cabanas[numeroCabana];
+
+        const solicitudEliminada =
+            cabana.solicitudAseoExpress || "";
+
         // Borrar solicitud
-        datos.cabanas[numeroCabana].solicitudAseoExpress = "";
+        cabana.solicitudAseoExpress = "";
 
         // Guardar cambio
         guardarDatos();
+
+        if (
+            solicitudEliminada &&
+            typeof registrarActividadHaiku ===
+                "function"
+        ) {
+            registrarActividadHaiku({
+                tipo: "solicitud",
+                accion: "Solicitud eliminada",
+                reservaId: cabana.reservaId || "",
+                numeroCabana,
+                titular: cabana.titular || "",
+                fechaOperacion: fecha,
+                detalle: solicitudEliminada
+            });
+        }
 
         // Actualizar las tarjetas inmediatamente
         actualizarResumenAseo(fecha);
@@ -5999,6 +6214,24 @@ if (
         datos.cabanas[numeroCabana].solicitudAseoExpress = solicitud;
 
         guardarDatos();
+
+        if (
+            typeof registrarActividadHaiku ===
+            "function"
+        ) {
+            const cabana =
+                datos.cabanas[numeroCabana];
+
+            registrarActividadHaiku({
+                tipo: "solicitud",
+                accion: "Solicitud agregada",
+                reservaId: cabana.reservaId || "",
+                numeroCabana,
+                titular: cabana.titular || "",
+                fechaOperacion: fechaSeleccionada,
+                detalle: solicitud
+            });
+        }
 
         // Limpiar campo
         textoSolicita.value = "";
@@ -6488,6 +6721,36 @@ if (menuEstadoFicha) {
 
             if (!actualizado) {
                 return;
+            }
+
+            if (
+                typeof registrarActividadHaiku ===
+                "function"
+            ) {
+                const registroHistorial =
+                    buscarDatosReservaPorId(reservaId);
+
+                registrarActividadHaiku({
+                    tipo: "estado",
+                    accion: "Reserva marcada Hospedado",
+                    reservaId,
+                    numeroCabana,
+                    titular:
+                        registroHistorial?.cabana?.titular ||
+                        "",
+                    fechaOperacion:
+                        registroHistorial?.cabana
+                            ?.fechaOrigenReserva ||
+                        registroHistorial?.fecha ||
+                        "",
+                    cambios: [
+                        {
+                            campo: "Estado",
+                            anterior: "Activa",
+                            nuevo: "Hospedado"
+                        }
+                    ]
+                });
             }
 
 
@@ -6989,6 +7252,26 @@ document.addEventListener(
             fichas
         );
 
+        if (
+            typeof registrarActividadHaiku ===
+            "function"
+        ) {
+            registrarActividadHaiku({
+                tipo: "reserva",
+                accion: "Titular de reserva modificado",
+                reservaId,
+                numeroCabana,
+                titular: nombreFinal,
+                cambios: [
+                    {
+                        campo: "Titular",
+                        anterior: nombreActual,
+                        nuevo: nombreFinal
+                    }
+                ]
+            });
+        }
+
 
         const titularFicha =
             document.getElementById(
@@ -7267,6 +7550,9 @@ document.addEventListener(
         const nochesActuales =
             Number(cabana.noches) || 1;
 
+        const totalAnterior =
+            Number(cabana.totalReserva || 0);
+
 
         const respuesta =
             prompt(
@@ -7459,6 +7745,32 @@ document.addEventListener(
         guardarFichasReservas(
             fichas
         );
+
+        if (
+            typeof registrarActividadHaiku ===
+            "function"
+        ) {
+            registrarActividadHaiku({
+                tipo: "reserva",
+                accion: "Cantidad de noches modificada",
+                reservaId,
+                numeroCabana,
+                titular: cabana.titular || "",
+                fechaOperacion: fechaIngreso,
+                cambios: [
+                    {
+                        campo: "Noches",
+                        anterior: nochesActuales,
+                        nuevo: nuevasNoches
+                    },
+                    {
+                        campo: "Total reserva",
+                        anterior: totalAnterior,
+                        nuevo: nuevoTotal
+                    }
+                ]
+            });
+        }
 
 
         const nuevaSalida =

@@ -11064,3 +11064,480 @@ body.bloqueo-modal-abierto {
         flex: 1;
     }
 }
+/* =========================================
+   HISTORIAL GENERAL Y DE RESERVA
+========================================= */
+
+.historial-cabecera {
+    align-items: flex-start;
+    gap: 12px;
+}
+
+.historial-usuario-activo {
+    flex: 0 0 auto;
+
+    padding: 7px 10px;
+
+    color: #246344;
+    background: #eaf4ee;
+    border: 1px solid #cfe1d6;
+    border-radius: 999px;
+
+    font-size: 9px;
+    font-weight: 800;
+    letter-spacing: 0.25px;
+}
+
+.historial-panel {
+    padding: 14px;
+}
+
+.historial-filtros {
+    display: grid;
+    grid-template-columns: minmax(180px, 1.7fr) repeat(3, minmax(105px, 0.75fr)) auto;
+    align-items: end;
+    gap: 8px;
+
+    margin-bottom: 14px;
+    padding: 12px;
+
+    background: #f5f7f6;
+    border: 1px solid #dfe4e1;
+    border-radius: 12px;
+}
+
+.historial-filtros label {
+    display: grid;
+    gap: 5px;
+    min-width: 0;
+
+    color: #677069;
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+}
+
+.historial-filtros input,
+.historial-filtros select {
+    width: 100%;
+    min-width: 0;
+    height: 36px;
+
+    padding: 0 10px;
+
+    color: #27312b;
+    background: #ffffff;
+    border: 1px solid #d5dcd7;
+    border-radius: 9px;
+    outline: none;
+
+    font-family: inherit;
+    font-size: 10px;
+    text-transform: none;
+}
+
+.historial-filtros input:focus,
+.historial-filtros select:focus {
+    border-color: #6d9d82;
+    box-shadow: 0 0 0 3px rgba(47, 118, 83, 0.08);
+}
+
+.historial-limpiar-filtros {
+    height: 36px;
+    padding: 0 12px;
+
+    color: #536058;
+    background: #ffffff;
+    border: 1px solid #d5dcd7;
+    border-radius: 9px;
+
+    font-family: inherit;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+.historial-listado-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+
+    margin-bottom: 9px;
+}
+
+.historial-listado-cabecera h3 {
+    margin: 0 0 2px;
+
+    color: #253029;
+    font-size: 13px;
+}
+
+.historial-listado-cabecera p {
+    margin: 0;
+
+    color: #7d857f;
+    font-size: 9px;
+}
+
+.historial-listado-cabecera > strong {
+    flex: 0 0 auto;
+
+    padding: 5px 8px;
+
+    color: #276246;
+    background: #edf5f0;
+    border-radius: 999px;
+
+    font-size: 9px;
+}
+
+.historial-lista {
+    display: grid;
+    gap: 7px;
+}
+
+.historial-registro {
+    overflow: hidden;
+
+    background: #ffffff;
+    border: 1px solid #dde2df;
+    border-radius: 11px;
+}
+
+.historial-registro-resumen {
+    display: grid;
+    grid-template-columns: 5px minmax(0, 1fr) 22px;
+    align-items: stretch;
+    gap: 9px;
+
+    width: 100%;
+    padding: 0;
+
+    color: inherit;
+    background: transparent;
+    border: 0;
+
+    font-family: inherit;
+    text-align: left;
+}
+
+.historial-registro-resumen:hover {
+    background: #fafcfb;
+}
+
+.historial-registro-marca {
+    min-height: 68px;
+    background: #83958a;
+}
+
+.historial-tipo-reserva .historial-registro-marca {
+    background: #2f7653;
+}
+
+.historial-tipo-estado .historial-registro-marca {
+    background: #6d8290;
+}
+
+.historial-tipo-pago .historial-registro-marca {
+    background: #d69928;
+}
+
+.historial-tipo-servicio .historial-registro-marca {
+    background: #7e6b9b;
+}
+
+.historial-tipo-bloqueo .historial-registro-marca {
+    background: #b55b4c;
+}
+
+.historial-tipo-nota .historial-registro-marca,
+.historial-tipo-solicitud .historial-registro-marca {
+    background: #9b8251;
+}
+
+.historial-registro-contenido {
+    display: grid;
+    gap: 3px;
+    min-width: 0;
+    padding: 9px 0;
+}
+
+.historial-registro-encabezado {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    min-width: 0;
+}
+
+.historial-registro-accion {
+    overflow: hidden;
+
+    color: #263029;
+    font-size: 11px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.historial-registro-tipo {
+    flex: 0 0 auto;
+
+    padding: 3px 6px;
+
+    color: #667169;
+    background: #f0f3f1;
+    border-radius: 999px;
+
+    font-size: 7px;
+    font-style: normal;
+    font-weight: 800;
+    letter-spacing: 0.35px;
+    text-transform: uppercase;
+}
+
+.historial-registro-meta {
+    overflow: hidden;
+
+    color: #515c54;
+    font-size: 9px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.historial-registro-pie {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px 9px;
+
+    color: #929993;
+    font-size: 8px;
+}
+
+.historial-registro-indicador {
+    align-self: center;
+
+    color: #728078;
+    font-size: 15px;
+    font-weight: 400;
+    text-align: center;
+}
+
+.historial-registro-detalle {
+    padding: 10px 13px 12px 18px;
+
+    background: #f8faf9;
+    border-top: 1px solid #e5e9e7;
+}
+
+.historial-registro-descripcion,
+.historial-registro-fecha-operacion {
+    margin: 0;
+
+    color: #566159;
+    font-size: 9px;
+    line-height: 1.45;
+}
+
+.historial-registro-fecha-operacion {
+    margin-top: 4px;
+    color: #7c867f;
+}
+
+.historial-registro-cambios {
+    display: grid;
+    gap: 5px;
+    margin-top: 8px;
+}
+
+.historial-cambio {
+    display: grid;
+    grid-template-columns: minmax(90px, 0.55fr) minmax(0, 1fr);
+    gap: 9px;
+
+    padding: 6px 8px;
+
+    background: #ffffff;
+    border: 1px solid #e0e5e2;
+    border-radius: 7px;
+
+    color: #59645c;
+    font-size: 8px;
+}
+
+.historial-cambio strong {
+    color: #344039;
+}
+
+.historial-vacio {
+    margin: 0;
+    padding: 28px 15px;
+
+    color: #7e8781;
+    background: #fafbfa;
+    border: 1px dashed #d8ded9;
+    border-radius: 11px;
+
+    font-size: 10px;
+    line-height: 1.5;
+    text-align: center;
+}
+
+.historial-reserva-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 1400;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    padding: 14px;
+
+    background: rgba(20, 26, 22, 0.64);
+    backdrop-filter: blur(2px);
+}
+
+.historial-reserva-modal[hidden] {
+    display: none !important;
+}
+
+.historial-reserva-card {
+    width: min(430px, 100%);
+    max-height: min(650px, calc(100vh - 28px));
+    overflow: hidden;
+
+    padding: 15px;
+
+    background: #fbfaf7;
+    border: 1px solid #ddd8cd;
+    border-radius: 17px;
+    box-shadow: 0 20px 50px rgba(18, 25, 21, 0.24);
+}
+
+.historial-reserva-cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+
+    margin-bottom: 12px;
+}
+
+.historial-reserva-cabecera span {
+    color: #2f7653;
+    font-size: 8px;
+    font-weight: 900;
+    letter-spacing: 1.5px;
+}
+
+.historial-reserva-cabecera h2 {
+    margin: 2px 0 3px;
+
+    color: #273029;
+    font-size: 18px;
+}
+
+.historial-reserva-cabecera p {
+    margin: 0;
+
+    color: #737c75;
+    font-size: 9px;
+    line-height: 1.4;
+}
+
+#historial-reserva-cerrar {
+    flex: 0 0 auto;
+
+    width: 32px;
+    height: 32px;
+
+    color: #626b64;
+    background: #ffffff;
+    border: 1px solid #ddd8cd;
+    border-radius: 50%;
+
+    font-size: 17px;
+}
+
+.historial-reserva-lista {
+    max-height: calc(min(650px, 100vh - 28px) - 95px);
+    overflow-y: auto;
+    padding-right: 3px;
+}
+
+body.historial-modal-abierto {
+    overflow: hidden;
+}
+
+@media (max-width: 900px) {
+    .historial-filtros {
+        grid-template-columns: minmax(0, 1.5fr) repeat(2, minmax(105px, 0.75fr));
+    }
+
+    .historial-filtro-buscar {
+        grid-column: 1 / -1;
+    }
+}
+
+@media (max-width: 560px) {
+    .historial-cabecera {
+        display: flex;
+    }
+
+    .historial-usuario-activo {
+        margin-top: 2px;
+        padding: 6px 8px;
+        font-size: 8px;
+    }
+
+    .historial-panel {
+        padding: 10px;
+    }
+
+    .historial-filtros {
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+        padding: 10px;
+    }
+
+    .historial-filtro-buscar,
+    .historial-filtros label:last-of-type {
+        grid-column: 1 / -1;
+    }
+
+    .historial-limpiar-filtros {
+        grid-column: 1 / -1;
+    }
+
+    .historial-registro-accion {
+        white-space: normal;
+    }
+
+    .historial-registro-encabezado {
+        align-items: flex-start;
+    }
+
+    .historial-registro-tipo {
+        margin-top: 1px;
+    }
+
+    .historial-cambio {
+        grid-template-columns: 1fr;
+        gap: 3px;
+    }
+
+    .historial-reserva-modal {
+        align-items: flex-end;
+        padding: 8px;
+    }
+
+    .historial-reserva-card {
+        max-height: calc(100vh - 16px);
+        padding: 13px;
+        border-radius: 17px;
+    }
+
+    .historial-reserva-lista {
+        max-height: calc(100vh - 112px);
+    }
+}

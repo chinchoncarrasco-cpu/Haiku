@@ -1047,6 +1047,9 @@ const checkManager = tarjeta.querySelector(
 );
 
 function actualizarEstadoCompleto() {
+    const estadoCompletoAnterior =
+        cabana.checkinCompleto === true;
+
     const completo =
         Number(inputTotal.value) > 0 &&
         selectMedio.value !== "" &&
@@ -1060,6 +1063,45 @@ function actualizarEstadoCompleto() {
 
     cabana.checkinCompleto = completo;
     guardarDatos();
+
+    if (
+        completo !== estadoCompletoAnterior &&
+        typeof registrarActividadHaiku ===
+            "function"
+    ) {
+        registrarActividadHaiku({
+            tipo: "pago",
+            accion:
+                completo
+                    ? "Cobro de check-in completado"
+                    : "Cobro de check-in reabierto",
+            reservaId:
+                cabana.reservaId || "",
+            numeroCabana,
+            titular:
+                cabana.titular || "",
+            fechaOperacion: fechaSeleccionada,
+            detalle:
+                `Total $${Number(
+                    inputTotal.value || 0
+                ).toLocaleString("es-CL")} · ${
+                    selectMedio.value || "Sin medio"
+                }`,
+            cambios: [
+                {
+                    campo: "Cobro check-in",
+                    anterior:
+                        estadoCompletoAnterior
+                            ? "Completo"
+                            : "Pendiente",
+                    nuevo:
+                        completo
+                            ? "Completo"
+                            : "Pendiente"
+                }
+            ]
+        });
+    }
 
 
 const pendientes = lista.querySelectorAll(
@@ -1223,6 +1265,13 @@ document.addEventListener("change", (evento) => {
 
     const cabana = datos.cabanas[numeroCabana];
 
+    const abonoAnterior =
+        cabana.abono || "";
+    const medioAnterior =
+        cabana.medioPago || "";
+    const verificadoAnterior =
+        cabana.abonoVerificado === true;
+
     if (monto) {
         cabana.abono = monto.value;
     }
@@ -1236,6 +1285,68 @@ document.addEventListener("change", (evento) => {
 }
 
 guardarDatos();
+
+if (
+    typeof registrarActividadHaiku ===
+    "function"
+) {
+    const cambios = [];
+
+    if (monto) {
+        cambios.push({
+            campo: "Monto del abono",
+            anterior: abonoAnterior,
+            nuevo: monto.value
+        });
+    }
+
+    if (medio) {
+        cambios.push({
+            campo: "Medio de pago",
+            anterior: medioAnterior,
+            nuevo: medio.value
+        });
+    }
+
+    if (verificado) {
+        cambios.push({
+            campo: "Verificación",
+            anterior:
+                verificadoAnterior
+                    ? "Verificado"
+                    : "Pendiente",
+            nuevo:
+                verificado.checked
+                    ? "Verificado"
+                    : "Pendiente"
+        });
+    }
+
+    registrarActividadHaiku({
+        tipo: "pago",
+        accion:
+            verificado
+                ? verificado.checked
+                    ? "Abono confirmado"
+                    : "Confirmación de abono retirada"
+                : "Datos del abono actualizados",
+        reservaId:
+            cabana.reservaId || "",
+        numeroCabana,
+        titular:
+            cabana.titular || "",
+        fechaOperacion: fechaSeleccionada,
+        detalle:
+            `Abono $${Number(
+                cabana.abono || 0
+            ).toLocaleString("es-CL")}${
+                cabana.medioPago
+                    ? ` · ${cabana.medioPago}`
+                    : ""
+            }`,
+        cambios
+    });
+}
 
 cargarAbonosPagos();
 cargarSaldosCheckin();

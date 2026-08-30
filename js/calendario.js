@@ -1743,6 +1743,29 @@ function guardarBloqueoSeleccionadoCalendario() {
         JSON.stringify(datosCalendario)
     );
 
+    if (
+        typeof registrarActividadHaiku ===
+        "function"
+    ) {
+        registrarActividadHaiku({
+            tipo: "bloqueo",
+            accion:
+                seleccionadas.length === 1
+                    ? "Fechas bloqueadas"
+                    : "Fechas bloqueadas en varias cabañas",
+            numeroCabana:
+                seleccionadas.join(", "),
+            fechaOperacion:
+                fechaInicioBloqueoCalendario,
+            detalle:
+                `Desde ${fechaInicioBloqueoCalendario} hasta ${fechaFinBloqueoCalendario} · ${noches} ${
+                    noches === 1
+                        ? "noche"
+                        : "noches"
+                }${motivo ? ` · Motivo: ${motivo}` : ""}`
+        });
+    }
+
     if (typeof datosPorFecha !== "undefined") {
         datosPorFecha = datosCalendario;
     }

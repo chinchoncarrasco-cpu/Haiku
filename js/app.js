@@ -731,13 +731,13 @@ document.addEventListener("click", (evento) => {
     }
 
     const numeroCabana = boton.dataset.cabana;
-    const textoNota = boton.dataset.texto;
+    const contenidoNota = boton.dataset.texto;
 
     const datos = obtenerDatosDia(fechaSeleccionada);
 
     const indice = datos.notasOperativas.findIndex(nota =>
         String(nota.cabana) === String(numeroCabana) &&
-        nota.texto === textoNota
+        nota.texto === contenidoNota
     );
 
     if (indice === -1) {
@@ -747,6 +747,24 @@ document.addEventListener("click", (evento) => {
     datos.notasOperativas.splice(indice, 1);
 
     guardarDatos();
+
+    if (
+        typeof registrarActividadHaiku ===
+        "function"
+    ) {
+        const cabana =
+            datos.cabanas?.[numeroCabana] || {};
+
+        registrarActividadHaiku({
+            tipo: "nota",
+            accion: "Nota operativa eliminada",
+            reservaId: cabana.reservaId || "",
+            numeroCabana,
+            titular: cabana.titular || "",
+            fechaOperacion: fechaSeleccionada,
+            detalle: contenidoNota
+        });
+    }
 
 mostrarNotasOperativas(fechaSeleccionada);
 
@@ -785,6 +803,26 @@ botonGuardarNota.addEventListener("click", () => {
     });
 
     guardarDatos();
+
+    if (
+        typeof registrarActividadHaiku ===
+        "function"
+    ) {
+        const numeroCabana =
+            selectorNotaCabana.value;
+        const cabana =
+            datos.cabanas?.[numeroCabana] || {};
+
+        registrarActividadHaiku({
+            tipo: "nota",
+            accion: "Nota operativa agregada",
+            reservaId: cabana.reservaId || "",
+            numeroCabana,
+            titular: cabana.titular || "",
+            fechaOperacion: fechaSeleccionada,
+            detalle: nota
+        });
+    }
 
 mostrarNotasOperativas(fechaSeleccionada);
 
@@ -5007,6 +5045,84 @@ function guardarCambiosReservaEditada() {
         );
     }
 
+    if (
+        typeof registrarActividadHaiku ===
+        "function"
+    ) {
+        registrarActividadHaiku({
+            tipo: "reserva",
+            accion: "Reserva editada",
+            reservaId,
+            numeroCabana,
+            titular,
+            fechaOperacion: fechaLlegadaReserva,
+            detalle:
+                "Se actualizaron los datos, fechas o asignación de la reserva.",
+            cambios: [
+                {
+                    campo: "Cabaña",
+                    anterior:
+                        `CAB ${reservaEditandoOriginal.numeroCabana}`,
+                    nuevo: `CAB ${numeroCabana}`
+                },
+                {
+                    campo: "Ingreso",
+                    anterior:
+                        reservaEditandoOriginal.fechaIngreso,
+                    nuevo: fechaLlegadaReserva
+                },
+                {
+                    campo: "Noches",
+                    anterior:
+                        reservaEditandoOriginal.noches,
+                    nuevo: noches
+                },
+                {
+                    campo: "Titular",
+                    anterior: originales.titular || "",
+                    nuevo: titular
+                },
+                {
+                    campo: "Adultos",
+                    anterior: originales.adultos || "0",
+                    nuevo: adultosReserva
+                },
+                {
+                    campo: "Niños",
+                    anterior: originales.ninos || "0",
+                    nuevo: ninosReserva
+                },
+                {
+                    campo: "Mascotas",
+                    anterior: originales.mascotas || "0",
+                    nuevo: mascotasReserva
+                },
+                {
+                    campo: "Total",
+                    anterior:
+                        originales.totalReserva || "0",
+                    nuevo: totalReserva
+                },
+                {
+                    campo: "Teléfono",
+                    anterior:
+                        reservaEditandoFichaOriginal.telefono ||
+                        originales.telefono ||
+                        "",
+                    nuevo: campoNuevoTelefono.value.trim()
+                },
+                {
+                    campo: "RUT",
+                    anterior:
+                        reservaEditandoFichaOriginal.rut ||
+                        originales.rut ||
+                        "",
+                    nuevo: campoNuevoRut.value.trim()
+                }
+            ]
+        });
+    }
+
     reservaCreadaId = reservaId;
 
     if (typeof generarCalendario === "function") {
@@ -5290,6 +5406,32 @@ ninos:
             fichasReservas
         )
     );
+
+    if (
+        typeof registrarActividadHaiku ===
+        "function"
+    ) {
+        registrarActividadHaiku({
+            tipo: "reserva",
+            accion: "Reserva creada",
+            reservaId,
+            numeroCabana,
+            titular,
+            fechaOperacion: fechaLlegadaReserva,
+            detalle:
+                `${noches} ${
+                    noches === 1
+                        ? "noche"
+                        : "noches"
+                } · ${cantidadHuespedes} ${
+                    cantidadHuespedes === 1
+                        ? "huésped"
+                        : "huéspedes"
+                } · Total $${Number(
+                    totalReserva
+                ).toLocaleString("es-CL")}`
+        });
+    }
 
 
     reservaCreadaId =

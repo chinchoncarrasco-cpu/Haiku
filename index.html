@@ -178,6 +178,10 @@
             📋 Cierre de turno
         </button>
 
+        <button class="menu-item" data-seccion="historial">
+            ↶ Historial
+        </button>
+
     </nav>
 
 </aside>
@@ -6708,6 +6712,93 @@ Terraza:
 
 </section>
 
+<!-- ========================================
+     SECCIÓN HISTORIAL
+======================================== -->
+
+<section id="seccion-historial" class="seccion-app">
+
+    <header class="cabecera historial-cabecera">
+        <div>
+            <p class="subtitulo">REGISTROS</p>
+            <h2>Historial de actividades</h2>
+            <p class="texto-secundario">
+                Acciones realizadas en el panel HAIKU.
+            </p>
+        </div>
+
+        <span class="historial-usuario-activo">
+            Usuario Haiku
+        </span>
+    </header>
+
+    <section class="panel historial-panel">
+
+        <div class="historial-filtros">
+            <label class="historial-filtro-buscar">
+                <span>Buscar</span>
+                <input
+                    type="search"
+                    id="historial-buscar"
+                    placeholder="Reserva, huésped, cabaña o acción..."
+                    autocomplete="off"
+                >
+            </label>
+
+            <label>
+                <span>Desde</span>
+                <input type="date" id="historial-desde">
+            </label>
+
+            <label>
+                <span>Hasta</span>
+                <input type="date" id="historial-hasta">
+            </label>
+
+            <label>
+                <span>Tipo</span>
+                <select id="historial-tipo">
+                    <option value="">Todas</option>
+                    <option value="reserva">Reservas</option>
+                    <option value="estado">Estados</option>
+                    <option value="pago">Pagos</option>
+                    <option value="servicio">Servicios</option>
+                    <option value="bloqueo">Bloqueos</option>
+                    <option value="nota">Notas</option>
+                    <option value="solicitud">Solicitudes</option>
+                    <option value="cabana">Cabañas</option>
+                </select>
+            </label>
+
+            <button
+                type="button"
+                id="historial-limpiar-filtros"
+                class="historial-limpiar-filtros"
+            >
+                Limpiar
+            </button>
+        </div>
+
+        <div class="historial-listado-cabecera">
+            <div>
+                <h3>Actividad reciente</h3>
+                <p>Presiona una acción para ver sus detalles.</p>
+            </div>
+
+            <strong id="historial-contador">
+                0 acciones
+            </strong>
+        </div>
+
+        <div
+            id="historial-lista"
+            class="historial-lista"
+        ></div>
+
+    </section>
+
+</section>
+
 </main>
 
 <!-- =========================================
@@ -7051,7 +7142,48 @@ Terraza:
 
 </div>
 
+<!-- ========================================
+     HISTORIAL DE UNA RESERVA
+======================================== -->
+
+<div
+    id="historial-reserva-modal"
+    class="historial-reserva-modal"
+    hidden
+>
+    <section
+        class="historial-reserva-card"
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby="historial-reserva-titulo"
+    >
+        <header class="historial-reserva-cabecera">
+            <div>
+                <span>REGISTROS</span>
+                <h2 id="historial-reserva-titulo">
+                    Historial de la reserva
+                </h2>
+                <p id="historial-reserva-meta"></p>
+            </div>
+
+            <button
+                type="button"
+                id="historial-reserva-cerrar"
+                aria-label="Cerrar historial"
+            >
+                ×
+            </button>
+        </header>
+
+        <div
+            id="historial-reserva-lista"
+            class="historial-lista historial-reserva-lista"
+        ></div>
+    </section>
+</div>
+
     <!-- JAVASCRIPT -->
+    <script src="js/historial.js"></script>
     <script src="js/calendario.js"></script>
     <script src="js/checklist.js"></script>
     <script src="js/app.js"></script>
