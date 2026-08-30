@@ -1861,11 +1861,58 @@ function obtenerPagosPendientes() {
         ) || [];
 
 
+    // Los servicios adicionales se cobran al finalizar
+    // la estadía, no el día en que fueron programados.
+    function obtenerFechaCobroServicio(servicio) {
+
+        const reservaId =
+            String(servicio?.reservaId || "");
+
+        if (
+            reservaId &&
+            typeof buscarDatosReservaPorId ===
+                "function"
+        ) {
+
+            const registroReserva =
+                buscarDatosReservaPorId(reservaId);
+
+            const cabanaReserva =
+                registroReserva?.cabana || {};
+
+            const fechaIngreso =
+                cabanaReserva.fechaOrigenReserva ||
+                cabanaReserva.fechaIngresoReserva ||
+                registroReserva?.fecha ||
+                "";
+
+            const noches =
+                Number(cabanaReserva.noches) || 0;
+
+            if (fechaIngreso && noches > 0) {
+
+                return sumarDiasFecha(
+                    fechaIngreso,
+                    noches
+                );
+            }
+        }
+
+        // Respaldo para servicios antiguos que no tengan
+        // una reserva correctamente asociada.
+        return (
+            servicio?.fechaServicio ||
+            servicio?.fecha ||
+            ""
+        );
+    }
+
+
     servicios
         .filter(servicio =>
             servicio.estadoPago ===
                 "pendiente" &&
-            servicio.fechaServicio ===
+            obtenerFechaCobroServicio(servicio) ===
                 fechaSeleccionada
         )
         .forEach(servicio => {
