@@ -1878,6 +1878,44 @@ function cargarPagosFichaReserva(reservaId) {
     campoTotal.textContent =
         `$${totalReserva.toLocaleString("es-CL")}`;
 
+    const accesoTotalReserva =
+    campoTotal.closest("div");
+
+if (accesoTotalReserva) {
+
+    const puedeEditarTotal =
+        Boolean(registroReserva?.cabana);
+
+    accesoTotalReserva.classList.toggle(
+        "ficha-pago-total-acceso",
+        puedeEditarTotal
+    );
+
+    if (puedeEditarTotal) {
+
+        accesoTotalReserva.setAttribute(
+            "role",
+            "button"
+        );
+
+        accesoTotalReserva.setAttribute(
+            "tabindex",
+            "0"
+        );
+
+        accesoTotalReserva.setAttribute(
+            "title",
+            "Ir a Total reserva"
+        );
+
+    } else {
+
+        accesoTotalReserva.removeAttribute("role");
+        accesoTotalReserva.removeAttribute("tabindex");
+        accesoTotalReserva.removeAttribute("title");
+    }
+}
+
     campoAbono.textContent =
         `$${abono.toLocaleString("es-CL")}`;
 
@@ -2095,6 +2133,175 @@ document.addEventListener(
         evento.preventDefault();
 
         abrirAbonoReservaDesdeFicha();
+    }
+);
+
+// ========================================
+// FICHA · IR DIRECTO A TOTAL RESERVA
+// ========================================
+
+function abrirTotalReservaDesdeFicha() {
+
+    if (!fichaReservaModal) {
+        return;
+    }
+
+    const reservaId =
+        fichaReservaModal.dataset.reservaId;
+
+    if (!reservaId) {
+        return;
+    }
+
+
+    const registroReserva =
+        buscarDatosReservaPorId(
+            reservaId
+        );
+
+    if (!registroReserva?.cabana) {
+        return;
+    }
+
+
+    const numeroCabana =
+        registroReserva.numeroCabana;
+
+    const fechaIngreso =
+        registroReserva.cabana
+            .fechaOrigenReserva ||
+        registroReserva.fecha;
+
+
+    if (
+        !numeroCabana ||
+        !fechaIngreso
+    ) {
+        return;
+    }
+
+
+    const [
+        anio,
+        mes,
+        dia
+    ] =
+        fechaIngreso
+            .split("-")
+            .map(Number);
+
+
+    if (
+        !anio ||
+        !mes ||
+        !dia
+    ) {
+        return;
+    }
+
+
+    // Cerrar ficha
+    fichaReservaModal.hidden = true;
+
+
+    // Ir al día de ingreso
+    seleccionarDia(
+        anio,
+        mes - 1,
+        dia,
+        fechaIngreso
+    );
+
+
+    // Abrir Pagos
+    const botonPagos =
+        document.querySelector(
+            '.menu-item[data-seccion="pagos"]'
+        );
+
+    if (botonPagos) {
+        botonPagos.click();
+    }
+
+
+    // Ir directamente a Total reserva
+    requestAnimationFrame(() => {
+
+        const campoTotal =
+            document.querySelector(
+                `.pago-checkin-total[data-pago-checkin-total="${numeroCabana}"]`
+            );
+
+        if (!campoTotal) {
+            return;
+        }
+
+
+        const tarjeta =
+            campoTotal.closest(
+                ".pago-checkin-item"
+            );
+
+
+        if (tarjeta) {
+
+            tarjeta.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        }
+
+
+        campoTotal.focus();
+        campoTotal.select();
+
+    });
+}
+
+
+// CLICK
+document.addEventListener(
+    "click",
+    evento => {
+
+        const acceso =
+            evento.target.closest(
+                ".ficha-pago-total-acceso"
+            );
+
+        if (!acceso) {
+            return;
+        }
+
+        abrirTotalReservaDesdeFicha();
+    }
+);
+
+
+// ENTER / ESPACIO
+document.addEventListener(
+    "keydown",
+    evento => {
+
+        const acceso =
+            evento.target.closest(
+                ".ficha-pago-total-acceso"
+            );
+
+        if (!acceso) {
+            return;
+        }
+
+        if (
+            evento.key !== "Enter" &&
+            evento.key !== " "
+        ) {
+            return;
+        }
+
+        evento.preventDefault();
+
+        abrirTotalReservaDesdeFicha();
     }
 );
 
