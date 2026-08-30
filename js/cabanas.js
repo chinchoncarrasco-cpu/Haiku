@@ -1881,6 +1881,44 @@ function cargarPagosFichaReserva(reservaId) {
     campoAbono.textContent =
         `$${abono.toLocaleString("es-CL")}`;
 
+    const accesoAbono =
+    campoAbono.closest("div");
+
+if (accesoAbono) {
+
+    const puedeRegistrarAbono =
+        Boolean(registroReserva?.cabana);
+
+    accesoAbono.classList.toggle(
+        "ficha-pago-abono-acceso",
+        puedeRegistrarAbono
+    );
+
+    if (puedeRegistrarAbono) {
+
+        accesoAbono.setAttribute(
+            "role",
+            "button"
+        );
+
+        accesoAbono.setAttribute(
+            "tabindex",
+            "0"
+        );
+
+        accesoAbono.setAttribute(
+            "title",
+            "Ir a registrar abono"
+        );
+
+    } else {
+
+        accesoAbono.removeAttribute("role");
+        accesoAbono.removeAttribute("tabindex");
+        accesoAbono.removeAttribute("title");
+    }
+}
+
     campoSaldo.textContent =
         `$${saldo.toLocaleString("es-CL")}`;
 
@@ -1888,6 +1926,177 @@ function cargarPagosFichaReserva(reservaId) {
         `$${totalServiciosPendientes.toLocaleString("es-CL")}`;
 
 }
+
+// ========================================
+// FICHA · IR DIRECTO AL ABONO
+// ========================================
+
+function abrirAbonoReservaDesdeFicha() {
+
+    if (!fichaReservaModal) {
+        return;
+    }
+
+    const reservaId =
+        fichaReservaModal.dataset.reservaId;
+
+    if (!reservaId) {
+        return;
+    }
+
+
+    const registroReserva =
+        buscarDatosReservaPorId(
+            reservaId
+        );
+
+    if (!registroReserva?.cabana) {
+        return;
+    }
+
+
+    const numeroCabana =
+        registroReserva.numeroCabana;
+
+    const fechaIngreso =
+        registroReserva.cabana
+            .fechaOrigenReserva ||
+        registroReserva.fecha;
+
+
+    if (
+        !numeroCabana ||
+        !fechaIngreso
+    ) {
+        return;
+    }
+
+
+    const partesFecha =
+        fechaIngreso
+            .split("-")
+            .map(Number);
+
+    const [
+        anio,
+        mes,
+        dia
+    ] = partesFecha;
+
+
+    if (
+        !anio ||
+        !mes ||
+        !dia
+    ) {
+        return;
+    }
+
+
+    // Cerrar ficha
+    fichaReservaModal.hidden = true;
+
+
+    // Ir al día REAL de ingreso
+    seleccionarDia(
+        anio,
+        mes - 1,
+        dia,
+        fechaIngreso
+    );
+
+
+    // Abrir sección Pagos
+    const botonPagos =
+        document.querySelector(
+            '.menu-item[data-seccion="pagos"]'
+        );
+
+    if (botonPagos) {
+        botonPagos.click();
+    }
+
+
+    // Buscar el abono de ESTA cabaña
+    requestAnimationFrame(() => {
+
+        const campoAbono =
+            document.querySelector(
+                `.pago-abono-monto[data-pago-cabana="${numeroCabana}"]`
+            );
+
+        if (!campoAbono) {
+            return;
+        }
+
+
+        const tarjeta =
+            campoAbono.closest(
+                ".pago-abono-item"
+            );
+
+
+        if (tarjeta) {
+
+            tarjeta.scrollIntoView({
+                behavior: "smooth",
+                block: "center"
+            });
+        }
+
+
+        campoAbono.focus();
+        campoAbono.select();
+
+    });
+}
+
+
+// CLICK
+document.addEventListener(
+    "click",
+    evento => {
+
+        const acceso =
+            evento.target.closest(
+                ".ficha-pago-abono-acceso"
+            );
+
+        if (!acceso) {
+            return;
+        }
+
+        abrirAbonoReservaDesdeFicha();
+    }
+);
+
+
+// ENTER / ESPACIO
+document.addEventListener(
+    "keydown",
+    evento => {
+
+        const acceso =
+            evento.target.closest(
+                ".ficha-pago-abono-acceso"
+            );
+
+        if (!acceso) {
+            return;
+        }
+
+        if (
+            evento.key !== "Enter" &&
+            evento.key !== " "
+        ) {
+            return;
+        }
+
+        evento.preventDefault();
+
+        abrirAbonoReservaDesdeFicha();
+    }
+);
 
 // ========================================
 // SOLICITUDES DE LA FICHA POR RESERVA ID
