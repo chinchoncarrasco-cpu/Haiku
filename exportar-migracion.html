@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>HAIKU · Exportar migración</title>
+  <style>
+    :root { color-scheme: light dark; }
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; background: #111; color: #eee; }
+    main { width: min(760px, calc(100% - 32px)); margin: 48px auto; }
+    .card { border: 1px solid #383838; border-radius: 18px; padding: 28px; background: #181818; box-shadow: 0 20px 50px rgba(0,0,0,.25); }
+    h1 { margin-top: 0; font-size: 1.7rem; }
+    p { line-height: 1.55; color: #cfcfcf; }
+    .seguro { padding: 12px 14px; border-radius: 12px; background: #202820; margin: 18px 0; }
+    button { width: 100%; border: 0; border-radius: 12px; padding: 14px 18px; font-size: 1rem; font-weight: 700; cursor: pointer; background: #58c987; color: #082313; }
+    button:disabled { opacity: .55; cursor: wait; }
+    pre { white-space: pre-wrap; word-break: break-word; background: #0d0d0d; border: 1px solid #303030; border-radius: 12px; padding: 14px; min-height: 86px; margin-top: 18px; color: #d9d9d9; }
+    small { color: #999; }
+  </style>
+</head>
+<body>
+<main>
+  <section class="card">
+    <h1>HAIKU · Exportación para migración</h1>
+    <p>Esta página temporal crea un respaldo de los datos HAIKU guardados en este navegador para migrarlos a Supabase.</p>
+    <div class="seguro"><strong>Privacidad:</strong> el exportador no envía datos a ningún servidor. Sólo lee claves HAIKU conocidas de <code>localStorage</code> y las evidencias de <code>IndexedDB</code>, y descarga un archivo JSON en tu computador.</div>
+    <button id="exportar" type="button">Exportar datos HAIKU</button>
+    <pre id="estado">Esperando exportación.</pre>
+    <small>Después de descargar el archivo, súbelo únicamente al chat de trabajo de HAIKU. Contiene información operacional y puede contener datos personales de huéspedes.</small>
+  </section>
+</main>
+<script>
+(() => {
+  "use strict";
+
+  const CLAVES_DATOS = [
+    "haikuDatos",
+    "haikuFichaReservas",
+    "haikuServicios",
+    "haikuWebpay",
+    "haikuHistorialActividades",
+    "haikuReservasCanceladas",
+    "haikuReservasNoShow"
+  ];
+
+  const VERSIONES = {
+    formatoExportacion: "haiku-browser-export-v1",
+    commitAplicacionReferencia: "469dde1011f76e392e0a88f417c4e647c58f2821",
+    archivos: {
+      "index.html": "ceb864eb25b6d2e1f43791755df3d1eccb722c42",
+      "js/app.js": "cbc2d7619b9f830fe2187a5fa28c2727bb2bc3d6",
+      "js/cabanas.js": "34a2fc0720f01386723d2bb91087ee58e826ce9f",
+      "js/calendario.js": "374e2f4a7935f26c6db1b4b580ff55dfda0e7ba2",
+      "js/checklist.js": "49a9175d42c6ccbde9fa9e637570fbe83b3281ef",
+      "js/cierre.js": "1055a04f0c89eccbaeb908a2d7ae67fedbe0199d",
+      "js/historial.js": "aa041dbeb51bfe48044fd8b8f204c3cb64e611d1",
+      "js/pagos.js": "ff250c7d67f66623675cd42ebbfef4cadaa8add7",
+      "js/servicios.js": "e1daa68bace1d89e336d27cce24d0d2147199bb9"
+    }
+  };
+
+  const boton = document.getElementById("exportar");
+  const estado = document.getElementById("estado");
+
+  function mostrar(texto) {
+    estado.textContent = texto;
+  }
+
+  function leerLocalStorage() {
+    const datos = {};
+    const errores = [];
+
+    for (const clave of CLAVES_DATOS) {
+      const bruto = localStorage.getItem(clave);
+      if (bruto === null) {
+        datos[clave] = null;
+        continue;
+      }
+      try {
+        datos[clave] = JSON.parse(bruto);
+      } catch (error) {
+        datos[clave] = { __haiku_valor_bruto: bruto };
+        errores.push({ clave, error: String(error?.message || error) });
+      }
+    }
+
+    const clavesHaikuPresentes = Object.keys(localStorage)
+      .filter(clave => clave.toLowerCase().startsWith("haiku"))
+      .sort();
+
+    const clavesNoExportadas = clavesHaikuPresentes
+      .filter(clave => !CLAVES_DATOS.includes(clave));
+
+    return { datos, errores, clavesHaikuPresentes, clavesNoExportadas };
+  }
+
+  async function existeBaseEvidencias() {
+    if (typeof indexedDB.databases !== "function") return null;
+    const bases = await indexedDB.databases();
+    return bases.some(base => base.name === "haikuEvidencias");
+  }
+
+  async function leerEvidencias() {
+    const existe = await existeBaseEvidencias();
+    if (existe === false) return [];
+
+    return new Promise((resolve, reject) => {
+      const solicitud = indexedDB.open("haikuEvidencias", 1);
+      let creadaDuranteExportacion = false;
+
+      solicitud.onupgradeneeded = () => {
+        creadaDuranteExportacion = true;
+      };
+
+      solicitud.onerror = () => reject(solicitud.error);
+
+      solicitud.onsuccess = () => {
+        const db = solicitud.result;
+
+        if (creadaDuranteExportacion || !db.objectStoreNames.contains("imagenes")) {
+          db.close();
+          if (creadaDuranteExportacion) indexedDB.deleteDatabase("haikuEvidencias");
+          resolve([]);
+          return;
+        }
+
+        const transaccion = db.transaction("imagenes", "readonly");
+        const almacen = transaccion.objectStore("imagenes");
+        const cursor = almacen.openCursor();
+        const registros = [];
+
+        cursor.onerror = () => {
+          db.close();
+          reject(cursor.error);
+        };
+
+        cursor.onsuccess = () => {
+          const actual = cursor.result;
+          if (!actual) return;
+
+          const clave = String(actual.key);
+          const coincidencia = clave.match(/^(\d{4}-\d{2}-\d{2})_(.+)$/);
+          registros.push({
+            clave,
+            fecha: coincidencia ? coincidencia[1] : null,
+            nombre: coincidencia ? coincidencia[2] : null,
+            imagen: actual.value
+          });
+          actual.continue();
+        };
+
+        transaccion.oncomplete = () => {
+          db.close();
+          resolve(registros);
+        };
+
+        transaccion.onerror = () => {
+          db.close();
+          reject(transaccion.error);
+        };
+      };
+    });
+  }
+
+  function contarResumen(local, evidencias) {
+    const haikuDatos = local.haikuDatos && typeof local.haikuDatos === "object" ? local.haikuDatos : {};
+    const ids = new Set();
+
+    Object.values(haikuDatos).forEach(dia => {
+      Object.values(dia?.cabanas || {}).forEach(cabana => {
+        if (cabana?.reservaId) ids.add(String(cabana.reservaId));
+      });
+    });
+
+    (Array.isArray(local.haikuReservasCanceladas) ? local.haikuReservasCanceladas : []).forEach(r => r?.reservaId && ids.add(String(r.reservaId)));
+    (Array.isArray(local.haikuReservasNoShow) ? local.haikuReservasNoShow : []).forEach(r => r?.reservaId && ids.add(String(r.reservaId)));
+
+    return {
+      diasEnHaikuDatos: Object.keys(haikuDatos).length,
+      reservasLegacyUnicasAproximadas: ids.size,
+      fichasReserva: local.haikuFichaReservas && typeof local.haikuFichaReservas === "object" ? Object.keys(local.haikuFichaReservas).length : 0,
+      servicios: Array.isArray(local.haikuServicios) ? local.haikuServicios.length : 0,
+      webpay: Array.isArray(local.haikuWebpay) ? local.haikuWebpay.length : 0,
+      historial: Array.isArray(local.haikuHistorialActividades) ? local.haikuHistorialActividades.length : 0,
+      canceladas: Array.isArray(local.haikuReservasCanceladas) ? local.haikuReservasCanceladas.length : 0,
+      noShow: Array.isArray(local.haikuReservasNoShow) ? local.haikuReservasNoShow.length : 0,
+      evidencias: evidencias.length
+    };
+  }
+
+  async function sha256Hex(texto) {
+    const bytes = new TextEncoder().encode(texto);
+    const hash = await crypto.subtle.digest("SHA-256", bytes);
+    return Array.from(new Uint8Array(hash)).map(b => b.toString(16).padStart(2, "0")).join("");
+  }
+
+  function nombreArchivo() {
+    return `haiku_export_${new Date().toISOString().replace(/[:.]/g, "-")}.json`;
+  }
+
+  async function exportar() {
+    boton.disabled = true;
+    mostrar("Leyendo datos HAIKU del navegador…");
+
+    try {
+      const lectura = leerLocalStorage();
+      mostrar("Leyendo evidencias de IndexedDB…");
+      const evidencias = await leerEvidencias();
+
+      const payload = {
+        formato: VERSIONES.formatoExportacion,
+        exportadoEn: new Date().toISOString(),
+        origen: {
+          origin: location.origin,
+          pathname: location.pathname,
+          userAgent: navigator.userAgent
+        },
+        versiones: VERSIONES,
+        localStorage: lectura.datos,
+        diagnosticoLocalStorage: {
+          erroresJSON: lectura.errores,
+          clavesHaikuPresentes: lectura.clavesHaikuPresentes,
+          clavesHaikuNoExportadas: lectura.clavesNoExportadas
+        },
+        indexedDB: {
+          base: "haikuEvidencias",
+          almacen: "imagenes",
+          evidencias
+        }
+      };
+
+      payload.resumen = contarResumen(payload.localStorage, evidencias);
+
+      const contenidoBase = JSON.stringify(payload);
+      const hash = await sha256Hex(contenidoBase);
+      const salida = {
+        ...payload,
+        integridad: {
+          algoritmo: "SHA-256",
+          alcance: "JSON.stringify(payload_sin_integridad)",
+          hash
+        }
+      };
+
+      const json = JSON.stringify(salida, null, 2);
+      const blob = new Blob([json], { type: "application/json;charset=utf-8" });
+      const url = URL.createObjectURL(blob);
+      const enlace = document.createElement("a");
+      enlace.href = url;
+      enlace.download = nombreArchivo();
+      document.body.appendChild(enlace);
+      enlace.click();
+      enlace.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+
+      mostrar(
+        "EXPORTACIÓN COMPLETA\n\n" +
+        `Días: ${salida.resumen.diasEnHaikuDatos}\n` +
+        `Reservas aprox.: ${salida.resumen.reservasLegacyUnicasAproximadas}\n` +
+        `Fichas: ${salida.resumen.fichasReserva}\n` +
+        `Servicios: ${salida.resumen.servicios}\n` +
+        `WebPay: ${salida.resumen.webpay}\n` +
+        `Historial: ${salida.resumen.historial}\n` +
+        `Canceladas: ${salida.resumen.canceladas}\n` +
+        `No-Show: ${salida.resumen.noShow}\n` +
+        `Evidencias: ${salida.resumen.evidencias}\n\n` +
+        `SHA-256: ${hash}\n\n` +
+        "Ahora sube el archivo descargado al chat de HAIKU."
+      );
+    } catch (error) {
+      console.error(error);
+      mostrar("No fue posible completar la exportación.\n\n" + String(error?.message || error));
+    } finally {
+      boton.disabled = false;
+    }
+  }
+
+  boton.addEventListener("click", exportar);
+})();
+</script>
+</body>
+</html>
