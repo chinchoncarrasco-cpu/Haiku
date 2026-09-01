@@ -1,6 +1,6 @@
 // ========================================
-// HAIKU · HISTORIAL + AUDITORÍA · SUPABASE V1
-// Historial humano + auditoría técnica desde eventos_auditoria.
+// HAIKU · HISTORIAL + AUDITORÍA · SUPABASE V2
+// Historial humano + auditoría técnica legible desde eventos_auditoria.
 // ========================================
 
 (() => {
@@ -24,18 +24,25 @@
         reservas: new Map(),
         cabanas: new Map(),
         pagos: new Map(),
-        servicios: new Map()
+        servicios: new Map(),
+        estadias: new Map()
     };
 
     const CAMPOS = {
         estado: "Estado",
         estado_reserva: "Estado de reserva",
+        estado_estadia: "Estado de estadía",
         estado_servicio: "Estado del servicio",
         titular_nombre: "Titular",
         fecha_ingreso: "Ingreso",
         fecha_salida: "Salida",
+        fecha_servicio: "Fecha del servicio",
+        hora_inicio: "Hora",
         cabana_id: "Cabaña",
+        reserva_id: "Reserva",
+        estadia_id: "Estadía",
         monto: "Monto",
+        total: "Total",
         medio_pago: "Medio de pago",
         etapa_operativa: "Etapa",
         codigo_autorizacion: "CodAut",
@@ -45,14 +52,58 @@
         bove_checkout: "BOVE Check-out",
         resumen_entrega: "Resumen de entrega",
         novedades: "Novedades",
-        motivo_reapertura: "Motivo reapertura",
+        motivo_reapertura: "Motivo de reapertura",
         checkin_realizado_en: "Check-in",
         checkout_realizado_en: "Check-out",
-        observaciones: "Observaciones"
+        observaciones: "Observaciones",
+        datos_origen: "Datos del pago",
+        verificado_en: "Verificado",
+        verificado_por: "Verificado por",
+        bove_cierre_registrado_en: "BOVE alojamiento registrado",
+        bove_cierre_registrado_por: "BOVE alojamiento registrado por",
+        bove_checkout_registrado_en: "BOVE Check-out registrado",
+        bove_checkout_registrado_por: "BOVE Check-out registrado por",
+        cerrado_en: "Cerrado",
+        cerrado_por: "Cerrado por",
+        reabierto_en: "Reabierto",
+        reabierto_por: "Reabierto por",
+        finalizado_en: "Finalizado",
+        finalizado_por: "Finalizado por",
+        snapshot: "Copia histórica del cierre"
     };
+
+    const CAMPOS_OCULTOS_HISTORIAL = new Set([
+        "datos_origen",
+        "snapshot",
+        "verificado_en",
+        "verificado_por",
+        "bove_cierre_registrado_en",
+        "bove_cierre_registrado_por",
+        "bove_checkout_registrado_en",
+        "bove_checkout_registrado_por",
+        "cerrado_en",
+        "cerrado_por",
+        "reabierto_en",
+        "reabierto_por",
+        "finalizado_en",
+        "finalizado_por",
+        "creado_en",
+        "creado_por",
+        "actualizado_en",
+        "actualizado_por"
+    ]);
+
+    const UUID_RE = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 
     function limpiar(valor) {
         return String(valor ?? "").trim();
+    }
+
+    function elemento(tag, clase, texto) {
+        const el = document.createElement(tag);
+        if (clase) el.className = clase;
+        if (texto !== undefined) el.textContent = texto;
+        return el;
     }
 
     function escaparJson(valor) {
@@ -76,7 +127,42 @@
             tarjeta_debito: "Tarjeta Débito",
             efectivo: "Efectivo"
         };
-        return mapa[String(valor || "")] || limpiar(valor).replaceAll("_", " ") || "—";
+        return mapa[String(valor || "")] || textoEstado(valor);
+    }
+
+    function textoEstado(valor) {
+        const mapa = {
+            pendiente_asociacion: "Pendiente de asociar",
+            pendiente: "Pendiente",
+            confirmado: "Confirmado",
+            confirmada: "Confirmada",
+            hospedada: "Hospedada",
+            checked_out: "Check-out realizado",
+            cancelada: "Cancelada",
+            no_show: "No Show",
+            activo: "Activo",
+            anulado: "Anulado",
+            programado: "Programado",
+            en_proceso: "En proceso",
+            realizado: "Realizado",
+            completado: "Completado",
+            completada: "Completada",
+            cerrado: "Cerrado",
+            abierto: "Abierto",
+            borrador: "Borrador",
+            cerrado_con_pendientes: "Cerrado con pendientes",
+            reabierto: "Reabierto",
+            abono: "Abono",
+            saldo: "Saldo",
+            otro: "Otro",
+            usuario: "Usuario",
+            sistema: "Sistema",
+            importacion: "Importación",
+            cloudbeds: "Cloudbeds"
+        };
+        const clave = limpiar(valor);
+        if (!clave) return "—";
+        return mapa[clave] || clave.replaceAll("_", " ").replace(/^./, s => s.toUpperCase());
     }
 
     function fechaHora(valor) {
@@ -90,6 +176,14 @@
         } catch {
             return String(valor);
         }
+    }
+
+    function fechaCorta(valor) {
+        if (!valor) return "—";
+        const texto = String(valor);
+        const match = texto.match(/^(\d{4})-(\d{2})-(\d{2})$/);
+        if (match) return `${match[3]}-${match[2]}-${match[1]}`;
+        return fechaHora(valor);
     }
 
     function fechaLocal(valor) {
@@ -108,11 +202,19 @@
         }
     }
 
-    function elemento(tag, clase, texto) {
-        const el = document.createElement(tag);
-        if (clase) el.className = clase;
-        if (texto !== undefined) el.textContent = texto;
-        return el;
+    function esFechaISO(valor) {
+        if (typeof valor !== "string") return false;
+        return /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}/.test(valor);
+    }
+
+    function esUuid(valor) {
+        return UUID_RE.test(String(valor || ""));
+    }
+
+    function cortoId(valor) {
+        const texto = limpiar(valor);
+        if (!texto) return "—";
+        return texto.length > 13 ? `${texto.slice(0, 8)}…${texto.slice(-4)}` : texto;
     }
 
     function idsUnicos(lista) {
@@ -134,14 +236,34 @@
         return id ? contexto.cabanas.get(String(id)) || null : null;
     }
 
+    function estadiaInfo(id) {
+        return id ? contexto.estadias.get(String(id)) || null : null;
+    }
+
     function pagoInfo(evento) {
         if (!["pago", "pagos"].includes(evento?.entidad_tipo)) return null;
         return evento.entidad_id ? contexto.pagos.get(String(evento.entidad_id)) || null : null;
     }
 
     function servicioInfo(evento) {
-        if (evento?.entidad_tipo !== "servicios") return null;
+        if (!["servicio", "servicios"].includes(evento?.entidad_tipo)) return null;
         return evento.entidad_id ? contexto.servicios.get(String(evento.entidad_id)) || null : null;
+    }
+
+    function reservaEvento(evento) {
+        return reservaInfo(
+            evento?.reserva_id ||
+            pagoInfo(evento)?.reserva_id ||
+            servicioInfo(evento)?.reserva_id ||
+            estadiaInfo(evento?.estadia_id)?.reserva_id
+        );
+    }
+
+    function cabanaEvento(evento) {
+        const directa = cabanaInfo(evento?.cabana_id);
+        if (directa) return directa;
+        const estadia = estadiaInfo(evento?.estadia_id);
+        return cabanaInfo(estadia?.cabana_id);
     }
 
     function normalizarCambios(evento) {
@@ -153,28 +275,138 @@
         }));
     }
 
-    function valorHumano(valor, campo = "") {
-        if (valor === null || valor === undefined || valor === "") return "—";
-        if (typeof valor === "boolean") return valor ? "Sí" : "No";
-        if (typeof valor === "object") {
-            const texto = escaparJson(valor);
-            return texto.length > 190 ? `${texto.slice(0, 187)}…` : texto;
-        }
-        if (String(campo).includes("monto")) return dinero(valor);
-        if (campo === "medio_pago") return medioPago(valor);
-        return String(valor);
+    function nombreCampo(campo) {
+        return CAMPOS[campo] || limpiar(campo)
+            .replaceAll("_", " ")
+            .replace(/^./, s => s.toUpperCase());
     }
 
-    function nombreCampo(campo) {
-        return CAMPOS[campo] || limpiar(campo).replaceAll("_", " ").replace(/^./, s => s.toUpperCase());
+    function nombreEntidad(valor) {
+        const mapa = {
+            reservas: "Reserva",
+            reserva: "Reserva",
+            reserva_estadias: "Estadía",
+            estadia_noches: "Noche de estadía",
+            pagos: "Pago",
+            pago: "Pago",
+            servicios: "Servicio",
+            servicio: "Servicio",
+            turnos: "Turno",
+            cierres_turno: "Cierre de turno",
+            cierre_turno: "Cierre de turno"
+        };
+        return mapa[String(valor || "")] || textoEstado(valor);
+    }
+
+    function nombreTipoEvento(valor) {
+        const mapa = {
+            creacion: "Creación",
+            actualizacion: "Actualización",
+            eliminacion: "Eliminación",
+            finanzas: "Finanzas",
+            cierre_turno: "Cierre de turno"
+        };
+        return mapa[String(valor || "")] || textoEstado(valor);
+    }
+
+    function resumenObjeto(valor, campo) {
+        if (!valor || typeof valor !== "object") return "Información actualizada";
+
+        if (campo === "datos_origen") {
+            const partes = [];
+            if (valor.destino_asociacion) {
+                const destino = valor.destino_asociacion === "servicios"
+                    ? "Servicios Check-out"
+                    : valor.destino_asociacion === "alojamiento"
+                        ? "Alojamiento"
+                        : textoEstado(valor.destino_asociacion);
+                partes.push(`Destino: ${destino}`);
+            }
+            if (valor.cabana_referencia) partes.push(`CAB ${valor.cabana_referencia}`);
+            if (valor.tarjeta_referencia) partes.push(valor.tarjeta_referencia);
+            if (valor.tipo_webpay) partes.push(`WebPay ${textoEstado(valor.tipo_webpay)}`);
+            if (typeof valor.manager_revisado === "boolean") {
+                partes.push(`Manager: ${valor.manager_revisado ? "revisado" : "pendiente"}`);
+            }
+            return partes.length ? partes.join(" · ") : "Datos administrativos del pago actualizados";
+        }
+
+        if (campo === "snapshot") {
+            return "Copia histórica del cierre guardada";
+        }
+
+        const cantidad = Array.isArray(valor)
+            ? valor.length
+            : Object.keys(valor).length;
+        return cantidad
+            ? `Información interna actualizada (${cantidad} ${cantidad === 1 ? "dato" : "datos"})`
+            : "Información interna actualizada";
+    }
+
+    function valorHumano(valor, campo = "", modoValor = "historial") {
+        if (valor === null || valor === undefined || valor === "") return "—";
+        if (typeof valor === "boolean") return valor ? "Sí" : "No";
+        if (typeof valor === "object") return resumenObjeto(valor, campo);
+
+        const texto = String(valor);
+
+        if (String(campo).includes("monto") || campo === "total") return dinero(valor);
+        if (campo === "medio_pago") return medioPago(valor);
+        if (["estado", "estado_reserva", "estado_estadia", "estado_servicio", "etapa_operativa"].includes(campo)) {
+            return textoEstado(valor);
+        }
+        if (["fecha_ingreso", "fecha_salida", "fecha_servicio"].includes(campo)) {
+            return fechaCorta(valor);
+        }
+        if (esFechaISO(texto) || /_(en)$/.test(campo)) return fechaHora(valor);
+
+        if (campo.endsWith("_por") && esUuid(texto)) {
+            return usuarioNombre(texto);
+        }
+        if (campo === "reserva_id" && esUuid(texto)) {
+            const r = reservaInfo(texto);
+            return r ? referenciaReserva(r) : (modoValor === "auditoria" ? cortoId(texto) : "Reserva HAIKU");
+        }
+        if (campo === "cabana_id" && esUuid(texto)) {
+            const c = cabanaInfo(texto);
+            return c?.numero ? `CAB ${c.numero}` : (modoValor === "auditoria" ? cortoId(texto) : "Cabaña");
+        }
+        if (campo === "estadia_id" && esUuid(texto)) {
+            const e = estadiaInfo(texto);
+            return e ? referenciaEstadia(e) : (modoValor === "auditoria" ? cortoId(texto) : "Estadía");
+        }
+        if (esUuid(texto)) {
+            return modoValor === "auditoria" ? cortoId(texto) : "Referencia interna";
+        }
+
+        return texto;
+    }
+
+    function referenciaReserva(reserva) {
+        if (!reserva) return "Reserva HAIKU";
+        return [
+            reserva.titular_nombre,
+            reserva.codigo_haiku || reserva.cloudbeds_id
+        ].filter(Boolean).join(" · ") || "Reserva HAIKU";
+    }
+
+    function referenciaEstadia(estadia) {
+        if (!estadia) return "Estadía";
+        const cabana = cabanaInfo(estadia.cabana_id);
+        const partes = [];
+        if (cabana?.numero) partes.push(`CAB ${cabana.numero}`);
+        if (estadia.fecha_ingreso && estadia.fecha_salida) {
+            partes.push(`${fechaCorta(estadia.fecha_ingreso)} → ${fechaCorta(estadia.fecha_salida)}`);
+        }
+        return partes.join(" · ") || "Estadía";
     }
 
     function categoriaEvento(evento) {
         const entidad = String(evento?.entidad_tipo || "");
         const tipo = String(evento?.tipo_evento || "");
-        if (entidad === "reservas" || entidad === "reserva" || entidad === "reserva_estadias" || entidad === "estadia_noches") return "reserva";
-        if (entidad === "pagos" || entidad === "pago" || tipo === "finanzas") return "pago";
-        if (entidad === "servicios" || entidad === "servicio") return "servicio";
+        if (["reservas", "reserva", "reserva_estadias", "estadia_noches"].includes(entidad)) return "reserva";
+        if (["pagos", "pago"].includes(entidad) || tipo === "finanzas") return "pago";
+        if (["servicios", "servicio"].includes(entidad)) return "servicio";
         if (entidad.includes("cierre") || entidad === "turnos" || tipo === "cierre_turno") return "cierre";
         return "sistema";
     }
@@ -190,8 +422,30 @@
         if (["reserva_estadias", "estadia_noches", "turnos", "cierres_turno"].includes(entidad)) {
             return ["creacion", "actualizacion", "eliminacion"].includes(tipo);
         }
-
         return false;
+    }
+
+    function tituloEstadoReserva(evento) {
+        const cambio = cambioTiene(evento, "estado_reserva");
+        if (!cambio) return "Estado de reserva actualizado";
+        const nuevo = String(cambio.nuevo || "");
+        const mapa = {
+            confirmada: "Reserva confirmada",
+            hospedada: "Check-in realizado",
+            checked_out: "Check-out realizado",
+            cancelada: "Reserva cancelada",
+            no_show: "Reserva marcada No Show",
+            pendiente: "Reserva dejada pendiente"
+        };
+        return mapa[nuevo] || "Estado de reserva actualizado";
+    }
+
+    function tituloBove(evento, campo, etiqueta) {
+        const cambio = cambioTiene(evento, campo);
+        if (!cambio) return `${etiqueta} actualizado`;
+        if (!cambio.anterior && cambio.nuevo) return `${etiqueta} registrado`;
+        if (cambio.anterior && !cambio.nuevo) return `${etiqueta} retirado`;
+        return `${etiqueta} actualizado`;
     }
 
     function tituloHumano(evento) {
@@ -208,15 +462,28 @@
 
         if (entidad === "reservas") {
             if (tipo === "creacion") return "Reserva creada";
-            if (cambioTiene(evento, "bove_checkout")) return "BOVE Check-out actualizado";
-            if (cambioTiene(evento, "bove_cierre")) return "BOVE alojamiento actualizado";
-            if (cambioTiene(evento, "estado_reserva")) return "Estado de reserva actualizado";
+            if (cambioTiene(evento, "bove_checkout")) return tituloBove(evento, "bove_checkout", "BOVE Check-out");
+            if (cambioTiene(evento, "bove_cierre")) return tituloBove(evento, "bove_cierre", "BOVE alojamiento");
+            if (cambioTiene(evento, "estado_reserva")) return tituloEstadoReserva(evento);
             return "Reserva actualizada";
+        }
+
+        if (entidad === "reserva_estadias") {
+            if (cambioTiene(evento, "fecha_ingreso") || cambioTiene(evento, "fecha_salida")) {
+                return "Fechas de estadía actualizadas";
+            }
+            if (cambioTiene(evento, "estado_estadia")) return "Estado de estadía actualizado";
+            return tipo === "creacion" ? "Estadía creada" : "Estadía actualizada";
+        }
+
+        if (entidad === "estadia_noches") {
+            return tipo === "creacion" ? "Noche de estadía creada" : "Tarifa de noche actualizada";
         }
 
         if (["pagos", "pago"].includes(entidad) || tipo === "finanzas") {
             const estado = cambioTiene(evento, "estado");
             const esWebpay = String(pago?.medio_pago || "").startsWith("webpay_");
+
             if (tipo === "creacion") {
                 return esWebpay && pago?.estado === "pendiente_asociacion"
                     ? "WebPay pendiente registrado"
@@ -225,45 +492,115 @@
             if (estado?.nuevo === "confirmado") {
                 return esWebpay ? "WebPay asociado y confirmado" : "Pago confirmado";
             }
-            if (tipo === "finanzas") return evento.descripcion || evento.accion || "Movimiento financiero";
+            if (tipo === "finanzas") {
+                return evento.descripcion || "Movimiento financiero";
+            }
             return esWebpay ? "WebPay actualizado" : "Pago actualizado";
         }
 
-        if (entidad === "servicios") {
+        if (["servicios", "servicio"].includes(entidad)) {
+            const estado = cambioTiene(evento, "estado_servicio");
             if (tipo === "creacion") {
                 const nombre = servicio?.catalogo_servicios?.nombre;
                 return nombre ? `Servicio agregado · ${nombre}` : "Servicio agregado";
             }
+            if (estado?.nuevo === "realizado") return "Servicio marcado realizado";
             return "Servicio actualizado";
+        }
+
+        if (entidad === "turnos") {
+            if (cambioTiene(evento, "estado")) return "Estado del turno actualizado";
+            return tipo === "creacion" ? "Turno creado" : "Turno actualizado";
+        }
+
+        if (entidad === "cierres_turno") {
+            return tipo === "creacion" ? "Cierre preparado" : "Cierre actualizado";
         }
 
         if (tipo === "creacion") return "Registro creado";
         if (tipo === "actualizacion") return "Registro actualizado";
         if (tipo === "eliminacion") return "Registro eliminado";
-        return evento.descripcion || evento.accion || "Actividad registrada";
+        return limpiar(evento.descripcion) || textoEstado(evento.accion) || "Actividad registrada";
+    }
+
+    function limpioAccion(valor) {
+        const texto = limpiar(valor);
+        if (!texto) return "";
+        const mapa = {
+            reabrir_cierre: "Cierre de turno reabierto",
+            cerrar_turno: "Cierre de turno realizado"
+        };
+        return mapa[texto] || texto.replaceAll("_", " ").replace(/^./, s => s.toUpperCase());
+    }
+
+    function tituloAuditoria(evento) {
+        const humano = tituloHumano(evento);
+        if (!["Registro creado", "Registro actualizado", "Registro eliminado", "Actividad registrada"].includes(humano)) {
+            return humano;
+        }
+        return limpioAccion(evento.accion) || humano;
     }
 
     function descripcionHumana(evento) {
         const pago = pagoInfo(evento);
         const servicio = servicioInfo(evento);
+
         if (pago) {
             const partes = [dinero(pago.monto), medioPago(pago.medio_pago)];
-            if (pago.etapa_operativa) partes.push(String(pago.etapa_operativa).replaceAll("_", " "));
+            if (pago.etapa_operativa) partes.push(textoEstado(pago.etapa_operativa));
             return partes.filter(Boolean).join(" · ");
         }
+
         if (servicio) {
             const nombre = servicio.catalogo_servicios?.nombre || "Servicio";
             const partes = [nombre];
             if (Number(servicio.total || 0) > 0) partes.push(dinero(servicio.total));
-            if (servicio.fecha_servicio) partes.push(String(servicio.fecha_servicio));
+            if (servicio.fecha_servicio) partes.push(fechaCorta(servicio.fecha_servicio));
             return partes.join(" · ");
         }
-        return evento.descripcion || "";
+
+        if (String(evento?.tipo_evento || "") === "cierre_turno") {
+            return limpiar(evento.descripcion);
+        }
+
+        return "";
+    }
+
+    function descripcionDetalle(evento, modoCard) {
+        if (modoCard === "auditoria") {
+            return limpiar(evento.descripcion) || descripcionHumana(evento);
+        }
+
+        const entidad = String(evento?.entidad_tipo || "");
+        const pago = pagoInfo(evento);
+        const servicio = servicioInfo(evento);
+
+        if (pago) {
+            return `${dinero(pago.monto)} · ${medioPago(pago.medio_pago)}${pago.etapa_operativa ? ` · ${textoEstado(pago.etapa_operativa)}` : ""}`;
+        }
+        if (servicio) {
+            return `${servicio.catalogo_servicios?.nombre || "Servicio"} · ${dinero(servicio.total || 0)}${servicio.fecha_servicio ? ` · ${fechaCorta(servicio.fecha_servicio)}` : ""}`;
+        }
+        if (entidad === "reservas" && cambioTiene(evento, "bove_cierre")) {
+            const c = cambioTiene(evento, "bove_cierre");
+            return c?.nuevo ? `BOVE alojamiento: ${c.nuevo}` : "El BOVE de alojamiento fue retirado.";
+        }
+        if (entidad === "reservas" && cambioTiene(evento, "bove_checkout")) {
+            const c = cambioTiene(evento, "bove_checkout");
+            return c?.nuevo ? `BOVE Check-out: ${c.nuevo}` : "El BOVE Check-out fue retirado.";
+        }
+        if (String(evento?.tipo_evento || "") === "cierre_turno") {
+            return limpiar(evento.descripcion);
+        }
+        if (entidad === "reservas" && String(evento.tipo_evento) === "creacion") {
+            return "Reserva creada y registrada en HAIKU.";
+        }
+        return "";
     }
 
     function referenciaHumana(evento) {
-        const reserva = reservaInfo(evento.reserva_id);
-        const cabana = cabanaInfo(evento.cabana_id);
+        const reserva = reservaEvento(evento);
+        const cabana = cabanaEvento(evento);
         const partes = [];
 
         if (cabana?.numero) partes.push(`CAB ${cabana.numero}`);
@@ -271,14 +608,20 @@
         if (reserva?.codigo_haiku) partes.push(reserva.codigo_haiku);
         else if (reserva?.cloudbeds_id) partes.push(reserva.cloudbeds_id);
 
+        if (!partes.length && String(evento?.tipo_evento || "") === "cierre_turno") {
+            const fecha = evento?.datos_contexto?.fecha_operativa;
+            return fecha ? `Turno ${fechaCorta(fecha)}` : "Cierre de turno";
+        }
+
         return partes.length ? partes.join(" · ") : "Actividad general";
     }
 
     function textoBuscable(evento) {
-        const reserva = reservaInfo(evento.reserva_id);
-        const cabana = cabanaInfo(evento.cabana_id);
+        const reserva = reservaEvento(evento);
+        const cabana = cabanaEvento(evento);
         const pago = pagoInfo(evento);
         const servicio = servicioInfo(evento);
+
         return [
             evento.accion,
             evento.descripcion,
@@ -287,6 +630,7 @@
             evento.entidad_id,
             evento.reserva_id,
             evento.estadia_id,
+            evento.cabana_id,
             evento.turno_id,
             usuarioNombre(evento.usuario_id),
             reserva?.titular_nombre,
@@ -296,18 +640,31 @@
             pago?.medio_pago,
             pago?.monto,
             servicio?.catalogo_servicios?.nombre,
-            ...normalizarCambios(evento).flatMap(c => [c.campo, valorHumano(c.anterior, c.campo), valorHumano(c.nuevo, c.campo)])
-        ].filter(v => v !== undefined && v !== null).join(" ").toLocaleLowerCase("es-CL");
+            ...normalizarCambios(evento).flatMap(c => [
+                c.campo,
+                valorHumano(c.anterior, c.campo, "auditoria"),
+                valorHumano(c.nuevo, c.campo, "auditoria")
+            ])
+        ]
+            .filter(v => v !== undefined && v !== null)
+            .join(" ")
+            .toLocaleLowerCase("es-CL");
     }
 
     function permisosLocales() {
         const sesion = window.haikuSesion || {};
         const roles = Array.isArray(sesion.roles) ? sesion.roles : [];
         const permisos = Array.isArray(sesion.permisos) ? sesion.permisos : [];
-        const codigosRoles = roles.map(r => String(typeof r === "string" ? r : (r?.codigo || r?.nombre || "")).toLowerCase());
-        const codigosPermisos = permisos.map(p => String(typeof p === "string" ? p : (p?.codigo || p?.nombre || "")));
+        const codigosRoles = roles.map(r =>
+            String(typeof r === "string" ? r : (r?.codigo || r?.nombre || "")).toLowerCase()
+        );
+        const codigosPermisos = permisos.map(p =>
+            String(typeof p === "string" ? p : (p?.codigo || p?.nombre || ""))
+        );
         return {
-            auditoria: codigosRoles.some(r => ["administrador", "manager"].includes(r)) || codigosPermisos.includes("auditoria.ver")
+            auditoria:
+                codigosRoles.some(r => ["administrador", "manager"].includes(r)) ||
+                codigosPermisos.includes("auditoria.ver")
         };
     }
 
@@ -321,7 +678,7 @@
                     <div>
                         <p class="historial-supa-kicker">TRAZABILIDAD</p>
                         <h2>Historial y auditoría</h2>
-                        <p>Actividad real registrada en Supabase. Historial resume lo importante; Auditoría conserva el detalle técnico completo.</p>
+                        <p>Historial muestra la actividad en lenguaje operativo. Auditoría conserva el detalle técnico cuando necesitas investigar un cambio.</p>
                     </div>
                     <button type="button" class="historial-supa-refresh" data-historial-refresh>↻ Actualizar</button>
                 </header>
@@ -366,6 +723,7 @@
                     <div class="historial-supa-lista" data-historial-lista>
                         <p class="historial-supa-cargando">Cargando actividad…</p>
                     </div>
+
                     <div class="historial-supa-mas-wrap" data-historial-mas-wrap hidden>
                         <button type="button" class="historial-supa-mas" data-historial-mas>Cargar más actividad</button>
                     </div>
@@ -374,16 +732,21 @@
         `;
 
         seccion.querySelector("[data-historial-refresh]")?.addEventListener("click", () => cargarEventos(true));
+
         seccion.querySelectorAll("[data-historial-modo]").forEach(btn => {
             btn.addEventListener("click", () => cambiarModo(btn.dataset.historialModo));
         });
+
         ["input", "change"].forEach(nombre => {
             seccion.addEventListener(nombre, event => {
-                if (event.target?.matches?.("[data-historial-buscar],[data-historial-desde],[data-historial-hasta],[data-historial-tipo]")) {
+                if (event.target?.matches?.(
+                    "[data-historial-buscar],[data-historial-desde],[data-historial-hasta],[data-historial-tipo]"
+                )) {
                     renderizar();
                 }
             });
         });
+
         seccion.querySelector("[data-historial-mas]")?.addEventListener("click", () => {
             limite += 250;
             cargarEventos(true);
@@ -402,28 +765,67 @@
 
     async function enriquecer(lista) {
         const usuarioIds = idsUnicos(lista.map(e => e.usuario_id));
-        const reservaIds = idsUnicos(lista.map(e => e.reserva_id));
-        const cabanaIds = idsUnicos(lista.map(e => e.cabana_id));
-        const pagoIds = idsUnicos(lista.filter(e => ["pago", "pagos"].includes(e.entidad_tipo)).map(e => e.entidad_id));
-        const servicioIds = idsUnicos(lista.filter(e => e.entidad_tipo === "servicios").map(e => e.entidad_id));
+        const reservaIdsDirectos = idsUnicos(lista.map(e => e.reserva_id));
+        const cabanaIdsDirectos = idsUnicos(lista.map(e => e.cabana_id));
+        const pagoIds = idsUnicos(
+            lista.filter(e => ["pago", "pagos"].includes(e.entidad_tipo)).map(e => e.entidad_id)
+        );
+        const servicioIds = idsUnicos(
+            lista.filter(e => ["servicio", "servicios"].includes(e.entidad_tipo)).map(e => e.entidad_id)
+        );
+        const estadiaIds = idsUnicos([
+            ...lista.map(e => e.estadia_id),
+            ...lista.filter(e => e.entidad_tipo === "reserva_estadias").map(e => e.entidad_id)
+        ]);
 
-        const [usuarios, reservas, cabanas, pagos, servicios] = await Promise.all([
+        const [usuarios, reservasA, cabanasA, pagos, servicios, estadias] = await Promise.all([
             consultaPorIds("usuarios", "id,nombre,apellido", usuarioIds),
-            consultaPorIds("reservas", "id,codigo_haiku,cloudbeds_id,titular_nombre", reservaIds),
-            consultaPorIds("cabanas", "id,numero,nombre", cabanaIds),
-            consultaPorIds("pagos", "id,reserva_id,monto,medio_pago,estado,etapa_operativa,tipo_movimiento,codigo_autorizacion,folio,bove,datos_origen", pagoIds),
-            consultaPorIds("servicios", "id,reserva_id,total,estado_servicio,fecha_servicio,hora_inicio,tipo_cobro,catalogo_servicios(nombre,codigo)", servicioIds)
+            consultaPorIds("reservas", "id,codigo_haiku,cloudbeds_id,titular_nombre", reservaIdsDirectos),
+            consultaPorIds("cabanas", "id,numero,nombre", cabanaIdsDirectos),
+            consultaPorIds(
+                "pagos",
+                "id,reserva_id,monto,medio_pago,estado,etapa_operativa,tipo_movimiento,codigo_autorizacion,folio,bove,datos_origen",
+                pagoIds
+            ),
+            consultaPorIds(
+                "servicios",
+                "id,reserva_id,estadia_id,total,estado_servicio,fecha_servicio,hora_inicio,tipo_cobro,catalogo_servicios(nombre,codigo)",
+                servicioIds
+            ),
+            consultaPorIds(
+                "reserva_estadias",
+                "id,reserva_id,cabana_id,fecha_ingreso,fecha_salida,estado_estadia",
+                estadiaIds
+            )
+        ]);
+
+        const reservaIdsExtra = idsUnicos([
+            ...pagos.map(x => x.reserva_id),
+            ...servicios.map(x => x.reserva_id),
+            ...estadias.map(x => x.reserva_id)
+        ].filter(id => !reservaIdsDirectos.includes(String(id))));
+
+        const cabanaIdsExtra = idsUnicos(
+            estadias.map(x => x.cabana_id)
+                .filter(id => !cabanaIdsDirectos.includes(String(id)))
+        );
+
+        const [reservasB, cabanasB] = await Promise.all([
+            consultaPorIds("reservas", "id,codigo_haiku,cloudbeds_id,titular_nombre", reservaIdsExtra),
+            consultaPorIds("cabanas", "id,numero,nombre", cabanaIdsExtra)
         ]);
 
         contexto.usuarios = new Map(usuarios.map(x => [String(x.id), x]));
-        contexto.reservas = new Map(reservas.map(x => [String(x.id), x]));
-        contexto.cabanas = new Map(cabanas.map(x => [String(x.id), x]));
+        contexto.reservas = new Map([...reservasA, ...reservasB].map(x => [String(x.id), x]));
+        contexto.cabanas = new Map([...cabanasA, ...cabanasB].map(x => [String(x.id), x]));
         contexto.pagos = new Map(pagos.map(x => [String(x.id), x]));
         contexto.servicios = new Map(servicios.map(x => [String(x.id), x]));
+        contexto.estadias = new Map(estadias.map(x => [String(x.id), x]));
     }
 
     async function cargarEventos(forzar = false) {
         if (cargando) return;
+
         if (!forzar && Date.now() - ultimaCarga < 1200) {
             renderizar();
             return;
@@ -431,14 +833,20 @@
 
         const lista = seccion.querySelector("[data-historial-lista]");
         const boton = seccion.querySelector("[data-historial-refresh]");
+
         cargando = true;
         if (boton) boton.disabled = true;
-        if (lista && eventos.length === 0) lista.innerHTML = '<p class="historial-supa-cargando">Cargando actividad desde Supabase…</p>';
+        if (lista && eventos.length === 0) {
+            lista.innerHTML = '<p class="historial-supa-cargando">Cargando actividad desde Supabase…</p>';
+        }
 
         try {
             const { data, error, count } = await cliente
                 .from("eventos_auditoria")
-                .select("id,usuario_id,accion,tipo_evento,entidad_tipo,entidad_id,reserva_id,estadia_id,cabana_id,turno_id,descripcion,cambios,datos_contexto,origen,creado_en", { count: "exact" })
+                .select(
+                    "id,usuario_id,accion,tipo_evento,entidad_tipo,entidad_id,reserva_id,estadia_id,cabana_id,turno_id,descripcion,cambios,datos_contexto,origen,creado_en",
+                    { count: "exact" }
+                )
                 .order("creado_en", { ascending: false })
                 .range(0, limite - 1);
 
@@ -449,15 +857,22 @@
             await enriquecer(eventos);
             ultimaCarga = Date.now();
             renderizar();
-            console.info("HAIKU · Historial Supabase cargado:", eventos.length, "de", totalExacto);
+
+            console.info("HAIKU · Historial Supabase V2 cargado:", eventos.length, "de", totalExacto);
         } catch (error) {
             console.error("HAIKU · No fue posible cargar historial Supabase:", error);
+
             if (lista) {
                 lista.innerHTML = "";
-                const p = elemento("p", "historial-supa-error", error?.message?.includes("permission")
-                    ? "Tu usuario no tiene permiso para consultar la auditoría."
-                    : "No fue posible cargar el historial desde Supabase.");
-                lista.appendChild(p);
+                lista.appendChild(
+                    elemento(
+                        "p",
+                        "historial-supa-error",
+                        error?.message?.includes("permission")
+                            ? "Tu usuario no tiene permiso para consultar la auditoría."
+                            : "No fue posible cargar el historial desde Supabase."
+                    )
+                );
             }
         } finally {
             cargando = false;
@@ -466,48 +881,130 @@
     }
 
     function cambiarModo(nuevo) {
-        if (!['historial','auditoria'].includes(nuevo)) return;
+        if (!["historial", "auditoria"].includes(nuevo)) return;
+
         if (nuevo === "auditoria" && !permisosLocales().auditoria) {
             alert("Tu usuario no tiene permiso para ver la auditoría técnica.");
             return;
         }
+
         modo = nuevo;
+
         seccion.querySelectorAll("[data-historial-modo]").forEach(btn => {
             btn.classList.toggle("activo", btn.dataset.historialModo === modo);
         });
+
         renderizar();
     }
 
     function eventosFiltrados(origen = eventos, modoForzado = modo) {
-        const buscar = limpiar(seccion.querySelector("[data-historial-buscar]")?.value).toLocaleLowerCase("es-CL");
+        const buscar = limpiar(
+            seccion.querySelector("[data-historial-buscar]")?.value
+        ).toLocaleLowerCase("es-CL");
         const desde = seccion.querySelector("[data-historial-desde]")?.value || "";
         const hasta = seccion.querySelector("[data-historial-hasta]")?.value || "";
         const tipo = seccion.querySelector("[data-historial-tipo]")?.value || "";
 
         return origen.filter(evento => {
             if (modoForzado === "historial" && esTecnicoOcultoEnHistorial(evento)) return false;
+
             const fecha = fechaLocal(evento.creado_en);
             if (desde && fecha < desde) return false;
             if (hasta && fecha > hasta) return false;
             if (tipo && categoriaEvento(evento) !== tipo) return false;
             if (buscar && !textoBuscable(evento).includes(buscar)) return false;
+
             return true;
         });
     }
 
-    function crearCambios(evento) {
-        const cambios = normalizarCambios(evento);
+    function crearCambios(evento, modoCard) {
+        let cambios = normalizarCambios(evento);
+
+        if (modoCard === "historial") {
+            cambios = cambios.filter(c => !CAMPOS_OCULTOS_HISTORIAL.has(c.campo));
+        }
+
         if (!cambios.length) return null;
+
         const cont = elemento("div", "historial-supa-cambios");
+
         cambios.forEach(c => {
             const fila = elemento("div", "historial-supa-cambio");
             fila.append(
                 elemento("strong", "", nombreCampo(c.campo)),
-                elemento("span", "", `${valorHumano(c.anterior, c.campo)} → ${valorHumano(c.nuevo, c.campo)}`)
+                elemento(
+                    "span",
+                    "",
+                    `${valorHumano(c.anterior, c.campo, modoCard)} → ${valorHumano(c.nuevo, c.campo, modoCard)}`
+                )
             );
             cont.appendChild(fila);
         });
+
         return cont;
+    }
+
+    function datosTecnicosHumanos(evento) {
+        const filas = [];
+        const reserva = reservaEvento(evento);
+        const estadia = estadiaInfo(evento.estadia_id) ||
+            (evento.entidad_tipo === "reserva_estadias" ? estadiaInfo(evento.entidad_id) : null);
+        const cabana = cabanaEvento(evento);
+
+        filas.push(["Tipo", `${nombreTipoEvento(evento.tipo_evento)} · ${nombreEntidad(evento.entidad_tipo)}`]);
+
+        if (reserva) filas.push(["Reserva", referenciaReserva(reserva)]);
+        if (estadia) filas.push(["Estadía", referenciaEstadia(estadia)]);
+        if (cabana?.numero) filas.push(["Cabaña", `CAB ${cabana.numero}${cabana.nombre ? ` · ${cabana.nombre}` : ""}`]);
+
+        if (evento.turno_id) {
+            const fecha = evento?.datos_contexto?.fecha_operativa;
+            filas.push(["Turno", fecha ? `Turno ${fechaCorta(fecha)}` : `Turno ${cortoId(evento.turno_id)}`]);
+        }
+
+        filas.push(["Origen", textoEstado(evento.origen || "usuario")]);
+
+        return filas;
+    }
+
+    function crearDetallesTecnicos(evento) {
+        const tecnico = elemento("div", "historial-supa-tecnico");
+
+        datosTecnicosHumanos(evento).forEach(([titulo, valor]) => {
+            const caja = elemento("div");
+            caja.append(
+                elemento("span", "", titulo),
+                elemento("code", "", valor)
+            );
+            tecnico.appendChild(caja);
+        });
+
+        const ids = elemento("details", "historial-supa-json");
+        ids.appendChild(elemento("summary", "", "Identificadores técnicos"));
+        ids.appendChild(
+            elemento(
+                "pre",
+                "",
+                escaparJson({
+                    evento_id: evento.id || null,
+                    entidad_tipo: evento.entidad_tipo || null,
+                    entidad_id: evento.entidad_id || null,
+                    reserva_id: evento.reserva_id || null,
+                    estadia_id: evento.estadia_id || null,
+                    cabana_id: evento.cabana_id || null,
+                    turno_id: evento.turno_id || null
+                })
+            )
+        );
+
+        const contextoJson = elemento("details", "historial-supa-json");
+        contextoJson.appendChild(elemento("summary", "", "Contexto técnico JSON"));
+        contextoJson.appendChild(
+            elemento("pre", "", escaparJson(evento.datos_contexto || {}))
+        );
+
+        return { tecnico, ids, contextoJson };
     }
 
     function crearCard(evento, modoCard = modo) {
@@ -521,25 +1018,35 @@
         const marca = elemento("span", "historial-supa-marca");
         const contenido = elemento("span", "historial-supa-contenido");
         const accion = elemento("span", "historial-supa-accion");
-        accion.appendChild(elemento("strong", "", modoCard === "historial" ? tituloHumano(evento) : (evento.accion || "Evento de auditoría")));
-        accion.appendChild(elemento("em", "historial-supa-chip", modoCard === "historial" ? categoriaEvento(evento) : `${evento.tipo_evento} · ${evento.entidad_tipo}`));
 
-        const meta = elemento("span", "historial-supa-meta");
-        meta.textContent = referenciaHumana(evento);
+        accion.appendChild(
+            elemento(
+                "strong",
+                "",
+                modoCard === "historial" ? tituloHumano(evento) : tituloAuditoria(evento)
+            )
+        );
+
+        accion.appendChild(
+            elemento(
+                "em",
+                "historial-supa-chip",
+                modoCard === "historial"
+                    ? categoriaEvento(evento)
+                    : `${nombreTipoEvento(evento.tipo_evento)} · ${nombreEntidad(evento.entidad_tipo)}`
+            )
+        );
+
+        const meta = elemento("span", "historial-supa-meta", referenciaHumana(evento));
+        contenido.append(accion, meta);
 
         const desc = descripcionHumana(evento);
-        if (desc && desc !== evento.descripcion) {
-            const breve = elemento("span", "historial-supa-meta", desc);
-            contenido.append(accion, meta, breve);
-        } else {
-            contenido.append(accion, meta);
-        }
+        if (desc) contenido.appendChild(elemento("span", "historial-supa-meta", desc));
 
         const pie = elemento("span", "historial-supa-pie");
         pie.append(
             elemento("span", "", fechaHora(evento.creado_en)),
-            elemento("span", "", usuarioNombre(evento.usuario_id)),
-            elemento("span", "", evento.origen || "usuario")
+            elemento("span", "", usuarioNombre(evento.usuario_id))
         );
         contenido.appendChild(pie);
 
@@ -548,34 +1055,31 @@
 
         const detalle = elemento("div", "historial-supa-detalle");
         detalle.hidden = true;
-        const descripcion = evento.descripcion || descripcionHumana(evento);
-        if (descripcion) detalle.appendChild(elemento("p", "historial-supa-descripcion", descripcion));
-        const cambios = crearCambios(evento);
+
+        const descripcion = descripcionDetalle(evento, modoCard);
+        if (descripcion) {
+            detalle.appendChild(
+                elemento("p", "historial-supa-descripcion", descripcion)
+            );
+        }
+
+        const cambios = crearCambios(evento, modoCard);
         if (cambios) detalle.appendChild(cambios);
 
         if (modoCard === "auditoria") {
-            const tecnico = elemento("div", "historial-supa-tecnico");
-            [
-                ["Evento", evento.id],
-                ["Entidad", `${evento.entidad_tipo || "—"}${evento.entidad_id ? ` · ${evento.entidad_id}` : ""}`],
-                ["Reserva", evento.reserva_id || "—"],
-                ["Estadía", evento.estadia_id || "—"],
-                ["Cabaña", evento.cabana_id || "—"],
-                ["Turno", evento.turno_id || "—"]
-            ].forEach(([titulo, valor]) => {
-                const caja = elemento("div");
-                caja.append(elemento("span", "", titulo), elemento("code", "", valor));
-                tecnico.appendChild(caja);
-            });
-            detalle.appendChild(tecnico);
-
-            const json = elemento("details", "historial-supa-json");
-            json.appendChild(elemento("summary", "", "Contexto técnico JSON"));
-            json.appendChild(elemento("pre", "", escaparJson(evento.datos_contexto || {})));
-            detalle.appendChild(json);
+            const tech = crearDetallesTecnicos(evento);
+            detalle.append(tech.tecnico, tech.ids, tech.contextoJson);
         }
 
-        if (!detalle.childElementCount) detalle.appendChild(elemento("p", "historial-supa-descripcion", "Evento registrado sin detalle adicional."));
+        if (!detalle.childElementCount) {
+            detalle.appendChild(
+                elemento(
+                    "p",
+                    "historial-supa-descripcion",
+                    "La acción quedó registrada correctamente."
+                )
+            );
+        }
 
         boton.addEventListener("click", () => {
             const abrir = detalle.hidden;
@@ -590,11 +1094,15 @@
 
     function pintarLista(contenedor, lista, modoCard, vacio) {
         contenedor.innerHTML = "";
+
         if (!lista.length) {
             contenedor.appendChild(elemento("p", "historial-supa-vacio", vacio));
             return;
         }
-        lista.forEach(evento => contenedor.appendChild(crearCard(evento, modoCard)));
+
+        lista.forEach(evento => {
+            contenedor.appendChild(crearCard(evento, modoCard));
+        });
     }
 
     function renderizar() {
@@ -602,11 +1110,21 @@
         const contador = seccion.querySelector("[data-historial-contador]");
         const fuente = seccion.querySelector("[data-historial-fuente]");
         const masWrap = seccion.querySelector("[data-historial-mas-wrap]");
+
         if (!listaEl) return;
 
         const lista = eventosFiltrados();
-        if (contador) contador.textContent = `${lista.length} ${lista.length === 1 ? "evento" : "eventos"}`;
-        if (fuente) fuente.textContent = modo === "historial" ? "Vista operativa · Supabase" : "Auditoría completa · Supabase";
+
+        if (contador) {
+            contador.textContent = `${lista.length} ${lista.length === 1 ? "evento" : "eventos"}`;
+        }
+
+        if (fuente) {
+            fuente.textContent = modo === "historial"
+                ? "Vista operativa · Supabase"
+                : "Auditoría completa · Supabase";
+        }
+
         pintarLista(
             listaEl,
             lista,
@@ -615,12 +1133,14 @@
                 ? "No hay actividad operativa para mostrar con estos filtros."
                 : "No hay eventos de auditoría para mostrar con estos filtros."
         );
+
         if (masWrap) masWrap.hidden = eventos.length >= totalExacto;
     }
 
     function asegurarModalReserva() {
         let modal = document.getElementById("historial-supa-reserva-modal");
         if (modal) return modal;
+
         modal = elemento("div", "historial-supa-modal");
         modal.id = "historial-supa-reserva-modal";
         modal.hidden = true;
@@ -640,11 +1160,18 @@
                 </div>
             </section>
         `;
+
         document.body.appendChild(modal);
-        modal.querySelector("[data-historial-reserva-cerrar]")?.addEventListener("click", () => cerrarModalReserva());
+
+        modal.querySelector("[data-historial-reserva-cerrar]")?.addEventListener(
+            "click",
+            () => cerrarModalReserva()
+        );
+
         modal.addEventListener("click", event => {
             if (event.target === modal) cerrarModalReserva();
         });
+
         return modal;
     }
 
@@ -663,30 +1190,62 @@
         const modal = asegurarModalReserva();
         const listaEl = modal.querySelector("[data-historial-reserva-lista]");
         const meta = modal.querySelector("[data-historial-reserva-meta]");
-        const titular = document.getElementById("ficha-huesped-titular")?.textContent?.trim() || "";
+        const titular =
+            document.getElementById("ficha-huesped-titular")?.textContent?.trim() ||
+            document.getElementById("ficha-reserva-titular")?.textContent?.trim() ||
+            "";
         const cabana = ficha?.dataset.numeroCabana || "";
-        if (meta) meta.textContent = [cabana ? `CAB ${cabana}` : "", titular].filter(Boolean).join(" · ") || "Reserva HAIKU";
-        if (listaEl) listaEl.innerHTML = '<p class="historial-supa-cargando">Cargando historial desde Supabase…</p>';
+
+        if (meta) {
+            meta.textContent = [
+                cabana ? `CAB ${cabana}` : "",
+                titular
+            ].filter(Boolean).join(" · ") || "Reserva HAIKU";
+        }
+
+        if (listaEl) {
+            listaEl.innerHTML =
+                '<p class="historial-supa-cargando">Cargando historial desde Supabase…</p>';
+        }
+
         modal.hidden = false;
         document.body.style.overflow = "hidden";
 
         try {
             const { data, error } = await cliente
                 .from("eventos_auditoria")
-                .select("id,usuario_id,accion,tipo_evento,entidad_tipo,entidad_id,reserva_id,estadia_id,cabana_id,turno_id,descripcion,cambios,datos_contexto,origen,creado_en")
+                .select(
+                    "id,usuario_id,accion,tipo_evento,entidad_tipo,entidad_id,reserva_id,estadia_id,cabana_id,turno_id,descripcion,cambios,datos_contexto,origen,creado_en"
+                )
                 .eq("reserva_id", reservaId)
                 .order("creado_en", { ascending: false })
                 .limit(400);
+
             if (error) throw error;
+
             const lista = data || [];
             await enriquecer([...eventos, ...lista]);
+
             const visibles = lista.filter(e => !esTecnicoOcultoEnHistorial(e));
-            pintarLista(listaEl, visibles, "historial", "Esta reserva todavía no tiene actividad registrada en Supabase.");
+
+            pintarLista(
+                listaEl,
+                visibles,
+                "historial",
+                "Esta reserva todavía no tiene actividad registrada en Supabase."
+            );
         } catch (error) {
             console.error("HAIKU · No fue posible abrir historial de reserva:", error);
+
             if (listaEl) {
                 listaEl.innerHTML = "";
-                listaEl.appendChild(elemento("p", "historial-supa-error", "No fue posible cargar el historial de esta reserva."));
+                listaEl.appendChild(
+                    elemento(
+                        "p",
+                        "historial-supa-error",
+                        "No fue posible cargar el historial de esta reserva."
+                    )
+                );
             }
         }
     }
@@ -694,32 +1253,40 @@
     construirUI();
     asegurarModalReserva();
 
-    // Intercepta el antiguo botón de historial de la ficha antes del listener legacy.
-    document.addEventListener("click", event => {
-        const botonFicha = event.target?.closest?.("#ficha-reserva-historial");
-        if (botonFicha) {
-            event.preventDefault();
-            event.stopImmediatePropagation();
-            abrirHistorialReserva();
-            return;
-        }
+    document.addEventListener(
+        "click",
+        event => {
+            const botonFicha = event.target?.closest?.("#ficha-reserva-historial");
 
-        const enlace = event.target?.closest?.('[data-seccion="historial"]');
-        if (enlace) setTimeout(() => cargarEventos(true), 70);
-    }, true);
+            if (botonFicha) {
+                event.preventDefault();
+                event.stopImmediatePropagation();
+                abrirHistorialReserva();
+                return;
+            }
+
+            const enlace = event.target?.closest?.('[data-seccion="historial"]');
+            if (enlace) setTimeout(() => cargarEventos(true), 70);
+        },
+        true
+    );
 
     document.addEventListener("keydown", event => {
         if (event.key === "Escape") cerrarModalReserva();
     });
 
-    // Cuando Historial pasa realmente a visible, pide una copia fresca a Supabase.
     let visibleAnterior = seccion.classList.contains("activa");
+
     const observador = new MutationObserver(() => {
         const visible = seccion.classList.contains("activa") && !seccion.hidden;
         if (visible && !visibleAnterior) setTimeout(() => cargarEventos(true), 30);
         visibleAnterior = visible;
     });
-    observador.observe(seccion, { attributes: true, attributeFilter: ["class", "hidden", "style"] });
+
+    observador.observe(seccion, {
+        attributes: true,
+        attributeFilter: ["class", "hidden", "style"]
+    });
 
     window.addEventListener("haiku:auth-ready", () => {
         setTimeout(() => {
@@ -728,7 +1295,9 @@
     });
 
     setTimeout(() => {
-        if (window.haikuSesion && seccion.classList.contains("activa")) cargarEventos(true);
+        if (window.haikuSesion && seccion.classList.contains("activa")) {
+            cargarEventos(true);
+        }
     }, 700);
 
     window.HistorialSupabase = {
@@ -737,5 +1306,5 @@
         eventos: () => [...eventos]
     };
 
-    console.info("HAIKU · Historial + Auditoría Supabase V1 preparado.");
+    console.info("HAIKU · Historial + Auditoría Supabase V2 preparado.");
 })();
