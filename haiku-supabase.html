@@ -89,7 +89,7 @@
 
                 html = html.replace(
                     "</head>",
-                    `<link rel="stylesheet" href="css/supabase-pagos-v4-fix.css?v=${version}">\n<link rel="stylesheet" href="css/supabase-webpay-v1.css?v=${version}">\n<link rel="stylesheet" href="css/supabase-cierre-final-v1.css?v=${version}">\n<link rel="stylesheet" href="css/supabase-cierre-modern-v1.css?v=${version}">\n<link rel="stylesheet" href="css/supabase-historial-v1.css?v=${version}">\n</head>`
+                    `<link rel="stylesheet" href="css/supabase-pagos-v4-fix.css?v=${version}">\n<link rel="stylesheet" href="css/supabase-webpay-v1.css?v=${version}">\n<link rel="stylesheet" href="css/supabase-cierre-final-v1.css?v=${version}">\n<link rel="stylesheet" href="css/supabase-cierre-modern-v1.css?v=${version}">\n<link rel="stylesheet" href="css/supabase-historial-v1.css?v=${version}">\n<link rel="stylesheet" href="css/supabase-revision-modern-v1.css?v=${version}">\n</head>`
                 );
 
                 const marca = "<!-- JAVASCRIPT -->";
@@ -131,7 +131,8 @@
                     `<script src="js/supabase-cierre-final-v1.js?v=${version}"><` + '/script>',
                     `<script src="js/supabase-cierre-autorefresh-v1.js?v=${version}"><` + '/script>',
                     `<script src="js/supabase-historial-v1.js?v=${version}"><` + '/script>',
-                    `<script src="js/supabase-aseo-revision-v1.js?v=${version}"><` + '/script>'
+                    `<script src="js/supabase-aseo-revision-v1.js?v=${version}"><` + '/script>',
+                    `<script src="js/supabase-revision-ui-v1.js?v=${version}"><` + '/script>'
                 ].join("\n");
 
                 html = html.replace(
