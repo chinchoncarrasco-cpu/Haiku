@@ -17,6 +17,8 @@
     let refrescando = false;
     let refrescoPendiente = false;
     let reconectando = false;
+    let recuperando = false;
+    let ultimoIntentoRecuperacion = 0;
     let ultimoEvento = 0;
     let ultimoRefresco = 0;
 
@@ -42,12 +44,29 @@
         );
     }
 
-    function esperar(ms) {
-        return new Promise(resolve => setTimeout(resolve, ms));
+    function usuarioEditandoAseo() {
+        const activo = document.activeElement;
+        const seccion = document.getElementById("seccion-aseo");
+
+        return Boolean(
+            activo &&
+            seccion?.contains(activo) &&
+            activo.matches?.(
+                "input, select, textarea, [contenteditable='true']"
+            )
+        );
     }
 
     async function refrescarDesdeSupabase() {
         if (!window.haikuSesion) return;
+
+        // No reemplazamos el DOM mientras el usuario escribe o mantiene un
+        // selector abierto. El cambio remoto queda pendiente hasta que salga
+        // del campo, evitando que el teclado/selector móvil se cierre.
+        if (usuarioEditandoAseo()) {
+            refrescoPendiente = true;
+            return;
+        }
 
         if (refrescando) {
             refrescoPendiente = true;
@@ -64,13 +83,10 @@
             const apiRevision = window.HAIKU_REVISION_RESUMEN_SYNC_V2;
 
             if (apiAseo?.hidratar) {
-                await apiAseo.hidratar(fecha, { pintar: false });
                 await apiAseo.hidratar(fecha, { pintar: true });
             }
 
             if (apiRevision?.resincronizar) {
-                await apiRevision.resincronizar();
-                await esperar(120);
                 await apiRevision.resincronizar();
             }
 
@@ -141,7 +157,7 @@
 
         estadoCanal = "CONECTANDO";
 
-        canal = cliente
+        const nuevoCanal = cliente
             .channel(`haiku-aseo-operacion-${Date.now()}`)
             .on(
                 "postgres_changes",
@@ -163,7 +179,11 @@
                 { event: "*", schema: "public", table: "revision_items" },
                 eventoRealtime
             )
-            .subscribe(status => {
+            .subscribe((status, error) => {
+                // removeChannel() también emite CLOSED. Si este canal ya no
+                // es el activo, fue cerrado por nosotros y no es una caída.
+                if (canal !== nuevoCanal) return;
+
                 estadoCanal = status;
 
                 if (status === "SUBSCRIBED") {
@@ -179,26 +199,44 @@
                 ) {
                     console.warn(
                         "HAIKU · Aseo Realtime perdió conexión:",
-                        status
+                        status,
+                        error || ""
                     );
-                    programarReconexion(300);
+                    programarReconexion(800);
                 }
             });
+
+        canal = nuevoCanal;
     }
 
-    async function recuperarConexion() {
-        if (!window.haikuSesion) return;
+    async function recuperarConexion(forzar = false) {
+        if (!window.haikuSesion || recuperando) return;
 
-        // iOS/Android pueden conservar un canal que figura vivo aunque el
-        // socket haya sido suspendido. Al volver a la app lo reconstruimos.
-        if (esMovil()) {
-            await desconectar();
-            await conectar();
-        } else if (estadoCanal !== "SUBSCRIBED") {
-            await conectar();
+        const ahora = Date.now();
+        if (
+            forzar &&
+            estadoCanal === "SUBSCRIBED" &&
+            ahora - ultimoIntentoRecuperacion < 1500
+        ) {
+            programarRefresco(80);
+            return;
         }
 
-        programarRefresco(40);
+        recuperando = true;
+        ultimoIntentoRecuperacion = ahora;
+
+        try {
+            // Al volver desde segundo plano reconstruimos una sola vez el
+            // canal móvil. Los demás eventos de foco sólo reparan si cayó.
+            if (forzar || estadoCanal !== "SUBSCRIBED") {
+                await desconectar();
+                await conectar();
+            }
+
+            programarRefresco(80);
+        } finally {
+            recuperando = false;
+        }
     }
 
     window.addEventListener("haiku:auth-ready", () => {
@@ -207,22 +245,38 @@
     });
 
     window.addEventListener("focus", () => {
-        if (window.haikuSesion) recuperarConexion();
+        if (window.haikuSesion && estadoCanal !== "SUBSCRIBED") {
+            recuperarConexion();
+        }
     });
 
-    window.addEventListener("pageshow", () => {
-        if (window.haikuSesion) recuperarConexion();
+    window.addEventListener("pageshow", evento => {
+        if (window.haikuSesion) recuperarConexion(Boolean(evento.persisted));
     });
 
     window.addEventListener("online", () => {
-        if (window.haikuSesion) recuperarConexion();
+        if (window.haikuSesion) recuperarConexion(true);
     });
 
     document.addEventListener("visibilitychange", () => {
         if (!document.hidden && window.haikuSesion) {
-            recuperarConexion();
+            recuperarConexion(esMovil());
         }
     });
+
+    // Si llegó un cambio mientras se editaba, lo aplicamos al abandonar el
+    // campo. Dejamos margen para que termine primero su escritura local.
+    document.addEventListener("focusout", evento => {
+        if (!evento.target?.closest?.("#seccion-aseo")) return;
+        if (!refrescoPendiente) return;
+
+        setTimeout(() => {
+            if (!usuarioEditandoAseo()) {
+                refrescoPendiente = false;
+                programarRefresco(450);
+            }
+        }, 0);
+    }, true);
 
     cliente.auth.onAuthStateChange(evento => {
         if (evento === "SIGNED_OUT") {
@@ -230,21 +284,22 @@
         }
     });
 
-    // Respaldo móvil: mientras el usuario está mirando Aseo hacemos una
-    // verificación liviana cada pocos segundos. Normalmente Realtime gana y
-    // esta pasada no cambia nada; evita depender de F5 si el SO durmió el socket.
+    // Respaldo móvil: si el sistema durmió el WebSocket, comprobamos Supabase
+    // sin interrumpir una edición activa. Realtime sigue siendo la vía normal.
     setInterval(() => {
         if (!window.haikuSesion || !esMovil() || !aseoVisible()) return;
 
+        if (usuarioEditandoAseo()) return;
+
         const ahora = Date.now();
-        if (ahora - ultimoRefresco > 3500 && ahora - ultimoEvento > 1200) {
+        if (ahora - ultimoRefresco > 8000 && ahora - ultimoEvento > 1500) {
             programarRefresco(0);
         }
 
         if (estadoCanal !== "SUBSCRIBED") {
             programarReconexion(0);
         }
-    }, 2000);
+    }, 4000);
 
     window.HAIKU_ASEO_REALTIME_V1 = Object.freeze({
         refrescar: refrescarDesdeSupabase,
