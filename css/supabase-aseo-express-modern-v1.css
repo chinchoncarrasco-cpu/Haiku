@@ -1,0 +1,390 @@
+/* ========================================
+   HAIKU · REVISIÓN ASEO EXPRESS · MODERNO V1
+   Capa visual aislada. NO modifica display ni lógica JS.
+======================================== */
+
+#aseo-express-individual {
+    --exp-panel: #ffffff;
+    --exp-fondo-suave: #f7f9f7;
+    --exp-borde: #dfe6e1;
+    --exp-borde-fuerte: #cbd8cf;
+    --exp-texto: #1f2b24;
+    --exp-texto-suave: #758078;
+    --exp-verde: #2f7653;
+    --exp-verde-suave: #eaf5ee;
+    --exp-amarillo: #9b6e1f;
+    --exp-amarillo-suave: #fff6df;
+    --exp-sombra: 0 10px 30px rgba(26, 45, 34, 0.055);
+    padding-bottom: 96px;
+}
+
+#aseo-express-individual.activa {
+    animation: aseoExpressEntrada .16s ease-out;
+}
+
+@keyframes aseoExpressEntrada {
+    from { opacity: 0; transform: translateY(3px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+/* VOLVER */
+#aseo-express-individual .boton-volver-revision {
+    display: inline-flex;
+    align-items: center;
+    gap: 7px;
+    min-height: 38px;
+    margin-bottom: 14px;
+    padding: 8px 13px;
+    border: 1px solid var(--exp-borde);
+    border-radius: 12px;
+    background: #fff;
+    color: #4b5750;
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 0 2px 8px rgba(20, 35, 26, .025);
+    transition: border-color .15s ease, background .15s ease, color .15s ease;
+}
+
+#aseo-express-individual .boton-volver-revision:hover {
+    border-color: var(--exp-borde-fuerte);
+    background: var(--exp-fondo-suave);
+    color: #2f684a;
+}
+
+/* CABECERA */
+#aseo-express-individual .revision-cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    margin-bottom: 16px;
+    padding: 18px 20px;
+    border: 1px solid var(--exp-borde);
+    border-radius: 20px;
+    background: linear-gradient(180deg, #ffffff 0%, #fbfcfb 100%);
+    box-shadow: var(--exp-sombra);
+}
+
+#aseo-express-individual .revision-cabecera-info {
+    min-width: 0;
+    width: 100%;
+}
+
+#aseo-express-individual .revision-cabecera-info .subtitulo {
+    margin: 0 0 5px;
+    color: var(--exp-verde);
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .10em;
+}
+
+#aseo-express-individual #aseo-express-titulo {
+    margin: 0 0 5px;
+    color: var(--exp-texto);
+    font-size: clamp(24px, 3vw, 31px);
+    line-height: 1.05;
+}
+
+#aseo-express-individual #aseo-express-fecha {
+    margin: 0;
+    color: var(--exp-texto-suave);
+    font-size: 12px;
+    line-height: 1.45;
+}
+
+#aseo-express-individual #aseo-express-solicitud {
+    margin-top: 10px;
+    padding: 10px 12px;
+    border: 1px solid #e5eae7;
+    border-radius: 12px;
+    background: #f8faf8;
+    color: #58645d;
+    font-size: 11px;
+    line-height: 1.45;
+}
+
+#aseo-express-individual #aseo-express-solicitud:empty {
+    display: none;
+}
+
+/* PANELES */
+#aseo-express-individual .panel {
+    overflow: visible;
+    margin-bottom: 16px;
+    border: 1px solid var(--exp-borde);
+    border-radius: 20px;
+    background: var(--exp-panel);
+    box-shadow: 0 5px 20px rgba(25, 42, 32, 0.035);
+}
+
+#aseo-express-individual .panel-titulo {
+    padding: 15px 18px;
+    border-bottom: 1px solid #edf1ee;
+}
+
+#aseo-express-individual .panel-titulo h3 {
+    margin: 0 0 3px;
+    color: var(--exp-texto);
+    font-size: 15px;
+    line-height: 1.25;
+}
+
+#aseo-express-individual .panel-titulo p {
+    margin: 0;
+    color: var(--exp-texto-suave);
+    font-size: 11px;
+    line-height: 1.4;
+}
+
+/* CHECKLIST */
+#aseo-express-individual #aseo-express-checklist {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    align-items: start;
+    gap: 12px;
+    padding: 16px;
+}
+
+#aseo-express-individual #aseo-express-checklist .revision-area {
+    min-width: 0;
+    padding: 13px;
+    border: 1px solid #e6ebe7;
+    border-radius: 15px;
+    background: #fbfcfb;
+}
+
+#aseo-express-individual #aseo-express-checklist .revision-area h4 {
+    margin: 0 0 10px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #e8ede9;
+    color: #26332b;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .01em;
+}
+
+#aseo-express-individual #aseo-express-checklist .revision-area label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 31px;
+    margin: 3px 0;
+    padding: 5px 7px;
+    border: 1px solid transparent;
+    border-radius: 9px;
+    color: #455149;
+    font-size: 11px;
+    line-height: 1.25;
+    transition: background .13s ease, border-color .13s ease, color .13s ease;
+}
+
+#aseo-express-individual #aseo-express-checklist .revision-area label:hover {
+    border-color: #e1e8e3;
+    background: #f4f8f5;
+}
+
+#aseo-express-individual #aseo-express-checklist .revision-area label:has(input:checked) {
+    border-color: #d7e9dd;
+    background: #eef7f1;
+    color: #24573d;
+    font-weight: 700;
+}
+
+#aseo-express-individual #aseo-express-checklist input[type="checkbox"] {
+    flex: 0 0 auto;
+    width: 17px;
+    height: 17px;
+    margin: 0;
+    accent-color: var(--exp-verde);
+}
+
+/* DETALLES */
+#aseo-express-individual .revision-detalles-contenido {
+    padding: 16px 18px 18px;
+}
+
+#aseo-express-individual #aseo-express-detalles {
+    width: 100%;
+    min-height: 165px;
+    margin: 0;
+    padding: 13px 14px;
+    border: 1px solid #dce5df;
+    border-radius: 14px;
+    background: #fcfdfc;
+    color: #263129;
+    font: inherit;
+    font-size: 12px;
+    line-height: 1.5;
+    outline: none;
+    resize: vertical;
+    box-sizing: border-box;
+    transition: border-color .15s ease, box-shadow .15s ease, background .15s ease;
+}
+
+#aseo-express-individual #aseo-express-detalles:focus {
+    border-color: #83b196;
+    background: #fff;
+    box-shadow: 0 0 0 3px rgba(47, 118, 83, .10);
+}
+
+/* El botón conserva su ID/listener; sólo cambia presentación */
+#aseo-express-individual #copiar-detalles-aseo-express {
+    position: static;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 92px;
+    min-height: 34px;
+    margin: 9px 0 0 auto;
+    padding: 7px 11px;
+    border: 1px solid #d9e2dc;
+    border-radius: 10px;
+    background: #fff;
+    color: #4d5b52;
+    font-size: 0;
+    font-weight: 750;
+    line-height: 1;
+    box-shadow: none;
+}
+
+#aseo-express-individual #copiar-detalles-aseo-express::before {
+    content: "⧉";
+    font-size: 12px;
+}
+
+#aseo-express-individual #copiar-detalles-aseo-express::after {
+    content: "Copiar";
+    font-size: 11px;
+}
+
+#aseo-express-individual #copiar-detalles-aseo-express:hover {
+    border-color: #bdd0c3;
+    background: #f6faf7;
+    color: #2f684a;
+}
+
+/* ESTADO */
+#aseo-express-individual .revision-estado {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(120px, 160px);
+    align-items: center;
+    gap: 12px;
+    margin-top: 12px;
+    padding: 12px 14px;
+    border: 1px solid #e3e9e5;
+    border-radius: 14px;
+    background: #f8faf8;
+}
+
+#aseo-express-individual .revision-estado label {
+    margin: 0;
+    color: #68736c;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .03em;
+    text-transform: uppercase;
+}
+
+#aseo-express-individual #aseo-express-estado {
+    width: 100%;
+    min-height: 39px;
+    padding: 7px 10px;
+    border: 1px solid #d7e0da;
+    border-radius: 10px;
+    background: #fff;
+    color: #344039;
+    font-size: 12px;
+    font-weight: 700;
+    outline: none;
+}
+
+#aseo-express-individual #aseo-express-estado:focus {
+    border-color: #83b196;
+    box-shadow: 0 0 0 3px rgba(47, 118, 83, .10);
+}
+
+/* CELULAR */
+@media (max-width: 760px) {
+    #aseo-express-individual {
+        padding-bottom: 112px;
+    }
+
+    #aseo-express-individual .boton-volver-revision {
+        min-height: 36px;
+        margin-bottom: 12px;
+        padding: 7px 11px;
+        font-size: 11px;
+    }
+
+    #aseo-express-individual .revision-cabecera {
+        margin-bottom: 12px;
+        padding: 15px 16px;
+        border-radius: 17px;
+    }
+
+    #aseo-express-individual #aseo-express-titulo {
+        font-size: 25px;
+    }
+
+    #aseo-express-individual .panel {
+        margin-bottom: 12px;
+        border-radius: 17px;
+    }
+
+    #aseo-express-individual .panel-titulo {
+        padding: 14px 15px 12px;
+    }
+
+    #aseo-express-individual #aseo-express-checklist {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 9px;
+        padding: 12px;
+    }
+
+    #aseo-express-individual #aseo-express-checklist .revision-area {
+        padding: 11px 10px;
+        border-radius: 13px;
+    }
+
+    #aseo-express-individual #aseo-express-checklist .revision-area h4 {
+        font-size: 11px;
+    }
+
+    #aseo-express-individual #aseo-express-checklist .revision-area label {
+        min-height: 29px;
+        padding: 4px 5px;
+        font-size: 10px;
+    }
+
+    #aseo-express-individual .revision-detalles-contenido {
+        padding: 13px 14px 15px;
+    }
+
+    #aseo-express-individual #aseo-express-detalles {
+        min-height: 145px;
+        font-size: 11px;
+    }
+
+    #aseo-express-individual .revision-estado {
+        grid-template-columns: 1fr 126px;
+        gap: 9px;
+        padding: 10px 11px;
+    }
+}
+
+@media (max-width: 390px) {
+    #aseo-express-individual #aseo-express-checklist {
+        grid-template-columns: 1fr 1fr;
+        gap: 7px;
+        padding: 10px;
+    }
+
+    #aseo-express-individual #aseo-express-checklist .revision-area {
+        padding: 10px 8px;
+    }
+
+    #aseo-express-individual .revision-estado {
+        grid-template-columns: 1fr;
+    }
+}
