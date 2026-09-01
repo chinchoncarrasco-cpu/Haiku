@@ -6,6 +6,9 @@
 (() => {
     "use strict";
 
+    const cliente = window.haikuSupabase;
+    if (!cliente) return;
+
     function fechaActual() {
         try { return String(fechaSeleccionada || "").slice(0,10); }
         catch { return ""; }
@@ -21,6 +24,12 @@
         }
     }
 
+    function diferenciaDias(inicio, fin) {
+        const a = new Date(`${String(inicio).slice(0,10)}T12:00:00`);
+        const b = new Date(`${String(fin).slice(0,10)}T12:00:00`);
+        return Math.max(0, Math.round((b - a) / 86400000));
+    }
+
     async function abrirEditorReal(numeroCabana) {
         const fecha = fechaActual();
         if (!fecha || !numeroCabana) return;
@@ -33,11 +42,92 @@
         }
     }
 
-    document.addEventListener("click", evento => {
-        const boton = evento.target.closest("[data-editar-titular], [data-editar-noches]");
-        if (!boton || !window.haikuSesion) return;
+    async function cambiarNochesRapido(numeroCabana, reservaId) {
+        if (!window.haikuTienePermiso?.("reservas.editar")) {
+            alert("Tu usuario no tiene permiso para editar reservas.");
+            return;
+        }
 
-        const numero = boton.dataset.editarTitular || boton.dataset.editarNoches || "";
+        try {
+            const { data: ficha, error: errorFicha } = await cliente.rpc(
+                "haiku_ficha_reserva_core",
+                { p_reserva_id: reservaId }
+            );
+            if (errorFicha) throw errorFicha;
+
+            const estadia = (ficha?.estadias || []).find(e =>
+                e.tipo_estadia === "alojamiento" &&
+                !["cancelada", "no_show"].includes(e.estado_estadia)
+            ) || ficha?.estadias?.[0];
+
+            if (!estadia || estadia.tipo_estadia !== "alojamiento") {
+                throw new Error("Esta reserva no tiene una estadía de alojamiento editable.");
+            }
+
+            const actuales = diferenciaDias(estadia.fecha_ingreso, estadia.fecha_salida);
+            const respuesta = prompt(
+                `Noches CAB ${numeroCabana}:`,
+                String(actuales)
+            );
+
+            if (respuesta === null) return;
+
+            const nuevas = Number(String(respuesta).trim());
+            if (!Number.isInteger(nuevas) || nuevas < 1 || nuevas > 365) {
+                alert("Ingresa una cantidad de noches válida entre 1 y 365.");
+                return;
+            }
+
+            if (nuevas === actuales) return;
+
+            const { data, error } = await cliente.rpc(
+                "haiku_actualizar_noches_rapido",
+                {
+                    p_reserva_id: reservaId,
+                    p_noches: nuevas
+                }
+            );
+            if (error) throw error;
+
+            console.info("HAIKU · Noches actualizadas en Supabase:", data);
+
+            if (typeof window.haikuSincronizarReservasSupabase === "function") {
+                await window.haikuSincronizarReservasSupabase();
+            }
+
+            try {
+                if (typeof cargarCabanasDia === "function") {
+                    cargarCabanasDia(fechaActual());
+                }
+            } catch {}
+
+            setTimeout(() => {
+                window.haikuProtegerFilasSupabase?.();
+            }, 30);
+        } catch (error) {
+            console.error("HAIKU · No fue posible cambiar noches:", error);
+            alert(error?.message || "No fue posible cambiar la cantidad de noches.");
+        }
+    }
+
+    document.addEventListener("click", evento => {
+        const botonNoches = evento.target.closest("[data-editar-noches]");
+        if (botonNoches && window.haikuSesion) {
+            const numero = botonNoches.dataset.editarNoches || "";
+            const reserva = reservaLocal(numero);
+            if (reserva?.reservaId) {
+                evento.preventDefault();
+                evento.stopPropagation();
+                evento.stopImmediatePropagation();
+                cambiarNochesRapido(numero, reserva.reservaId);
+                return;
+            }
+        }
+
+        const botonTitular = evento.target.closest("[data-editar-titular]");
+        if (!botonTitular || !window.haikuSesion) return;
+
+        const numero = botonTitular.dataset.editarTitular || "";
         const reserva = reservaLocal(numero);
         if (!reserva?.reservaId) return;
 
