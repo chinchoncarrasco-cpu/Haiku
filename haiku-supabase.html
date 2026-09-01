@@ -87,6 +87,11 @@
 
                 let html = await respuesta.text();
 
+                html = html.replace(
+                    "</head>",
+                    `<link rel="stylesheet" href="css/supabase-pagos-v4-fix.css?v=${version}">\n</head>`
+                );
+
                 const marca = "<!-- JAVASCRIPT -->";
 
                 if (!html.includes(marca)) {
