@@ -1,0 +1,204 @@
+/* ========================================
+   HAIKU · WEBPAY SUPABASE V1
+======================================== */
+
+#seccion-pagos .haiku-webpay-ayuda {
+    display: grid;
+    gap: 3px;
+    margin-bottom: 14px;
+    padding: 11px 12px;
+    border: 1px solid #dce7df;
+    border-radius: 12px;
+    background: #f7faf8;
+    color: #526158;
+}
+
+#seccion-pagos .haiku-webpay-ayuda strong {
+    color: #244331;
+    font-size: 12px;
+}
+
+#seccion-pagos .haiku-webpay-ayuda span {
+    font-size: 10px;
+    line-height: 1.45;
+}
+
+#seccion-pagos .haiku-webpay-pendiente {
+    padding: 14px;
+    border: 1px solid #e3dfd4;
+    border-radius: 15px;
+    background: #fffdfa;
+    box-shadow: 0 3px 10px rgba(47, 55, 49, 0.045);
+}
+
+#seccion-pagos .haiku-webpay-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #ece8df;
+}
+
+#seccion-pagos .haiku-webpay-header > div {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+#seccion-pagos .haiku-webpay-header strong {
+    color: #253229;
+    font-size: 12px;
+}
+
+#seccion-pagos .haiku-webpay-header span:not(.haiku-webpay-badge) {
+    color: #6d766f;
+    font-size: 11px;
+}
+
+#seccion-pagos .haiku-webpay-badge {
+    flex: 0 0 auto;
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: #fff1d6;
+    color: #946416;
+    font-size: 9px;
+    font-weight: 700;
+}
+
+#seccion-pagos .haiku-webpay-monto {
+    margin: 12px 0;
+    color: #1f3327;
+    font-size: 22px;
+    font-weight: 800;
+}
+
+#seccion-pagos .haiku-webpay-datos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 8px;
+    margin-bottom: 13px;
+}
+
+#seccion-pagos .haiku-webpay-datos > div {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+    padding: 9px 10px;
+    border: 1px solid #e7e9e6;
+    border-radius: 10px;
+    background: #fafbfa;
+}
+
+#seccion-pagos .haiku-webpay-datos span {
+    color: #7a817c;
+    font-size: 9px;
+}
+
+#seccion-pagos .haiku-webpay-datos strong {
+    overflow: hidden;
+    color: #354239;
+    font-size: 10px;
+    font-weight: 650;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+#seccion-pagos .haiku-webpay-asociacion {
+    display: grid;
+    gap: 10px;
+    padding-top: 12px;
+    border-top: 1px solid #ece8df;
+}
+
+#seccion-pagos .haiku-webpay-asociacion label:not(.haiku-webpay-manager) {
+    display: grid;
+    gap: 5px;
+    color: #5e6861;
+    font-size: 10px;
+    font-weight: 600;
+}
+
+#seccion-pagos .haiku-webpay-asociacion select {
+    width: 100%;
+    min-width: 0;
+    min-height: 42px;
+    padding: 0 10px;
+    border: 1px solid #d8dfda;
+    border-radius: 10px;
+    background: #fff;
+    color: #263129;
+    font-size: 11px;
+}
+
+#seccion-pagos .haiku-webpay-manager {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 42px;
+    padding: 0 11px;
+    border: 1px solid #d8dfda;
+    border-radius: 10px;
+    background: #fff;
+    color: #3b483f;
+    font-size: 10px;
+}
+
+#seccion-pagos .haiku-webpay-manager input {
+    width: 16px;
+    height: 16px;
+    margin: 0;
+    accent-color: #2f7653;
+}
+
+#seccion-pagos .haiku-webpay-acciones {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 8px;
+}
+
+#seccion-pagos .haiku-webpay-confirmar,
+#seccion-pagos .haiku-webpay-anular {
+    min-height: 42px;
+    border-radius: 10px;
+    font-size: 10px;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#seccion-pagos .haiku-webpay-confirmar {
+    border: 0;
+    background: #2f7653;
+    color: #fff;
+}
+
+#seccion-pagos .haiku-webpay-confirmar:hover {
+    background: #286847;
+}
+
+#seccion-pagos .haiku-webpay-anular {
+    padding: 0 13px;
+    border: 1px solid #e4c5bf;
+    background: #fff8f6;
+    color: #9a4c3e;
+}
+
+#seccion-pagos .haiku-webpay-confirmar:disabled,
+#seccion-pagos .haiku-webpay-anular:disabled {
+    opacity: .55;
+    cursor: wait;
+}
+
+@media (max-width: 650px) {
+    #seccion-pagos .haiku-webpay-datos {
+        grid-template-columns: 1fr 1fr;
+    }
+
+    #seccion-pagos .haiku-webpay-acciones {
+        grid-template-columns: 1fr;
+    }
+
+    #seccion-pagos .haiku-webpay-anular {
+        width: 100%;
+    }
+}
