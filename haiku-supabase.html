@@ -95,7 +95,6 @@
                     );
                 }
 
-                // Cliente/Auth/Data deben estar disponibles antes de los scripts legacy.
                 const scriptsSupabaseBase = [
                     `<script src="js/supabase-client.js?v=${version}"><` + '/script>',
                     `<script src="js/supabase-auth.js?v=${version}"><` + '/script>',
@@ -107,12 +106,11 @@
                     `${marca}\n${scriptsSupabaseBase}`
                 );
 
-                // La capa V2 se carga al final, después de que HAIKU legacy declare
-                // todas sus funciones. Así puede reemplazar renderizadores sin carreras.
                 const scriptsSupabaseV2 = [
                     `<script src="js/supabase-sync-v2.js?v=${version}"><` + '/script>',
                     `<script src="js/supabase-ficha-v2.js?v=${version}"><` + '/script>',
-                    `<script src="js/supabase-pagos-v2.js?v=${version}"><` + '/script>'
+                    `<script src="js/supabase-pagos-v2.js?v=${version}"><` + '/script>',
+                    `<script src="js/supabase-guard-v2.js?v=${version}"><` + '/script>'
                 ].join("\n");
 
                 html = html.replace(
