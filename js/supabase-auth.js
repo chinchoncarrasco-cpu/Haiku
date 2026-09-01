@@ -1,0 +1,519 @@
+// ========================================
+// HAIKU · AUTENTICACIÓN SUPABASE
+// ========================================
+
+(() => {
+    "use strict";
+
+    const cliente = window.haikuSupabase;
+
+    if (!cliente) {
+        console.error(
+            "HAIKU · Cliente Supabase no disponible."
+        );
+        return;
+    }
+
+    const estilo = document.createElement("style");
+    estilo.textContent = `
+        .haiku-auth-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 999999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            background:
+                radial-gradient(circle at top, rgba(87, 118, 92, .22), transparent 38%),
+                rgba(18, 18, 18, .97);
+            backdrop-filter: blur(12px);
+        }
+
+        .haiku-auth-overlay[hidden] {
+            display: none !important;
+        }
+
+        .haiku-auth-card {
+            width: min(430px, 100%);
+            border: 1px solid rgba(255, 255, 255, .10);
+            border-radius: 22px;
+            padding: 30px;
+            background: rgba(31, 31, 31, .97);
+            box-shadow: 0 24px 70px rgba(0, 0, 0, .42);
+            color: #f2f2f2;
+        }
+
+        .haiku-auth-marca {
+            display: block;
+            margin-bottom: 8px;
+            font-size: .76rem;
+            letter-spacing: .16em;
+            color: #9db6a1;
+        }
+
+        .haiku-auth-card h1 {
+            margin: 0;
+            font-size: 1.7rem;
+            font-weight: 700;
+        }
+
+        .haiku-auth-card p {
+            margin: 8px 0 22px;
+            color: #bdbdbd;
+            line-height: 1.45;
+        }
+
+        .haiku-auth-card label {
+            display: block;
+            margin-top: 14px;
+            font-size: .86rem;
+            color: #d8d8d8;
+        }
+
+        .haiku-auth-card input {
+            width: 100%;
+            margin-top: 6px;
+            padding: 12px 13px;
+            border: 1px solid #444;
+            border-radius: 11px;
+            background: #171717;
+            color: #fff;
+            font: inherit;
+            outline: none;
+        }
+
+        .haiku-auth-card input:focus {
+            border-color: #718c76;
+            box-shadow: 0 0 0 3px rgba(113, 140, 118, .18);
+        }
+
+        .haiku-auth-submit {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px 16px;
+            border: 0;
+            border-radius: 11px;
+            background: #738e78;
+            color: #fff;
+            font: inherit;
+            font-weight: 700;
+            cursor: pointer;
+        }
+
+        .haiku-auth-submit:disabled {
+            opacity: .55;
+            cursor: wait;
+        }
+
+        .haiku-auth-error {
+            min-height: 20px;
+            margin-top: 12px;
+            color: #f3a5a5;
+            font-size: .86rem;
+        }
+
+        .haiku-auth-estado {
+            min-height: 20px;
+            margin-top: 12px;
+            color: #b6cdb9;
+            font-size: .86rem;
+        }
+
+        .haiku-usuario-chip {
+            position: fixed;
+            z-index: 99990;
+            top: 10px;
+            right: 14px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            max-width: min(420px, calc(100vw - 28px));
+            padding: 7px 9px 7px 11px;
+            border: 1px solid rgba(255,255,255,.12);
+            border-radius: 999px;
+            background: rgba(30, 30, 30, .92);
+            backdrop-filter: blur(8px);
+            color: #f2f2f2;
+            box-shadow: 0 8px 24px rgba(0,0,0,.22);
+            font-size: .78rem;
+        }
+
+        .haiku-usuario-chip[hidden] {
+            display: none !important;
+        }
+
+        .haiku-usuario-chip strong {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .haiku-usuario-chip span {
+            color: #9fb5a3;
+            white-space: nowrap;
+        }
+
+        .haiku-usuario-chip button {
+            border: 0;
+            border-radius: 999px;
+            padding: 5px 9px;
+            background: #4a4a4a;
+            color: #fff;
+            cursor: pointer;
+            font: inherit;
+        }
+
+        @media (max-width: 700px) {
+            .haiku-auth-card {
+                padding: 24px 20px;
+            }
+
+            .haiku-usuario-chip {
+                top: 6px;
+                right: 8px;
+                max-width: calc(100vw - 16px);
+                font-size: .72rem;
+            }
+        }
+    `;
+    document.head.appendChild(estilo);
+
+    const overlay = document.createElement("div");
+    overlay.className = "haiku-auth-overlay";
+    overlay.innerHTML = `
+        <form class="haiku-auth-card" id="haiku-auth-form">
+            <span class="haiku-auth-marca">HAIKU · ACCESO INTERNO</span>
+            <h1>Iniciar sesión</h1>
+            <p>
+                Ingresa con tu usuario autorizado de HAIKU.
+            </p>
+
+            <label>
+                Correo
+                <input
+                    id="haiku-auth-email"
+                    type="email"
+                    autocomplete="username"
+                    required
+                >
+            </label>
+
+            <label>
+                Contraseña
+                <input
+                    id="haiku-auth-password"
+                    type="password"
+                    autocomplete="current-password"
+                    required
+                >
+            </label>
+
+            <button
+                id="haiku-auth-submit"
+                class="haiku-auth-submit"
+                type="submit"
+            >
+                Entrar a HAIKU
+            </button>
+
+            <div
+                id="haiku-auth-error"
+                class="haiku-auth-error"
+                aria-live="polite"
+            ></div>
+
+            <div
+                id="haiku-auth-estado"
+                class="haiku-auth-estado"
+                aria-live="polite"
+            >
+                Comprobando sesión…
+            </div>
+        </form>
+    `;
+    document.body.appendChild(overlay);
+
+    const chip = document.createElement("div");
+    chip.className = "haiku-usuario-chip";
+    chip.hidden = true;
+    chip.innerHTML = `
+        <strong id="haiku-usuario-chip-email"></strong>
+        <span id="haiku-usuario-chip-rol"></span>
+        <button type="button" id="haiku-cerrar-sesion">
+            Salir
+        </button>
+    `;
+    document.body.appendChild(chip);
+
+    const formulario =
+        document.getElementById("haiku-auth-form");
+    const campoEmail =
+        document.getElementById("haiku-auth-email");
+    const campoPassword =
+        document.getElementById("haiku-auth-password");
+    const botonEntrar =
+        document.getElementById("haiku-auth-submit");
+    const errorElemento =
+        document.getElementById("haiku-auth-error");
+    const estadoElemento =
+        document.getElementById("haiku-auth-estado");
+    const chipEmail =
+        document.getElementById("haiku-usuario-chip-email");
+    const chipRol =
+        document.getElementById("haiku-usuario-chip-rol");
+    const botonSalir =
+        document.getElementById("haiku-cerrar-sesion");
+
+    const emailRecordado =
+        localStorage.getItem("haikuLoginEmail") || "";
+
+    if (emailRecordado) {
+        campoEmail.value = emailRecordado;
+    }
+
+    function mensajeError(texto = "") {
+        errorElemento.textContent = texto;
+    }
+
+    function mensajeEstado(texto = "") {
+        estadoElemento.textContent = texto;
+    }
+
+    function bloquearFormulario(bloqueado) {
+        botonEntrar.disabled = bloqueado;
+        campoEmail.disabled = bloqueado;
+        campoPassword.disabled = bloqueado;
+    }
+
+    function mostrarLogin(mensaje = "") {
+        overlay.hidden = false;
+        chip.hidden = true;
+        mensajeEstado(mensaje);
+
+        requestAnimationFrame(() => {
+            if (campoEmail.value) {
+                campoPassword.focus();
+            } else {
+                campoEmail.focus();
+            }
+        });
+    }
+
+    function nombreRol(roles = []) {
+        if (!Array.isArray(roles) || roles.length === 0) {
+            return "Sin rol";
+        }
+
+        return roles
+            .map(rol => rol?.nombre || rol?.codigo || "")
+            .filter(Boolean)
+            .join(" · ");
+    }
+
+    async function validarSesion(session) {
+        if (!session?.user) {
+            window.haikuSesion = null;
+            window.haikuTienePermiso = () => false;
+            mostrarLogin("Ingresa para continuar.");
+            return false;
+        }
+
+        const { data, error } =
+            await cliente.rpc("haiku_sesion_actual");
+
+        if (error || !data?.usuario?.activo) {
+            console.error(
+                "HAIKU · Sesión rechazada:",
+                error || data
+            );
+
+            await cliente.auth.signOut();
+
+            window.haikuSesion = null;
+            window.haikuTienePermiso = () => false;
+
+            mensajeError(
+                "Tu cuenta no está habilitada dentro de HAIKU."
+            );
+            mostrarLogin("");
+            return false;
+        }
+
+        const permisos =
+            Array.isArray(data.permisos)
+                ? data.permisos
+                : [];
+
+        window.haikuSesion = {
+            auth: session.user,
+            usuario: data.usuario,
+            roles: data.roles || [],
+            permisos
+        };
+
+        window.haikuTienePermiso = codigo =>
+            permisos.includes(codigo);
+
+        chipEmail.textContent =
+            session.user.email || data.usuario.nombre || "Usuario";
+
+        chipRol.textContent =
+            nombreRol(data.roles);
+
+        chip.hidden = false;
+        overlay.hidden = true;
+        mensajeError("");
+        mensajeEstado("");
+
+        window.dispatchEvent(
+            new CustomEvent(
+                "haiku:auth-ready",
+                {
+                    detail: window.haikuSesion
+                }
+            )
+        );
+
+        console.info(
+            "HAIKU · Sesión Supabase activa:",
+            {
+                usuario: data.usuario,
+                roles: data.roles,
+                permisos: permisos.length
+            }
+        );
+
+        return true;
+    }
+
+    formulario.addEventListener(
+        "submit",
+        async evento => {
+            evento.preventDefault();
+
+            const email =
+                campoEmail.value.trim();
+            const password =
+                campoPassword.value;
+
+            if (!email || !password) {
+                mensajeError(
+                    "Ingresa correo y contraseña."
+                );
+                return;
+            }
+
+            mensajeError("");
+            mensajeEstado("Validando acceso…");
+            bloquearFormulario(true);
+
+            try {
+                const { data, error } =
+                    await cliente.auth.signInWithPassword({
+                        email,
+                        password
+                    });
+
+                if (error) {
+                    throw error;
+                }
+
+                localStorage.setItem(
+                    "haikuLoginEmail",
+                    email
+                );
+
+                campoPassword.value = "";
+
+                const valido =
+                    await validarSesion(data.session);
+
+                if (!valido) {
+                    return;
+                }
+            } catch (error) {
+                console.error(
+                    "HAIKU · Error de login:",
+                    error
+                );
+
+                mensajeError(
+                    error?.message === "Invalid login credentials"
+                        ? "Correo o contraseña incorrectos."
+                        : "No fue posible iniciar sesión. Revisa tu conexión e inténtalo otra vez."
+                );
+
+                mensajeEstado("");
+            } finally {
+                bloquearFormulario(false);
+            }
+        }
+    );
+
+    botonSalir.addEventListener(
+        "click",
+        async () => {
+            botonSalir.disabled = true;
+
+            try {
+                await cliente.auth.signOut();
+            } finally {
+                botonSalir.disabled = false;
+                window.haikuSesion = null;
+                window.haikuTienePermiso = () => false;
+                mostrarLogin("Sesión cerrada.");
+            }
+        }
+    );
+
+    cliente.auth.onAuthStateChange(
+        async (evento, session) => {
+            if (evento === "SIGNED_OUT") {
+                window.haikuSesion = null;
+                window.haikuTienePermiso = () => false;
+                mostrarLogin("Sesión cerrada.");
+                return;
+            }
+
+            if (
+                evento === "TOKEN_REFRESHED" ||
+                evento === "SIGNED_IN"
+            ) {
+                await validarSesion(session);
+            }
+        }
+    );
+
+    (async () => {
+        bloquearFormulario(true);
+        mensajeError("");
+        mensajeEstado("Comprobando sesión…");
+
+        try {
+            const { data, error } =
+                await cliente.auth.getSession();
+
+            if (error) {
+                throw error;
+            }
+
+            if (data.session) {
+                await validarSesion(data.session);
+            } else {
+                mostrarLogin("Ingresa para continuar.");
+            }
+        } catch (error) {
+            console.error(
+                "HAIKU · Error comprobando sesión:",
+                error
+            );
+
+            mostrarLogin(
+                "No fue posible comprobar la sesión."
+            );
+        } finally {
+            bloquearFormulario(false);
+        }
+    })();
+})();
