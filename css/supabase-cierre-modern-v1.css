@@ -1,0 +1,552 @@
+/* =====================================================
+   HAIKU · CIERRE DE TURNO · MODERN UI V1
+   Sólo presentación. No altera lógica ni persistencia.
+===================================================== */
+
+#seccion-cierre {
+    --cierre-verde: #286b4a;
+    --cierre-verde-2: #357f5a;
+    --cierre-verde-suave: #eef7f1;
+    --cierre-borde: #dfe7e1;
+    --cierre-texto: #223128;
+    --cierre-muted: #718078;
+    --cierre-fondo: #f5f7f6;
+}
+
+#seccion-cierre > .cabecera {
+    margin-bottom: 18px;
+}
+
+#seccion-cierre > .cabecera h2 {
+    letter-spacing: -0.035em;
+}
+
+#seccion-cierre > .panel {
+    background: transparent;
+    border: 0;
+    box-shadow: none;
+    padding: 0;
+    overflow: visible;
+}
+
+#seccion-cierre > .panel > .panel-titulo {
+    padding: 18px 20px;
+    margin-bottom: 14px;
+    border: 1px solid var(--cierre-borde);
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(24, 55, 39, 0.045);
+}
+
+#seccion-cierre > .panel > .panel-titulo h3 {
+    margin: 0 0 4px;
+    color: var(--cierre-texto);
+    font-size: 1.1rem;
+}
+
+#seccion-cierre > .panel > .panel-titulo p {
+    margin: 0;
+    color: var(--cierre-muted);
+}
+
+/* Progreso principal */
+#seccion-cierre .cierre-progreso {
+    margin: 0 0 16px;
+    padding: 18px 20px;
+    border: 1px solid var(--cierre-borde);
+    border-radius: 20px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(24, 55, 39, 0.045);
+}
+
+#seccion-cierre .cierre-progreso-info {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+}
+
+#seccion-cierre .cierre-progreso-info span {
+    color: var(--cierre-muted);
+    font-size: .8rem;
+    font-weight: 650;
+}
+
+#seccion-cierre .cierre-progreso-info strong {
+    color: var(--cierre-verde);
+    font-size: 1.2rem;
+}
+
+#seccion-cierre .cierre-barra {
+    height: 10px;
+    overflow: hidden;
+    border-radius: 999px;
+    background: #edf1ee;
+}
+
+#seccion-cierre .cierre-barra-progreso {
+    height: 100%;
+    border-radius: inherit;
+    background: linear-gradient(90deg, var(--cierre-verde), #65a47f);
+    transition: width .25s ease;
+}
+
+#seccion-cierre .cierre-etapas-resumen {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 8px;
+    margin-top: 14px;
+}
+
+#seccion-cierre .cierre-etapas-resumen span {
+    min-width: 0;
+    padding: 8px 10px;
+    border: 1px solid #e5ebe7;
+    border-radius: 999px;
+    background: #f8faf8;
+    color: #69766e;
+    font-size: .7rem;
+    text-align: center;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Etapas */
+#seccion-cierre .cierre-etapa {
+    margin: 0 0 16px;
+    padding: 18px;
+    border: 1px solid var(--cierre-borde);
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 8px 28px rgba(24, 55, 39, 0.04);
+}
+
+#seccion-cierre .cierre-etapa-cabecera,
+#seccion-cierre .cierre-etapa-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 16px;
+    margin-bottom: 16px;
+    padding-bottom: 14px;
+    border-bottom: 1px solid #edf1ee;
+}
+
+#seccion-cierre .cierre-etapa-numero {
+    display: inline-flex;
+    align-items: center;
+    min-height: 24px;
+    padding: 4px 9px;
+    margin-bottom: 7px;
+    border-radius: 999px;
+    background: var(--cierre-verde-suave);
+    color: var(--cierre-verde);
+    font-size: .65rem;
+    font-weight: 800;
+    letter-spacing: .09em;
+}
+
+#seccion-cierre .cierre-etapa-cabecera h3,
+#seccion-cierre .cierre-etapa-header h2 {
+    margin: 0;
+    color: var(--cierre-texto);
+    font-size: 1.25rem;
+    letter-spacing: -.025em;
+}
+
+#seccion-cierre .cierre-etapa-cabecera p,
+#seccion-cierre .cierre-etapa-header p {
+    margin: 5px 0 0;
+    max-width: 620px;
+    color: var(--cierre-muted);
+    font-size: .8rem;
+    line-height: 1.45;
+}
+
+#seccion-cierre .cierre-etapa-estado,
+#seccion-cierre .cierre-estado {
+    flex: 0 0 auto;
+    padding: 6px 10px;
+    border-radius: 999px;
+    background: #fff1d8;
+    color: #95620b;
+    font-size: .7rem;
+    font-weight: 700;
+}
+
+/* Grillas y sub-bloques */
+#seccion-cierre .cierre-bloques {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+}
+
+#seccion-cierre .cierre-bloque,
+#seccion-cierre .cierre-card,
+#seccion-cierre .cierre-cabana-card {
+    border: 1px solid #e3eae5;
+    border-radius: 18px;
+    background: #fbfcfb;
+    box-shadow: none;
+}
+
+#seccion-cierre .cierre-bloque,
+#seccion-cierre .cierre-card {
+    padding: 15px;
+}
+
+#seccion-cierre .cierre-bloque-titulo,
+#seccion-cierre .cierre-card h3 {
+    margin-bottom: 10px;
+}
+
+#seccion-cierre .cierre-bloque-titulo h4,
+#seccion-cierre .cierre-card h3 {
+    margin: 0;
+    color: var(--cierre-texto);
+    font-size: .92rem;
+    letter-spacing: -.01em;
+}
+
+#seccion-cierre .cierre-card-descripcion,
+#seccion-cierre .cierre-card > .cierre-pregunta {
+    color: var(--cierre-muted);
+    font-size: .76rem;
+    line-height: 1.4;
+}
+
+/* Preguntas */
+#seccion-cierre .cierre-pregunta {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 10px 0;
+    border-top: 1px solid #edf1ee;
+}
+
+#seccion-cierre .cierre-pregunta:first-of-type {
+    border-top: 0;
+}
+
+#seccion-cierre .cierre-pregunta > span {
+    color: #39483f;
+    font-size: .78rem;
+    line-height: 1.4;
+}
+
+#seccion-cierre .cierre-opciones {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+    gap: 6px;
+}
+
+#seccion-cierre .cierre-opciones label {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-height: 32px;
+    padding: 6px 10px;
+    border: 1px solid #dfe6e1;
+    border-radius: 999px;
+    background: #fff;
+    color: #526159;
+    font-size: .72rem;
+    cursor: pointer;
+    transition: .15s ease;
+}
+
+#seccion-cierre .cierre-opciones label:has(input:checked) {
+    border-color: #acd2ba;
+    background: #eef8f1;
+    color: #1f6642;
+}
+
+/* Checks */
+#seccion-cierre .cierre-check {
+    display: flex;
+    align-items: center;
+    gap: 9px;
+    min-height: 38px;
+    padding: 8px 10px;
+    border-radius: 11px;
+    color: #425047;
+    font-size: .76rem;
+    line-height: 1.35;
+    cursor: pointer;
+    transition: background .15s ease;
+}
+
+#seccion-cierre .cierre-check:hover {
+    background: #f1f6f3;
+}
+
+#seccion-cierre input[type="checkbox"],
+#seccion-cierre input[type="radio"] {
+    accent-color: var(--cierre-verde-2);
+}
+
+#seccion-cierre .cierre-llaves-grid,
+#seccion-cierre .cierre-cabana-checks {
+    gap: 5px;
+}
+
+#seccion-cierre .cierre-llaves-recepcion {
+    grid-column: 1 / -1;
+}
+
+#seccion-cierre .cierre-llaves-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+/* Texto / novedades */
+#seccion-cierre .cierre-campo-texto {
+    display: block;
+    margin-top: 12px;
+}
+
+#seccion-cierre .cierre-campo-texto > span {
+    display: block;
+    margin-bottom: 7px;
+    color: #6f7c74;
+    font-size: .72rem;
+}
+
+#seccion-cierre .cierre-campo-texto textarea {
+    box-sizing: border-box;
+    width: 100%;
+    min-height: 92px;
+    padding: 12px 13px;
+    border: 1px solid #dce5df;
+    border-radius: 14px;
+    background: #fff;
+    color: var(--cierre-texto);
+    font: inherit;
+    resize: vertical;
+}
+
+#seccion-cierre .cierre-campo-texto textarea:focus {
+    outline: none;
+    border-color: #80b395;
+    box-shadow: 0 0 0 3px rgba(54, 126, 87, .1);
+}
+
+/* Evidencias */
+#seccion-cierre .cierre-item-evidencia {
+    padding: 7px 0;
+    border-top: 1px solid #edf1ee;
+}
+
+#seccion-cierre .cierre-evidencia {
+    margin-top: 9px;
+    padding: 12px;
+    border: 1px solid #dfe8e2;
+    border-radius: 15px;
+    background: #f6faf7;
+}
+
+#seccion-cierre .cierre-evidencia-titulo {
+    margin-bottom: 9px;
+    color: #345440;
+    font-size: .74rem;
+    font-weight: 750;
+}
+
+#seccion-cierre .cierre-evidencia-acciones {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+}
+
+#seccion-cierre .cierre-evidencia-boton,
+#seccion-cierre .cierre-evidencia-toggle {
+    min-height: 34px;
+    padding: 7px 10px;
+    border: 1px solid #d7e2da;
+    border-radius: 10px;
+    background: #fff;
+    color: #425148;
+    font: inherit;
+    font-size: .7rem;
+    cursor: pointer;
+}
+
+#seccion-cierre .cierre-evidencia-zona {
+    margin-top: 9px;
+    padding: 14px;
+    border: 1px dashed #bfcfc4;
+    border-radius: 12px;
+    background: #fff;
+    color: #79857e;
+    font-size: .7rem;
+    text-align: center;
+}
+
+#seccion-cierre .cierre-evidencia-preview {
+    margin-top: 9px;
+    overflow: hidden;
+    border-radius: 12px;
+}
+
+#seccion-cierre .cierre-evidencia-preview img {
+    display: block;
+    width: 100%;
+    height: auto;
+    border-radius: 12px;
+}
+
+/* Tinajas */
+#seccion-cierre .cierre-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+/* Cabañas */
+#seccion-cierre .cierre-cabanas-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+}
+
+#seccion-cierre .cierre-cabana-card {
+    overflow: hidden;
+}
+
+#seccion-cierre .cierre-cabana-header {
+    padding: 12px 13px;
+    border-bottom: 1px solid #e8eeea;
+    background: #f7faf8;
+}
+
+#seccion-cierre .cierre-cabana-header h3 {
+    margin: 0 0 7px;
+    color: #26372c;
+    font-size: .85rem;
+}
+
+#seccion-cierre .cierre-cabana-checks {
+    padding: 8px;
+}
+
+/* Panel final: más cercano a Pagos / Servicios */
+#seccion-cierre .cierre-final-supabase {
+    position: relative;
+    margin: 18px 0 8px;
+    padding: 18px;
+    border: 1px solid #dbe6de;
+    border-radius: 22px;
+    background: #fff;
+    box-shadow: 0 10px 30px rgba(24, 55, 39, .055);
+}
+
+#seccion-cierre .cierre-final-supabase::before {
+    content: "";
+    position: absolute;
+    inset: 0 auto 0 0;
+    width: 4px;
+    border-radius: 22px 0 0 22px;
+    background: var(--cierre-verde);
+    opacity: .75;
+}
+
+#seccion-cierre .cierre-final-supabase.cerrado {
+    border-color: #bfe0ca;
+    background: #f5fbf7;
+}
+
+#seccion-cierre .cierre-final-supabase.cerrado-con-pendientes {
+    border-color: #ecd7a8;
+    background: #fffaf0;
+}
+
+#seccion-cierre .cierre-final-cabecera h3 {
+    font-size: 1.25rem;
+    letter-spacing: -.03em;
+}
+
+#seccion-cierre .cierre-final-metricas {
+    gap: 9px;
+}
+
+#seccion-cierre .cierre-final-metrica {
+    padding: 13px;
+    border-radius: 15px;
+    background: #fafcfb;
+}
+
+#seccion-cierre .cierre-final-metrica strong {
+    color: #1e3025;
+    font-size: 1.18rem;
+}
+
+#seccion-cierre .cierre-final-resumen {
+    min-height: 96px;
+    border-radius: 14px;
+}
+
+#seccion-cierre .cierre-final-boton {
+    min-height: 46px;
+    border-radius: 14px;
+}
+
+#seccion-cierre .cierre-final-boton.primario {
+    background: var(--cierre-verde);
+}
+
+@media (max-width: 900px) {
+    #seccion-cierre .cierre-cabanas-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
+
+@media (max-width: 700px) {
+    #seccion-cierre > .panel > .panel-titulo,
+    #seccion-cierre .cierre-progreso,
+    #seccion-cierre .cierre-etapa,
+    #seccion-cierre .cierre-final-supabase {
+        border-radius: 18px;
+    }
+
+    #seccion-cierre .cierre-etapas-resumen {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+
+    #seccion-cierre .cierre-bloques,
+    #seccion-cierre .cierre-grid,
+    #seccion-cierre .cierre-cabanas-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #seccion-cierre .cierre-llaves-grid {
+        grid-template-columns: 1fr;
+    }
+
+    #seccion-cierre .cierre-etapa-cabecera,
+    #seccion-cierre .cierre-etapa-header {
+        gap: 10px;
+    }
+
+    #seccion-cierre .cierre-pregunta {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    #seccion-cierre .cierre-opciones {
+        justify-content: flex-start;
+    }
+
+    #seccion-cierre .cierre-etapa,
+    #seccion-cierre .cierre-progreso {
+        padding: 14px;
+    }
+
+    #seccion-cierre .cierre-final-supabase {
+        margin-left: 0;
+        margin-right: 0;
+    }
+}
