@@ -580,6 +580,7 @@ function actualizarResumenDia(fecha) {
     let salen = 0;
     let continuan = 0;
     let servicios = 0;
+    let pagosPendientes = 0;
 
     Object.values(datos.cabanas).forEach(cabana => {
 
@@ -624,6 +625,14 @@ if (
     servicio.fechaServicio === fecha
     ).length;
 
+    if (
+        typeof obtenerPagosPendientes ===
+            "function"
+    ) {
+        pagosPendientes =
+            obtenerPagosPendientes(fecha).length;
+    }
+
     document.getElementById("contador-ingresan").textContent =
         ingresan;
 
@@ -635,6 +644,16 @@ if (
 
     document.getElementById("contador-servicios").textContent =
         servicios;
+
+    const contadorPagos =
+        document.getElementById(
+            "contador-pagos"
+        );
+
+    if (contadorPagos) {
+        contadorPagos.textContent =
+            pagosPendientes;
+    }
 }
 
 // ====================================
@@ -7894,3 +7913,584 @@ if (botonCopiarResumen) {
         }
     });
 }
+
+// ======================================
+// RESUMEN RÁPIDO AL MANTENER PRESIONADO
+// ======================================
+
+const configuracionResumenRapido = [
+    {
+        contador: "contador-ingresan",
+        tipo: "ingresan",
+        titulo: "Ingresan"
+    },
+    {
+        contador: "contador-salen",
+        tipo: "salen",
+        titulo: "Salen"
+    },
+    {
+        contador: "contador-continuan",
+        tipo: "continuan",
+        titulo: "Continúan"
+    },
+    {
+        contador: "contador-servicios",
+        tipo: "servicios",
+        titulo: "Servicios"
+    },
+    {
+        contador: "contador-pagos",
+        tipo: "pagos",
+        titulo: "Pagos pendientes"
+    }
+];
+
+let resumenRapidoTarjetaActiva = null;
+let resumenRapidoTemporizador = null;
+let resumenRapidoPointerId = null;
+let resumenRapidoInicioX = 0;
+let resumenRapidoInicioY = 0;
+
+function obtenerReservaQueSale(
+    numeroCabana,
+    fecha
+) {
+
+    const reservasRevisadas =
+        new Set();
+
+    for (
+        const datosDia of
+        Object.values(datosPorFecha)
+    ) {
+
+        const cabanaDia =
+            datosDia?.cabanas?.[numeroCabana];
+
+        const reservaId =
+            cabanaDia?.reservaId || "";
+
+        if (
+            !reservaId ||
+            reservasRevisadas.has(reservaId)
+        ) {
+            continue;
+        }
+
+        reservasRevisadas.add(reservaId);
+
+        const registro =
+            typeof buscarDatosReservaPorId ===
+                "function"
+                ? buscarDatosReservaPorId(
+                    reservaId
+                )
+                : null;
+
+        const cabanaReserva =
+            registro?.cabana || cabanaDia;
+
+        const fechaIngreso =
+            cabanaReserva.fechaOrigenReserva ||
+            cabanaReserva.fechaIngresoReserva ||
+            registro?.fecha ||
+            "";
+
+        const noches =
+            Number(cabanaReserva.noches) || 0;
+
+        if (!fechaIngreso || noches < 1) {
+            continue;
+        }
+
+        if (
+            calcularSalidaReserva(
+                fechaIngreso,
+                noches
+            ) === fecha
+        ) {
+            return cabanaReserva;
+        }
+    }
+
+    return null;
+}
+
+function crearTextoReservaResumenRapido(
+    numeroCabana,
+    cabana
+) {
+
+    const titular =
+        cabana?.titular ||
+        cabana?.nombre ||
+        cabana?.huesped ||
+        "Sin titular";
+
+    const noches =
+        Number(cabana?.noches) || 0;
+
+    const esFullDay =
+        cabana?.estado === "fullday";
+
+    const duracion =
+        esFullDay
+            ? "Full Day"
+            : `${noches}N`;
+
+    return (
+        `CAB ${numeroCabana} · ` +
+        `${titular} · ${duracion}`
+    );
+}
+
+function obtenerLineasResumenRapido(tipo) {
+
+    if (!fechaSeleccionada) {
+        return [];
+    }
+
+    const datos =
+        obtenerDatosDia(fechaSeleccionada);
+
+    const cabanasOrdenadas =
+        Object.entries(datos?.cabanas || {})
+            .sort(
+                ([numeroA], [numeroB]) =>
+                    Number(numeroA) -
+                    Number(numeroB)
+            );
+
+    if (
+        tipo === "ingresan" ||
+        tipo === "salen" ||
+        tipo === "continuan"
+    ) {
+
+        return cabanasOrdenadas
+            .filter(([, cabana]) => {
+
+                const estado =
+                    cabana?.estado || "";
+
+                if (tipo === "ingresan") {
+                    return (
+                        estado ===
+                            "libre-ingresa" ||
+                        estado ===
+                            "sale-ingresa" ||
+                        estado === "fullday"
+                    );
+                }
+
+                if (tipo === "salen") {
+                    return (
+                        estado === "sale-libre" ||
+                        estado === "sale-ingresa" ||
+                        estado === "fullday"
+                    );
+                }
+
+                return estado === "continua";
+            })
+            .map(([numeroCabana, cabana]) => {
+
+                let cabanaMostrada = cabana;
+
+                if (
+                    tipo === "salen" &&
+                    cabana?.estado !== "fullday"
+                ) {
+                    cabanaMostrada =
+                        obtenerReservaQueSale(
+                            numeroCabana,
+                            fechaSeleccionada
+                        ) || cabana;
+                }
+
+                return crearTextoReservaResumenRapido(
+                    numeroCabana,
+                    cabanaMostrada
+                );
+            });
+    }
+
+    if (tipo === "servicios") {
+
+        const servicios =
+            JSON.parse(
+                localStorage.getItem(
+                    "haikuServicios"
+                )
+            ) || [];
+
+        return servicios
+            .filter(servicio =>
+                servicio.fechaServicio ===
+                    fechaSeleccionada
+            )
+            .sort((servicioA, servicioB) => {
+
+                const horaA =
+                    servicioA.hora || "";
+
+                const horaB =
+                    servicioB.hora || "";
+
+                return horaA.localeCompare(horaB);
+            })
+            .map(servicio => {
+
+                const numeroCabana =
+                    servicio.numeroCabana || "—";
+
+                const titular =
+                    servicio.titular ||
+                    datos.cabanas?.[numeroCabana]
+                        ?.titular ||
+                    "Sin titular";
+
+                const nombre =
+                    servicio.nombre ||
+                    "Servicio";
+
+                const hora =
+                    servicio.hora
+                        ? ` · ${servicio.hora}`
+                        : "";
+
+                return (
+                    `CAB ${numeroCabana} · ` +
+                    `${titular} · ${nombre}${hora}`
+                );
+            });
+    }
+
+    if (
+        tipo === "pagos" &&
+        typeof obtenerPagosPendientes ===
+            "function"
+    ) {
+
+        return obtenerPagosPendientes(
+            fechaSeleccionada
+        ).map(pago => {
+
+            const monto =
+                Number(pago.monto) > 0
+                    ? ` · $${Number(
+                        pago.monto
+                    ).toLocaleString("es-CL")}`
+                    : "";
+
+            return (
+                `CAB ${pago.numeroCabana} · ` +
+                `${pago.titular} · ` +
+                `${pago.titulo}${monto}`
+            );
+        });
+    }
+
+    return [];
+}
+
+function llenarPanelResumenRapido(
+    tarjeta,
+    tipo,
+    titulo
+) {
+
+    const panel =
+        tarjeta.querySelector(
+            ".tarjeta-resumen-rapido-panel"
+        );
+
+    const lista =
+        panel?.querySelector(
+            ".tarjeta-resumen-rapido-lista"
+        );
+
+    const encabezado =
+        panel?.querySelector(
+            ".tarjeta-resumen-rapido-titulo"
+        );
+
+    if (!panel || !lista || !encabezado) {
+        return;
+    }
+
+    const lineas =
+        obtenerLineasResumenRapido(tipo);
+
+    encabezado.textContent =
+        `${titulo} · ${lineas.length}`;
+
+    lista.innerHTML = "";
+
+    if (lineas.length === 0) {
+
+        const vacio =
+            document.createElement("span");
+
+        vacio.className =
+            "tarjeta-resumen-rapido-vacio";
+
+        vacio.textContent =
+            "Sin registros para este día.";
+
+        lista.appendChild(vacio);
+        return;
+    }
+
+    lineas.forEach(textoLinea => {
+
+        const linea =
+            document.createElement("strong");
+
+        linea.className =
+            "tarjeta-resumen-rapido-linea";
+
+        linea.textContent = textoLinea;
+
+        lista.appendChild(linea);
+    });
+}
+
+function cerrarResumenRapido() {
+
+    if (resumenRapidoTemporizador) {
+        clearTimeout(
+            resumenRapidoTemporizador
+        );
+    }
+
+    resumenRapidoTemporizador = null;
+
+    if (resumenRapidoTarjetaActiva) {
+
+        const panel =
+            resumenRapidoTarjetaActiva
+                .querySelector(
+                    ".tarjeta-resumen-rapido-panel"
+                );
+
+        if (panel) {
+            panel.hidden = true;
+        }
+
+        resumenRapidoTarjetaActiva
+            .classList.remove(
+                "tarjeta-resumen-rapido-activa",
+                "tarjeta-resumen-rapido-esperando"
+            );
+    }
+
+    resumenRapidoTarjetaActiva = null;
+    resumenRapidoPointerId = null;
+}
+
+function iniciarResumenRapido(
+    tarjeta,
+    configuracion,
+    evento
+) {
+
+    if (
+        evento.pointerType === "mouse" &&
+        evento.button !== 0
+    ) {
+        return;
+    }
+
+    cerrarResumenRapido();
+
+    resumenRapidoTarjetaActiva = tarjeta;
+    resumenRapidoPointerId =
+        evento.pointerId;
+
+    resumenRapidoInicioX =
+        evento.clientX;
+
+    resumenRapidoInicioY =
+        evento.clientY;
+
+    tarjeta.classList.add(
+        "tarjeta-resumen-rapido-esperando"
+    );
+
+    resumenRapidoTemporizador =
+        setTimeout(() => {
+
+            if (
+                resumenRapidoTarjetaActiva !==
+                tarjeta
+            ) {
+                return;
+            }
+
+            llenarPanelResumenRapido(
+                tarjeta,
+                configuracion.tipo,
+                configuracion.titulo
+            );
+
+            const panel =
+                tarjeta.querySelector(
+                    ".tarjeta-resumen-rapido-panel"
+                );
+
+            if (panel) {
+                panel.hidden = false;
+            }
+
+            tarjeta.classList.remove(
+                "tarjeta-resumen-rapido-esperando"
+            );
+
+            tarjeta.classList.add(
+                "tarjeta-resumen-rapido-activa"
+            );
+
+        }, 450);
+}
+
+function inicializarResumenRapido() {
+
+    configuracionResumenRapido
+        .forEach(configuracion => {
+
+            const contador =
+                document.getElementById(
+                    configuracion.contador
+                );
+
+            const tarjeta =
+                contador?.closest(".tarjeta");
+
+            if (!tarjeta) {
+                return;
+            }
+
+            tarjeta.classList.add(
+                "tarjeta-resumen-rapido"
+            );
+
+            tarjeta.dataset.resumenRapido =
+                configuracion.tipo;
+
+            tarjeta.setAttribute(
+                "aria-label",
+                `${configuracion.titulo}. ` +
+                "Mantén presionado para ver el detalle."
+            );
+
+            const panel =
+                document.createElement("div");
+
+            panel.className =
+                "tarjeta-resumen-rapido-panel";
+
+            panel.hidden = true;
+
+            const titulo =
+                document.createElement("span");
+
+            titulo.className =
+                "tarjeta-resumen-rapido-titulo";
+
+            const lista =
+                document.createElement("div");
+
+            lista.className =
+                "tarjeta-resumen-rapido-lista";
+
+            panel.appendChild(titulo);
+            panel.appendChild(lista);
+            tarjeta.appendChild(panel);
+
+            tarjeta.addEventListener(
+                "pointerdown",
+                evento => {
+                    iniciarResumenRapido(
+                        tarjeta,
+                        configuracion,
+                        evento
+                    );
+                }
+            );
+
+            tarjeta.addEventListener(
+                "contextmenu",
+                evento => {
+                    evento.preventDefault();
+                }
+            );
+
+            tarjeta.addEventListener(
+                "dragstart",
+                evento => {
+                    evento.preventDefault();
+                }
+            );
+        });
+
+    document.addEventListener(
+        "pointermove",
+        evento => {
+
+            if (
+                resumenRapidoPointerId === null ||
+                evento.pointerId !==
+                    resumenRapidoPointerId
+            ) {
+                return;
+            }
+
+            const distanciaX =
+                Math.abs(
+                    evento.clientX -
+                    resumenRapidoInicioX
+                );
+
+            const distanciaY =
+                Math.abs(
+                    evento.clientY -
+                    resumenRapidoInicioY
+                );
+
+            if (
+                distanciaX > 14 ||
+                distanciaY > 14
+            ) {
+                cerrarResumenRapido();
+            }
+        },
+        { passive: true }
+    );
+
+    document.addEventListener(
+        "pointerup",
+        evento => {
+
+            if (
+                evento.pointerId ===
+                resumenRapidoPointerId
+            ) {
+                cerrarResumenRapido();
+            }
+        }
+    );
+
+    document.addEventListener(
+        "pointercancel",
+        cerrarResumenRapido
+    );
+
+    window.addEventListener(
+        "blur",
+        cerrarResumenRapido
+    );
+}
+
+inicializarResumenRapido();

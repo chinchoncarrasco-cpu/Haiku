@@ -246,6 +246,153 @@ body {
 
 
 /* ========================================
+   RESUMEN RÁPIDO · PULSACIÓN SOSTENIDA
+======================================== */
+
+.tarjeta-resumen-rapido {
+    position: relative;
+    cursor: pointer;
+
+    user-select: none;
+    -webkit-user-select: none;
+
+    touch-action: pan-y;
+
+    transition:
+        transform 0.14s ease,
+        box-shadow 0.14s ease,
+        border-color 0.14s ease;
+}
+
+.tarjeta-resumen-rapido-esperando {
+    transform: scale(0.985);
+    border-color: #9ebead;
+}
+
+.tarjeta-resumen-rapido-activa {
+    z-index: 600;
+
+    border-color: #2f7653;
+
+    box-shadow:
+        0 8px 24px rgba(28, 57, 42, 0.13);
+}
+
+.tarjeta-resumen-rapido-panel {
+    position: absolute;
+    top: calc(100% + 8px);
+    left: 0;
+    z-index: 610;
+
+    width: min(340px, calc(100vw - 30px));
+    max-height: min(310px, calc(100vh - 120px));
+    overflow-y: auto;
+
+    padding: 12px;
+
+    background: #fbfaf7;
+    border: 1px solid #d8ded9;
+    border-radius: 12px;
+
+    box-shadow:
+        0 16px 38px rgba(18, 31, 24, 0.20);
+
+    color: #202723;
+
+    pointer-events: none;
+}
+
+.tarjeta-resumen-rapido-panel[hidden] {
+    display: none !important;
+}
+
+.resumen .tarjeta:nth-child(4)
+    .tarjeta-resumen-rapido-panel,
+.resumen .tarjeta:nth-child(5)
+    .tarjeta-resumen-rapido-panel {
+    right: 0;
+    left: auto;
+}
+
+.tarjeta-resumen-rapido-titulo {
+    display: block;
+
+    padding-bottom: 8px;
+    margin-bottom: 5px;
+
+    border-bottom: 1px solid #e1e5e2;
+
+    color: #2f7653;
+
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 0.7px;
+    text-transform: uppercase;
+}
+
+.tarjeta-resumen-rapido-lista {
+    display: flex;
+    flex-direction: column;
+}
+
+.tarjeta-resumen-rapido-linea {
+    display: block;
+
+    padding: 7px 2px;
+
+    border-bottom: 1px solid #ecefeb;
+
+    font-size: 11px !important;
+    font-weight: 650;
+    line-height: 1.35;
+}
+
+.tarjeta-resumen-rapido-linea:last-child {
+    border-bottom: 0;
+}
+
+.tarjeta-resumen-rapido-vacio {
+    display: block;
+
+    padding: 7px 2px 3px;
+
+    color: #7c857f;
+
+    font-size: 10px;
+    line-height: 1.35;
+}
+
+@media (max-width: 768px) {
+
+    .tarjeta-resumen-rapido-panel {
+        top: calc(100% + 6px);
+
+        width: min(300px, calc(100vw - 28px));
+        max-height: min(280px, calc(100vh - 100px));
+
+        padding: 10px;
+    }
+
+    .resumen .tarjeta:nth-child(even)
+        .tarjeta-resumen-rapido-panel {
+        right: 0;
+        left: auto;
+    }
+
+    .resumen .tarjeta:nth-child(5)
+        .tarjeta-resumen-rapido-panel {
+        right: auto;
+        left: 0;
+    }
+
+    .tarjeta-resumen-rapido-linea {
+        padding: 6px 1px;
+        font-size: 10px !important;
+    }
+}
+
+
+/* ========================================
    PANELES
 ======================================== */
 
@@ -6410,10 +6557,6 @@ tr.cabana-libre .info-cabana {
    PANEL DE NOTIFICACIONES
    ========================================= */
 
-.sidebar {
-    position: relative;
-}
-
 .panel-notificaciones {
     position: absolute;
 
@@ -8719,6 +8862,48 @@ tr.cabana-libre .info-cabana {
 
     .sidebar-fila-superior .boton-notificaciones {
         margin-left: auto !important;
+    }
+}
+
+/* =========================================
+   ACCIONES SUPERIORES SOLO EN ESCRITORIO
+========================================= */
+
+@media (min-width: 769px) {
+
+    .sidebar-fila-superior .boton-nueva-reserva {
+        position: fixed;
+        top: 30px;
+        right: 78px;
+        z-index: 120;
+
+        height: 34px;
+        margin: 0;
+
+        background: #17211c;
+        border-color: #2f7653;
+
+        box-shadow:
+            0 5px 16px rgba(23, 33, 28, 0.14);
+    }
+
+    .sidebar-fila-superior .boton-notificaciones {
+        position: fixed !important;
+        top: 30px !important;
+        right: 30px !important;
+        z-index: 120 !important;
+
+        background: #17211c !important;
+        border-color: #2f7653 !important;
+
+        box-shadow:
+            0 5px 16px rgba(23, 33, 28, 0.14);
+    }
+
+    .panel-notificaciones {
+        position: fixed;
+        top: 74px;
+        right: 30px;
     }
 }
 

@@ -1716,16 +1716,18 @@ function obtenerServiciosProximos() {
 // PAGOS PENDIENTES REALES
 // ========================================
 
-function obtenerPagosPendientes() {
+function obtenerPagosPendientes(
+    fechaConsulta = fechaSeleccionada
+) {
 
-    if (!fechaSeleccionada) {
+    if (!fechaConsulta) {
         return [];
     }
 
     const pendientes = [];
 
     const datos =
-        obtenerDatosDia(fechaSeleccionada);
+        obtenerDatosDia(fechaConsulta);
 
     const cabanas =
         datos?.cabanas || {};
@@ -1913,7 +1915,7 @@ function obtenerPagosPendientes() {
             servicio.estadoPago ===
                 "pendiente" &&
             obtenerFechaCobroServicio(servicio) ===
-                fechaSeleccionada
+                fechaConsulta
         )
         .forEach(servicio => {
 
