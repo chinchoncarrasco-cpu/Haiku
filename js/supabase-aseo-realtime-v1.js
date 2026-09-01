@@ -1,6 +1,7 @@
 // ========================================
 // HAIKU · ASEO REALTIME MULTIDISPOSITIVO V1
 // Refresca Aseo + revisión cuando Supabase cambia desde otro dispositivo.
+// Incluye recuperación especial para navegadores móviles que suspenden WebSocket.
 // ========================================
 
 (() => {
@@ -10,9 +11,18 @@
     if (!cliente) return;
 
     let canal = null;
+    let estadoCanal = "DESCONECTADO";
     let timer = null;
+    let timerReconexion = null;
     let refrescando = false;
     let refrescoPendiente = false;
+    let reconectando = false;
+    let ultimoEvento = 0;
+    let ultimoRefresco = 0;
+
+    const esMovil = () =>
+        window.matchMedia?.("(pointer: coarse)")?.matches ||
+        window.innerWidth <= 768;
 
     function fechaActual() {
         try {
@@ -22,6 +32,14 @@
         } catch (_) {
             return "";
         }
+    }
+
+    function aseoVisible() {
+        const seccion = document.getElementById("seccion-aseo");
+        return Boolean(
+            !document.hidden &&
+            seccion?.classList.contains("activa")
+        );
     }
 
     function esperar(ms) {
@@ -45,22 +63,18 @@
             const apiAseo = window.HAIKU_ASEO_OPERACION_V1;
             const apiRevision = window.HAIKU_REVISION_RESUMEN_SYNC_V2;
 
-            // Aseo puede estar terminando una hidratación anterior. La segunda
-            // pasada garantiza que leamos el cambio que disparó Realtime.
             if (apiAseo?.hidratar) {
                 await apiAseo.hidratar(fecha, { pintar: false });
                 await apiAseo.hidratar(fecha, { pintar: true });
             }
 
-            // La sincronización de revisiones ya tiene su propia cola de
-            // escrituras. Repetimos tras una pausa corta para cubrir el caso
-            // en que otra lectura antigua estaba terminando al mismo tiempo.
             if (apiRevision?.resincronizar) {
                 await apiRevision.resincronizar();
                 await esperar(120);
                 await apiRevision.resincronizar();
             }
 
+            ultimoRefresco = Date.now();
             console.info("HAIKU · Aseo Realtime actualizado:", fecha);
         } catch (error) {
             console.error("HAIKU · No fue posible refrescar Aseo Realtime:", error);
@@ -80,25 +94,55 @@
     }
 
     function eventoRealtime(payload) {
+        ultimoEvento = Date.now();
         const tabla = payload?.table || payload?.schema || "operacion";
         console.info("HAIKU · Cambio Realtime recibido:", tabla);
-        programarRefresco(90);
+        programarRefresco(70);
     }
 
     async function desconectar() {
-        if (!canal) return;
-        try {
-            await cliente.removeChannel(canal);
-        } catch (_) {}
+        clearTimeout(timerReconexion);
+
+        const actual = canal;
         canal = null;
+        estadoCanal = "DESCONECTADO";
+
+        if (!actual) return;
+
+        try {
+            await cliente.removeChannel(actual);
+        } catch (_) {}
+    }
+
+    function programarReconexion(delay = 350) {
+        clearTimeout(timerReconexion);
+        if (!window.haikuSesion) return;
+
+        timerReconexion = setTimeout(async () => {
+            if (!window.haikuSesion || reconectando) return;
+
+            reconectando = true;
+            try {
+                await desconectar();
+                await conectar();
+            } finally {
+                reconectando = false;
+            }
+        }, delay);
     }
 
     async function conectar() {
         if (!window.haikuSesion) return;
-        if (canal) return;
+        if (canal && estadoCanal === "SUBSCRIBED") return;
+
+        if (canal) {
+            await desconectar();
+        }
+
+        estadoCanal = "CONECTANDO";
 
         canal = cliente
-            .channel("haiku-aseo-operacion-v1")
+            .channel(`haiku-aseo-operacion-${Date.now()}`)
             .on(
                 "postgres_changes",
                 { event: "*", schema: "public", table: "aseos" },
@@ -120,25 +164,63 @@
                 eventoRealtime
             )
             .subscribe(status => {
+                estadoCanal = status;
+
                 if (status === "SUBSCRIBED") {
                     console.info("HAIKU · Aseo Realtime conectado.");
                     programarRefresco(0);
+                    return;
+                }
+
+                if (
+                    status === "CHANNEL_ERROR" ||
+                    status === "TIMED_OUT" ||
+                    status === "CLOSED"
+                ) {
+                    console.warn(
+                        "HAIKU · Aseo Realtime perdió conexión:",
+                        status
+                    );
+                    programarReconexion(300);
                 }
             });
     }
 
+    async function recuperarConexion() {
+        if (!window.haikuSesion) return;
+
+        // iOS/Android pueden conservar un canal que figura vivo aunque el
+        // socket haya sido suspendido. Al volver a la app lo reconstruimos.
+        if (esMovil()) {
+            await desconectar();
+            await conectar();
+        } else if (estadoCanal !== "SUBSCRIBED") {
+            await conectar();
+        }
+
+        programarRefresco(40);
+    }
+
     window.addEventListener("haiku:auth-ready", () => {
         conectar();
-        programarRefresco(120);
+        programarRefresco(100);
     });
 
     window.addEventListener("focus", () => {
-        if (window.haikuSesion) programarRefresco(70);
+        if (window.haikuSesion) recuperarConexion();
+    });
+
+    window.addEventListener("pageshow", () => {
+        if (window.haikuSesion) recuperarConexion();
+    });
+
+    window.addEventListener("online", () => {
+        if (window.haikuSesion) recuperarConexion();
     });
 
     document.addEventListener("visibilitychange", () => {
         if (!document.hidden && window.haikuSesion) {
-            programarRefresco(70);
+            recuperarConexion();
         }
     });
 
@@ -148,11 +230,27 @@
         }
     });
 
+    // Respaldo móvil: mientras el usuario está mirando Aseo hacemos una
+    // verificación liviana cada pocos segundos. Normalmente Realtime gana y
+    // esta pasada no cambia nada; evita depender de F5 si el SO durmió el socket.
+    setInterval(() => {
+        if (!window.haikuSesion || !esMovil() || !aseoVisible()) return;
+
+        const ahora = Date.now();
+        if (ahora - ultimoRefresco > 3500 && ahora - ultimoEvento > 1200) {
+            programarRefresco(0);
+        }
+
+        if (estadoCanal !== "SUBSCRIBED") {
+            programarReconexion(0);
+        }
+    }, 2000);
+
     window.HAIKU_ASEO_REALTIME_V1 = Object.freeze({
         refrescar: refrescarDesdeSupabase,
-        reconectar: async () => {
-            await desconectar();
-            await conectar();
+        reconectar: recuperarConexion,
+        estado() {
+            return estadoCanal;
         }
     });
 
