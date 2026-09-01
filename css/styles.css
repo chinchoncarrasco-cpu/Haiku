@@ -12245,3 +12245,73 @@ input[type="checkbox"] {
         width: 100%;
     }
 }
+
+/* =========================================
+   FIX · MONTO DE PAGO V4
+   Evita borde doble del input
+========================================= */
+
+#seccion-pagos .haiku-saldo-v4 .pago-checkin-input-monto {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+
+    width: 100%;
+    height: 42px;
+
+    padding: 0 12px;
+
+    background: #ffffff;
+
+    border: 1px solid #d8e0da;
+    border-radius: 10px;
+
+    overflow: hidden;
+}
+
+#seccion-pagos .haiku-saldo-v4 .pago-checkin-input-monto > span {
+    position: static;
+
+    flex: 0 0 auto;
+
+    margin: 0 8px 0 0;
+
+    color: #758079;
+
+    font-size: 12px;
+
+    pointer-events: none;
+}
+
+#seccion-pagos
+.haiku-saldo-v4
+.pago-checkin-input-monto
+input[type="number"] {
+
+    flex: 1;
+
+    width: 100%;
+    min-width: 0;
+    height: 100%;
+
+    padding: 0 !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+
+    background: transparent !important;
+
+    box-shadow: none !important;
+    outline: none !important;
+}
+
+#seccion-pagos
+.haiku-saldo-v4
+.pago-checkin-input-monto
+input[type="number"]:focus {
+
+    border: 0 !important;
+
+    box-shadow: none !important;
+}
