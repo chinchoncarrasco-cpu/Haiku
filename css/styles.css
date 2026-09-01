@@ -11726,3 +11726,522 @@ body.historial-modal-abierto {
         max-height: calc(100vh - 112px);
     }
 }
+
+/* =========================================================
+   HAIKU · SUPABASE · PAGOS V4
+   Ajuste visual — solo Saldo Check-in nuevo
+========================================================= */
+
+#seccion-pagos .haiku-saldo-v4 {
+    background: #ffffff;
+    border: 1px solid #dfe6e1;
+    border-radius: 16px;
+    overflow: hidden;
+
+    box-shadow:
+        0 3px 12px rgba(28, 49, 37, 0.055);
+
+    transition:
+        border-color 0.18s ease,
+        box-shadow 0.18s ease;
+}
+
+#seccion-pagos .haiku-saldo-v4.pago-checkin-completo {
+    background: #f4fbf6;
+    border-color: #b9ddc5;
+
+    box-shadow:
+        0 4px 14px rgba(47, 118, 83, 0.08);
+}
+
+
+/* ===============================
+   CONTENIDO PRINCIPAL
+================================ */
+
+#seccion-pagos .haiku-saldo-v4 .pago-checkin-nuevo {
+    padding: 16px;
+}
+
+
+/* ===============================
+   CABECERA CAB / ESTADO
+================================ */
+
+#seccion-pagos .haiku-saldo-v4 .pago-checkin-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+
+    gap: 10px;
+
+    padding-bottom: 12px;
+    margin-bottom: 12px;
+
+    border-bottom: 1px solid #e7ece8;
+}
+
+#seccion-pagos .haiku-saldo-v4 .pago-checkin-identidad {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+
+    min-width: 0;
+}
+
+#seccion-pagos .haiku-saldo-v4 .pago-checkin-identidad strong {
+    color: #243029;
+    font-size: 13px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .pago-checkin-identidad span {
+    color: #768079;
+    font-size: 12px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .pago-checkin-estado {
+    flex: 0 0 auto;
+
+    padding: 5px 9px;
+
+    border-radius: 999px;
+
+    background: #fff3d9;
+    color: #9b681d;
+
+    font-size: 10px;
+    font-weight: 700;
+}
+
+#seccion-pagos
+.haiku-saldo-v4.pago-checkin-completo
+.pago-checkin-estado {
+    background: #e2f3e8;
+    color: #287449;
+}
+
+
+/* ===============================
+   TOTAL / SALDO
+================================ */
+
+#seccion-pagos .haiku-saldo-v4 .pago-checkin-resumen-nuevo {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 9px;
+
+    margin-bottom: 13px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-resumen-celda {
+    padding: 12px 13px;
+
+    background: #fafbf9;
+    border: 1px solid #e3e8e4;
+    border-radius: 12px;
+
+    display: flex;
+    flex-direction: column;
+
+    gap: 4px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-resumen-celda span {
+    color: #768079;
+    font-size: 10px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-resumen-celda strong {
+    color: #202b24;
+
+    font-size: 17px;
+    font-weight: 750;
+}
+
+
+/* ===============================
+   DETALLE DE PAGOS
+================================ */
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-detalle {
+    margin: 12px 0;
+
+    padding-top: 10px;
+
+    border-top: 1px solid #e4eae6;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-detalle summary {
+    cursor: pointer;
+
+    color: #315f47;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    user-select: none;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-pagos-lista {
+    display: grid;
+
+    gap: 8px;
+
+    margin-top: 9px;
+}
+
+
+/* ===============================
+   PAGO YA REGISTRADO
+================================ */
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-pago-confirmado {
+    padding: 11px 12px;
+
+    background: #f4faf6;
+
+    border: 1px solid #d2e7d8;
+    border-radius: 12px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-pago-principal {
+    display: flex;
+    align-items: center;
+
+    gap: 7px;
+
+    color: #29372e;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-pago-principal strong {
+    font-size: 14px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-pago-principal span {
+    font-size: 12px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-pago-ok {
+    margin-left: auto;
+
+    color: #26804e;
+
+    font-weight: 800;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-pago-meta {
+    display: grid;
+
+    gap: 2px;
+
+    margin-top: 6px;
+
+    color: #6d7870;
+
+    font-size: 10px;
+    line-height: 1.4;
+}
+
+
+/* ===============================
+   FORMULARIO NUEVO PAGO
+================================ */
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-formulario {
+    margin-top: 14px;
+
+    padding: 14px;
+
+    background: #f9faf9;
+
+    border: 1px solid #e1e7e3;
+    border-radius: 14px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-form-grid,
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-datos-dinamicos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+
+    gap: 10px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-datos-dinamicos {
+    margin-top: 10px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-formulario label {
+    display: grid;
+
+    gap: 6px;
+
+    min-width: 0;
+
+    color: #59645d;
+
+    font-size: 10px;
+    font-weight: 600;
+}
+
+
+/* ===============================
+   INPUTS MODERNOS
+================================ */
+
+#seccion-pagos .haiku-saldo-v4 input[type="text"],
+#seccion-pagos .haiku-saldo-v4 input[type="number"],
+#seccion-pagos .haiku-saldo-v4 select {
+    width: 100%;
+    min-width: 0;
+
+    height: 42px;
+
+    padding: 0 12px;
+
+    background: #ffffff;
+    color: #263029;
+
+    border: 1px solid #d8e0da;
+    border-radius: 10px;
+
+    outline: none;
+
+    font: inherit;
+    font-size: 12px;
+
+    transition:
+        border-color 0.16s ease,
+        box-shadow 0.16s ease,
+        background 0.16s ease;
+}
+
+#seccion-pagos .haiku-saldo-v4 input[type="text"]:focus,
+#seccion-pagos .haiku-saldo-v4 input[type="number"]:focus,
+#seccion-pagos .haiku-saldo-v4 select:focus {
+    background: #ffffff;
+
+    border-color: #75a58a;
+
+    box-shadow:
+        0 0 0 3px rgba(47, 118, 83, 0.10);
+}
+
+
+/* MONTO CON SIGNO $ */
+
+#seccion-pagos .haiku-saldo-v4 .pago-checkin-input-monto {
+    position: relative;
+
+    display: flex;
+    align-items: center;
+}
+
+#seccion-pagos
+.haiku-saldo-v4
+.pago-checkin-input-monto > span {
+    position: absolute;
+
+    left: 12px;
+
+    z-index: 2;
+
+    color: #758079;
+
+    font-size: 12px;
+
+    pointer-events: none;
+}
+
+#seccion-pagos
+.haiku-saldo-v4
+.pago-checkin-input-monto input {
+    padding-left: 27px;
+}
+
+
+/* ===============================
+   MANAGER
+================================ */
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-manager {
+    align-content: end;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-check-wrap {
+    min-height: 42px;
+
+    padding: 0 11px;
+
+    display: flex;
+    align-items: center;
+
+    gap: 8px;
+
+    background: #ffffff;
+
+    border: 1px solid #d8e0da;
+    border-radius: 10px;
+
+    color: #39463e;
+
+    font-size: 11px;
+    font-weight: 500;
+}
+
+#seccion-pagos
+.haiku-saldo-v4
+.haiku-saldo-check-wrap
+input[type="checkbox"] {
+    width: 16px;
+    height: 16px;
+
+    margin: 0;
+
+    accent-color: #2f7653;
+}
+
+
+/* ===============================
+   BOTÓN REGISTRAR
+================================ */
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-registrar {
+    width: 100%;
+
+    min-height: 43px;
+
+    margin-top: 12px;
+
+    padding: 0 16px;
+
+    border: none;
+    border-radius: 11px;
+
+    background: #2f7653;
+    color: #ffffff;
+
+    font-size: 12px;
+    font-weight: 700;
+
+    cursor: pointer;
+
+    box-shadow:
+        0 4px 10px rgba(47, 118, 83, 0.14);
+
+    transition:
+        transform 0.15s ease,
+        background 0.15s ease,
+        box-shadow 0.15s ease;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-registrar:hover {
+    background: #286847;
+
+    box-shadow:
+        0 6px 14px rgba(47, 118, 83, 0.20);
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-saldo-registrar:active {
+    transform: translateY(1px);
+}
+
+
+/* ===============================
+   BOVE
+================================ */
+
+#seccion-pagos .haiku-saldo-v4 .haiku-bove-cierre {
+    display: grid;
+
+    gap: 5px;
+
+    margin-top: 11px;
+
+    padding: 12px;
+
+    border-radius: 12px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-bove-ok {
+    background: #f1f9f3;
+
+    border: 1px solid #c7e3cf;
+
+    color: #2c5e3e;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-bove-pendiente {
+    background: #fff9ed;
+
+    border: 1px solid #ead7ab;
+
+    color: #765825;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-bove-cierre strong {
+    font-size: 11px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-bove-cierre span,
+#seccion-pagos .haiku-saldo-v4 .haiku-bove-cierre small {
+    font-size: 10px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-bove-fila {
+    display: flex;
+
+    gap: 8px;
+
+    margin-top: 5px;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-bove-fila input {
+    flex: 1;
+}
+
+#seccion-pagos .haiku-saldo-v4 .haiku-bove-fila button {
+    min-height: 42px;
+
+    padding: 0 14px;
+
+    border: none;
+    border-radius: 10px;
+
+    background: #2f7653;
+    color: white;
+
+    font-size: 11px;
+    font-weight: 700;
+
+    cursor: pointer;
+}
+
+
+/* ===============================
+   CELULAR
+================================ */
+
+@media (max-width: 650px) {
+
+    #seccion-pagos .haiku-saldo-v4 .pago-checkin-nuevo {
+        padding: 12px;
+    }
+
+    #seccion-pagos .haiku-saldo-v4 .haiku-saldo-formulario {
+        padding: 12px;
+    }
+
+    #seccion-pagos .haiku-saldo-v4 .haiku-saldo-form-grid,
+    #seccion-pagos .haiku-saldo-v4 .haiku-saldo-datos-dinamicos {
+        grid-template-columns: 1fr;
+    }
+
+    #seccion-pagos .haiku-saldo-v4 .haiku-bove-fila {
+        flex-direction: column;
+    }
+
+    #seccion-pagos .haiku-saldo-v4 .haiku-bove-fila button {
+        width: 100%;
+    }
+}
