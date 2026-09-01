@@ -39,3 +39,36 @@
     box-sizing: border-box !important;
     overflow: hidden !important;
 }
+
+/* Campo visual formateado: el valor numérico real queda oculto
+   y esta capa muestra 144.000, 1.250.000, etc. */
+#seccion-pagos .haiku-saldo-v4 .pago-checkin-input-monto > span {
+    margin-right: 4px !important;
+}
+
+#seccion-pagos .haiku-saldo-v4 .pago-checkin-input-monto .haiku-monto-visual {
+    flex: 1 1 auto !important;
+    width: 0 !important;
+    min-width: 0 !important;
+    height: 100% !important;
+
+    margin: 0 !important;
+    padding: 0 !important;
+
+    border: 0 !important;
+    border-radius: 0 !important;
+    outline: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+
+    color: #263029 !important;
+    font: inherit !important;
+    font-size: 12px !important;
+    font-weight: 600 !important;
+}
+
+#seccion-pagos .haiku-saldo-v4 .pago-checkin-input-monto .haiku-monto-visual:focus {
+    border: 0 !important;
+    box-shadow: none !important;
+    background: transparent !important;
+}
