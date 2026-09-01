@@ -232,8 +232,77 @@
         });
     }
 
+    // ========================================
+    // NAVEGACIÓN LISTADO ↔ REVISIÓN INDIVIDUAL
+    // ========================================
+    // La capa moderna usa display:grid !important para el listado.
+    // El legacy lo oculta con style.display='none'; por eso debemos
+    // elevar ese ocultamiento a !important sólo mientras la revisión
+    // individual está activa.
+    function sincronizarVistaRevision() {
+        const lista = document.querySelector(".lista-revision-cabanas");
+        const revision = document.getElementById("revision-individual");
+
+        if (!lista || !revision) {
+            return;
+        }
+
+        if (revision.classList.contains("activa")) {
+            lista.style.setProperty("display", "none", "important");
+        } else {
+            lista.style.removeProperty("display");
+        }
+    }
+
+    function prepararNavegacion() {
+        const revision = document.getElementById("revision-individual");
+
+        if (!revision || revision.dataset.haikuNavV1 === "1") {
+            sincronizarVistaRevision();
+            return;
+        }
+
+        revision.dataset.haikuNavV1 = "1";
+
+        // Observar el estado real que ya maneja el código legacy.
+        if (typeof MutationObserver === "function") {
+            const observerRevision = new MutationObserver(() => {
+                sincronizarVistaRevision();
+            });
+
+            observerRevision.observe(revision, {
+                attributes: true,
+                attributeFilter: ["class"]
+            });
+        }
+
+        // Refuerzo después de los clics legacy, por compatibilidad móvil.
+        document.addEventListener("click", evento => {
+            const abre = evento.target.closest("[data-revision-cabana]");
+            const vuelve = evento.target.closest("#volver-cabanas");
+
+            if (!abre && !vuelve) {
+                return;
+            }
+
+            setTimeout(() => {
+                sincronizarVistaRevision();
+
+                if (abre) {
+                    const seccion = document.getElementById("seccion-cabanas");
+                    if (seccion) {
+                        seccion.scrollIntoView({ block: "start" });
+                    }
+                }
+            }, 0);
+        });
+
+        sincronizarVistaRevision();
+    }
+
     function iniciar() {
         prepararBotones();
+        prepararNavegacion();
 
         // La revisión individual ya existe en el DOM, pero dejamos observador
         // por compatibilidad con futuros renders dinámicos.
@@ -242,6 +311,7 @@
         if (seccion && typeof MutationObserver === "function") {
             const observer = new MutationObserver(() => {
                 prepararBotones();
+                sincronizarVistaRevision();
             });
 
             observer.observe(seccion, {
@@ -252,6 +322,8 @@
 
         window.HAIKU_REVISION_UI_V1 = Object.freeze({
             prepararBotones,
+            prepararNavegacion,
+            sincronizarVistaRevision,
             copiar: () => manejarCopiar(document.getElementById("copiar-detalles")),
             pegar: () => manejarPegar(document.getElementById("pegar-detalles"))
         });
