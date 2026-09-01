@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>HAIKU · Supabase</title>
+    <link rel="icon" href="data:,">
     <style>
         html, body {
             margin: 0;
@@ -44,7 +45,33 @@
         (async () => {
             "use strict";
 
+            function cargarScript(src) {
+                return new Promise((resolve, reject) => {
+                    const script = document.createElement("script");
+                    script.src = src;
+                    script.async = true;
+                    script.onload = resolve;
+                    script.onerror = () => reject(
+                        new Error(`No fue posible cargar ${src}`)
+                    );
+                    document.head.appendChild(script);
+                });
+            }
+
             try {
+                await cargarScript(
+                    "https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"
+                );
+
+                if (
+                    !window.supabase ||
+                    typeof window.supabase.createClient !== "function"
+                ) {
+                    throw new Error(
+                        "supabase-js no quedó disponible en window.supabase"
+                    );
+                }
+
                 const respuesta = await fetch(
                     `./index.html?v=${Date.now()}`,
                     { cache: "no-store" }
@@ -67,9 +94,9 @@
                 }
 
                 const scriptsSupabase = [
-                    '<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"><' + '/script>',
                     '<script src="js/supabase-client.js"><' + '/script>',
-                    '<script src="js/supabase-auth.js"><' + '/script>'
+                    '<script src="js/supabase-auth.js"><' + '/script>',
+                    '<script src="js/supabase-data.js"><' + '/script>'
                 ].join("\n");
 
                 html = html.replace(
