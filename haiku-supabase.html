@@ -89,7 +89,7 @@
 
                 html = html.replace(
                     "</head>",
-                    `<link rel="stylesheet" href="css/supabase-pagos-v4-fix.css?v=${version}">\n</head>`
+                    `<link rel="stylesheet" href="css/supabase-pagos-v4-fix.css?v=${version}">\n<link rel="stylesheet" href="css/supabase-webpay-v1.css?v=${version}">\n</head>`
                 );
 
                 const marca = "<!-- JAVASCRIPT -->";
@@ -123,7 +123,8 @@
                     `<script src="js/supabase-ficha-atajos.js?v=${version}"><` + '/script>',
                     `<script src="js/supabase-servicios-bridge-v1.js?v=${version}"><` + '/script>',
                     `<script src="js/supabase-pagos-checkout-v1.js?v=${version}"><` + '/script>',
-                    `<script src="js/supabase-reserva-calendario-nav.js?v=${version}"><` + '/script>'
+                    `<script src="js/supabase-reserva-calendario-nav.js?v=${version}"><` + '/script>',
+                    `<script src="js/supabase-webpay-v1.js?v=${version}"><` + '/script>'
                 ].join("\n");
 
                 html = html.replace(
