@@ -7,15 +7,9 @@
    - BODY sólo para el fondo general de la revisión activa
 ===================================================== */
 
-/* Evita que una tarjeta sin foto se estire por compartir fila
-   con otra que sí lleva fotografía. */
 #seccion-cabanas .lista-revision-cabanas {
     align-items: start !important;
 }
-
-/* =====================================================
-   TARJETAS DEL LISTADO
-===================================================== */
 
 #seccion-cabanas .cabana-revision:is(
     [data-revision-cabana="1"],
@@ -44,10 +38,6 @@
     background: rgba(255,255,255,.985) !important;
 }
 
-/* =====================================================
-   REVISIÓN INDIVIDUAL · CABECERA
-===================================================== */
-
 #revision-individual.activa[data-foto-cabana] .revision-cabecera {
     min-height: 188px;
     align-items: center;
@@ -75,19 +65,13 @@
     max-width: 48%;
 }
 
-#revision-individual.activa[data-foto-cabana]
-#revision-nota-operativa:not(:empty) {
+#revision-individual.activa[data-foto-cabana] #revision-nota-operativa:not(:empty) {
     position: relative;
     z-index: 2;
     max-width: 42%;
     background: rgba(255,255,255,.90) !important;
     backdrop-filter: blur(3px);
 }
-
-/* =====================================================
-   FONDO GENERAL DE REVISIÓN
-   Igual que en Resumen: el área visible real la pinta BODY.
-===================================================== */
 
 body:has(#revision-individual.activa[data-foto-cabana]) {
     background-color: var(--fondo);
@@ -114,10 +98,6 @@ body:has(#revision-individual.activa[data-foto-cabana]) #revision-individual {
         background-position: calc(50% + 120px) 48%;
     }
 }
-
-/* =====================================================
-   CELULAR
-===================================================== */
 
 @media (max-width: 700px) {
     #seccion-cabanas .cabana-revision:is(
@@ -151,8 +131,7 @@ body:has(#revision-individual.activa[data-foto-cabana]) #revision-individual {
         max-width: 72%;
     }
 
-    #revision-individual.activa[data-foto-cabana]
-    #revision-nota-operativa:not(:empty) {
+    #revision-individual.activa[data-foto-cabana] #revision-nota-operativa:not(:empty) {
         max-width: 100%;
     }
 
