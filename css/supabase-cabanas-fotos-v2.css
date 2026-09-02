@@ -1,8 +1,10 @@
 /* =====================================================
    HAIKU · FOTOGRAFÍAS CABAÑAS / REVISIÓN · V2
-   Capa visual aislada. Sólo CAB 1, 2, 3, 4 y 6.
+   Capa visual aislada.
+   CAB 1, 2, 3, 4 y 6 usan la fotografía general.
+   CAB 5 usa su propia fotografía original (CAB5.jpg).
    Arquitectura basada en la solución correcta de WORK:
-   - archivo físico en assets/img
+   - archivo físico en repositorio
    - CSS directo sobre el elemento que pinta la zona
    - BODY sólo para el fondo general de la revisión activa
 ===================================================== */
@@ -33,6 +35,22 @@
     [data-revision-cabana="4"],
     [data-revision-cabana="6"]
 ) .cabana-revision-info {
+    position: relative;
+    z-index: 1;
+    background: rgba(255,255,255,.985) !important;
+}
+
+/* CAB 5 · misma tarjeta fotográfica, pero con su imagen propia. */
+#seccion-cabanas .cabana-revision[data-revision-cabana="5"] {
+    padding-top: 96px !important;
+    background-color: #ffffff !important;
+    background-image: url("../CAB5.jpg") !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    background-position: center 50% !important;
+}
+
+#seccion-cabanas .cabana-revision[data-revision-cabana="5"] .cabana-revision-info {
     position: relative;
     z-index: 1;
     background: rgba(255,255,255,.985) !important;
@@ -107,6 +125,11 @@ body:has(#revision-individual.activa[data-foto-cabana]) #revision-individual {
         [data-revision-cabana="4"],
         [data-revision-cabana="6"]
     ) {
+        padding-top: 78px !important;
+        background-position: center 48% !important;
+    }
+
+    #seccion-cabanas .cabana-revision[data-revision-cabana="5"] {
         padding-top: 78px !important;
         background-position: center 48% !important;
     }
