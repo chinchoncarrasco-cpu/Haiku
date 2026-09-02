@@ -2842,6 +2842,10 @@ function obtenerReservasParaBusqueda() {
                             reservaId,
                             {
                                 reservaId,
+                                codigoHaiku:
+                                    cabana.codigoHaiku ||
+                                    ficha.codigoHaiku ||
+                                    "",
                                 numeroCabana,
                                 fechaIngreso,
 
@@ -2902,6 +2906,12 @@ function obtenerReservasParaBusqueda() {
         reservaId,
         {
             reservaId,
+
+            codigoHaiku:
+                cancelada.codigoHaiku ||
+                datosReserva.codigoHaiku ||
+                ficha.codigoHaiku ||
+                "",
 
             numeroCabana:
                 cancelada.numeroCabana || "",
@@ -2967,6 +2977,12 @@ function obtenerReservasParaBusqueda() {
             reservaId,
             {
                 reservaId,
+
+                codigoHaiku:
+                    noShow.codigoHaiku ||
+                    datosReserva.codigoHaiku ||
+                    ficha.codigoHaiku ||
+                    "",
 
                 numeroCabana:
                     noShow.numeroCabana || "",
@@ -3055,7 +3071,7 @@ function buscarReservas(texto) {
                 normalizarBusqueda(
                     [
                         reserva.titular,
-                        reserva.reservaId,
+                        reserva.codigoHaiku,
                         reserva.rut,
                         reserva.telefono,
                         reserva.correo,
@@ -3125,7 +3141,7 @@ function buscarReservas(texto) {
                 <span>
                     CAB ${reserva.numeroCabana}
                     ·
-                    ${reserva.reservaId}
+                    ${reserva.codigoHaiku || "Sin código Haiku"}
                 </span>
 
                 ${
