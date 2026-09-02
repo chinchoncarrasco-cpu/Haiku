@@ -722,7 +722,7 @@ function mostrarNotasOperativas(fecha) {
 // ELIMINAR NOTA OPERATIVA
 // =====================================
 
-document.addEventListener("click", (evento) => {
+document.addEventListener("click", async (evento) => {
 
     const boton = evento.target.closest(".nota-eliminar");
 
@@ -744,7 +744,37 @@ document.addEventListener("click", (evento) => {
         return;
     }
 
-    datos.notasOperativas.splice(indice, 1);
+    const notaOperativa = datos.notasOperativas[indice];
+    const puenteNotas =
+        window.HAIKU_NOTAS_RESUMEN_SUPABASE_V1;
+
+    if (puenteNotas && notaOperativa?.id) {
+        try {
+            await puenteNotas.eliminar({
+                id: notaOperativa.id
+            });
+        } catch (error) {
+            console.error(
+                "HAIKU · No fue posible eliminar la nota en Supabase:",
+                error
+            );
+            alert("No fue posible eliminar la nota. Intenta nuevamente.");
+            return;
+        }
+    }
+
+    const indiceActual = datos.notasOperativas.findIndex(nota =>
+        notaOperativa?.id
+            ? nota.id === notaOperativa.id
+            : (
+                String(nota.cabana) === String(numeroCabana) &&
+                nota.texto === contenidoNota
+            )
+    );
+
+    if (indiceActual !== -1) {
+        datos.notasOperativas.splice(indiceActual, 1);
+    }
 
     guardarDatos();
 
@@ -783,7 +813,7 @@ cerrarPanelNota();
 // GUARDAR NOTA OPERATIVA
 // ========================================
 
-botonGuardarNota.addEventListener("click", () => {
+botonGuardarNota.addEventListener("click", async () => {
 
     if (!fechaSeleccionada) {
         return;
@@ -797,10 +827,42 @@ botonGuardarNota.addEventListener("click", () => {
 
     const datos = obtenerDatosDia(fechaSeleccionada);
 
-    datos.notasOperativas.push({
+    const numeroCabana = selectorNotaCabana.value;
+    const cabana = datos.cabanas?.[numeroCabana] || {};
+    let notaOperativa = {
         cabana: selectorNotaCabana.value,
         texto: nota
-    });
+    };
+
+    const puenteNotas =
+        window.HAIKU_NOTAS_RESUMEN_SUPABASE_V1;
+
+    if (puenteNotas) {
+        try {
+            notaOperativa = await puenteNotas.guardar({
+                fecha: fechaSeleccionada,
+                numeroCabana,
+                texto: nota,
+                reservaId: cabana.reservaId || ""
+            });
+        } catch (error) {
+            console.error(
+                "HAIKU · No fue posible guardar la nota en Supabase:",
+                error
+            );
+            alert("No fue posible guardar la nota. Intenta nuevamente.");
+            return;
+        }
+    }
+
+    if (
+        !notaOperativa.id ||
+        !datos.notasOperativas.some(item =>
+            item.id === notaOperativa.id
+        )
+    ) {
+        datos.notasOperativas.push(notaOperativa);
+    }
 
     guardarDatos();
 
@@ -808,11 +870,6 @@ botonGuardarNota.addEventListener("click", () => {
         typeof registrarActividadHaiku ===
         "function"
     ) {
-        const numeroCabana =
-            selectorNotaCabana.value;
-        const cabana =
-            datos.cabanas?.[numeroCabana] || {};
-
         registrarActividadHaiku({
             tipo: "nota",
             accion: "Nota operativa agregada",
