@@ -286,6 +286,7 @@
         }
 
         fichas[reserva.id] = {
+            codigoHaiku: reserva.codigo_haiku || "",
             titular: reserva.titular_nombre || "",
             rut: base.rut,
             telefono: base.telefono,
