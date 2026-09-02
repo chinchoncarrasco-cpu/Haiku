@@ -25,7 +25,7 @@
     background-image: url("../assets/img/cabanas-revision-foto-original.jpg") !important;
     background-repeat: no-repeat !important;
     background-size: cover !important;
-    background-position: center 62% !important;
+    background-position: center 80% !important;
 }
 
 #seccion-cabanas .cabana-revision:is(
@@ -47,7 +47,7 @@
     background-image: url("../CAB5.jpg") !important;
     background-repeat: no-repeat !important;
     background-size: cover !important;
-    background-position: center 70% !important;
+    background-position: center 88% !important;
 }
 
 #seccion-cabanas .cabana-revision[data-revision-cabana="5"] .cabana-revision-info {
@@ -126,12 +126,12 @@ body:has(#revision-individual.activa[data-foto-cabana]) #revision-individual {
         [data-revision-cabana="6"]
     ) {
         padding-top: 78px !important;
-        background-position: center 60% !important;
+        background-position: center 75% !important;
     }
 
     #seccion-cabanas .cabana-revision[data-revision-cabana="5"] {
         padding-top: 78px !important;
-        background-position: center 68% !important;
+        background-position: center 84% !important;
     }
 
     #revision-individual.activa[data-foto-cabana] .revision-cabecera {
