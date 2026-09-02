@@ -1,0 +1,50 @@
+/* ========================================
+   HAIKU · RESUMEN · FONDO FOTOGRÁFICO V1
+   Prueba reversible · solo escritorio
+======================================== */
+
+@media (min-width: 901px) {
+    #seccion-resumen {
+        position: relative;
+        isolation: isolate;
+        margin: -40px;
+        padding: 40px;
+        min-height: 100vh;
+    }
+
+    #seccion-resumen::before {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -2;
+        pointer-events: none;
+        background-image:
+            linear-gradient(rgba(246, 248, 246, 0.82), rgba(246, 248, 246, 0.82)),
+            url("../assets/img/resumen-fondo.jpg");
+        background-size: cover;
+        background-position: center center;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+    }
+
+    #seccion-resumen::after {
+        content: "";
+        position: absolute;
+        inset: 0;
+        z-index: -1;
+        pointer-events: none;
+        background: linear-gradient(
+            to bottom,
+            rgba(255,255,255,0.10),
+            rgba(255,255,255,0.03) 45%,
+            rgba(255,255,255,0.12)
+        );
+    }
+
+    #seccion-resumen > .resumen .tarjeta,
+    #seccion-resumen > .panel {
+        background-color: rgba(255, 255, 255, 0.91);
+        backdrop-filter: blur(1.5px);
+        -webkit-backdrop-filter: blur(1.5px);
+    }
+}
