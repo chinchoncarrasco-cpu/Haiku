@@ -320,12 +320,13 @@
 
             if (
                 evento.target?.closest?.('[data-seccion="resumen"]') ||
-                evento.target?.closest?.('[data-seccion="calendario"]')
+                evento.target?.closest?.('[data-seccion="calendario"]') ||
+                evento.target?.closest?.(".dia-calendario")
             ) {
                 setTimeout(() => {
                     aplicarBloqueosLegacyFechaActual();
                     refrescarBloqueosDesdeSupabase();
-                }, 50);
+                }, 120);
             }
         },
         true
