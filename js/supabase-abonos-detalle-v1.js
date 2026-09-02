@@ -2,7 +2,6 @@
 "use strict";
 const sb=window.haikuSupabase;if(!sb)return;
 const M={"Transferencia":"transferencia","WebPay Crédito":"webpay_credito","WebPay Débito":"webpay_debito","Tarjeta Crédito":"tarjeta_credito","Tarjeta Débito":"tarjeta_debito","Efectivo":"efectivo"};
-const U={transferencia:"Transferencia",webpay_credito:"WebPay Crédito",webpay_debito:"WebPay Débito",tarjeta_credito:"Tarjeta Crédito",tarjeta_debito:"Tarjeta Débito",efectivo:"Efectivo"};
 const busy=new Set();let timer=0,seq=0;
 const esc=v=>String(v??"").replaceAll("&","&amp;").replaceAll("<","&lt;").replaceAll(">","&gt;").replaceAll('"',"&quot;").replaceAll("'","&#039;");
 const money=v=>"$"+Number(v||0).toLocaleString("es-CL");
@@ -48,8 +47,7 @@ function detail(p){
  if(p.medio_pago==="transferencia")return p.referencia_externa?`Glosa: ${esc(p.referencia_externa)}`:"Glosa: no registrada en este abono";
  if(["webpay_credito","webpay_debito"].includes(p.medio_pago))return p.codigo_autorizacion?`CodAut: ${esc(p.codigo_autorizacion)}`:"CodAut: no registrado en este abono";
  if(["tarjeta_credito","tarjeta_debito"].includes(p.medio_pago))return`Folio: ${p.folio?esc(p.folio):"no registrado"} · BOVTAR: ${p.bove?esc(p.bove):"no registrado"}`;
- if(p.medio_pago==="efectivo")return"Efectivo · sin dato adicional";
- return"Sin detalle adicional";
+ return"";
 }
 async function verified(){
  const list=document.getElementById("pagos-lista-abonos");if(!list||!window.haikuSesion)return;
@@ -61,8 +59,10 @@ async function verified(){
  const map=new Map();(data||[]).forEach(p=>{if(!map.has(p.reserva_id))map.set(p.reserva_id,[]);map.get(p.reserva_id).push(p)});
  cards.forEach(card=>{
   const arr=map.get(card.dataset.reservaId)||[];if(!arr.length)return;
-  const html=arr.map(p=>`<div class="haiku-abono-registro-v1"><div class="haiku-abono-registro-principal-v1"><strong>${esc(money(p.monto))}</strong><span>${esc(U[p.medio_pago]||p.medio_pago||"Sin medio")}</span></div><small>${detail(p)}</small></div>`).join("");
+  const detalles=arr.map(detail).filter(Boolean);
   let b=card.querySelector("[data-haiku-abonos-verificados-v1]");
+  if(!detalles.length){b?.remove();return}
+  const html=detalles.map(texto=>`<div class="haiku-abono-registro-v1"><small>${texto}</small></div>`).join("");
   if(b&&b.dataset.html===html)return;
   if(!b){b=document.createElement("div");b.className="haiku-abonos-verificados-v1";b.dataset.haikuAbonosVerificadosV1="1";const v=card.querySelector(".pago-abono-verificacion");v?v.insertAdjacentElement("beforebegin",b):card.appendChild(b)}
   b.dataset.html=html;b.innerHTML=html;
@@ -97,8 +97,8 @@ window.addEventListener("haiku:auth-ready",()=>setTimeout(later,120));setTimeout
 const style=document.createElement("style");style.textContent=`
 .haiku-abono-detalles-v1{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(47,118,83,.12)}
 .haiku-abono-detalles-v1[hidden]{display:none!important}.haiku-abono-extra-grupo{display:flex;flex-direction:column;gap:5px;min-width:0}.haiku-abono-extra-grupo span{font-size:10px;color:#68716d}.haiku-abono-extra-grupo input{width:100%;min-width:0;height:38px;padding:0 10px;border:1px solid #ccd3cf;border-radius:7px;background:#fff;font:inherit;box-sizing:border-box}
-.haiku-abonos-verificados-v1{display:flex;flex-direction:column;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(47,118,83,.12)}.haiku-abono-registro-v1{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:7px 9px;border:1px solid rgba(47,118,83,.14);border-radius:8px;background:rgba(255,255,255,.48)}.haiku-abono-registro-principal-v1{display:flex;align-items:center;gap:8px;flex:0 0 auto}.haiku-abono-registro-principal-v1 strong{font-size:11px}.haiku-abono-registro-principal-v1 span,.haiku-abono-registro-v1 small{font-size:10px;color:#65706a}.haiku-abono-registro-v1 small{text-align:right;overflow-wrap:anywhere}
-@media(max-width:700px){.haiku-abono-detalles-v1{grid-template-columns:1fr;gap:7px}.haiku-abono-registro-v1{align-items:flex-start;flex-direction:column;gap:3px}.haiku-abono-registro-v1 small{text-align:left}}`;
+.haiku-abonos-verificados-v1{display:flex;flex-direction:column;gap:6px;margin-top:10px;padding-top:10px;border-top:1px solid rgba(47,118,83,.12)}.haiku-abono-registro-v1{display:flex;align-items:center;padding:7px 9px;border:1px solid rgba(47,118,83,.14);border-radius:8px;background:rgba(255,255,255,.48)}.haiku-abono-registro-v1 small{font-size:10px;color:#65706a;text-align:left;overflow-wrap:anywhere}
+@media(max-width:700px){.haiku-abono-detalles-v1{grid-template-columns:1fr;gap:7px}}`;
 document.head.appendChild(style);
 window.HAIKU_ABONOS_DETALLE_V1=Object.freeze({refrescar:later});
 console.info("HAIKU · Detalle de verificación de abonos V1 preparado.");
