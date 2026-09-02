@@ -11,14 +11,13 @@
         padding: 40px !important;
         min-height: 100vh !important;
 
-        /* Ruta absoluta + prioridad alta para evitar que otra regla lo pise */
         background-color: transparent !important;
         background-image:
             linear-gradient(
                 rgba(246, 248, 246, 0.45),
                 rgba(246, 248, 246, 0.45)
             ),
-            url("/Haiku/assets/img/resumen-fondo.jpg") !important;
+            url("https://raw.githubusercontent.com/chinchoncarrasco-cpu/Haiku/main/assets/img/resumen-fondo.jpg") !important;
         background-size: cover !important;
         background-position: center top !important;
         background-repeat: no-repeat !important;
@@ -30,7 +29,6 @@
         content: none !important;
     }
 
-    /* Mantener legibilidad de la interfaz */
     #seccion-resumen > .resumen .tarjeta,
     #seccion-resumen > .panel {
         background-color: rgba(255, 255, 255, 0.94) !important;
