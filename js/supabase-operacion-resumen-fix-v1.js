@@ -1,8 +1,8 @@
 // ========================================
-// HAIKU · OPERACIÓN RESUMEN FIX V2
+// HAIKU · OPERACIÓN RESUMEN FIX V3
 // Rehidrata estados del Resumen desde Supabase después de bloqueos/liberaciones
 // y cada vez que cambia la fecha seleccionada.
-// Evita que filas libres queden en "Seleccionar" por un refresco legacy vacío.
+// Los colores quedan exclusivamente a cargo del CSS/lógica visual original.
 // ========================================
 
 (() => {
@@ -92,31 +92,30 @@
 
         const estadoReal = fila.estado_operativo || "libre-libre";
         const selector = tr.querySelector('[data-campo="estado"]');
+
         if (selector) {
             const existe = Array.from(selector.options || []).some(
                 opcion => opcion.value === estadoReal
             );
-            if (existe) selector.value = estadoReal;
+
+            if (existe) {
+                selector.value = estadoReal;
+            }
         }
 
-        const titular = tr.querySelector(`[data-titular-cabana="${numero}"]`);
-        if (titular) titular.textContent = titularPrincipal(fila);
-
-        tr.classList.remove(
-            "cabana-checkout",
-            "cabana-checkin",
-            "cabana-libre",
-            "cabana-ingresa",
-            "cabana-bloqueada"
+        const titular = tr.querySelector(
+            `[data-titular-cabana="${numero}"]`
         );
 
-        if (estadoReal === "bloqueada") {
-            tr.classList.add("cabana-bloqueada");
-        } else if (["libre-ingresa", "sale-ingresa"].includes(estadoReal)) {
-            tr.classList.add("cabana-ingresa");
-        } else {
-            tr.classList.add("cabana-libre");
+        if (titular) {
+            titular.textContent = titularPrincipal(fila);
         }
+
+        // IMPORTANTE:
+        // No agregar/quitar clases de color aquí.
+        // El diseño original de HAIKU ya pinta cada fila según el valor
+        // del selector y según check-in/check-out. Este puente solo hidrata
+        // datos desde Supabase y no debe competir con esa lógica visual.
     }
 
     async function refrescar(fechaForzada = "") {
@@ -129,11 +128,13 @@
         }
 
         sincronizando = true;
+
         try {
             const { data, error } = await cliente.rpc(
                 "haiku_operacion_dia",
                 { p_fecha: fecha }
             );
+
             if (error) throw error;
 
             const filas = Array.isArray(data) ? data : [];
@@ -151,13 +152,12 @@
                 dia.cabanas[numero] = {
                     ...anterior,
                     estado: estadoReal,
-                    titular: titular === "Sin titular" || titular === "BLOQUEADA"
-                        ? ""
-                        : titular
+                    titular:
+                        titular === "Sin titular" || titular === "BLOQUEADA"
+                            ? ""
+                            : titular
                 };
 
-                // Solo pintamos la pantalla si el usuario sigue mirando
-                // la misma fecha que acabamos de consultar.
                 if (fechaActual() === fecha) {
                     aplicarFilaVisual(fila);
                 }
@@ -197,10 +197,8 @@
     function programarCambioFecha(fecha) {
         if (!fecha) return;
 
-        // Primera pasada: apenas termina la navegación legacy.
         programar(80, fecha);
 
-        // Segunda pasada: corrige cualquier repaint legacy tardío.
         clearTimeout(timerSegundaPasada);
         timerSegundaPasada = setTimeout(() => {
             if (fechaActual() === fecha) {
@@ -221,7 +219,7 @@
         if (canal || !window.haikuSesion) return;
 
         canal = cliente
-            .channel("haiku-operacion-resumen-fix-v2")
+            .channel("haiku-operacion-resumen-fix-v3")
             .on(
                 "postgres_changes",
                 {
@@ -239,7 +237,6 @@
         "click",
         evento => {
             if (evento.target?.closest?.(".dia-calendario")) {
-                // El handler legacy cambia fechaSeleccionada durante este mismo click.
                 setTimeout(revisarCambioFecha, 20);
                 setTimeout(revisarCambioFecha, 120);
                 return;
@@ -274,8 +271,6 @@
         setTimeout(() => programarCambioFecha(fechaActual()), 120);
     });
 
-    // Protección adicional: detecta cambios de fecha hechos por cualquier
-    // otro módulo, incluso si no provienen de un click del calendario.
     setInterval(revisarCambioFecha, 250);
 
     setTimeout(() => {
