@@ -1,54 +1,68 @@
 /* =====================================================
    HAIKU · RESUMEN DEL DÍA · AJUSTE SOLO ESCRITORIO
-   No afecta móvil/tablet angosta ni la columna inicial CAB.
+   No afecta móvil/tablet angosta ni modifica el contenido
+   interno de la columna inicial CAB.
 ===================================================== */
 
 @media (min-width: 901px) {
 
-    /* Distribución más equilibrada de las columnas operativas.
-       La columna 1 (CAB) queda completamente intacta. */
+    /* Reparto proporcional del ancho disponible.
+       Evita que CAB absorba todo el espacio sobrante. */
+    .tabla-contenedor > table {
+        table-layout: fixed;
+        width: 100%;
+    }
+
+    /* ESTADO */
     .tabla-contenedor > table th:nth-child(2),
     .tabla-contenedor > table td:nth-child(2) {
-        width: 130px;
-        min-width: 130px;
-        max-width: 130px;
+        width: 10%;
+        min-width: 0;
+        max-width: none;
     }
 
+    /* ASEO */
     .tabla-contenedor > table th:nth-child(3),
     .tabla-contenedor > table td:nth-child(3) {
-        width: 190px;
-        min-width: 190px;
-        max-width: 190px;
+        width: 14%;
+        min-width: 0;
+        max-width: none;
     }
 
+    /* INGRESO */
     .tabla-contenedor > table th:nth-child(4),
     .tabla-contenedor > table td:nth-child(4) {
-        width: 125px;
-        min-width: 125px;
-        max-width: 125px;
+        width: 9%;
+        min-width: 0;
+        max-width: none;
     }
 
-    /* Notas y Servicios quedan prácticamente equivalentes. */
+    /* NOTAS */
     .tabla-contenedor > table th:nth-child(5),
     .tabla-contenedor > table td:nth-child(5) {
-        width: 165px;
-        min-width: 165px;
-        max-width: 165px;
+        width: 17%;
+        min-width: 0;
+        max-width: none;
     }
 
+    /* SERVICIOS */
     .tabla-contenedor > table th:nth-child(6),
     .tabla-contenedor > table td:nth-child(6) {
-        width: 175px;
-        min-width: 175px;
-        max-width: 175px;
+        width: 18%;
+        min-width: 0;
+        max-width: none;
     }
 
+    /* ESTADO FINAL */
     .tabla-contenedor > table th:nth-child(7),
     .tabla-contenedor > table td:nth-child(7) {
-        width: 155px;
-        min-width: 155px;
-        max-width: 155px;
+        width: 12%;
+        min-width: 0;
+        max-width: none;
     }
+
+    /* La primera columna queda con el 20% restante,
+       sin modificar ninguno de sus elementos internos. */
 
     /* ESTADO: ocupa de verdad el espacio de su columna. */
     .tabla-contenedor .estado-reserva-con-checkin {
@@ -106,7 +120,7 @@
         min-width: 0;
     }
 
-    /* NOTAS y SERVICIOS: mismas proporciones visuales. */
+    /* NOTAS y SERVICIOS aprovechan su nuevo ancho. */
     .tabla-contenedor .celda-notas,
     .tabla-contenedor > table td:nth-child(6) {
         padding-left: 8px;
@@ -124,7 +138,7 @@
         min-width: 0;
     }
 
-    /* ESTADO FINAL: aprovecha toda la columna sin quedar flotando. */
+    /* ESTADO FINAL: aprovecha toda la columna. */
     .tabla-contenedor .estado-final-contenido,
     .tabla-contenedor .estado-final-select {
         width: 100%;
