@@ -1,6 +1,7 @@
 // ========================================
 // HAIKU · PAGOS PENDIENTES SUPABASE V1
-// Una sola verdad financiera para contador, resumen rápido y campana.
+// Supabase como fuente única: pagos y BOVE se calculan juntos,
+// pero se presentan como pendientes independientes.
 // ========================================
 
 (() => {
@@ -10,6 +11,7 @@
     if (!cliente) return;
 
     const cachePorFecha = new Map();
+    const cacheBovesPorFecha = new Map();
     const cargasPorFecha = new Map();
 
     let canal = null;
@@ -129,6 +131,15 @@
         return cachePorFecha.has(String(fecha).slice(0, 10));
     }
 
+    function obtenerBoves(fecha = fechaActual()) {
+        return (cacheBovesPorFecha.get(String(fecha).slice(0, 10)) || [])
+            .map(item => ({ ...item }));
+    }
+
+    function bovesListos(fecha = fechaActual()) {
+        return cacheBovesPorFecha.has(String(fecha).slice(0, 10));
+    }
+
     function actualizarPantalla(fecha, pendientes) {
         if (fecha !== fechaActual()) return;
 
@@ -149,6 +160,7 @@
                 }
             } catch (_) {}
         }
+
     }
 
     async function cargar(fecha = fechaActual()) {
@@ -179,6 +191,7 @@
 
             if (ids.length === 0) {
                 cachePorFecha.set(fechaISO, []);
+                cacheBovesPorFecha.set(fechaISO, []);
                 fechaVisible = fechaISO;
                 actualizarPantalla(fechaISO, []);
                 return [];
@@ -210,6 +223,7 @@
                 (reservasR.data || []).map(item => [item.id, item])
             );
             const pendientes = [];
+            const bovesPendientes = [];
 
             ingresos.forEach(item => {
                 if (!saldoAlojamiento.has(item.reservaId)) return;
@@ -218,6 +232,10 @@
                     saldoAlojamiento.get(item.reservaId) || 0
                 );
 
+                // Conservamos la secuencia operativa existente:
+                // mientras queda saldo de alojamiento, primero se recuerda
+                // el cobro. Cuando el saldo llega a 0, BOVE pasa a su propio
+                // apartado si todavía no se ha cerrado.
                 if (saldo > 0) {
                     pendientes.push({
                         tipo: "checkin",
@@ -231,7 +249,7 @@
                 }
 
                 if (!reservas.get(item.reservaId)?.bove_cierre) {
-                    pendientes.push({
+                    bovesPendientes.push({
                         tipo: "bove",
                         numeroCabana: item.numeroCabana,
                         reservaId: item.reservaId,
@@ -260,13 +278,20 @@
             });
 
             const resultado = ordenarPendientes(pendientes);
+            const resultadoBoves = ordenarPendientes(bovesPendientes);
+
             cachePorFecha.set(fechaISO, resultado);
+            cacheBovesPorFecha.set(fechaISO, resultadoBoves);
             fechaVisible = fechaISO;
             actualizarPantalla(fechaISO, resultado);
 
             console.info(
-                "HAIKU · Pagos pendientes sincronizados desde Supabase:",
-                { fecha: fechaISO, pendientes: resultado }
+                "HAIKU · Pendientes sincronizados desde Supabase:",
+                {
+                    fecha: fechaISO,
+                    pagos: resultado,
+                    boves: resultadoBoves
+                }
             );
 
             return obtener(fechaISO);
@@ -278,7 +303,7 @@
             return await carga;
         } catch (error) {
             console.error(
-                "HAIKU · No fue posible calcular pagos pendientes:",
+                "HAIKU · No fue posible calcular pagos/BOVE pendientes:",
                 error
             );
             throw error;
@@ -320,14 +345,173 @@
         canal.subscribe(estado => {
             if (estado === "SUBSCRIBED") {
                 console.info(
-                    "HAIKU · Pagos pendientes Realtime conectado."
+                    "HAIKU · Pagos/BOVE pendientes Realtime conectado."
                 );
             }
         });
     }
 
+    function obtenerSeccionNotificaciones(contenido) {
+        let seccion = contenido.querySelector(
+            ".notificaciones-seccion"
+        );
+
+        if (seccion) return seccion;
+
+        contenido.innerHTML = "";
+
+        seccion = document.createElement("div");
+        seccion.className = "notificaciones-seccion";
+
+        const titulo = document.createElement("div");
+        titulo.className = "notificaciones-seccion-titulo";
+        titulo.textContent = "Ahora";
+
+        seccion.appendChild(titulo);
+        contenido.appendChild(seccion);
+
+        return seccion;
+    }
+
+    function renderizarBovesPendientes() {
+        const contenido = document.getElementById(
+            "notificaciones-contenido"
+        );
+
+        if (!contenido) return;
+
+        contenido
+            .querySelectorAll("[data-haiku-boves-pendientes]")
+            .forEach(elemento => elemento.remove());
+
+        const fecha = fechaActual();
+        if (!bovesListos(fecha)) return;
+
+        const boves = obtenerBoves(fecha);
+        if (boves.length === 0) return;
+
+        const seccion = obtenerSeccionNotificaciones(contenido);
+
+        const resumenBoves = document.createElement("button");
+        resumenBoves.type = "button";
+        resumenBoves.className = "notificacion-item";
+        resumenBoves.dataset.haikuBovesPendientes = "resumen";
+
+        resumenBoves.innerHTML = `
+            <span class="notificacion-icono">
+                🧾
+            </span>
+
+            <span class="notificacion-contenido">
+                <strong>
+                    ${boves.length}
+                    ${
+                        boves.length === 1
+                            ? "BOVE pendiente"
+                            : "BOVE pendientes"
+                    }
+                </strong>
+
+                <small>
+                    Ver pendientes
+                </small>
+            </span>
+
+            <span class="notificacion-flecha">
+                ›
+            </span>
+        `;
+
+        const detalleBoves = document.createElement("div");
+        detalleBoves.className = "notificacion-detalle";
+        detalleBoves.dataset.haikuBovesPendientes = "detalle";
+        detalleBoves.hidden = true;
+
+        boves.forEach(bove => {
+            const item = document.createElement("button");
+            item.type = "button";
+            item.className = "notificacion-reserva";
+            item.dataset.cabana = bove.numeroCabana;
+
+            item.innerHTML = `
+                <strong>
+                    CAB ${bove.numeroCabana}
+                    ·
+                    ${bove.titular}
+                </strong>
+
+                <span>
+                    BOVE alojamiento pendiente
+                </span>
+            `;
+
+            detalleBoves.appendChild(item);
+        });
+
+        resumenBoves.addEventListener("click", () => {
+            detalleBoves.hidden = !detalleBoves.hidden;
+
+            const flecha = resumenBoves.querySelector(
+                ".notificacion-flecha"
+            );
+
+            if (flecha) {
+                flecha.textContent = detalleBoves.hidden
+                    ? "›"
+                    : "⌄";
+            }
+        });
+
+        detalleBoves.addEventListener("click", evento => {
+            const bove = evento.target.closest(
+                ".notificacion-reserva"
+            );
+
+            if (!bove) return;
+
+            const numeroCabana = bove.dataset.cabana;
+            const botonCabana = document.querySelector(
+                `[data-ficha-cabana="${numeroCabana}"]`
+            );
+
+            if (!botonCabana) return;
+
+            try {
+                if (typeof cerrarPanelNotificaciones === "function") {
+                    cerrarPanelNotificaciones();
+                }
+            } catch (_) {}
+
+            botonCabana.click();
+        });
+
+        seccion.appendChild(resumenBoves);
+        seccion.appendChild(detalleBoves);
+    }
+
+    function instalarIntegracionNotificaciones() {
+        const base = window.actualizarNotificaciones;
+
+        if (
+            typeof base !== "function" ||
+            base.__haikuBovesSeparadosV1 === true
+        ) {
+            return;
+        }
+
+        const integrada = function (...args) {
+            const resultado = base.apply(this, args);
+            renderizarBovesPendientes();
+            return resultado;
+        };
+
+        integrada.__haikuBovesSeparadosV1 = true;
+        window.actualizarNotificaciones = integrada;
+    }
+
     function iniciar() {
         if (!window.haikuSesion) return;
+        instalarIntegracionNotificaciones();
         instalarRealtime();
         cargar(fechaActual()).catch(() => {});
     }
@@ -337,6 +521,14 @@
         estaListo,
         refrescar: cargar
     });
+
+    window.HAIKU_BOVES_PENDIENTES_SUPABASE_V1 = Object.freeze({
+        obtener: obtenerBoves,
+        estaListo: bovesListos,
+        refrescar: cargar
+    });
+
+    instalarIntegracionNotificaciones();
 
     window.addEventListener("haiku:auth-ready", iniciar);
     window.addEventListener("online", () => programar(0));
