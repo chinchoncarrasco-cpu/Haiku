@@ -26,7 +26,7 @@
 ) {
     padding-top: 96px !important;
     background-color: #ffffff !important;
-    background-image: url("../assets/img/cabanas-revision-foto-v3.jpeg") !important;
+    background-image: url("../assets/img/cabanas-revision-foto-v2.jpeg") !important;
     background-repeat: no-repeat !important;
     background-size: 100% auto !important;
     background-position: center 50% !important;
@@ -46,8 +46,6 @@
 
 /* =====================================================
    REVISIÓN INDIVIDUAL · CABECERA
-   El JS existente sólo agrega data-foto-cabana a
-   #revision-individual cuando corresponde.
 ===================================================== */
 
 #revision-individual.activa[data-foto-cabana] .revision-cabecera {
@@ -64,7 +62,7 @@
             rgba(255,255,255,.22) 72%,
             rgba(255,255,255,.06) 100%
         ),
-        url("../assets/img/cabanas-revision-foto-v3.jpeg") !important;
+        url("../assets/img/cabanas-revision-foto-v2.jpeg") !important;
     background-repeat: no-repeat !important;
     background-size: cover !important;
     background-position: center 50% !important;
@@ -98,7 +96,7 @@ body:has(#revision-individual.activa[data-foto-cabana]) {
             rgba(244,246,248,.78),
             rgba(244,246,248,.88)
         ),
-        url("../assets/img/cabanas-revision-foto-v3.jpeg");
+        url("../assets/img/cabanas-revision-foto-v2.jpeg");
     background-repeat: no-repeat;
     background-position: center 48%;
     background-size: cover;
@@ -144,7 +142,7 @@ body:has(#revision-individual.activa[data-foto-cabana]) #revision-individual {
                 rgba(255,255,255,.54) 78%,
                 rgba(255,255,255,.30) 100%
             ),
-            url("../assets/img/cabanas-revision-foto-v3.jpeg") !important;
+            url("../assets/img/cabanas-revision-foto-v2.jpeg") !important;
         background-position: 57% center !important;
     }
 
