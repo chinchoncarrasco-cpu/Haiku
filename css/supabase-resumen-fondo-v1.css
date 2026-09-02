@@ -4,36 +4,36 @@
 ======================================== */
 
 @media (min-width: 901px) {
+    #seccion-resumen.seccion-app.activa,
     #seccion-resumen {
-        position: relative;
-        margin: -40px;
-        padding: 40px;
-        min-height: 100vh;
+        position: relative !important;
+        margin: -40px !important;
+        padding: 40px !important;
+        min-height: 100vh !important;
 
-        /* Fondo directo para evitar que otras capas lo tapen */
+        /* Ruta absoluta + prioridad alta para evitar que otra regla lo pise */
         background-color: transparent !important;
         background-image:
             linear-gradient(
-                rgba(246, 248, 246, 0.74),
-                rgba(246, 248, 246, 0.74)
+                rgba(246, 248, 246, 0.45),
+                rgba(246, 248, 246, 0.45)
             ),
-            url("../assets/img/resumen-fondo.jpg") !important;
+            url("/Haiku/assets/img/resumen-fondo.jpg") !important;
         background-size: cover !important;
         background-position: center top !important;
         background-repeat: no-repeat !important;
         background-attachment: fixed !important;
     }
 
-    /* Ya no necesitamos las capas negativas de la primera prueba */
     #seccion-resumen::before,
     #seccion-resumen::after {
         content: none !important;
     }
 
-    /* Las tarjetas siguen dominando visualmente para conservar lectura */
+    /* Mantener legibilidad de la interfaz */
     #seccion-resumen > .resumen .tarjeta,
     #seccion-resumen > .panel {
-        background-color: rgba(255, 255, 255, 0.94);
+        background-color: rgba(255, 255, 255, 0.94) !important;
         backdrop-filter: blur(1.5px);
         -webkit-backdrop-filter: blur(1.5px);
     }
