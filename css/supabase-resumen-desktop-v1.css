@@ -1,0 +1,137 @@
+/* =====================================================
+   HAIKU · RESUMEN DEL DÍA · AJUSTE SOLO ESCRITORIO
+   No afecta móvil/tablet angosta ni la columna inicial CAB.
+===================================================== */
+
+@media (min-width: 901px) {
+
+    /* Distribución más equilibrada de las columnas operativas.
+       La columna 1 (CAB) queda completamente intacta. */
+    .tabla-contenedor > table th:nth-child(2),
+    .tabla-contenedor > table td:nth-child(2) {
+        width: 130px;
+        min-width: 130px;
+        max-width: 130px;
+    }
+
+    .tabla-contenedor > table th:nth-child(3),
+    .tabla-contenedor > table td:nth-child(3) {
+        width: 190px;
+        min-width: 190px;
+        max-width: 190px;
+    }
+
+    .tabla-contenedor > table th:nth-child(4),
+    .tabla-contenedor > table td:nth-child(4) {
+        width: 125px;
+        min-width: 125px;
+        max-width: 125px;
+    }
+
+    /* Notas y Servicios quedan prácticamente equivalentes. */
+    .tabla-contenedor > table th:nth-child(5),
+    .tabla-contenedor > table td:nth-child(5) {
+        width: 165px;
+        min-width: 165px;
+        max-width: 165px;
+    }
+
+    .tabla-contenedor > table th:nth-child(6),
+    .tabla-contenedor > table td:nth-child(6) {
+        width: 175px;
+        min-width: 175px;
+        max-width: 175px;
+    }
+
+    .tabla-contenedor > table th:nth-child(7),
+    .tabla-contenedor > table td:nth-child(7) {
+        width: 155px;
+        min-width: 155px;
+        max-width: 155px;
+    }
+
+    /* ESTADO: ocupa de verdad el espacio de su columna. */
+    .tabla-contenedor .estado-reserva-con-checkin {
+        width: 100%;
+        min-width: 0;
+        margin: 0;
+    }
+
+    .tabla-contenedor .estado-reserva-con-checkin > select {
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        flex: 1 1 auto;
+    }
+
+    /* ASEO: alineación compacta y consistente. */
+    .tabla-contenedor .campo-encargado-aseo {
+        width: 100%;
+    }
+
+    .tabla-contenedor .aseo-horarios {
+        width: 100%;
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
+        align-items: center;
+        gap: 5px;
+    }
+
+    .tabla-contenedor .aseo-horarios::after {
+        grid-column: 2;
+        grid-row: 1;
+        order: initial;
+    }
+
+    .tabla-contenedor .aseo-horarios input:first-child {
+        grid-column: 1;
+        grid-row: 1;
+        order: initial;
+    }
+
+    .tabla-contenedor .aseo-horarios input:last-child {
+        grid-column: 3;
+        grid-row: 1;
+        order: initial;
+    }
+
+    .tabla-contenedor .aseo-horarios input[type="time"] {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* INGRESO usa el ancho de la celda y queda alineado. */
+    .tabla-contenedor > table td:nth-child(4) input[type="time"] {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* NOTAS y SERVICIOS: mismas proporciones visuales. */
+    .tabla-contenedor .celda-notas,
+    .tabla-contenedor > table td:nth-child(6) {
+        padding-left: 8px;
+        padding-right: 8px;
+    }
+
+    .tabla-contenedor .nota-cabana,
+    .tabla-contenedor .servicio-resumen-wrap {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .tabla-contenedor .servicio-resumen-wrap input {
+        width: 100%;
+        min-width: 0;
+    }
+
+    /* ESTADO FINAL: aprovecha toda la columna sin quedar flotando. */
+    .tabla-contenedor .estado-final-contenido,
+    .tabla-contenedor .estado-final-select {
+        width: 100%;
+        min-width: 0;
+    }
+
+    .tabla-contenedor .estado-final-select {
+        max-width: none;
+    }
+}
