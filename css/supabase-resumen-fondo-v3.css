@@ -1,0 +1,33 @@
+/* =====================================================
+   HAIKU · FONDO FOTOGRÁFICO DEL RESUMEN · V3
+   El fondo real del área visible pertenece a <body>.
+   Se activa sólo en escritorio y sólo mientras Resumen
+   es la sección activa. No modifica tarjetas ni móvil.
+===================================================== */
+
+@media (min-width: 901px) {
+
+    body:has(#seccion-resumen.activa) {
+        background-color: var(--fondo);
+        background-image:
+            linear-gradient(
+                rgba(244, 246, 248, 0.62),
+                rgba(244, 246, 248, 0.76)
+            ),
+            url("../assets/img/resumen-fondo-haiku-v1.jpeg");
+        background-repeat: no-repeat;
+        /* +120 px centra la foto en el área que queda a la
+           derecha del sidebar fijo de 240 px. */
+        background-position: calc(50% + 120px) 44%;
+        background-size: cover;
+        background-attachment: fixed;
+    }
+
+    /* El contenido ya es transparente en el diseño base.
+       Estas reglas lo dejan explícito sólo en Resumen para
+       impedir que un ajuste posterior vuelva a tapar la foto. */
+    body:has(#seccion-resumen.activa) > .contenido,
+    body:has(#seccion-resumen.activa) #seccion-resumen {
+        background-color: transparent;
+    }
+}
