@@ -19,7 +19,7 @@
 
     resumen.style.setProperty(
       "background-image",
-      'linear-gradient(rgba(246,248,246,.60), rgba(246,248,246,.60)), url("/Haiku/assets/img/resumen-fondo.jpg")',
+      'linear-gradient(rgba(246,248,246,.60), rgba(246,248,246,.60)), url("https://raw.githubusercontent.com/chinchoncarrasco-cpu/Haiku/main/assets/img/resumen-fondo.jpg")',
       "important"
     );
     resumen.style.setProperty("background-size", "cover", "important");
