@@ -1,6 +1,7 @@
 // ========================================
-// HAIKU · OPERACIÓN RESUMEN FIX V1
-// Rehidrata estados del Resumen desde Supabase después de bloqueos/liberaciones.
+// HAIKU · OPERACIÓN RESUMEN FIX V2
+// Rehidrata estados del Resumen desde Supabase después de bloqueos/liberaciones
+// y cada vez que cambia la fecha seleccionada.
 // Evita que filas libres queden en "Seleccionar" por un refresco legacy vacío.
 // ========================================
 
@@ -13,6 +14,9 @@
     let sincronizando = false;
     let canal = null;
     let timer = null;
+    let timerSegundaPasada = null;
+    let ultimaFechaVista = "";
+    let fechaPendiente = "";
 
     function fechaActual() {
         try {
@@ -117,7 +121,12 @@
 
     async function refrescar(fechaForzada = "") {
         const fecha = String(fechaForzada || fechaActual()).slice(0, 10);
-        if (!fecha || !window.haikuSesion || sincronizando) return;
+        if (!fecha || !window.haikuSesion) return;
+
+        if (sincronizando) {
+            fechaPendiente = fecha;
+            return;
+        }
 
         sincronizando = true;
         try {
@@ -147,10 +156,15 @@
                         : titular
                 };
 
-                aplicarFilaVisual(fila);
+                // Solo pintamos la pantalla si el usuario sigue mirando
+                // la misma fecha que acabamos de consultar.
+                if (fechaActual() === fecha) {
+                    aplicarFilaVisual(fila);
+                }
             });
 
             guardarCache(cache);
+            ultimaFechaVista = fecha;
 
             console.info(
                 "HAIKU · Estados del Resumen rehidratados desde Supabase:",
@@ -165,19 +179,49 @@
             );
         } finally {
             sincronizando = false;
+
+            const pendiente = fechaPendiente;
+            fechaPendiente = "";
+
+            if (pendiente && pendiente !== fecha) {
+                setTimeout(() => refrescar(pendiente), 30);
+            }
         }
     }
 
-    function programar(ms = 120) {
+    function programar(ms = 120, fechaForzada = "") {
         clearTimeout(timer);
-        timer = setTimeout(() => refrescar(), ms);
+        timer = setTimeout(() => refrescar(fechaForzada), ms);
+    }
+
+    function programarCambioFecha(fecha) {
+        if (!fecha) return;
+
+        // Primera pasada: apenas termina la navegación legacy.
+        programar(80, fecha);
+
+        // Segunda pasada: corrige cualquier repaint legacy tardío.
+        clearTimeout(timerSegundaPasada);
+        timerSegundaPasada = setTimeout(() => {
+            if (fechaActual() === fecha) {
+                refrescar(fecha);
+            }
+        }, 420);
+    }
+
+    function revisarCambioFecha() {
+        const fecha = fechaActual();
+        if (!fecha || fecha === ultimaFechaVista) return;
+
+        ultimaFechaVista = fecha;
+        programarCambioFecha(fecha);
     }
 
     function instalarRealtime() {
         if (canal || !window.haikuSesion) return;
 
         canal = cliente
-            .channel("haiku-operacion-resumen-fix-v1")
+            .channel("haiku-operacion-resumen-fix-v2")
             .on(
                 "postgres_changes",
                 {
@@ -185,7 +229,7 @@
                     schema: "public",
                     table: "bloqueos_cabana"
                 },
-                () => programar(180)
+                () => programarCambioFecha(fechaActual())
             );
 
         canal.subscribe();
@@ -194,11 +238,18 @@
     document.addEventListener(
         "click",
         evento => {
+            if (evento.target?.closest?.(".dia-calendario")) {
+                // El handler legacy cambia fechaSeleccionada durante este mismo click.
+                setTimeout(revisarCambioFecha, 20);
+                setTimeout(revisarCambioFecha, 120);
+                return;
+            }
+
             if (
                 evento.target?.closest?.('[data-seccion="resumen"]') ||
                 evento.target?.closest?.(".haiku-bloqueo-liberar-confirmar")
             ) {
-                programar(220);
+                programarCambioFecha(fechaActual());
             }
         },
         true
@@ -207,19 +258,36 @@
     window.addEventListener("haiku:auth-ready", () => {
         setTimeout(() => {
             instalarRealtime();
-            refrescar();
+            ultimaFechaVista = "";
+            revisarCambioFecha();
         }, 100);
     });
 
-    window.addEventListener("pageshow", () => setTimeout(refrescar, 120));
-    window.addEventListener("focus", () => setTimeout(refrescar, 120));
+    window.addEventListener("pageshow", () => {
+        setTimeout(() => {
+            ultimaFechaVista = "";
+            revisarCambioFecha();
+        }, 120);
+    });
+
+    window.addEventListener("focus", () => {
+        setTimeout(() => programarCambioFecha(fechaActual()), 120);
+    });
+
+    // Protección adicional: detecta cambios de fecha hechos por cualquier
+    // otro módulo, incluso si no provienen de un click del calendario.
+    setInterval(revisarCambioFecha, 250);
 
     setTimeout(() => {
         if (window.haikuSesion) {
             instalarRealtime();
-            refrescar();
+            ultimaFechaVista = "";
+            revisarCambioFecha();
         }
     }, 220);
 
-    window.HAIKU_OPERACION_RESUMEN_FIX_V1 = Object.freeze({ refrescar });
+    window.HAIKU_OPERACION_RESUMEN_FIX_V1 = Object.freeze({
+        refrescar,
+        revisarCambioFecha
+    });
 })();
