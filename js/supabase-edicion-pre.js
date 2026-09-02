@@ -431,13 +431,14 @@
         }, 30);
     }, true);
 
-    const observer = new MutationObserver(() => {
-        if (modoActual() === "editar") {
-            prepararSelectorTipo();
-            if (tipoEdicion === "fullday") ajustarVisualTipo();
-        }
+    document.addEventListener("click", evento => {
+        if (modoActual() !== "editar" || tipoEdicion !== "fullday") return;
+        if (!evento.target.closest?.(
+            "#continuar-fechas-reserva, #continuar-reserva-detalles, .reserva-editar-tarifas, #volver-reserva-fechas, #volver-reserva-cabana"
+        )) return;
+        setTimeout(ajustarVisualTipo, 0);
+        setTimeout(ajustarVisualTipo, 80);
     });
-    observer.observe(document.body, { subtree: true, childList: true });
 
     const estilo = document.createElement("style");
     estilo.textContent = `
