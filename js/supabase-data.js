@@ -224,6 +224,14 @@
             );
         }
 
+        const puentePagos =
+            window.HAIKU_PAGOS_PENDIENTES_SUPABASE_V1;
+
+        if (puentePagos) {
+            await puentePagos.refrescar(fecha);
+            return;
+        }
+
         const reservasIngreso = [
             ...new Set(
                 filas.flatMap(fila => [

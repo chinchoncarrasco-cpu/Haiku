@@ -425,6 +425,8 @@
             console.info("HAIKU · Pago parcial Check-in V5 registrado:", data);
             borradores.delete(reservaId);
             await cargarSaldosCheckinMixto();
+            await window.HAIKU_PAGOS_PENDIENTES_SUPABASE_V1
+                ?.refrescar(fechaActual());
             await window.haikuSincronizarReservasSupabase?.();
         } catch (error) {
             console.error("HAIKU · No fue posible registrar pago Check-in V5:", error);
@@ -461,6 +463,8 @@
             if (error) throw error;
             console.info("HAIKU · BOVE alojamiento V5 registrado:", data);
             await cargarSaldosCheckinMixto();
+            await window.HAIKU_PAGOS_PENDIENTES_SUPABASE_V1
+                ?.refrescar(fechaActual());
         } catch (error) {
             console.error("HAIKU · No fue posible registrar BOVE alojamiento V5:", error);
             alert(error?.message || "No fue posible registrar el BOVE.");

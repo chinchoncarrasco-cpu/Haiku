@@ -1781,6 +1781,15 @@ function obtenerPagosPendientes(
         return [];
     }
 
+    const puenteSupabase =
+        window.HAIKU_PAGOS_PENDIENTES_SUPABASE_V1;
+
+    if (
+        puenteSupabase?.estaListo?.(fechaConsulta)
+    ) {
+        return puenteSupabase.obtener(fechaConsulta);
+    }
+
     const pendientes = [];
 
     const datos =
