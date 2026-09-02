@@ -16,6 +16,7 @@
     let usuarioIdCache = null;
     let resumenSincronizando = false;
     let temporizadorDetalles = null;
+    let detallesEditandoHasta = 0;
 
     function cliente() {
         return window.haikuSupabase || null;
@@ -377,10 +378,7 @@
         const selectorEstado =
             document.getElementById("revision-estado");
 
-        if (
-            selectorEstado &&
-            document.activeElement !== selectorEstado
-        ) {
+        if (selectorEstado) {
             selectorEstado.value =
                 estadoLegacyDesdeRevision(revision);
         }
@@ -390,7 +388,7 @@
 
         if (
             detalles &&
-            document.activeElement !== detalles
+            Date.now() >= detallesEditandoHasta
         ) {
             detalles.value = revision?.observaciones || "";
         }
@@ -716,6 +714,7 @@
             detalles.dataset.supabaseRevisionListener = "1";
 
             detalles.addEventListener("input", () => {
+                detallesEditandoHasta = Date.now() + 1200;
                 clearTimeout(temporizadorDetalles);
 
                 temporizadorDetalles = setTimeout(async () => {

@@ -98,7 +98,6 @@
         if (
             !panel?.classList.contains("activa") ||
             !selector ||
-            document.activeElement === selector ||
             !numero ||
             !fecha ||
             typeof obtenerDatosDia !== "function"
