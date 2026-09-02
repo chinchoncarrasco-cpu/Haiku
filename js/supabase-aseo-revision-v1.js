@@ -377,7 +377,10 @@
         const selectorEstado =
             document.getElementById("revision-estado");
 
-        if (selectorEstado) {
+        if (
+            selectorEstado &&
+            document.activeElement !== selectorEstado
+        ) {
             selectorEstado.value =
                 estadoLegacyDesdeRevision(revision);
         }
@@ -385,7 +388,10 @@
         const detalles =
             document.getElementById("revision-detalles");
 
-        if (detalles) {
+        if (
+            detalles &&
+            document.activeElement !== detalles
+        ) {
             detalles.value = revision?.observaciones || "";
         }
     }

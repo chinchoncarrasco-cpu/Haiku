@@ -4,6 +4,7 @@
 
     let timer = null;
     let sincronizando = false;
+    let sincronizacionPendiente = false;
     const escriturasPendientes = new Map();
 
     function cliente() {
@@ -88,6 +89,28 @@
         }
     }
 
+    function refrescarAseoExpressAbierto() {
+        const panel = document.getElementById("aseo-express-individual");
+        const selector = document.getElementById("aseo-express-estado");
+        const numero = localStorage.getItem("haikuAseoExpressCabana") || "";
+        const fecha = fechaActual();
+
+        if (
+            !panel?.classList.contains("activa") ||
+            !selector ||
+            document.activeElement === selector ||
+            !numero ||
+            !fecha ||
+            typeof obtenerDatosDia !== "function"
+        ) {
+            return;
+        }
+
+        const datos = obtenerDatosDia(fecha);
+        selector.value =
+            datos.cabanas?.[numero]?.estadoRevision || "pendiente";
+    }
+
     function refrescarDesdeLocal() {
         const fecha = fechaActual();
         if (!fecha || typeof obtenerDatosDia !== "function") return;
@@ -100,6 +123,7 @@
         });
 
         refrescarVistasLocales();
+        refrescarAseoExpressAbierto();
     }
 
     async function obtenerUsuarioId() {
@@ -276,7 +300,10 @@
     }
 
     async function resincronizar() {
-        if (sincronizando) return;
+        if (sincronizando) {
+            sincronizacionPendiente = true;
+            return;
+        }
 
         const puente = window.HAIKU_REVISION_SUPABASE_V1;
         if (!puente) return;
@@ -293,6 +320,12 @@
             refrescarDesdeLocal();
         } finally {
             sincronizando = false;
+
+            if (sincronizacionPendiente) {
+                sincronizacionPendiente = false;
+                clearTimeout(timer);
+                timer = setTimeout(resincronizar, 0);
+            }
         }
     }
 
