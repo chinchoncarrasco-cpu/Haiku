@@ -95,6 +95,7 @@
                 id,reserva_id,fecha_ingreso,fecha_salida,adultos,ninos,mascotas,
                 tipo_estadia,estado_estadia,hora_ingreso_prevista,
                 checkin_realizado_en,checkout_realizado_en,
+                fullday_liberado_en,fullday_liberacion_motivo,
                 reservas(
                     id,codigo_haiku,cloudbeds_id,titular_nombre,
                     titular_numero_documento,correo_contacto,telefono_contacto,
@@ -227,6 +228,9 @@
             ninos: Number(estadia.ninos || 0),
             mascotas: Number(estadia.mascotas || 0),
             noches: cantidadNoches,
+            tipoEstadia: estadia.tipo_estadia || "alojamiento",
+            fulldayLiberadoEn: estadia.fullday_liberado_en || null,
+            fulldayLiberacionMotivo: estadia.fullday_liberacion_motivo || "",
             fechaOrigenReserva: String(estadia.fecha_ingreso).slice(0, 10),
             fechaIngresoReserva: String(estadia.fecha_ingreso).slice(0, 10),
             correo: reserva.correo_contacto || titularHuesped.correo || "",
@@ -248,13 +252,17 @@
             const ingreso = String(estadia.fecha_ingreso).slice(0, 10);
 
             if (estadia.tipo_estadia === "fullday") {
-                const dia = obtenerDatosDia(ingreso);
-                const op = obtenerCamposOperativos(operativos, ingreso, numero);
-                dia.cabanas[numero] = {
-                    ...base,
-                    ...op,
-                    estado: "fullday"
-                };
+                // Un Full Day liberado sigue existiendo como reserva/historial,
+                // pero deja de ocupar comercialmente la cabaña ese día.
+                if (!estadia.fullday_liberado_en) {
+                    const dia = obtenerDatosDia(ingreso);
+                    const op = obtenerCamposOperativos(operativos, ingreso, numero);
+                    dia.cabanas[numero] = {
+                        ...base,
+                        ...op,
+                        estado: "fullday"
+                    };
+                }
             } else {
                 for (let i = 0; i <= cantidadNoches; i++) {
                     const fecha = sumarDias(ingreso, i);
@@ -297,6 +305,9 @@
             numeroCabana: numero,
             fechaIngreso: base.fechaOrigenReserva,
             noches: cantidadNoches,
+            tipoEstadia: base.tipoEstadia,
+            fulldayLiberadoEn: base.fulldayLiberadoEn,
+            fulldayLiberacionMotivo: base.fulldayLiberacionMotivo,
             adultos: base.adultos,
             ninos: base.ninos,
             mascotas: base.mascotas
