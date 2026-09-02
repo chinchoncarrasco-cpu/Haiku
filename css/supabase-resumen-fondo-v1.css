@@ -1,9 +1,9 @@
 /* ========================================
    HAIKU · RESUMEN · FONDO FOTOGRÁFICO V1
-   Prueba reversible · solo escritorio
+   Reversible · solo escritorio con puntero
 ======================================== */
 
-@media (min-width: 901px) {
+@media (hover: hover) and (pointer: fine) {
     #seccion-resumen.seccion-app.activa,
     #seccion-resumen {
         position: relative !important;
@@ -14,10 +14,10 @@
         background-color: transparent !important;
         background-image:
             linear-gradient(
-                rgba(246, 248, 246, 0.45),
-                rgba(246, 248, 246, 0.45)
+                rgba(246, 248, 246, 0.58),
+                rgba(246, 248, 246, 0.58)
             ),
-            url("https://raw.githubusercontent.com/chinchoncarrasco-cpu/Haiku/main/assets/img/resumen-fondo.jpg") !important;
+            url("../assets/img/resumen-fondo.jpg") !important;
         background-size: cover !important;
         background-position: center top !important;
         background-repeat: no-repeat !important;
