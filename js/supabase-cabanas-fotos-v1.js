@@ -58,7 +58,13 @@
                 return;
             }
 
-            if (evento.target.closest("#volver-cabanas")) {
+            // Al volver al listado o abandonar la sección Cabañas,
+            // retiramos sólo la marca visual para que el fondo no se filtre
+            // a Calendario, Pagos, Aseo u otra sección.
+            if (
+                evento.target.closest("#volver-cabanas") ||
+                evento.target.closest(".menu-item")
+            ) {
                 limpiar();
             }
         },
