@@ -43,7 +43,6 @@
                 border-radius: inherit;
             }
 
-            /* Fotografía: un poco ampliada para que el blur no deje bordes. */
             #seccion-aseo #aseo-resumen .aseo-resumen-cabana::before {
                 z-index: 0;
                 background-repeat: no-repeat;
@@ -51,26 +50,23 @@
                 background-position: center center;
                 filter: blur(9px);
                 transform: scale(1.08);
-                opacity: .72;
+                opacity: .78;
             }
 
-            /* Velo blanco: conserva la legibilidad de toda la tarjeta. */
             #seccion-aseo #aseo-resumen .aseo-resumen-cabana::after {
                 z-index: 1;
                 background: linear-gradient(
                     180deg,
-                    rgba(255, 255, 255, .79) 0%,
-                    rgba(255, 255, 255, .86) 100%
+                    rgba(255, 255, 255, .72) 0%,
+                    rgba(255, 255, 255, .82) 100%
                 );
             }
 
-            /* Todo el contenido real queda por encima de foto + velo. */
             #seccion-aseo #aseo-resumen .aseo-resumen-cabana > * {
                 position: relative;
                 z-index: 2;
             }
 
-            /* Los controles conservan su fondo propio para máxima lectura. */
             #seccion-aseo #aseo-resumen .aseo-resumen-cabana input,
             #seccion-aseo #aseo-resumen .aseo-resumen-cabana select,
             #seccion-aseo #aseo-resumen .aseo-resumen-cabana textarea {
@@ -78,50 +74,55 @@
                 z-index: 3;
             }
 
+            /*
+               IMPORTANTE:
+               :nth-child(N of .aseo-resumen-cabana) cuenta solamente
+               tarjetas de Aseo e ignora otros hijos del contenedor.
+            */
+
             /* CAB 1, 2, 3, 4 y 6 */
-            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(1)::before,
-            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(2)::before,
-            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(3)::before,
-            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(4)::before,
-            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(6)::before {
+            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(1 of .aseo-resumen-cabana)::before,
+            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(2 of .aseo-resumen-cabana)::before,
+            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(3 of .aseo-resumen-cabana)::before,
+            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(4 of .aseo-resumen-cabana)::before,
+            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(6 of .aseo-resumen-cabana)::before {
                 background-image: url("assets/img/cabanas-revision-foto-original.jpg");
             }
 
             /* CAB 5 */
-            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(5)::before {
+            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(5 of .aseo-resumen-cabana)::before {
                 background-image: url("CAB5.jpg");
             }
 
             /* CAB 7, 8 y 9 */
-            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(7)::before,
-            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(8)::before,
-            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(9)::before {
+            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(7 of .aseo-resumen-cabana)::before,
+            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(8 of .aseo-resumen-cabana)::before,
+            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(9 of .aseo-resumen-cabana)::before {
                 background-image: url("internal-cabin-classic-loft-1120x434.jpg");
             }
 
             /* CAB 10 */
-            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(10)::before {
+            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(10 of .aseo-resumen-cabana)::before {
                 background-image: url("miniloft.jpg");
             }
 
             /* CAB 11 */
-            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(11)::before {
+            #seccion-aseo #aseo-resumen .aseo-resumen-cabana:nth-child(11 of .aseo-resumen-cabana)::before {
                 background-image: url("maxiloft.jpg");
             }
 
-            /* En móvil mantenemos el mismo efecto, apenas más claro. */
             @media (max-width: 700px) {
                 #seccion-aseo #aseo-resumen .aseo-resumen-cabana::before {
                     filter: blur(8px);
                     transform: scale(1.10);
-                    opacity: .70;
+                    opacity: .76;
                 }
 
                 #seccion-aseo #aseo-resumen .aseo-resumen-cabana::after {
                     background: linear-gradient(
                         180deg,
-                        rgba(255, 255, 255, .81) 0%,
-                        rgba(255, 255, 255, .88) 100%
+                        rgba(255, 255, 255, .74) 0%,
+                        rgba(255, 255, 255, .84) 100%
                     );
                 }
             }
@@ -165,8 +166,6 @@
 
     instalarEstilosAseo();
 
-    // Captura el clic antes de abrir la revisión para que la foto
-    // esté identificada desde el primer render visual.
     document.addEventListener(
         "click",
         (evento) => {
@@ -179,9 +178,6 @@
                 return;
             }
 
-            // Al volver al listado o abandonar la sección Cabañas,
-            // retiramos sólo la marca visual para que el fondo no se filtre
-            // a Calendario, Pagos, Aseo u otra sección.
             if (
                 evento.target.closest("#volver-cabanas") ||
                 evento.target.closest(".menu-item")
@@ -192,8 +188,6 @@
         true
     );
 
-    // Si por alguna razón la revisión ya estaba abierta al cargar,
-    // recupera únicamente el número recordado por la UI existente.
     const revisionInicial = obtenerRevision();
     const numeroInicial = localStorage.getItem("haikuRevisionCabana");
 
