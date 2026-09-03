@@ -140,6 +140,24 @@
         aplicarAgenda();
     }
 
+    function cargarModuloEliminarPrueba() {
+        if (
+            window.haikuEliminarServicioPrueba ||
+            document.querySelector('script[data-haiku-servicios-eliminar-prueba="1"]')
+        ) {
+            return;
+        }
+
+        const script = document.createElement("script");
+        script.src = `js/supabase-servicios-eliminar-prueba-v1.js?v=${Date.now()}`;
+        script.async = true;
+        script.dataset.haikuServiciosEliminarPrueba = "1";
+        script.onerror = () => console.error(
+            "HAIKU · No fue posible cargar Eliminar Servicio de prueba V1."
+        );
+        document.head.appendChild(script);
+    }
+
     const style = document.createElement("style");
     style.id = "haiku-servicios-tiempo-v1-css";
     style.textContent = `
@@ -169,6 +187,7 @@
     if (notif) observer.observe(notif, { childList: true, subtree: true });
     if (agenda) observer.observe(agenda, { childList: true, subtree: true });
 
+    cargarModuloEliminarPrueba();
     setInterval(aplicar, 30000);
     window.haikuTextoTiempoServicio = textoTiempo;
     setTimeout(aplicar, 900);
