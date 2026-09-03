@@ -1,6 +1,7 @@
 // ========================================
-// HAIKU · AJUSTES DE CARGO · SUPABASE V1
+// HAIKU · AJUSTES DE CARGO · SUPABASE V2
 // Exención IVA extranjero y cargos 10%.
+// Las reservas conjuntas se tratan como una sola unidad financiera.
 // ========================================
 
 (() => {
@@ -37,6 +38,8 @@
         }
     });
 
+    const dinero = valor => `$${Math.round(Number(valor || 0)).toLocaleString("es-CL")}`;
+
     function escapar(valor) {
         return String(valor ?? "")
             .replaceAll("&", "&amp;")
@@ -46,16 +49,16 @@
             .replaceAll("'", "&#039;");
     }
 
-    function dinero(valor) {
-        return `$${Math.round(Number(valor || 0)).toLocaleString("es-CL")}`;
+    function fechaActual() {
+        try { return String(fechaSeleccionada || "").slice(0, 10); }
+        catch { return ""; }
     }
 
-    function fechaActual() {
-        try {
-            return String(fechaSeleccionada || "").slice(0, 10);
-        } catch (_) {
-            return "";
-        }
+    function cabsActuales() {
+        return (resumenActual?.miembros || [])
+            .map(m => Number(m.cabana || 0))
+            .filter(Boolean)
+            .sort((a,b) => a-b);
     }
 
     function calcularVistaPrevia() {
@@ -107,7 +110,7 @@
             }
             .haiku-ajuste-cargo-overlay[hidden] { display:none!important; }
             .haiku-ajuste-cargo-modal {
-                width:min(620px,100%); max-height:min(760px,calc(100vh - 32px)); overflow-y:auto;
+                width:min(620px,100%); max-height:min(780px,calc(100vh - 32px)); overflow-y:auto;
                 background:#fff; border:1px solid #dfe5e1; border-radius:16px;
                 box-shadow:0 24px 70px rgba(20,35,27,.24); color:#202723;
             }
@@ -131,14 +134,19 @@
                 font-weight:700; letter-spacing:.35px; text-transform:uppercase;
             }
             .haiku-ajuste-cargo-select,.haiku-ajuste-cargo-textarea {
-                width:100%; border:1px solid #dce3df; border-radius:9px; background:#fff;
-                color:#202723; font:inherit; font-size:13px; outline:none;
+                width:100%; box-sizing:border-box; border:1px solid #dce3df; border-radius:9px;
+                background:#fff; color:#202723; font:inherit; font-size:13px; outline:none;
             }
             .haiku-ajuste-cargo-select { min-height:42px; padding:0 11px; }
             .haiku-ajuste-cargo-textarea { min-height:72px; padding:10px 11px; resize:vertical; }
             .haiku-ajuste-cargo-select:focus,.haiku-ajuste-cargo-textarea:focus {
                 border-color:#6ea58a; box-shadow:0 0 0 3px rgba(47,118,83,.08);
             }
+            .haiku-ajuste-cargo-vinculo {
+                display:flex; align-items:center; gap:7px; margin:-8px 0 17px;
+                color:#2f7653; font-size:10px; font-weight:700;
+            }
+            .haiku-ajuste-cargo-vinculo[hidden] { display:none!important; }
             .haiku-ajuste-cargo-opciones {
                 display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:9px;
             }
@@ -219,6 +227,8 @@
                         </select>
                     </div>
 
+                    <div id="haiku-ajuste-vinculo" class="haiku-ajuste-cargo-vinculo" hidden></div>
+
                     <div class="haiku-ajuste-cargo-grupo">
                         <span class="haiku-ajuste-cargo-label">Tipo de ajuste</span>
                         <div class="haiku-ajuste-cargo-opciones">
@@ -228,20 +238,20 @@
                             </button>
                             <button type="button" class="haiku-ajuste-cargo-opcion" data-haiku-ajuste-tipo="cargo_cancelacion">
                                 <strong>Cargo 10% · Cancelación</strong>
-                                <span>10% del total original de la reserva.</span>
+                                <span>10% del total original del alojamiento.</span>
                             </button>
                             <button type="button" class="haiku-ajuste-cargo-opcion" data-haiku-ajuste-tipo="cargo_modificacion">
                                 <strong>Cargo 10% · Modificación</strong>
-                                <span>10% del total original de la reserva.</span>
+                                <span>10% del total original del alojamiento.</span>
                             </button>
                         </div>
                     </div>
 
                     <div id="haiku-ajuste-cargo-resumen-wrap" hidden>
                         <div class="haiku-ajuste-cargo-resumen">
-                            <div><span>Total original</span><strong id="haiku-ajuste-total-original">$0</strong></div>
-                            <div><span>Total actual</span><strong id="haiku-ajuste-total-actual">$0</strong></div>
-                            <div><span>Saldo actual</span><strong id="haiku-ajuste-saldo-actual">$0</strong></div>
+                            <div><span id="haiku-ajuste-label-total-original">Total original</span><strong id="haiku-ajuste-total-original">$0</strong></div>
+                            <div><span id="haiku-ajuste-label-total-actual">Total actual</span><strong id="haiku-ajuste-total-actual">$0</strong></div>
+                            <div><span id="haiku-ajuste-label-saldo">Saldo actual</span><strong id="haiku-ajuste-saldo-actual">$0</strong></div>
                         </div>
                         <div class="haiku-ajuste-cargo-impacto" id="haiku-ajuste-impacto"></div>
                         <div class="haiku-ajuste-cargo-nota" id="haiku-ajuste-nota"></div>
@@ -320,6 +330,12 @@
         const observacion = document.getElementById("haiku-ajuste-observacion");
         if (observacion) observacion.value = "";
 
+        const vinculo = document.getElementById("haiku-ajuste-vinculo");
+        if (vinculo) {
+            vinculo.textContent = "";
+            vinculo.hidden = true;
+        }
+
         const wrap = document.getElementById("haiku-ajuste-cargo-resumen-wrap");
         if (wrap) wrap.hidden = true;
 
@@ -345,14 +361,14 @@
         const { data, error } = await cliente.rpc("haiku_operacion_dia", { p_fecha: fecha });
         if (error) throw error;
 
-        const mapa = new Map();
+        const base = new Map();
         const agregar = (numero, reservaId, titular, contexto) => {
-            if (!reservaId || mapa.has(String(reservaId))) return;
-            mapa.set(String(reservaId), {
+            if (!reservaId || base.has(String(reservaId))) return;
+            base.set(String(reservaId), {
                 reservaId: String(reservaId),
-                numero: String(numero || ""),
+                numero: Number(numero || 0),
                 titular: titular || "Sin titular",
-                contexto
+                contexto: contexto || ""
             });
         };
 
@@ -363,10 +379,45 @@
             agregar(fila.numero, fila.fullday_reserva_id, fila.fullday_titular, "Full Day");
         });
 
-        return [...mapa.values()].sort((a, b) => {
-            const cab = Number(a.numero) - Number(b.numero);
-            return cab !== 0 ? cab : a.titular.localeCompare(b.titular, "es");
+        const items = [...base.values()];
+        if (!items.length) return [];
+
+        const { data: reservas, error: eReservas } = await cliente
+            .from("reservas")
+            .select("id,grupo_reserva_id,titular_nombre")
+            .in("id", items.map(i => i.reservaId));
+
+        if (eReservas) throw eReservas;
+
+        const meta = new Map((reservas || []).map(r => [String(r.id), r]));
+        const unidades = new Map();
+
+        items.forEach(item => {
+            const r = meta.get(item.reservaId) || {};
+            const grupoId = r.grupo_reserva_id ? String(r.grupo_reserva_id) : "";
+            const clave = grupoId ? `g:${grupoId}` : `r:${item.reservaId}`;
+
+            if (!unidades.has(clave)) {
+                unidades.set(clave, {
+                    reservaId: item.reservaId,
+                    grupoId,
+                    titular: r.titular_nombre || item.titular,
+                    cabs: [],
+                    contextos: []
+                });
+            }
+
+            const unidad = unidades.get(clave);
+            if (item.numero && !unidad.cabs.includes(item.numero)) unidad.cabs.push(item.numero);
+            if (item.contexto && !unidad.contextos.includes(item.contexto)) unidad.contextos.push(item.contexto);
         });
+
+        return [...unidades.values()]
+            .map(item => {
+                item.cabs.sort((a,b) => a-b);
+                return item;
+            })
+            .sort((a,b) => (a.cabs[0] || 999) - (b.cabs[0] || 999));
     }
 
     async function cargarReservas() {
@@ -383,11 +434,16 @@
             reservas.forEach(item => {
                 const option = document.createElement("option");
                 option.value = item.reservaId;
-                option.textContent = `CAB ${item.numero} · ${item.titular} · ${item.contexto}`;
+
+                const contexto = item.contextos.join(" / ");
+                option.textContent = item.grupoId
+                    ? `↳ ${item.titular} · ${item.cabs.map(n => `CAB ${n}`).join(" + ")} · ${contexto}`
+                    : `CAB ${item.cabs[0] || "—"} · ${item.titular} · ${contexto}`;
+
                 select.appendChild(option);
             });
 
-            if (reservas.length === 0) {
+            if (!reservas.length) {
                 select.innerHTML = `<option value="">No hay reservas para esta fecha</option>`;
             }
         } catch (error) {
@@ -423,14 +479,16 @@
     async function cargarResumenSeleccionado() {
         if (!reservaSeleccionada) {
             resumenActual = null;
+            const vinculo = document.getElementById("haiku-ajuste-vinculo");
+            if (vinculo) vinculo.hidden = true;
             pintarPrevia();
             return;
         }
 
-        mostrarEstado("Cargando saldo de la reserva...");
+        mostrarEstado("Cargando saldo del alojamiento...");
 
         const { data, error } = await cliente.rpc(
-            "haiku_resumen_ajustes",
+            "haiku_resumen_ajustes_unidad",
             { p_reserva_id: reservaSeleccionada }
         );
 
@@ -443,6 +501,19 @@
         }
 
         resumenActual = data || null;
+
+        const vinculo = document.getElementById("haiku-ajuste-vinculo");
+        if (vinculo) {
+            if (resumenActual?.es_grupo) {
+                const cabs = cabsActuales();
+                vinculo.textContent = `↳ Reserva conjunta · ${cabs.map(n => `CAB ${n}`).join(" · ")}`;
+                vinculo.hidden = false;
+            } else {
+                vinculo.textContent = "";
+                vinculo.hidden = true;
+            }
+        }
+
         mostrarEstado("");
         pintarPrevia();
     }
@@ -461,6 +532,11 @@
             return;
         }
 
+        const esGrupo = resumenActual?.es_grupo === true;
+        document.getElementById("haiku-ajuste-label-total-original").textContent = esGrupo ? "Total original grupo" : "Total original";
+        document.getElementById("haiku-ajuste-label-total-actual").textContent = esGrupo ? "Total actual grupo" : "Total actual";
+        document.getElementById("haiku-ajuste-label-saldo").textContent = esGrupo ? "Saldo grupo" : "Saldo actual";
+
         document.getElementById("haiku-ajuste-total-original").textContent = dinero(previa.original);
         document.getElementById("haiku-ajuste-total-actual").textContent = dinero(previa.actual);
         document.getElementById("haiku-ajuste-saldo-actual").textContent = dinero(previa.saldoActual);
@@ -475,15 +551,26 @@
         }
 
         if (nota) {
-            nota.textContent = tipoSeleccionado === "iva_exento"
+            const calculo = tipoSeleccionado === "iva_exento"
                 ? "El IVA incluido se extrae del precio: total ÷ 1,19. No se resta 19% directamente al total."
                 : "El 10% se calcula siempre sobre el total original del alojamiento, sin acumular porcentajes sobre ajustes anteriores.";
+
+            const grupo = esGrupo
+                ? ` Se calculará una sola vez sobre ${cabsActuales().map(n => `CAB ${n}`).join(" + ")} y Haiku lo distribuirá internamente entre los alojamientos vinculados.`
+                : "";
+
+            nota.textContent = calculo + grupo;
         }
 
         if (wrap) wrap.hidden = false;
 
         if (yaExiste) {
-            mostrarEstado("Esta reserva ya tiene este ajuste activo.", "error");
+            mostrarEstado(
+                esGrupo
+                    ? "Esta reserva conjunta ya tiene este ajuste activo."
+                    : "Esta reserva ya tiene este ajuste activo.",
+                "error"
+            );
             if (confirmar) confirmar.disabled = true;
             return;
         }
@@ -509,6 +596,7 @@
             if (typeof window.haikuCargarAbonosSupabase === "function") tareas.push(window.haikuCargarAbonosSupabase());
             if (typeof window.haikuCargarSaldosCheckinSupabase === "function") tareas.push(window.haikuCargarSaldosCheckinSupabase());
             if (window.HAIKU_PAGOS_PENDIENTES_SUPABASE_V1?.refrescar) tareas.push(window.HAIKU_PAGOS_PENDIENTES_SUPABASE_V1.refrescar(fecha));
+            if (window.HAIKU_PAGO_GRUPO_V1?.refrescarFicha) tareas.push(window.HAIKU_PAGO_GRUPO_V1.refrescarFicha());
             await Promise.all(tareas);
         } catch (_) {}
     }
@@ -521,9 +609,14 @@
         if (!previa) return;
 
         const tipo = TIPOS[tipoSeleccionado];
+        const esGrupo = resumenActual?.es_grupo === true;
+        const destino = esGrupo
+            ? ` sobre ${cabsActuales().map(n => `CAB ${n}`).join(" + ")}`
+            : "";
+
         const mensaje = tipoSeleccionado === "iva_exento"
-            ? `¿Aplicar ${tipo.titulo}?\n\nSe descontarán ${dinero(previa.monto)} y el nuevo total será ${dinero(previa.nuevoTotal)}.`
-            : `¿Aplicar ${tipo.titulo}?\n\nSe añadirán ${dinero(previa.monto)} y el nuevo total será ${dinero(previa.nuevoTotal)}.`;
+            ? `¿Aplicar ${tipo.titulo}${destino}?\n\nSe descontarán ${dinero(previa.monto)} y el nuevo total será ${dinero(previa.nuevoTotal)}.`
+            : `¿Aplicar ${tipo.titulo}${destino}?\n\nSe añadirán ${dinero(previa.monto)} y el nuevo total será ${dinero(previa.nuevoTotal)}.`;
 
         if (!window.confirm(mensaje)) return;
 
@@ -537,7 +630,7 @@
         try {
             const observaciones = document.getElementById("haiku-ajuste-observacion")?.value || null;
             const { data, error } = await cliente.rpc(
-                "haiku_aplicar_ajuste_reserva",
+                "haiku_aplicar_ajuste_unidad",
                 {
                     p_reserva_id: reservaSeleccionada,
                     p_tipo_ajuste: tipoSeleccionado,
@@ -552,8 +645,8 @@
 
             mostrarEstado(
                 signo < 0
-                    ? `✓ Ajuste aplicado. Se descontaron ${dinero(monto)}.`
-                    : `✓ Cargo aplicado. Se añadieron ${dinero(monto)}.`,
+                    ? `✓ Ajuste aplicado. Se descontaron ${dinero(monto)}${esGrupo ? " del total conjunto" : ""}.`
+                    : `✓ Cargo aplicado. Se añadieron ${dinero(monto)}${esGrupo ? " al total conjunto" : ""}.`,
                 "exito"
             );
 
@@ -577,7 +670,7 @@
         if (canal || !window.haikuSesion) return;
 
         canal = cliente
-            .channel("haiku-ajustes-cargo-v1")
+            .channel("haiku-ajustes-cargo-v2")
             .on(
                 "postgres_changes",
                 { event:"*", schema:"public", table:"cargo_ajustes" },
@@ -602,10 +695,15 @@
         crearBoton();
         instalarRealtime();
         instalado = true;
-        console.info("HAIKU · Ajustes de cargo V1 preparados.");
+        console.info("HAIKU · Ajustes de cargo V2 preparados.");
     }
 
     window.addEventListener("haiku:auth-ready", () => setTimeout(instalar, 50));
     window.addEventListener("pageshow", () => setTimeout(instalar, 20));
     setTimeout(instalar, 120);
+
+    window.HAIKU_AJUSTES_CARGO_V2 = Object.freeze({
+        abrir: abrirModal,
+        refrescar: refrescarFinanzas
+    });
 })();
