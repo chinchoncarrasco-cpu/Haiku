@@ -109,6 +109,23 @@
         });
     });
 
+    // El PIN normal se valida apenas se completan sus 4 dígitos.
+    // requestSubmit reutiliza exactamente el mismo flujo/seguridad del formulario.
+    pinInput.addEventListener("input", () => {
+        const boton = formPin.querySelector('button[type="submit"]');
+        if (formPin.hidden || pinInput.value.length !== 4 || boton?.disabled) return;
+
+        queueMicrotask(() => {
+            if (
+                !formPin.hidden &&
+                pinInput.value.length === 4 &&
+                !boton?.disabled
+            ) {
+                formPin.requestSubmit();
+            }
+        });
+    });
+
     function clave(sufijo) {
         return usuarioId ? `haikuPrivacidad:${usuarioId}:${sufijo}` : "";
     }
