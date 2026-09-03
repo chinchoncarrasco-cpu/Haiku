@@ -341,3 +341,24 @@
         iniciar();
     }
 })();
+
+// Carga modular del Asistente flotante sin modificar el cargador principal.
+(() => {
+    "use strict";
+
+    if (!document.querySelector('link[data-haiku-asistente-v1]')) {
+        const link = document.createElement("link");
+        link.rel = "stylesheet";
+        link.href = `css/supabase-asistente-v1.css?v=${Date.now()}`;
+        link.dataset.haikuAsistenteV1 = "1";
+        document.head.appendChild(link);
+    }
+
+    if (!document.querySelector('script[data-haiku-asistente-v1]')) {
+        const script = document.createElement("script");
+        script.src = `js/supabase-asistente-v1.js?v=${Date.now()}`;
+        script.async = true;
+        script.dataset.haikuAsistenteV1 = "1";
+        document.head.appendChild(script);
+    }
+})();
