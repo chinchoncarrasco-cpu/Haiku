@@ -1,0 +1,59 @@
+/* ========================================
+   HAIKU · PAGOS · GRID ESCRITORIO V1
+   Dos tarjetas por fila en PC.
+   Móvil/tablet mantienen el diseño original.
+   WebPay por confirmar queda a ancho completo.
+   ======================================== */
+
+@media (min-width: 1100px) {
+    #pagos-lista-abonos,
+    #pagos-lista-checkin,
+    #pagos-lista-checkout {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 14px;
+        align-items: start;
+    }
+
+    /* Las tarjetas ocupan sólo su columna y no arrastran anchos legacy. */
+    #pagos-lista-abonos > .haiku-abono-verificacion-v2,
+    #pagos-lista-checkin > .pago-checkin-item,
+    #pagos-lista-checkin > .haiku-checkin-grupo-v2,
+    #pagos-lista-checkout > .pago-checkout-item {
+        width: 100%;
+        max-width: none;
+        min-width: 0;
+        margin: 0;
+        box-sizing: border-box;
+    }
+
+    /* Mensajes de lista vacía / estado informativo sí usan todo el ancho. */
+    #pagos-lista-abonos > p,
+    #pagos-lista-checkin > p,
+    #pagos-lista-checkout > p,
+    #pagos-lista-abonos > .pagos-checkout-vacio,
+    #pagos-lista-checkin > .pagos-checkout-vacio,
+    #pagos-lista-checkout > .pagos-checkout-vacio {
+        grid-column: 1 / -1;
+    }
+
+    /* Evita desbordes de campos largos dentro de una tarjeta de media página. */
+    #pagos-lista-checkin .pago-checkin-nuevo,
+    #pagos-lista-checkout .pago-checkin-nuevo,
+    #pagos-lista-checkin .haiku-saldo-formulario,
+    #pagos-lista-checkout .haiku-saldo-formulario,
+    #pagos-lista-checkin .haiku-saldo-form-grid,
+    #pagos-lista-checkout .haiku-saldo-form-grid,
+    #pagos-lista-checkin .haiku-saldo-datos-dinamicos,
+    #pagos-lista-checkout .haiku-saldo-datos-dinamicos {
+        min-width: 0;
+    }
+
+    #pagos-lista-checkin input,
+    #pagos-lista-checkin select,
+    #pagos-lista-checkout input,
+    #pagos-lista-checkout select {
+        min-width: 0;
+        max-width: 100%;
+    }
+}
