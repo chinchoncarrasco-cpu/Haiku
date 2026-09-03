@@ -1,5 +1,5 @@
 /* =====================================================
-   HAIKU · PAGO POR TITULAR / RESERVA CONJUNTA · V1
+   HAIKU · PAGO POR TITULAR / RESERVA CONJUNTA · V2
 ===================================================== */
 
 #seccion-pagos .haiku-anadir-pago-boton {
@@ -29,9 +29,10 @@
     backdrop-filter: blur(2px);
 }
 .haiku-pago-grupo-overlay[hidden] { display:none!important; }
+
 .haiku-pago-grupo-modal {
-    width: min(590px,100%);
-    max-height: min(760px,calc(100vh - 32px));
+    width: min(610px,100%);
+    max-height: min(820px,calc(100vh - 32px));
     overflow-y: auto;
     background:#fff;
     border:1px solid #dfe5e1;
@@ -39,6 +40,7 @@
     box-shadow:0 24px 70px rgba(20,35,27,.24);
     color:#202723;
 }
+
 .haiku-pago-grupo-cabecera {
     display:flex;
     align-items:flex-start;
@@ -47,6 +49,7 @@
     padding:19px 21px 15px;
     border-bottom:1px solid #e6eae7;
 }
+
 .haiku-pago-grupo-cabecera small {
     display:block;
     margin-bottom:4px;
@@ -56,7 +59,13 @@
     letter-spacing:1px;
     text-transform:uppercase;
 }
-.haiku-pago-grupo-cabecera h3 { margin:0; font-size:18px; line-height:1.2; }
+
+.haiku-pago-grupo-cabecera h3 {
+    margin:0;
+    font-size:18px;
+    line-height:1.2;
+}
+
 .haiku-pago-grupo-cerrar {
     width:32px;
     height:32px;
@@ -67,8 +76,10 @@
     font-size:19px;
     cursor:pointer;
 }
+
 .haiku-pago-grupo-cuerpo { padding:18px 21px 21px; }
 .haiku-pago-grupo-campo { margin-bottom:14px; }
+
 .haiku-pago-grupo-campo > label,
 .haiku-pago-grupo-campo > span:first-child {
     display:block;
@@ -79,6 +90,7 @@
     letter-spacing:.3px;
     text-transform:uppercase;
 }
+
 .haiku-pago-grupo-select,
 .haiku-pago-grupo-input,
 .haiku-pago-grupo-textarea {
@@ -92,12 +104,32 @@
     font-size:12px;
     outline:none;
 }
-.haiku-pago-grupo-select,.haiku-pago-grupo-input { height:40px; padding:0 10px; }
-.haiku-pago-grupo-textarea { min-height:66px; padding:9px 10px; resize:vertical; }
-.haiku-pago-grupo-select:focus,.haiku-pago-grupo-input:focus,.haiku-pago-grupo-textarea:focus {
+
+.haiku-pago-grupo-select,
+.haiku-pago-grupo-input {
+    height:40px;
+    padding:0 10px;
+}
+
+.haiku-pago-grupo-textarea {
+    min-height:66px;
+    padding:9px 10px;
+    resize:vertical;
+}
+
+.haiku-pago-grupo-select:focus,
+.haiku-pago-grupo-input:focus,
+.haiku-pago-grupo-textarea:focus {
     border-color:#6ea58a;
     box-shadow:0 0 0 3px rgba(47,118,83,.08);
 }
+
+.haiku-pago-grupo-input:disabled {
+    background:#f4f6f5;
+    color:#8a938e;
+    cursor:not-allowed;
+}
+
 .haiku-pago-grupo-vinculo {
     display:flex;
     align-items:center;
@@ -107,26 +139,145 @@
     font-size:10px;
     font-weight:700;
 }
+
 .haiku-pago-grupo-resumen {
     display:grid;
     grid-template-columns:repeat(3,1fr);
     gap:7px;
-    margin-bottom:15px;
+    margin-bottom:12px;
 }
+
 .haiku-pago-grupo-resumen > div {
     padding:10px;
     border:1px solid #e2e7e4;
     border-radius:10px;
     background:#f8faf9;
 }
-.haiku-pago-grupo-resumen span { display:block; margin-bottom:3px; color:#77817c; font-size:9px; }
-.haiku-pago-grupo-resumen strong { display:block; font-size:13px; }
+
+.haiku-pago-grupo-resumen span {
+    display:block;
+    margin-bottom:3px;
+    color:#77817c;
+    font-size:9px;
+}
+
+.haiku-pago-grupo-resumen strong {
+    display:block;
+    font-size:13px;
+}
+
 .haiku-pago-grupo-resumen .saldo strong { color:#216b48; }
-.haiku-pago-grupo-grid { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+
+.haiku-pago-grupo-historial {
+    margin:0 0 15px;
+    padding:10px 11px;
+    border:1px solid #e1e7e3;
+    border-radius:11px;
+    background:#fbfcfb;
+}
+
+.haiku-pago-grupo-historial[hidden] { display:none!important; }
+
+.haiku-pago-grupo-historial-cabecera {
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:10px;
+    margin-bottom:8px;
+    padding-bottom:7px;
+    border-bottom:1px solid #e7ebe8;
+}
+
+.haiku-pago-grupo-historial-cabecera > span {
+    color:#68736d;
+    font-size:9px;
+    font-weight:800;
+    letter-spacing:.35px;
+    text-transform:uppercase;
+}
+
+.haiku-pago-grupo-historial-cabecera > strong {
+    color:#2f7653;
+    font-size:10px;
+}
+
+.haiku-pago-grupo-historial-lista {
+    display:grid;
+    gap:6px;
+    max-height:175px;
+    overflow-y:auto;
+    padding-right:2px;
+}
+
+.haiku-pago-grupo-historial-item {
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    gap:3px 10px;
+    align-items:center;
+    padding:8px 9px;
+    border:1px solid #e4e9e6;
+    border-radius:9px;
+    background:#fff;
+}
+
+.haiku-pago-grupo-historial-principal {
+    display:flex;
+    align-items:center;
+    gap:7px;
+    min-width:0;
+    flex-wrap:wrap;
+}
+
+.haiku-pago-grupo-historial-principal > span {
+    color:#7b847f;
+    font-size:10px;
+}
+
+.haiku-pago-grupo-historial-principal > strong {
+    color:#34423a;
+    font-size:10px;
+}
+
+.haiku-pago-grupo-historial-monto {
+    color:#245f43;
+    font-size:12px;
+    white-space:nowrap;
+}
+
+.haiku-pago-grupo-historial-item > small {
+    grid-column:1 / -1;
+    color:#78827c;
+    font-size:9px;
+    line-height:1.35;
+}
+
+.haiku-pago-grupo-historial-vacio {
+    padding:5px 2px 3px;
+    color:#8a938e;
+    font-size:10px;
+}
+
+.haiku-pago-grupo-grid {
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+}
+
 .haiku-pago-grupo-extra[hidden] { display:none!important; }
-.haiku-pago-grupo-estado { min-height:17px; margin-top:8px; font-size:10px; }
+
+.haiku-pago-grupo-estado {
+    min-height:17px;
+    margin-top:8px;
+    font-size:10px;
+}
+
 .haiku-pago-grupo-estado.error { color:#a64545; }
-.haiku-pago-grupo-estado.exito { color:#216b48; font-weight:700; }
+
+.haiku-pago-grupo-estado.exito {
+    color:#216b48;
+    font-weight:700;
+}
+
 .haiku-pago-grupo-acciones {
     display:flex;
     justify-content:flex-end;
@@ -135,7 +286,9 @@
     padding-top:14px;
     border-top:1px solid #e7ebe8;
 }
-.haiku-pago-grupo-cancelar,.haiku-pago-grupo-confirmar {
+
+.haiku-pago-grupo-cancelar,
+.haiku-pago-grupo-confirmar {
     border-radius:9px;
     padding:9px 14px;
     font:inherit;
@@ -143,12 +296,26 @@
     font-weight:700;
     cursor:pointer;
 }
-.haiku-pago-grupo-cancelar { border:1px solid #dbe2de; background:#fff; color:#4f5a54; }
-.haiku-pago-grupo-confirmar { border:1px solid #245f43; background:#2f7653; color:#fff; }
-.haiku-pago-grupo-confirmar:disabled { opacity:.48; cursor:not-allowed; }
+
+.haiku-pago-grupo-cancelar {
+    border:1px solid #dbe2de;
+    background:#fff;
+    color:#4f5a54;
+}
+
+.haiku-pago-grupo-confirmar {
+    border:1px solid #245f43;
+    background:#2f7653;
+    color:#fff;
+}
+
+.haiku-pago-grupo-confirmar:disabled {
+    opacity:.48;
+    cursor:not-allowed;
+}
 
 #ficha-reserva-modal .haiku-ficha-finanzas-grupo-nota {
-    margin: 7px 0 0;
+    margin:7px 0 0;
     color:#2f7653;
     font-size:10px;
     font-weight:700;
@@ -156,10 +323,38 @@
 }
 
 @media (max-width:700px) {
-    #seccion-pagos .haiku-anadir-pago-boton { padding:9px 11px; font-size:11px; }
-    .haiku-pago-grupo-overlay { padding:9px; align-items:end; }
-    .haiku-pago-grupo-modal { width:100%; max-height:calc(100vh - 18px); border-radius:16px 16px 10px 10px; }
-    .haiku-pago-grupo-cabecera,.haiku-pago-grupo-cuerpo { padding-left:15px; padding-right:15px; }
-    .haiku-pago-grupo-resumen { grid-template-columns:1fr 1fr 1fr; }
-    .haiku-pago-grupo-grid { grid-template-columns:1fr; gap:0; }
+    #seccion-pagos .haiku-anadir-pago-boton {
+        padding:9px 11px;
+        font-size:11px;
+    }
+
+    .haiku-pago-grupo-overlay {
+        padding:9px;
+        align-items:end;
+    }
+
+    .haiku-pago-grupo-modal {
+        width:100%;
+        max-height:calc(100vh - 18px);
+        border-radius:16px 16px 10px 10px;
+    }
+
+    .haiku-pago-grupo-cabecera,
+    .haiku-pago-grupo-cuerpo {
+        padding-left:15px;
+        padding-right:15px;
+    }
+
+    .haiku-pago-grupo-resumen {
+        grid-template-columns:1fr 1fr 1fr;
+    }
+
+    .haiku-pago-grupo-grid {
+        grid-template-columns:1fr;
+        gap:0;
+    }
+
+    .haiku-pago-grupo-historial-lista {
+        max-height:150px;
+    }
 }
