@@ -152,14 +152,18 @@
 #seccion-aseo .aseo-resumen-numero > span {
     min-width: 0;
     overflow: hidden;
-    color: #758078;
+    color: #26322b;
     font-size: .92em;
     font-weight: 400;
     text-overflow: ellipsis;
 }
 
 #seccion-aseo .aseo-resumen-encargado > span,
-#seccion-aseo .aseo-resumen-revision > span,
+#seccion-aseo .aseo-resumen-revision > span {
+    color: #26322b;
+    font-weight: 600;
+}
+
 #seccion-aseo .aseo-resumen-horario > div > span {
     color: #758078;
     font-weight: 600;
