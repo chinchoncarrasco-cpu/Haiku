@@ -54,7 +54,7 @@
                 </div>
 
                 <div class="haiku-asistente-aviso">
-                    Vista previa segura: en esta etapa el asistente puede leer capturas, pero no puede crear ni modificar reservas.
+                    Vista previa segura: puedes adjuntar imágenes o pegar capturas con Ctrl+V dentro del cuadro de texto. En esta etapa el asistente puede leerlas, pero no puede crear ni modificar reservas.
                 </div>
 
                 <input id="haiku-asistente-archivos" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden>
@@ -210,6 +210,24 @@
                 `No adjunté ${omitidos} ${omitidos === 1 ? "imagen" : "imágenes"}. Se admiten hasta 6 capturas PNG/JPG/WEBP, máximo 5 MB por archivo y 12 MB en total.`
             );
         }
+    }
+
+    function imagenesDesdePortapapeles(evento) {
+        const portapapeles = evento.clipboardData;
+        if (!portapapeles) return [];
+
+        const desdeItems = [...(portapapeles.items || [])]
+            .filter(item =>
+                item.kind === "file" &&
+                /^image\/(png|jpeg|webp)$/i.test(item.type || "")
+            )
+            .map(item => item.getAsFile())
+            .filter(Boolean);
+
+        if (desdeItems.length) return desdeItems;
+
+        return [...(portapapeles.files || [])]
+            .filter(file => /^image\/(png|jpeg|webp)$/i.test(file.type || ""));
     }
 
     function archivoADataUrl(file) {
@@ -479,6 +497,17 @@
     });
     archivosInput.addEventListener("change", () => incorporarArchivos(archivosInput.files || []));
     campo.addEventListener("input", actualizarEnviar);
+    campo.addEventListener("paste", evento => {
+        if (procesando) return;
+
+        const imagenes = imagenesDesdePortapapeles(evento);
+        if (!imagenes.length) return;
+
+        // Una captura en el portapapeles se convierte en adjunto.
+        // Si sólo hay texto, el navegador conserva el pegado normal.
+        evento.preventDefault();
+        incorporarArchivos(imagenes);
+    });
     campo.addEventListener("keydown", evento => {
         if ((evento.ctrlKey || evento.metaKey) && evento.key === "Enter") {
             evento.preventDefault();
