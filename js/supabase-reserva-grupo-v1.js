@@ -1,6 +1,8 @@
 // ========================================
 // HAIKU · RESERVAS VINCULADAS · V1
 // Indicador discreto de grupo en Resumen y ficha de reserva.
+// Finanzas agrupadas: todas las CAB del mismo grupo muestran
+// el total, abonos y saldo conjunto del titular.
 // ========================================
 
 (() => {
@@ -15,6 +17,10 @@
     function fechaActual() {
         try { return String(fechaSeleccionada || "").slice(0, 10); }
         catch { return ""; }
+    }
+
+    function dinero(valor) {
+        return `$${Number(valor || 0).toLocaleString("es-CL")}`;
     }
 
     function reservaIdDeFila(fila) {
@@ -107,6 +113,82 @@
         };
     }
 
+    async function finanzasDeGrupo(grupo) {
+        const ids = (grupo?.miembros || []).map(m => m.reservaId).filter(Boolean);
+        if (ids.length < 2) return null;
+
+        const { data, error } = await cliente
+            .from("vista_estado_cargos")
+            .select("reserva_id,tipo_cargo,estado,monto_ajustado,aplicado_neto,saldo_cargo")
+            .in("reserva_id", ids)
+            .eq("estado", "activo");
+
+        if (error) throw error;
+
+        const cargos = Array.isArray(data) ? data : [];
+        const alojamiento = cargos.filter(c => c.tipo_cargo === "alojamiento");
+        const servicios = cargos.filter(c => c.tipo_cargo === "servicio");
+        const sumar = (lista, campo) => lista.reduce(
+            (total, item) => total + Number(item?.[campo] || 0),
+            0
+        );
+
+        return {
+            total: sumar(alojamiento, "monto_ajustado"),
+            abono: sumar(alojamiento, "aplicado_neto"),
+            saldo: sumar(alojamiento, "saldo_cargo"),
+            servicios: sumar(servicios, "saldo_cargo")
+        };
+    }
+
+    function etiquetaPago(id, texto) {
+        const valor = document.getElementById(id);
+        if (!valor) return;
+        const contenedor = valor.parentElement;
+        const etiqueta = contenedor?.querySelector("span");
+        if (etiqueta) etiqueta.textContent = texto;
+    }
+
+    function restaurarFinanzasFicha() {
+        document.getElementById("haiku-ficha-finanzas-grupo")?.remove();
+        etiquetaPago("ficha-pago-total", "Total reserva");
+        etiquetaPago("ficha-pago-abono", "Abono");
+        etiquetaPago("ficha-pago-saldo", "Saldo");
+        etiquetaPago("ficha-pago-servicios", "Servicios pendientes");
+    }
+
+    async function pintarFinanzasGrupo(grupo) {
+        const finanzas = await finanzasDeGrupo(grupo);
+        if (!finanzas) return;
+
+        const valores = {
+            "ficha-pago-total": finanzas.total,
+            "ficha-pago-abono": finanzas.abono,
+            "ficha-pago-saldo": finanzas.saldo,
+            "ficha-pago-servicios": finanzas.servicios
+        };
+
+        Object.entries(valores).forEach(([id, valor]) => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = dinero(valor);
+        });
+
+        etiquetaPago("ficha-pago-total", "Total grupo");
+        etiquetaPago("ficha-pago-abono", "Abono grupo");
+        etiquetaPago("ficha-pago-saldo", "Saldo grupo");
+        etiquetaPago("ficha-pago-servicios", "Servicios grupo");
+
+        const total = document.getElementById("ficha-pago-total");
+        const zona = total?.closest(".ficha-pagos-resumen") || total?.parentElement?.parentElement;
+        if (zona && !document.getElementById("haiku-ficha-finanzas-grupo")) {
+            const nota = document.createElement("div");
+            nota.id = "haiku-ficha-finanzas-grupo";
+            nota.style.cssText = "grid-column:1/-1;font-size:10px;color:#66716b;padding:0 2px 3px;text-align:left;";
+            nota.textContent = `↳ Totales de ${grupo.miembros.length} alojamientos vinculados`;
+            zona.insertAdjacentElement("afterbegin", nota);
+        }
+    }
+
     function limpiarMarcasResumen() {
         document.querySelectorAll(".haiku-reserva-grupo-marca").forEach(el => el.remove());
     }
@@ -178,6 +260,7 @@
 
     async function pintarGrupoFicha(numeroCabana, fecha) {
         quitarGrupoFicha();
+        restaurarFinanzasFicha();
         if (!numeroCabana || !fecha || !window.haikuSesion) return;
 
         try {
@@ -223,6 +306,7 @@
 
             panel.append(etiqueta, lista);
             titulo.insertAdjacentElement("afterend", panel);
+            await pintarFinanzasGrupo(grupo);
         } catch (error) {
             console.warn("HAIKU · No fue posible mostrar reserva conjunta en ficha:", error);
         }
@@ -234,7 +318,9 @@
         if (!boton || !window.haikuSesion) return;
         const numero = boton.dataset.fichaCabana;
         const fecha = fechaActual();
-        setTimeout(() => pintarGrupoFicha(numero, fecha), 180);
+        setTimeout(() => pintarGrupoFicha(numero, fecha), 240);
+        /* Segundo pase: garantiza que Ficha V2 haya terminado de pintar pagos. */
+        setTimeout(() => pintarGrupoFicha(numero, fecha), 760);
     }, true);
 
     document.addEventListener("click", evento => {
@@ -257,7 +343,9 @@
 
     window.HAIKU_RESERVA_GRUPO_V1 = {
         refrescarResumen,
-        pintarGrupoFicha
+        pintarGrupoFicha,
+        grupoDeReserva,
+        finanzasDeGrupo
     };
 
     console.info("HAIKU · Reservas vinculadas V1 preparadas.");
