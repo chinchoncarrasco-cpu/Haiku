@@ -195,13 +195,14 @@ body:has(#revision-individual.activa[data-foto-cabana]) #revision-individual {
         background-position: center 310% !important;
     }
 
-    /* Móvil · CAB 7, 8 y 9 · regla independiente para calibración */
+    /* Móvil · CAB 7, 8 y 9 · zoom vertical para permitir calibración real */
     #seccion-cabanas .cabana-revision:is(
         [data-revision-cabana="7"],
         [data-revision-cabana="8"],
         [data-revision-cabana="9"]
     ) {
         padding-top: 78px !important;
+        background-size: auto 160% !important;
         background-position: center 50% !important;
     }
 
