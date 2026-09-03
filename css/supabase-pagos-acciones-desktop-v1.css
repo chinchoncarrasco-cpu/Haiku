@@ -1,13 +1,15 @@
 /* ========================================
-   HAIKU · PAGOS · ACCIONES SUPERIORES PC V1
-   Una sola fila: Añadir pago · Ajustar cargo · Nueva reserva · Campana
+   HAIKU · ACCIONES SUPERIORES PC V2
+   Pagos: Añadir pago · Ajustar cargo · Nueva reserva · Campana
+   Calendario: Bloquear fechas · Nueva reserva · Campana
    No modifica tablet/móvil.
    ======================================== */
 
 @media (min-width: 1100px) {
-    /* Los cuatro controles comparten una misma línea y altura visual. */
+    /* Controles superiores compartiendo una misma línea y altura visual. */
     #seccion-pagos .haiku-anadir-pago-boton,
     #seccion-pagos .haiku-ajuste-cargo-boton,
+    #seccion-calendario #activar-bloqueo-calendario,
     .sidebar-fila-superior .boton-nueva-reserva,
     .sidebar-fila-superior .boton-notificaciones {
         position: fixed !important;
@@ -18,7 +20,7 @@
         box-sizing: border-box;
     }
 
-    /* De derecha a izquierda: campana, nueva reserva, ajustar, añadir. */
+    /* De derecha a izquierda: campana y nueva reserva son globales. */
     .sidebar-fila-superior .boton-notificaciones {
         right: 24px !important;
         width: 42px !important;
@@ -40,6 +42,7 @@
         white-space: nowrap;
     }
 
+    /* PAGOS */
     #seccion-pagos .haiku-ajuste-cargo-boton {
         right: 210px !important;
         width: 120px !important;
@@ -60,13 +63,27 @@
         justify-content: center;
     }
 
-    /* Al quedar las acciones fuera del flujo, la cabecera vuelve a ser limpia. */
-    #seccion-pagos .cabecera {
+    /* CALENDARIO */
+    #seccion-calendario #activar-bloqueo-calendario {
+        right: 210px !important;
+        width: 132px !important;
+        min-width: 132px !important;
+        padding: 0 14px !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+    }
+
+    /* Al quedar las acciones fuera del flujo, las cabeceras quedan limpias. */
+    #seccion-pagos .cabecera,
+    #seccion-calendario .cabecera {
         justify-content: flex-start !important;
         align-items: flex-start !important;
     }
 
-    #seccion-pagos .cabecera > div:first-child {
+    #seccion-pagos .cabecera > div:first-child,
+    #seccion-calendario .cabecera > div:first-child {
         margin-right: 0 !important;
     }
 }
