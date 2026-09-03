@@ -245,18 +245,27 @@
 .haiku-asistente-enviar:disabled { opacity: .5; cursor: not-allowed; }
 .haiku-asistente-aviso { margin-top: 8px; color: #87928b; font-size: .66rem; line-height: 1.35; }
 
-/* Botón flotante más discreto, manteniendo una zona cómoda de clic. */
+/* Botón flotante mínimo: pequeño visualmente, cómodo al tacto. */
 .haiku-asistente-boton {
-    width: 44px;
-    height: 44px;
+    width: 32px;
+    height: 32px;
+    box-shadow: 0 5px 14px rgba(0, 0, 0, .22);
+}
+
+/* Amplía sólo el área clickeable sin aumentar el círculo visible. */
+.haiku-asistente-boton::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: 50%;
 }
 
 .haiku-asistente-avatar {
-    transform: scale(.74);
+    transform: scale(.52);
 }
 
 .haiku-asistente-panel {
-    bottom: 56px;
+    bottom: 44px;
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -264,9 +273,10 @@
 }
 
 @media (max-width: 700px) {
-    .haiku-asistente-root { right: 14px; bottom: 14px; }
-    .haiku-asistente-boton { width: 42px; height: 42px; }
-    .haiku-asistente-panel { right: 0; bottom: 54px; width: calc(100vw - 28px); max-height: calc(100vh - 102px); border-radius: 17px; }
+    .haiku-asistente-root { right: 12px; bottom: 12px; }
+    .haiku-asistente-boton { width: 32px; height: 32px; }
+    .haiku-asistente-boton::after { inset: -7px; }
+    .haiku-asistente-panel { right: 0; bottom: 45px; width: calc(100vw - 28px); max-height: calc(100vh - 102px); border-radius: 17px; }
     .haiku-asistente-mensajes { min-height: 150px; }
     .haiku-asistente-preview-grid { grid-template-columns: 1fr; }
 }
