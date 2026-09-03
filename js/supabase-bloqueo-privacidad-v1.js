@@ -32,7 +32,7 @@
     overlay.setAttribute("aria-live", "polite");
     overlay.innerHTML = `
         <section class="haiku-privacidad-card" role="dialog" aria-modal="true" aria-labelledby="haiku-privacidad-titulo">
-            <span class="haiku-privacidad-marca">HAIKU · PRIVACIDAD</span>
+            <span class="haiku-privacidad-marca">ACCESO RESTRINGIDO</span>
             <h2 id="haiku-privacidad-titulo">Protección visual</h2>
             <p id="haiku-privacidad-descripcion"></p>
 
@@ -63,7 +63,7 @@
                     <span>PIN de 4 números</span>
                     <input class="haiku-privacidad-input" data-solo-numeros="4" id="haiku-privacidad-pin" type="password" inputmode="numeric" maxlength="4" autocomplete="off" placeholder="••••" required>
                 </label>
-                <button class="haiku-privacidad-submit" type="submit">Desbloquear HAIKU</button>
+                <button class="haiku-privacidad-submit" type="submit">Desbloquear</button>
             </form>
 
             <form id="haiku-privacidad-form-rescate" class="haiku-privacidad-form" hidden>
@@ -277,7 +277,7 @@
         if (modo === "verificando") {
             titulo.textContent = "Preparando protección";
             descripcion.textContent = "Comprobando la configuración de privacidad de esta sesión…";
-            info.textContent = "HAIKU permanecerá oculto hasta completar la comprobación.";
+            info.textContent = "El contenido permanecerá oculto hasta completar la comprobación.";
             return;
         }
 
@@ -293,7 +293,7 @@
         if (modo === "pin") {
             const fallos = Math.min(leerNumeroLocal("fallos"), MAX_INTENTOS);
             const restantes = Math.max(0, MAX_INTENTOS - fallos);
-            titulo.textContent = "HAIKU bloqueado";
+            titulo.textContent = "Acceso bloqueado";
             descripcion.textContent = "La página estuvo fuera de foco más de 5 segundos. Ingresa tu PIN para volver a operar.";
             formPin.hidden = false;
             info.textContent = restantes === MAX_INTENTOS
@@ -616,7 +616,7 @@
         } catch (e) {
             console.error("HAIKU · No fue posible preparar protección visual:", e);
             titulo.textContent = "Protección no disponible";
-            descripcion.textContent = "No fue posible comprobar la configuración de privacidad. HAIKU se mantiene oculto por seguridad.";
+            descripcion.textContent = "No fue posible comprobar la configuración de privacidad. El contenido se mantiene oculto por seguridad.";
             error.textContent = "Revisa la conexión y recarga la página.";
         } finally {
             inicializando = false;

@@ -183,10 +183,10 @@
     overlay.className = "haiku-auth-overlay";
     overlay.innerHTML = `
         <form class="haiku-auth-card" id="haiku-auth-form">
-            <span class="haiku-auth-marca">HAIKU · ACCESO INTERNO</span>
+            <span class="haiku-auth-marca">ACCESO INTERNO</span>
             <h1>Iniciar sesión</h1>
             <p>
-                Ingresa con tu usuario autorizado de HAIKU.
+                Ingresa con tu usuario autorizado.
             </p>
 
             <label>
@@ -214,7 +214,7 @@
                 class="haiku-auth-submit"
                 type="submit"
             >
-                Entrar a HAIKU
+                Entrar
             </button>
 
             <div
@@ -334,7 +334,7 @@
             window.haikuTienePermiso = () => false;
 
             mensajeError(
-                "Tu cuenta no está habilitada dentro de HAIKU."
+                "Tu cuenta no está habilitada para este acceso."
             );
             mostrarLogin("");
             return false;
