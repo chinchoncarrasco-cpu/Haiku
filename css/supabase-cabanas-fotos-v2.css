@@ -28,7 +28,7 @@
     background-image: url("../assets/img/cabanas-revision-foto-original.jpg") !important;
     background-repeat: no-repeat !important;
     background-size: cover !important;
-    background-position: center 108% !important;
+    background-position: center 84% !important;
 }
 
 #seccion-cabanas .cabana-revision:is(
@@ -50,7 +50,7 @@
     background-image: url("../CAB5.jpg") !important;
     background-repeat: no-repeat !important;
     background-size: cover !important;
-    background-position: center 100% !important;
+    background-position: center 85% !important;
 }
 
 #seccion-cabanas .cabana-revision[data-revision-cabana="5"] .cabana-revision-info {
@@ -70,7 +70,7 @@
     background-image: url("../internal-cabin-classic-loft-1120x434.jpg") !important;
     background-repeat: no-repeat !important;
     background-size: cover !important;
-    background-position: center 80% !important;
+    background-position: center 144% !important;
 }
 
 #seccion-cabanas .cabana-revision:is(
@@ -90,7 +90,7 @@
     background-image: url("../miniloft.jpg") !important;
     background-repeat: no-repeat !important;
     background-size: cover !important;
-    background-position: center 150% !important;
+    background-position: center 80% !important;
 }
 
 #seccion-cabanas .cabana-revision[data-revision-cabana="10"] .cabana-revision-info {
@@ -106,7 +106,7 @@
     background-image: url("../maxiloft.jpg") !important;
     background-repeat: no-repeat !important;
     background-size: cover !important;
-    background-position: center 60% !important;
+    background-position: center 48% !important;
 }
 
 #seccion-cabanas .cabana-revision[data-revision-cabana="11"] .cabana-revision-info {
