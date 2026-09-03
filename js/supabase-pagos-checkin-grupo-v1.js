@@ -98,7 +98,6 @@
         const total=Number(f.total_alojamiento||0), saldo=Number(f.saldo_alojamiento||0);
         const miembros=(f.miembros||[]).length?(f.miembros||[]):g.miembros.map(m=>({cabana:m.numero,reserva_id:m.reservaId}));
         const cabs=miembros.map(m=>Number(m.cabana)).filter(Boolean).sort((a,b)=>a-b);
-        const rep=g.miembros[0]?.reservaId||miembros[0]?.reserva_id||"";
         const draft=borradores.get(g.grupoId)||{monto:saldo,medio:"",glosa:"",folio:"",codaut:"",manager:false};
         const boves=g.miembros.map(m=>m.bove).filter(Boolean);
         const boveComun=boves.length===g.miembros.length && new Set(boves).size===1 ? boves[0] : "";
@@ -135,14 +134,21 @@
         </div>`;
     }
 
+    function observar(lista){
+        if(!lista) return;
+        if(!observer) observer=new MutationObserver(()=>luego(90));
+        observer.disconnect();
+        observer.observe(lista,{childList:true});
+    }
+
     async function aplicar(){
         if(procesando||!window.haikuSesion) return;
         const lista=document.getElementById("pagos-lista-checkin");
         if(!lista) return;
         procesando=true;
+        observer?.disconnect();
         try{
             const grupos=await gruposDelDia();
-            // Restaurar cualquier ocultamiento previo antes de recalcular.
             lista.querySelectorAll('[data-haiku-oculto-por-grupo="1"]').forEach(el=>{el.hidden=false;delete el.dataset.haikuOcultoPorGrupo;});
             lista.querySelectorAll('.haiku-checkin-grupo-v1').forEach(el=>el.remove());
 
@@ -167,7 +173,12 @@
                 const visibles=[...lista.querySelectorAll(".pago-checkin-item")].filter(x=>!x.hidden);
                 contador.textContent=String(visibles.filter(x=>(x.querySelector(".pago-checkin-estado")?.textContent||"").includes("Pendiente")).length);
             }
-        }catch(e){console.warn("HAIKU · Check-in grupo:",e);}finally{procesando=false;}
+        }catch(e){
+            console.warn("HAIKU · Check-in grupo:",e);
+        }finally{
+            procesando=false;
+            observar(lista);
+        }
     }
 
     function luego(ms=70){ clearTimeout(timer); timer=setTimeout(()=>aplicar(),ms); }
@@ -237,7 +248,7 @@
 
     function instalar(){
         const lista=document.getElementById("pagos-lista-checkin");
-        if(lista&&!observer){observer=new MutationObserver(()=>luego(90));observer.observe(lista,{childList:true});}
+        if(lista) observar(lista);
         luego(140);
     }
     document.addEventListener("click",e=>{if(e.target.closest?.('[data-seccion="pagos"]'))setTimeout(instalar,120);});
