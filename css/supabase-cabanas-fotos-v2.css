@@ -210,7 +210,7 @@ body:has(#revision-individual.activa[data-foto-cabana]) #revision-individual {
     #seccion-cabanas .cabana-revision[data-revision-cabana="10"] {
         padding-top: 78px !important;
         background-size: auto 160% !important;
-        background-position: center 50% !important;
+        background-position: center 100% !important;
     }
 
     /* Móvil · CAB 11 */
