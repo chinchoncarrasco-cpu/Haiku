@@ -1,0 +1,187 @@
+/* ========================================
+   HAIKU · SERVICIOS · ESTADOS TEMPORALES V1
+   Actual / Próxima / Pendiente / Completada / Cancelada
+======================================== */
+
+.servicios-agenda-item.haiku-servicio-estado {
+    position: relative;
+    border-width: 2px !important;
+    border-style: solid !important;
+    transition: border-color .16s ease, background .16s ease, box-shadow .16s ease;
+}
+
+.haiku-servicio-actual {
+    border-color: #df842c !important;
+    background: #fff7ed !important;
+    box-shadow: inset 3px 0 0 #df842c;
+}
+
+.haiku-servicio-proxima {
+    border-color: #d5ad32 !important;
+    background: #fffbed !important;
+    box-shadow: inset 3px 0 0 #d5ad32;
+}
+
+.haiku-servicio-pendiente {
+    border-color: #b8c0bc !important;
+    background: #fbfcfb !important;
+    box-shadow: inset 3px 0 0 #aeb7b2;
+}
+
+.haiku-servicio-completada {
+    border-color: #64a779 !important;
+    background: #f2faf4 !important;
+    box-shadow: inset 3px 0 0 #64a779;
+}
+
+.haiku-servicio-cancelada {
+    border-color: #c95a5a !important;
+    background: #fff5f5 !important;
+    box-shadow: inset 3px 0 0 #c95a5a;
+}
+
+.haiku-servicio-estado-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 5px 9px;
+    border-radius: 999px;
+    font-size: 10px;
+    font-weight: 700;
+    line-height: 1;
+    white-space: nowrap;
+}
+
+.haiku-servicio-actual .haiku-servicio-estado-badge {
+    color: #9b5217;
+    background: #ffe1c2;
+}
+
+.haiku-servicio-proxima .haiku-servicio-estado-badge {
+    color: #7b620e;
+    background: #fff0b3;
+}
+
+.haiku-servicio-pendiente .haiku-servicio-estado-badge {
+    color: #5f6964;
+    background: #edf0ee;
+}
+
+.haiku-servicio-completada .haiku-servicio-estado-badge {
+    color: #27633d;
+    background: #dff2e5;
+}
+
+.haiku-servicio-cancelada .haiku-servicio-estado-badge {
+    color: #8f3030;
+    background: #f8dede;
+}
+
+.haiku-servicio-cancelada-min {
+    padding-top: 11px !important;
+    padding-bottom: 11px !important;
+}
+
+.haiku-servicio-cancelada-resumen {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px solid rgba(160, 70, 70, .14);
+    color: #7b5a5a;
+    font-size: 11px;
+}
+
+.haiku-servicio-cancelada-resumen strong {
+    color: #9a3535;
+}
+
+.haiku-servicio-acciones-principales {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-wrap: wrap;
+}
+
+.haiku-servicio-btn-cancelar {
+    border: 1px solid #dba0a0 !important;
+    background: #fff7f7 !important;
+    color: #a34242 !important;
+}
+
+.haiku-servicio-btn-cancelar:hover {
+    background: #fae9e9 !important;
+}
+
+.haiku-servicio-btn-reactivar {
+    border: 1px solid #91b9a0 !important;
+    background: #eff8f2 !important;
+    color: #276a43 !important;
+}
+
+.haiku-servicio-btn-reactivar:hover {
+    background: #e2f1e7 !important;
+}
+
+/* Notificaciones: la línea envuelve el recuadro del servicio. */
+#notificaciones-contenido .notificacion-reserva.haiku-notif-servicio-estado {
+    border: 2px solid transparent !important;
+    border-radius: 10px !important;
+    position: relative;
+}
+
+#notificaciones-contenido .notificacion-reserva.haiku-notif-servicio-actual {
+    border-color: #df842c !important;
+    background: #fff7ed !important;
+}
+
+#notificaciones-contenido .notificacion-reserva.haiku-notif-servicio-proxima {
+    border-color: #d5ad32 !important;
+    background: #fffbed !important;
+}
+
+#notificaciones-contenido .notificacion-reserva.haiku-notif-servicio-pendiente {
+    border-color: #b8c0bc !important;
+    background: #f7f9f8 !important;
+}
+
+#notificaciones-contenido .notificacion-reserva.haiku-notif-servicio-completada {
+    border-color: #64a779 !important;
+    background: #f2faf4 !important;
+}
+
+#notificaciones-contenido .notificacion-reserva.haiku-notif-servicio-cancelada {
+    border-color: #c95a5a !important;
+    background: #fff5f5 !important;
+}
+
+.haiku-notif-servicio-etiqueta {
+    display: inline-block;
+    margin-top: 4px;
+    padding: 2px 6px;
+    border-radius: 999px;
+    background: rgba(255,255,255,.72);
+    font-size: 8px;
+    font-weight: 800;
+    letter-spacing: .35px;
+    text-transform: uppercase;
+}
+
+@media (max-width: 600px) {
+    .haiku-servicio-acciones-principales {
+        gap: 6px;
+    }
+
+    .haiku-servicio-estado-badge {
+        padding: 4px 8px;
+        font-size: 9px;
+    }
+
+    .haiku-servicio-cancelada-resumen {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 6px;
+    }
+}
