@@ -1,0 +1,77 @@
+/* =====================================================
+   HAIKU · RESERVAS VINCULADAS · V1
+   Indicadores discretos inspirados en la agrupación de Cloudbeds.
+===================================================== */
+
+.haiku-reserva-grupo-marca {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    margin-right: 3px;
+    color: #2f7852;
+    font-size: .72rem;
+    line-height: 1;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+.haiku-ficha-reserva-grupo {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 5px 7px;
+    margin-top: 4px;
+    font-size: .68rem;
+    line-height: 1.2;
+}
+
+.haiku-ficha-reserva-grupo-etiqueta {
+    color: #2f7852;
+    font-weight: 650;
+    white-space: nowrap;
+}
+
+.haiku-ficha-reserva-grupo-lista {
+    display: inline-flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+}
+
+.haiku-ficha-reserva-grupo-cab {
+    appearance: none;
+    border: 1px solid rgba(47, 120, 82, .16);
+    background: rgba(47, 120, 82, .06);
+    color: #47544d;
+    border-radius: 999px;
+    padding: 2px 6px;
+    font: inherit;
+    font-size: .65rem;
+    line-height: 1.15;
+    cursor: pointer;
+}
+
+button.haiku-ficha-reserva-grupo-cab:hover {
+    background: rgba(47, 120, 82, .11);
+}
+
+.haiku-ficha-reserva-grupo-cab.actual {
+    color: #1f5f42;
+    border-color: rgba(47, 120, 82, .28);
+    background: rgba(47, 120, 82, .12);
+    font-weight: 700;
+    cursor: default;
+}
+
+@media (max-width: 700px) {
+    .haiku-ficha-reserva-grupo {
+        gap: 4px 6px;
+        margin-top: 3px;
+        font-size: .64rem;
+    }
+
+    .haiku-ficha-reserva-grupo-cab {
+        font-size: .61rem;
+        padding: 2px 5px;
+    }
+}
