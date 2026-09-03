@@ -1,6 +1,6 @@
 /* =====================================================
-   HAIKU · VERIFICAR ABONOS · V2
-   Solo lectura, compacto y orientado a revisión.
+   HAIKU · VERIFICAR ABONOS · V3
+   Solo lectura, compacto y agrupado por titular/unidad.
 ===================================================== */
 
 #pagos-lista-abonos .haiku-abono-verificacion-v2 {
@@ -67,7 +67,7 @@
     white-space: nowrap;
 }
 
-#pagos-lista-abonos .verificado .haiku-abono-v2-estado {
+#pagos-lista-abonos .haiku-abono-verificacion-v2.verificado > .haiku-abono-v2-cabecera .haiku-abono-v2-estado {
     background: #e4f4e9;
     color: #246841;
 }
@@ -77,11 +77,36 @@
     color: #6a736e;
 }
 
+/* V3: varios abonos del mismo titular viven dentro de una sola tarjeta. */
+#pagos-lista-abonos .haiku-abono-v2-movimientos {
+    display: grid;
+}
+
+#pagos-lista-abonos .haiku-abono-v2-movimiento {
+    padding: 10px 0 9px;
+}
+
+#pagos-lista-abonos .haiku-abono-v2-movimiento + .haiku-abono-v2-movimiento {
+    border-top: 1px solid rgba(39,67,52,.09);
+}
+
+#pagos-lista-abonos .haiku-abono-v2-movimiento-superior {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 18px;
+}
+
+#pagos-lista-abonos .haiku-abono-v2-movimiento.verificado {
+    opacity: .82;
+}
+
 #pagos-lista-abonos .haiku-abono-v2-resumen {
     display: flex;
     align-items: center;
     gap: 28px;
-    padding: 10px 0 2px;
+    padding: 0;
+    min-width: 0;
 }
 
 #pagos-lista-abonos .haiku-abono-v2-resumen > span {
@@ -106,7 +131,7 @@
 }
 
 #pagos-lista-abonos .haiku-abono-v2-detalle {
-    margin-top: 8px;
+    margin-top: 7px;
     padding: 7px 9px;
     border: 1px solid rgba(47,118,83,.12);
     border-radius: 8px;
@@ -121,14 +146,20 @@
 }
 
 #pagos-lista-abonos .haiku-abono-v2-confirmar {
+    flex: 0 0 auto;
     display: flex;
     justify-content: flex-end;
     align-items: center;
     gap: 8px;
-    margin-top: 9px;
+    margin: 0;
     font-size: 10px;
     color: #4e5953;
     cursor: pointer;
+    white-space: nowrap;
+}
+
+#pagos-lista-abonos .haiku-abono-v2-movimiento.verificado .haiku-abono-v2-confirmar {
+    color: #2f7653;
 }
 
 #pagos-lista-abonos .haiku-abono-v2-confirmar input {
@@ -160,6 +191,12 @@
 
     #pagos-lista-abonos .haiku-abono-v2-cabecera {
         align-items: flex-start;
+    }
+
+    #pagos-lista-abonos .haiku-abono-v2-movimiento-superior {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 7px;
     }
 
     #pagos-lista-abonos .haiku-abono-v2-resumen {
