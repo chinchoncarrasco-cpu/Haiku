@@ -31,6 +31,33 @@
         el.textContent = texto;
     }
 
+    function solicitarValidacion() {
+        queueMicrotask(() => window.HAIKU_EDITAR_ABONOS_V1?.validar?.());
+    }
+
+    function estadoValidacion() {
+        const check = document.getElementById("haiku-edicion-saldo-favor-check");
+        const activa = Boolean(contexto && check?.checked);
+        if (!activa) return { activa: false, valida: false };
+
+        const monto = Math.round(Number(valor("haiku-pago-monto") || 0));
+        const medio = valor("haiku-pago-medio");
+        const fecha = valor("haiku-pago-fecha");
+        let valida = monto > Number(contexto.montoAnterior || 0) &&
+            Boolean(medio) &&
+            Boolean(fechaPagoISO(fecha));
+
+        if (medio === "transferencia" && !valor("haiku-pago-glosa")) valida = false;
+        if (["webpay_credito","webpay_debito"].includes(medio) &&
+            !valor("haiku-pago-codaut")) valida = false;
+        if (["tarjeta_credito","tarjeta_debito"].includes(medio) &&
+            (!valor("haiku-pago-folio") || !valor("haiku-pago-bove"))) valida = false;
+        if (!window.haikuTienePermiso?.("pagos.registrar") ||
+            !window.haikuTienePermiso?.("pagos.anular")) valida = false;
+
+        return { activa: true, valida };
+    }
+
     function crearOpcion() {
         const aviso = document.getElementById("haiku-abono-edicion-aviso");
         if (!aviso || !contexto) return;
@@ -54,7 +81,10 @@
             <div id="haiku-edicion-saldo-favor-preview"></div>`;
 
         aviso.insertAdjacentElement("afterend", wrap);
-        wrap.querySelector("input")?.addEventListener("change", actualizarPreview);
+        wrap.querySelector("input")?.addEventListener("change", () => {
+            actualizarPreview();
+            solicitarValidacion();
+        });
         actualizarOpcion();
     }
 
@@ -68,6 +98,7 @@
             if (check) check.checked = false;
         }
         actualizarPreview();
+        solicitarValidacion();
     }
 
     function actualizarPreview() {
@@ -158,24 +189,11 @@
         } finally {
             guardando = false;
             if (boton?.isConnected) {
-                boton.disabled = false;
                 boton.textContent = texto;
             }
+            solicitarValidacion();
         }
     }
-
-    // Este listener se registra antes que el módulo base del editor.
-    // Si la casilla está marcada, intercepta la confirmación especial;
-    // si no, deja pasar la corrección normal sin cambios.
-    document.addEventListener("click", evento => {
-        const boton = evento.target.closest?.("#haiku-pago-confirmar");
-        const check = document.getElementById("haiku-edicion-saldo-favor-check");
-        if (!boton || !contexto || !check?.checked) return;
-        evento.preventDefault();
-        evento.stopPropagation();
-        evento.stopImmediatePropagation();
-        guardarConSaldoFavor();
-    }, true);
 
     document.addEventListener("click", evento => {
         const editar = evento.target.closest?.("[data-haiku-editar-abono]");
@@ -202,7 +220,10 @@
     });
 
     document.addEventListener("change", evento => {
-        if (evento.target.matches?.("#haiku-pago-reserva") && contexto) limpiar();
+        if (evento.target.matches?.("#haiku-pago-reserva") && contexto) {
+            limpiar();
+            solicitarValidacion();
+        }
     });
 
     const style = document.createElement("style");
@@ -216,6 +237,11 @@
         #haiku-edicion-saldo-favor-preview{display:grid;gap:2px;padding-left:22px}#haiku-edicion-saldo-favor-preview strong{font-size:9px}
     `;
     if (!document.getElementById(style.id)) document.head.appendChild(style);
+
+    window.HAIKU_EDITAR_ABONO_SALDO_FAVOR_V1 = Object.freeze({
+        estadoValidacion,
+        guardar: guardarConSaldoFavor
+    });
 
     console.info("HAIKU · Corrección de abono con saldo a favor preparada.");
 })();

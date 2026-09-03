@@ -317,18 +317,36 @@
         const confirmar = document.getElementById("haiku-pago-confirmar");
         if (!confirmar) return;
 
-        const monto = Math.round(Number(document.getElementById("haiku-pago-monto")?.value || 0));
+        const montoInput = document.getElementById("haiku-pago-monto");
+        const monto = Math.round(Number(montoInput?.value || 0));
         const medio = document.getElementById("haiku-pago-medio")?.value || "";
         const fecha = document.getElementById("haiku-pago-fecha")?.value || "";
         const maximo = montoTexto("haiku-pago-saldo") + Number(edicionActual.monto || 0);
+        const especial = window.HAIKU_EDITAR_ABONO_SALDO_FAVOR_V1?.estadoValidacion?.();
 
-        const habilitado = !guardando &&
-            monto > 0 &&
-            monto <= maximo &&
-            Boolean(medio) &&
-            Boolean(fechaPagoISO(fecha));
+        let habilitado;
+        if (especial?.activa) {
+            // El editor principal sigue siendo el único dueño de `disabled`.
+            // En modo saldo a favor se retira solamente el tope contable antiguo.
+            montoInput?.removeAttribute("max");
+            if (montoInput) montoInput.disabled = false;
+            habilitado = !guardando && especial.valida;
+        } else {
+            if (montoInput) montoInput.max = String(Math.max(0, maximo));
+            habilitado = !guardando &&
+                monto > 0 &&
+                monto <= maximo &&
+                Boolean(medio) &&
+                Boolean(fechaPagoISO(fecha));
+        }
 
         confirmar.disabled = !habilitado;
+        confirmar.setAttribute("aria-disabled", habilitado ? "false" : "true");
+        confirmar.title = especial?.activa
+            ? (habilitado
+                ? "Guardar corrección y dejar el excedente como saldo a favor"
+                : "Completa los datos requeridos del pago")
+            : "";
         confirmar.textContent = guardando ? "Guardando..." : "Guardar corrección";
     }
 
@@ -471,6 +489,13 @@
         evento.preventDefault();
         evento.stopPropagation();
         evento.stopImmediatePropagation();
+
+        const especial = window.HAIKU_EDITAR_ABONO_SALDO_FAVOR_V1;
+        if (especial?.estadoValidacion?.().activa) {
+            especial.guardar?.();
+            return;
+        }
+
         guardarCorreccion();
     }, true);
 
@@ -514,7 +539,8 @@
 
     window.HAIKU_EDITAR_ABONOS_V1 = Object.freeze({
         refrescar: refrescarHistorial,
-        cancelar: cancelarEdicion
+        cancelar: cancelarEdicion,
+        validar: validarEdicion
     });
 
     console.info("HAIKU · Edición segura de abonos V1 preparada.");

@@ -271,6 +271,10 @@
     font-size:10px;
 }
 
+.haiku-pago-grupo-estado:empty {
+    display:none;
+}
+
 .haiku-pago-grupo-estado.error { color:#a64545; }
 
 .haiku-pago-grupo-estado.exito {
