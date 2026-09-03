@@ -177,6 +177,7 @@ body:has(#revision-individual.activa[data-foto-cabana]) #revision-individual {
 }
 
 @media (max-width: 700px) {
+    /* Móvil · CAB 1, 2, 3, 4 y 6 */
     #seccion-cabanas .cabana-revision:is(
         [data-revision-cabana="1"],
         [data-revision-cabana="2"],
@@ -185,20 +186,32 @@ body:has(#revision-individual.activa[data-foto-cabana]) #revision-individual {
         [data-revision-cabana="6"]
     ) {
         padding-top: 78px !important;
-        background-position: center 82% !important;
+        background-position: center 268% !important;
     }
 
+    /* Móvil · CAB 5 */
     #seccion-cabanas .cabana-revision[data-revision-cabana="5"] {
         padding-top: 78px !important;
-        background-position: center 84% !important;
+        background-position: center 310% !important;
     }
 
+    /* Móvil · CAB 7, 8 y 9 · regla independiente para calibración */
     #seccion-cabanas .cabana-revision:is(
         [data-revision-cabana="7"],
         [data-revision-cabana="8"],
         [data-revision-cabana="9"]
-    ),
-    #seccion-cabanas .cabana-revision[data-revision-cabana="10"],
+    ) {
+        padding-top: 78px !important;
+        background-position: center 50% !important;
+    }
+
+    /* Móvil · CAB 10 · regla independiente para calibración */
+    #seccion-cabanas .cabana-revision[data-revision-cabana="10"] {
+        padding-top: 78px !important;
+        background-position: center 50% !important;
+    }
+
+    /* Móvil · CAB 11 · regla independiente para calibración */
     #seccion-cabanas .cabana-revision[data-revision-cabana="11"] {
         padding-top: 78px !important;
         background-position: center 50% !important;
