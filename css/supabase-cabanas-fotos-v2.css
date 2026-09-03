@@ -3,6 +3,9 @@
    Capa visual aislada.
    CAB 1, 2, 3, 4 y 6 usan la fotografía general.
    CAB 5 usa su propia fotografía original (CAB5.jpg).
+   CAB 7, 8 y 9 usan internal-cabin-classic-loft-1120x434.jpg.
+   CAB 10 usa miniloft.jpg.
+   CAB 11 usa maxiloft.jpg.
    Arquitectura basada en la solución correcta de WORK:
    - archivo físico en repositorio
    - CSS directo sobre el elemento que pinta la zona
@@ -51,6 +54,62 @@
 }
 
 #seccion-cabanas .cabana-revision[data-revision-cabana="5"] .cabana-revision-info {
+    position: relative;
+    z-index: 1;
+    background: rgba(255,255,255,.985) !important;
+}
+
+/* CAB 7, 8 y 9 · Classic Loft. Encuadre neutro hasta ajuste visual. */
+#seccion-cabanas .cabana-revision:is(
+    [data-revision-cabana="7"],
+    [data-revision-cabana="8"],
+    [data-revision-cabana="9"]
+) {
+    padding-top: 96px !important;
+    background-color: #ffffff !important;
+    background-image: url("../internal-cabin-classic-loft-1120x434.jpg") !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    background-position: center 50% !important;
+}
+
+#seccion-cabanas .cabana-revision:is(
+    [data-revision-cabana="7"],
+    [data-revision-cabana="8"],
+    [data-revision-cabana="9"]
+) .cabana-revision-info {
+    position: relative;
+    z-index: 1;
+    background: rgba(255,255,255,.985) !important;
+}
+
+/* CAB 10 · Mini Loft. */
+#seccion-cabanas .cabana-revision[data-revision-cabana="10"] {
+    padding-top: 96px !important;
+    background-color: #ffffff !important;
+    background-image: url("../miniloft.jpg") !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    background-position: center 50% !important;
+}
+
+#seccion-cabanas .cabana-revision[data-revision-cabana="10"] .cabana-revision-info {
+    position: relative;
+    z-index: 1;
+    background: rgba(255,255,255,.985) !important;
+}
+
+/* CAB 11 · Maxi Loft. */
+#seccion-cabanas .cabana-revision[data-revision-cabana="11"] {
+    padding-top: 96px !important;
+    background-color: #ffffff !important;
+    background-image: url("../maxiloft.jpg") !important;
+    background-repeat: no-repeat !important;
+    background-size: cover !important;
+    background-position: center 50% !important;
+}
+
+#seccion-cabanas .cabana-revision[data-revision-cabana="11"] .cabana-revision-info {
     position: relative;
     z-index: 1;
     background: rgba(255,255,255,.985) !important;
@@ -132,6 +191,17 @@ body:has(#revision-individual.activa[data-foto-cabana]) #revision-individual {
     #seccion-cabanas .cabana-revision[data-revision-cabana="5"] {
         padding-top: 78px !important;
         background-position: center 84% !important;
+    }
+
+    #seccion-cabanas .cabana-revision:is(
+        [data-revision-cabana="7"],
+        [data-revision-cabana="8"],
+        [data-revision-cabana="9"]
+    ),
+    #seccion-cabanas .cabana-revision[data-revision-cabana="10"],
+    #seccion-cabanas .cabana-revision[data-revision-cabana="11"] {
+        padding-top: 78px !important;
+        background-position: center 50% !important;
     }
 
     #revision-individual.activa[data-foto-cabana] .revision-cabecera {
