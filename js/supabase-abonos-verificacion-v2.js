@@ -1,7 +1,8 @@
 // ========================================
-// HAIKU · VERIFICAR ABONOS · V2
+// HAIKU · VERIFICAR ABONOS · V3
 // Solo lectura: los pagos nacen en "Añadir pago".
-// Aquí únicamente se revisan y verifican.
+// Agrupa todos los abonos del mismo titular/unidad en una sola tarjeta.
+// Cada movimiento conserva su verificación independiente.
 // ========================================
 
 (() => {
@@ -189,34 +190,55 @@
         return "";
     }
 
-    function tarjetaPago(unidad, pago) {
-        const tarjeta = document.createElement("div");
-        tarjeta.className = "haiku-abono-verificacion-v2" + (pago.verificado ? " verificado" : " pendiente");
-        tarjeta.dataset.pagoId = pago.pagoId;
-        if (pago.pagoGrupoId) tarjeta.dataset.pagoGrupoId = pago.pagoGrupoId;
-
+    function filaPago(pago) {
         const detalle = detallePago(pago);
         const medio = MEDIOS[pago.medio] || pago.medio || "Sin medio";
+
+        return `
+            <div class="haiku-abono-v2-movimiento ${pago.verificado ? "verificado" : "pendiente"}"
+                data-pago-id="${escapar(pago.pagoId)}">
+                <div class="haiku-abono-v2-movimiento-superior">
+                    <div class="haiku-abono-v2-resumen">
+                        <span><small>Abono</small><strong>${dinero(pago.monto)}</strong></span>
+                        <span><small>Medio</small><strong>${escapar(medio)}</strong></span>
+                    </div>
+
+                    <label class="haiku-abono-v2-confirmar">
+                        <input type="checkbox"
+                            data-haiku-verificar-abono-v2="${escapar(pago.pagoId)}"
+                            ${pago.verificado ? "checked disabled" : ""}>
+                        <span>${pago.verificado ? "Verificado" : "Confirmar abono"}</span>
+                    </label>
+                </div>
+
+                ${detalle ? `<div class="haiku-abono-v2-detalle"><small>${detalle}</small></div>` : ""}
+            </div>`;
+    }
+
+    function tarjetaPagos(unidad, movimientos) {
+        const tarjeta = document.createElement("div");
+        const pendientes = movimientos.filter(pago => !pago.verificado).length;
+        const todosVerificados = pendientes === 0;
+        const cantidad = movimientos.length;
+
+        tarjeta.className = "haiku-abono-verificacion-v2 haiku-abono-v2-unidad" +
+            (todosVerificados ? " verificado" : " pendiente");
+        tarjeta.dataset.unidadKey = unidad.key;
+
+        const estado = todosVerificados
+            ? `✓ ${cantidad === 1 ? "Verificado" : `${cantidad} abonos verificados`}`
+            : pendientes === 1
+                ? "1 pendiente de revisión"
+                : `${pendientes} pendientes de revisión`;
 
         tarjeta.innerHTML = `
             <div class="haiku-abono-v2-cabecera">
                 <div class="haiku-abono-v2-identidad">${identidad(unidad)}</div>
-                <span class="haiku-abono-v2-estado">${pago.verificado ? "✓ Verificado" : "Pendiente de revisión"}</span>
+                <span class="haiku-abono-v2-estado">${estado}</span>
             </div>
-
-            <div class="haiku-abono-v2-resumen">
-                <span><small>Abono</small><strong>${dinero(pago.monto)}</strong></span>
-                <span><small>Medio</small><strong>${escapar(medio)}</strong></span>
-            </div>
-
-            ${detalle ? `<div class="haiku-abono-v2-detalle"><small>${detalle}</small></div>` : ""}
-
-            <label class="haiku-abono-v2-confirmar">
-                <input type="checkbox"
-                    data-haiku-verificar-abono-v2="${escapar(pago.pagoId)}"
-                    ${pago.verificado ? "checked disabled" : ""}>
-                <span>Confirmar abono</span>
-            </label>`;
+            <div class="haiku-abono-v2-movimientos">
+                ${movimientos.map(filaPago).join("")}
+            </div>`;
 
         return tarjeta;
     }
@@ -279,16 +301,14 @@
                     return;
                 }
 
-                movimientos.forEach(pago => {
-                    lista.appendChild(tarjetaPago(unidad, pago));
-                    if (!pago.verificado) pendientes++;
-                });
+                lista.appendChild(tarjetaPagos(unidad, movimientos));
+                pendientes += movimientos.filter(pago => !pago.verificado).length;
             });
 
             contador.textContent = String(pendientes);
-            console.info("HAIKU · Verificar abonos V2 solo lectura:", fecha, pagosLogicos.length);
+            console.info("HAIKU · Verificar abonos V3 agrupado:", fecha, pagosLogicos.length);
         } catch (error) {
-            console.error("HAIKU · No fue posible cargar Verificar abonos V2:", error);
+            console.error("HAIKU · No fue posible cargar Verificar abonos V3:", error);
         } finally {
             cargando = false;
         }
@@ -368,5 +388,5 @@
         refrescar: cargarAbonosVerificacion
     });
 
-    console.info("HAIKU · Verificar abonos V2 preparado.");
+    console.info("HAIKU · Verificar abonos V3 agrupado preparado.");
 })();
