@@ -280,7 +280,6 @@
             return;
         }
 
-        // Cancelados al final, conservando el horario original.
         listaDia.sort((a, b) => {
             const ca = estados.get(String(a.id)) === "cancelada" ? 1 : 0;
             const cb = estados.get(String(b.id)) === "cancelada" ? 1 : 0;
@@ -464,11 +463,12 @@
                     etiqueta.className = "haiku-notif-servicio-etiqueta";
                     item.appendChild(etiqueta);
                 }
-                etiqueta.textContent = estado.etiqueta;
+                if (etiqueta.textContent !== estado.etiqueta) {
+                    etiqueta.textContent = estado.etiqueta;
+                }
             });
     }
 
-    // Evita que los cancelados entren en el antiguo bloque de "servicios próximos".
     if (typeof originalObtenerServiciosProximos === "function") {
         window.obtenerServiciosProximos = function obtenerServiciosProximosEstados() {
             const lista = originalObtenerServiciosProximos.apply(this, arguments) || [];
@@ -557,7 +557,6 @@
             .observe(notif, { childList: true, subtree: true });
     }
 
-    // Actual / Próxima cambian con el reloj sin necesitar refrescar la página.
     setInterval(() => {
         renderizarAgenda();
         programarDecoracion(0);
