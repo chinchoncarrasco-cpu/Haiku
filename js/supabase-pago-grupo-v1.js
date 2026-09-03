@@ -1,6 +1,7 @@
 // ========================================
-// HAIKU · PAGO POR TITULAR / RESERVA CONJUNTA · V1
-// Un pago visible; distribución interna por reserva.
+// HAIKU · PAGO POR TITULAR / RESERVA CONJUNTA · V2
+// Permite registrar múltiples abonos sin cerrar el modal.
+// Cada pago conserva su fecha real y aparece en un historial compacto.
 // ========================================
 
 (() => {
@@ -14,11 +15,65 @@
     let reservaSeleccionada = "";
     let secuenciaFicha = 0;
 
+    const MEDIOS_UI = Object.freeze({
+        transferencia: "Transferencia",
+        webpay_credito: "WebPay Crédito",
+        webpay_debito: "WebPay Débito",
+        tarjeta_credito: "Tarjeta Crédito",
+        tarjeta_debito: "Tarjeta Débito",
+        efectivo: "Efectivo",
+        otro: "Otro"
+    });
+
     const dinero = valor => `$${Math.round(Number(valor || 0)).toLocaleString("es-CL")}`;
 
     function fechaActual() {
         try { return String(fechaSeleccionada || "").slice(0, 10); }
         catch { return ""; }
+    }
+
+    function hoyChile() {
+        try {
+            const partes = new Intl.DateTimeFormat("en-CA", {
+                timeZone: "America/Santiago",
+                year: "numeric",
+                month: "2-digit",
+                day: "2-digit"
+            }).formatToParts(new Date());
+            const mapa = Object.fromEntries(partes.map(p => [p.type, p.value]));
+            return `${mapa.year}-${mapa.month}-${mapa.day}`;
+        } catch {
+            return new Date().toISOString().slice(0, 10);
+        }
+    }
+
+    function fechaPagoISO(valor) {
+        const fecha = String(valor || "").trim();
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(fecha)) return "";
+        return `${fecha}T12:00:00.000Z`;
+    }
+
+    function fechaCorta(valor) {
+        if (!valor) return "Sin fecha";
+        try {
+            return new Intl.DateTimeFormat("es-CL", {
+                timeZone: "America/Santiago",
+                day: "2-digit",
+                month: "2-digit",
+                year: "numeric"
+            }).format(new Date(valor));
+        } catch {
+            return String(valor).slice(0, 10);
+        }
+    }
+
+    function escapar(valor) {
+        return String(valor ?? "")
+            .replaceAll("&", "&amp;")
+            .replaceAll("<", "&lt;")
+            .replaceAll(">", "&gt;")
+            .replaceAll('"', "&quot;")
+            .replaceAll("'", "&#039;");
     }
 
     function crearBoton() {
@@ -51,6 +106,7 @@
                     </div>
                     <button type="button" class="haiku-pago-grupo-cerrar" data-haiku-pago-cerrar aria-label="Cerrar">×</button>
                 </div>
+
                 <div class="haiku-pago-grupo-cuerpo">
                     <div class="haiku-pago-grupo-campo">
                         <label for="haiku-pago-reserva">Titular / reserva</label>
@@ -67,24 +123,38 @@
                         <div class="saldo"><span>Saldo</span><strong id="haiku-pago-saldo">$0</strong></div>
                     </div>
 
+                    <div id="haiku-pago-historial" class="haiku-pago-grupo-historial" hidden>
+                        <div class="haiku-pago-grupo-historial-cabecera">
+                            <span>Abonos registrados</span>
+                            <strong id="haiku-pago-historial-contador">0 pagos</strong>
+                        </div>
+                        <div id="haiku-pago-historial-lista" class="haiku-pago-grupo-historial-lista"></div>
+                    </div>
+
                     <div class="haiku-pago-grupo-grid">
+                        <div class="haiku-pago-grupo-campo">
+                            <label for="haiku-pago-fecha">Fecha del pago</label>
+                            <input id="haiku-pago-fecha" class="haiku-pago-grupo-input" type="date">
+                        </div>
+
                         <div class="haiku-pago-grupo-campo">
                             <label for="haiku-pago-monto">Monto de este pago</label>
                             <input id="haiku-pago-monto" class="haiku-pago-grupo-input" type="number" min="1" step="1" inputmode="numeric" placeholder="0">
                         </div>
-                        <div class="haiku-pago-grupo-campo">
-                            <label for="haiku-pago-medio">Medio de pago</label>
-                            <select id="haiku-pago-medio" class="haiku-pago-grupo-select">
-                                <option value="">Seleccionar...</option>
-                                <option value="transferencia">Transferencia</option>
-                                <option value="webpay_credito">WebPay Crédito</option>
-                                <option value="webpay_debito">WebPay Débito</option>
-                                <option value="tarjeta_credito">Tarjeta Crédito</option>
-                                <option value="tarjeta_debito">Tarjeta Débito</option>
-                                <option value="efectivo">Efectivo</option>
-                                <option value="otro">Otro</option>
-                            </select>
-                        </div>
+                    </div>
+
+                    <div class="haiku-pago-grupo-campo">
+                        <label for="haiku-pago-medio">Medio de pago</label>
+                        <select id="haiku-pago-medio" class="haiku-pago-grupo-select">
+                            <option value="">Seleccionar...</option>
+                            <option value="transferencia">Transferencia</option>
+                            <option value="webpay_credito">WebPay Crédito</option>
+                            <option value="webpay_debito">WebPay Débito</option>
+                            <option value="tarjeta_credito">Tarjeta Crédito</option>
+                            <option value="tarjeta_debito">Tarjeta Débito</option>
+                            <option value="efectivo">Efectivo</option>
+                            <option value="otro">Otro</option>
+                        </select>
                     </div>
 
                     <div class="haiku-pago-grupo-grid">
@@ -114,7 +184,7 @@
                     <div id="haiku-pago-estado" class="haiku-pago-grupo-estado" aria-live="polite"></div>
 
                     <div class="haiku-pago-grupo-acciones">
-                        <button type="button" class="haiku-pago-grupo-cancelar" data-haiku-pago-cerrar>Cancelar</button>
+                        <button type="button" class="haiku-pago-grupo-cancelar" data-haiku-pago-cerrar>Cerrar</button>
                         <button type="button" id="haiku-pago-confirmar" class="haiku-pago-grupo-confirmar" disabled>Registrar pago</button>
                     </div>
                 </div>
@@ -125,13 +195,18 @@
         overlay.addEventListener("click", evento => {
             if (evento.target === overlay) cerrarModal();
         });
-        overlay.querySelectorAll("[data-haiku-pago-cerrar]").forEach(b => b.addEventListener("click", cerrarModal));
+
+        overlay.querySelectorAll("[data-haiku-pago-cerrar]")
+            .forEach(b => b.addEventListener("click", cerrarModal));
+
         overlay.querySelector("#haiku-pago-reserva")?.addEventListener("change", async evento => {
             reservaSeleccionada = evento.target.value || "";
-            await cargarResumenSeleccionado();
+            await cargarResumenSeleccionado(false);
         });
+
         overlay.querySelector("#haiku-pago-medio")?.addEventListener("change", actualizarExtras);
         overlay.querySelector("#haiku-pago-monto")?.addEventListener("input", validarFormulario);
+        overlay.querySelector("#haiku-pago-fecha")?.addEventListener("change", validarFormulario);
         overlay.querySelector("#haiku-pago-confirmar")?.addEventListener("click", registrarPago);
     }
 
@@ -142,18 +217,64 @@
         el.textContent = texto;
     }
 
+    function limpiarCamposPago({ conservarFecha = true, conservarMedio = true } = {}) {
+        ["haiku-pago-monto","haiku-pago-glosa","haiku-pago-codaut","haiku-pago-folio","haiku-pago-bove","haiku-pago-observacion"]
+            .forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.value = "";
+            });
+
+        if (!conservarFecha) {
+            const fecha = document.getElementById("haiku-pago-fecha");
+            if (fecha) fecha.value = hoyChile();
+        }
+
+        if (!conservarMedio) {
+            const medio = document.getElementById("haiku-pago-medio");
+            if (medio) medio.value = "";
+            actualizarExtras();
+        }
+    }
+
     function resetModal() {
         reservaSeleccionada = "";
         resumenActual = null;
         guardando = false;
-        ["haiku-pago-monto","haiku-pago-glosa","haiku-pago-codaut","haiku-pago-folio","haiku-pago-bove","haiku-pago-observacion"].forEach(id => {
-            const el = document.getElementById(id); if (el) el.value = "";
-        });
-        const medio = document.getElementById("haiku-pago-medio"); if (medio) medio.value = "";
-        const resumen = document.getElementById("haiku-pago-resumen"); if (resumen) resumen.hidden = true;
-        const vinculo = document.getElementById("haiku-pago-vinculo"); if (vinculo) { vinculo.hidden = true; vinculo.textContent = ""; }
+
+        limpiarCamposPago({ conservarFecha: false, conservarMedio: false });
+
+        const reserva = document.getElementById("haiku-pago-reserva");
+        if (reserva) reserva.value = "";
+
+        const resumen = document.getElementById("haiku-pago-resumen");
+        if (resumen) resumen.hidden = true;
+
+        const vinculo = document.getElementById("haiku-pago-vinculo");
+        if (vinculo) {
+            vinculo.hidden = true;
+            vinculo.textContent = "";
+        }
+
+        const historial = document.getElementById("haiku-pago-historial");
+        if (historial) historial.hidden = true;
+
+        const lista = document.getElementById("haiku-pago-historial-lista");
+        if (lista) lista.innerHTML = "";
+
         document.querySelectorAll(".haiku-pago-grupo-extra").forEach(el => el.hidden = true);
-        const confirmar = document.getElementById("haiku-pago-confirmar"); if (confirmar) { confirmar.disabled = true; confirmar.textContent = "Registrar pago"; }
+
+        const confirmar = document.getElementById("haiku-pago-confirmar");
+        if (confirmar) {
+            confirmar.disabled = true;
+            confirmar.textContent = "Registrar pago";
+        }
+
+        const monto = document.getElementById("haiku-pago-monto");
+        if (monto) {
+            monto.disabled = false;
+            monto.removeAttribute("max");
+        }
+
         estado("");
     }
 
@@ -165,6 +286,7 @@
         if (error) throw error;
 
         const base = new Map();
+
         const agregar = (numero, reservaId, titular, contexto) => {
             if (!reservaId || base.has(String(reservaId))) return;
             base.set(String(reservaId), {
@@ -189,6 +311,7 @@
             .from("reservas")
             .select("id,grupo_reserva_id,titular_nombre")
             .in("id", items.map(i => i.reservaId));
+
         if (eReservas) throw eReservas;
 
         const meta = new Map((reservas || []).map(r => [String(r.id), r]));
@@ -197,6 +320,7 @@
         items.forEach(item => {
             const r = meta.get(item.reservaId) || {};
             const key = r.grupo_reserva_id ? `g:${r.grupo_reserva_id}` : `r:${item.reservaId}`;
+
             if (!grupos.has(key)) {
                 grupos.set(key, {
                     reservaId: item.reservaId,
@@ -206,6 +330,7 @@
                     contextos: []
                 });
             }
+
             const g = grupos.get(key);
             if (item.numero && !g.cabs.includes(item.numero)) g.cabs.push(item.numero);
             if (item.contexto && !g.contextos.includes(item.contexto)) g.contextos.push(item.contexto);
@@ -220,11 +345,14 @@
     async function cargarReservas() {
         const select = document.getElementById("haiku-pago-reserva");
         if (!select) return;
+
         select.disabled = true;
         select.innerHTML = `<option value="">Cargando...</option>`;
+
         try {
             const items = await obtenerReservasDia();
             select.innerHTML = `<option value="">Seleccionar titular / reserva...</option>`;
+
             items.forEach(item => {
                 const op = document.createElement("option");
                 op.value = item.reservaId;
@@ -233,7 +361,10 @@
                     : `CAB ${item.cabs[0] || "—"} · ${item.titular}`;
                 select.appendChild(op);
             });
-            if (!items.length) select.innerHTML = `<option value="">No hay reservas para esta fecha</option>`;
+
+            if (!items.length) {
+                select.innerHTML = `<option value="">No hay reservas para esta fecha</option>`;
+            }
         } catch (error) {
             console.error("HAIKU · cargar titulares para pago:", error);
             select.innerHTML = `<option value="">No fue posible cargar reservas</option>`;
@@ -244,7 +375,10 @@
     }
 
     async function finanzasReserva(reservaId) {
-        const { data: grupo, error: eGrupo } = await cliente.rpc("haiku_finanzas_grupo", { p_reserva_id: reservaId });
+        const { data: grupo, error: eGrupo } = await cliente.rpc("haiku_finanzas_grupo", {
+            p_reserva_id: reservaId
+        });
+
         if (eGrupo) throw eGrupo;
         if (grupo?.es_grupo) return grupo;
 
@@ -252,11 +386,13 @@
             .from("vista_estado_cargos")
             .select("tipo_cargo,estado,monto_ajustado,aplicado_neto,saldo_cargo")
             .eq("reserva_id", reservaId);
+
         if (error) throw error;
 
         const activos = (cargos || []).filter(c => c.estado === "activo");
         const alojamiento = activos.filter(c => c.tipo_cargo === "alojamiento");
         const servicios = activos.filter(c => c.tipo_cargo === "servicio");
+
         return {
             es_grupo: false,
             reserva_id: reservaId,
@@ -268,26 +404,152 @@
         };
     }
 
-    async function cargarResumenSeleccionado() {
+    function idsReservaActuales() {
+        if (!reservaSeleccionada || !resumenActual) return [];
+
+        if (resumenActual.es_grupo) {
+            return [...new Set(
+                (resumenActual.miembros || [])
+                    .map(m => String(m.reserva_id || ""))
+                    .filter(Boolean)
+            )];
+        }
+
+        return [String(reservaSeleccionada)];
+    }
+
+    function agruparMovimientosPagos(filas) {
+        const mapa = new Map();
+
+        (filas || []).forEach(pago => {
+            const grupo = pago.pago_grupo_id ? String(pago.pago_grupo_id) : "";
+            const clave = grupo ? `grupo:${grupo}` : `pago:${pago.id}`;
+
+            if (!mapa.has(clave)) {
+                mapa.set(clave, {
+                    clave,
+                    fecha_pago: pago.fecha_pago || "",
+                    medio_pago: pago.medio_pago || "",
+                    monto: 0,
+                    referencia_externa: pago.referencia_externa || "",
+                    folio: pago.folio || "",
+                    codigo_autorizacion: pago.codigo_autorizacion || "",
+                    observaciones: pago.observaciones || ""
+                });
+            }
+
+            const item = mapa.get(clave);
+            item.monto += Number(pago.monto || 0);
+
+            if (!item.referencia_externa && pago.referencia_externa) {
+                item.referencia_externa = pago.referencia_externa;
+            }
+            if (!item.folio && pago.folio) item.folio = pago.folio;
+            if (!item.codigo_autorizacion && pago.codigo_autorizacion) {
+                item.codigo_autorizacion = pago.codigo_autorizacion;
+            }
+            if (!item.observaciones && pago.observaciones) {
+                item.observaciones = pago.observaciones;
+            }
+        });
+
+        return [...mapa.values()].sort((a,b) =>
+            String(a.fecha_pago || "").localeCompare(String(b.fecha_pago || ""))
+        );
+    }
+
+    function renderHistorialPagos(items) {
+        const bloque = document.getElementById("haiku-pago-historial");
+        const lista = document.getElementById("haiku-pago-historial-lista");
+        const contador = document.getElementById("haiku-pago-historial-contador");
+
+        if (!bloque || !lista || !contador) return;
+
+        bloque.hidden = false;
+        contador.textContent = items.length === 1 ? "1 pago" : `${items.length} pagos`;
+
+        if (!items.length) {
+            lista.innerHTML = `
+                <div class="haiku-pago-grupo-historial-vacio">
+                    Aún no hay abonos registrados.
+                </div>`;
+            return;
+        }
+
+        lista.innerHTML = items.map(item => {
+            const detalles = [];
+            if (item.referencia_externa) detalles.push(`Glosa: ${escapar(item.referencia_externa)}`);
+            if (item.folio) detalles.push(`Folio: ${escapar(item.folio)}`);
+            if (item.codigo_autorizacion) detalles.push(`CodAut: ${escapar(item.codigo_autorizacion)}`);
+
+            return `
+                <div class="haiku-pago-grupo-historial-item">
+                    <div class="haiku-pago-grupo-historial-principal">
+                        <span>${escapar(fechaCorta(item.fecha_pago))}</span>
+                        <strong>${escapar(MEDIOS_UI[item.medio_pago] || item.medio_pago || "Sin medio")}</strong>
+                    </div>
+                    <strong class="haiku-pago-grupo-historial-monto">${dinero(item.monto)}</strong>
+                    ${detalles.length ? `<small>${detalles.join(" · ")}</small>` : ""}
+                </div>`;
+        }).join("");
+    }
+
+    async function cargarHistorialPagos() {
+        const ids = idsReservaActuales();
+        if (!ids.length) {
+            renderHistorialPagos([]);
+            return;
+        }
+
+        const { data, error } = await cliente
+            .from("pagos")
+            .select("id,reserva_id,pago_grupo_id,monto,medio_pago,fecha_pago,folio,codigo_autorizacion,referencia_externa,observaciones")
+            .in("reserva_id", ids)
+            .eq("tipo_movimiento", "pago")
+            .eq("etapa_operativa", "abono")
+            .eq("estado", "confirmado")
+            .order("fecha_pago", { ascending: true });
+
+        if (error) throw error;
+
+        renderHistorialPagos(agruparMovimientosPagos(data || []));
+    }
+
+    async function cargarResumenSeleccionado(preservarFormulario = false) {
         resumenActual = null;
+
         if (!reservaSeleccionada) {
-            const r = document.getElementById("haiku-pago-resumen"); if (r) r.hidden = true;
+            const resumen = document.getElementById("haiku-pago-resumen");
+            if (resumen) resumen.hidden = true;
+
+            const historial = document.getElementById("haiku-pago-historial");
+            if (historial) historial.hidden = true;
+
             validarFormulario();
             return;
         }
 
         estado("Cargando saldo...");
+
         try {
             resumenActual = await finanzasReserva(reservaSeleccionada);
-            document.getElementById("haiku-pago-total").textContent = dinero(resumenActual.total_alojamiento);
-            document.getElementById("haiku-pago-abonado").textContent = dinero(resumenActual.abonado_alojamiento);
-            document.getElementById("haiku-pago-saldo").textContent = dinero(resumenActual.saldo_alojamiento);
-            const resumen = document.getElementById("haiku-pago-resumen"); if (resumen) resumen.hidden = false;
+
+            document.getElementById("haiku-pago-total").textContent =
+                dinero(resumenActual.total_alojamiento);
+            document.getElementById("haiku-pago-abonado").textContent =
+                dinero(resumenActual.abonado_alojamiento);
+            document.getElementById("haiku-pago-saldo").textContent =
+                dinero(resumenActual.saldo_alojamiento);
+
+            const resumen = document.getElementById("haiku-pago-resumen");
+            if (resumen) resumen.hidden = false;
 
             const vinculo = document.getElementById("haiku-pago-vinculo");
             if (vinculo) {
                 if (resumenActual.es_grupo) {
-                    const cabs = (resumenActual.miembros || []).map(m => `CAB ${m.cabana}`).join(" · ");
+                    const cabs = (resumenActual.miembros || [])
+                        .map(m => `CAB ${m.cabana}`)
+                        .join(" · ");
                     vinculo.textContent = `↳ Reserva conjunta · ${cabs}`;
                     vinculo.hidden = false;
                 } else {
@@ -296,12 +558,28 @@
                 }
             }
 
+            const saldo = Number(resumenActual.saldo_alojamiento || 0);
             const monto = document.getElementById("haiku-pago-monto");
+
             if (monto) {
-                monto.value = String(Number(resumenActual.saldo_alojamiento || 0));
-                monto.max = String(Number(resumenActual.saldo_alojamiento || 0));
+                monto.max = String(Math.max(saldo, 0));
+                monto.disabled = saldo <= 0;
+
+                if (!preservarFormulario) {
+                    monto.value = "";
+                } else if (Number(monto.value || 0) > saldo) {
+                    monto.value = "";
+                }
             }
-            estado("");
+
+            await cargarHistorialPagos();
+
+            if (saldo <= 0) {
+                estado("Alojamiento completamente abonado.", "exito");
+            } else {
+                estado("");
+            }
+
             validarFormulario();
         } catch (error) {
             console.error("HAIKU · resumen de pago:", error);
@@ -312,26 +590,44 @@
     function actualizarExtras() {
         const medio = document.getElementById("haiku-pago-medio")?.value || "";
         const visibles = new Set();
+
         if (medio === "transferencia") visibles.add("glosa");
         if (["webpay_credito","webpay_debito"].includes(medio)) visibles.add("codaut");
-        if (["tarjeta_credito","tarjeta_debito"].includes(medio)) { visibles.add("folio"); visibles.add("bove"); }
+        if (["tarjeta_credito","tarjeta_debito"].includes(medio)) {
+            visibles.add("folio");
+            visibles.add("bove");
+        }
+
         document.querySelectorAll(".haiku-pago-grupo-extra").forEach(el => {
             el.hidden = !visibles.has(el.dataset.extra || "");
         });
+
         validarFormulario();
     }
 
     function validarFormulario() {
         const confirmar = document.getElementById("haiku-pago-confirmar");
         if (!confirmar) return;
+
         const monto = Number(document.getElementById("haiku-pago-monto")?.value || 0);
         const medio = document.getElementById("haiku-pago-medio")?.value || "";
+        const fecha = document.getElementById("haiku-pago-fecha")?.value || "";
         const saldo = Number(resumenActual?.saldo_alojamiento || 0);
-        confirmar.disabled = guardando || !reservaSeleccionada || !resumenActual || monto <= 0 || monto > saldo || !medio;
+
+        confirmar.disabled =
+            guardando ||
+            !reservaSeleccionada ||
+            !resumenActual ||
+            saldo <= 0 ||
+            monto <= 0 ||
+            monto > saldo ||
+            !medio ||
+            !fechaPagoISO(fecha);
     }
 
     function validarDetalles(medio) {
         const valor = id => document.getElementById(id)?.value?.trim() || "";
+
         const datos = {
             glosa: valor("haiku-pago-glosa"),
             codaut: valor("haiku-pago-codaut"),
@@ -339,32 +635,57 @@
             bove: valor("haiku-pago-bove"),
             observacion: valor("haiku-pago-observacion")
         };
-        if (medio === "transferencia" && !datos.glosa) throw new Error("Ingresa la glosa de la transferencia.");
-        if (["webpay_credito","webpay_debito"].includes(medio) && !datos.codaut) throw new Error("Ingresa el CodAut de WebPay.");
-        if (["tarjeta_credito","tarjeta_debito"].includes(medio) && (!datos.folio || !datos.bove)) throw new Error("Ingresa Folio y BOVTAR.");
+
+        if (medio === "transferencia" && !datos.glosa) {
+            throw new Error("Ingresa la glosa de la transferencia.");
+        }
+
+        if (["webpay_credito","webpay_debito"].includes(medio) && !datos.codaut) {
+            throw new Error("Ingresa el CodAut de WebPay.");
+        }
+
+        if (["tarjeta_credito","tarjeta_debito"].includes(medio) && (!datos.folio || !datos.bove)) {
+            throw new Error("Ingresa Folio y BOVTAR.");
+        }
+
         return datos;
     }
 
     async function registrarPago() {
         if (guardando || !reservaSeleccionada || !resumenActual) return;
-        if (typeof window.haikuTienePermiso === "function" && !window.haikuTienePermiso("pagos.registrar")) {
+
+        if (
+            typeof window.haikuTienePermiso === "function" &&
+            !window.haikuTienePermiso("pagos.registrar")
+        ) {
             alert("Tu usuario no tiene permiso para registrar pagos.");
             return;
         }
 
-        const monto = Math.round(Number(document.getElementById("haiku-pago-monto")?.value || 0));
+        const monto = Math.round(
+            Number(document.getElementById("haiku-pago-monto")?.value || 0)
+        );
         const medio = document.getElementById("haiku-pago-medio")?.value || "";
+        const fechaElegida = document.getElementById("haiku-pago-fecha")?.value || "";
+        const fechaPago = fechaPagoISO(fechaElegida);
         const saldo = Number(resumenActual.saldo_alojamiento || 0);
-        if (monto <= 0 || monto > saldo || !medio) return;
+
+        if (monto <= 0 || monto > saldo || !medio || !fechaPago) return;
 
         let datos;
-        try { datos = validarDetalles(medio); }
-        catch (error) { estado(error.message, "error"); return; }
+        try {
+            datos = validarDetalles(medio);
+        } catch (error) {
+            estado(error.message, "error");
+            return;
+        }
 
         guardando = true;
         validarFormulario();
+
         const confirmar = document.getElementById("haiku-pago-confirmar");
         if (confirmar) confirmar.textContent = "Registrando...";
+
         estado("Registrando pago...");
 
         try {
@@ -373,16 +694,15 @@
                 p_monto: monto,
                 p_medio_pago: medio,
                 p_etapa_operativa: "abono",
-                p_fecha_pago: new Date().toISOString(),
+                p_fecha_pago: fechaPago,
                 p_folio: datos.folio || null,
                 p_codigo_autorizacion: datos.codaut || null,
                 p_bove: datos.bove || null,
                 p_referencia_externa: datos.glosa || null,
                 p_observaciones: datos.observacion || null
             });
-            if (error) throw error;
 
-            estado(resumenActual.es_grupo ? "Pago conjunto registrado." : "Pago registrado.", "exito");
+            if (error) throw error;
 
             await Promise.allSettled([
                 Promise.resolve().then(() => window.haikuCargarAbonosSupabase?.()),
@@ -391,13 +711,29 @@
             ]);
 
             await refrescarFichaFinanzas();
-            setTimeout(() => cerrarModal(true), 550);
+
+            limpiarCamposPago({
+                conservarFecha: true,
+                conservarMedio: true
+            });
+
+            await cargarResumenSeleccionado(true);
+
+            const saldoNuevo = Number(resumenActual?.saldo_alojamiento || 0);
+            estado(
+                saldoNuevo > 0
+                    ? `Pago de ${dinero(monto)} registrado. Puedes añadir otro abono.`
+                    : `Pago de ${dinero(monto)} registrado. Alojamiento completamente abonado.`,
+                "exito"
+            );
+
             return data;
         } catch (error) {
             console.error("HAIKU · registrar pago por titular:", error);
             estado(error?.message || "No fue posible registrar el pago.", "error");
         } finally {
             guardando = false;
+
             if (confirmar) confirmar.textContent = "Registrar pago";
             validarFormulario();
         }
@@ -408,46 +744,61 @@
             alert("Debes iniciar sesión para registrar pagos.");
             return;
         }
-        if (typeof window.haikuTienePermiso === "function" && !window.haikuTienePermiso("pagos.registrar")) {
+
+        if (
+            typeof window.haikuTienePermiso === "function" &&
+            !window.haikuTienePermiso("pagos.registrar")
+        ) {
             alert("Tu usuario no tiene permiso para registrar pagos.");
             return;
         }
+
         const overlay = document.getElementById("haiku-pago-grupo-overlay");
         if (!overlay) return;
+
         resetModal();
         overlay.hidden = false;
         document.body.style.overflow = "hidden";
+
         await cargarReservas();
     }
 
     function cerrarModal(forzar = false) {
         const overlay = document.getElementById("haiku-pago-grupo-overlay");
         if (!overlay || (guardando && !forzar)) return;
+
         overlay.hidden = true;
         document.body.style.overflow = "";
     }
 
     function etiquetaFicha(indice, texto) {
-        const label = document.querySelector(`#ficha-reserva-modal .ficha-pagos > div:nth-child(${indice}) > span`);
+        const label = document.querySelector(
+            `#ficha-reserva-modal .ficha-pagos > div:nth-child(${indice}) > span`
+        );
         if (label) label.textContent = texto;
     }
 
     function limpiarNotaFicha() {
-        document.querySelector("#ficha-reserva-modal .haiku-ficha-finanzas-grupo-nota")?.remove();
+        document.querySelector(
+            "#ficha-reserva-modal .haiku-ficha-finanzas-grupo-nota"
+        )?.remove();
     }
 
     async function refrescarFichaFinanzas() {
         const modal = document.getElementById("ficha-reserva-modal");
         if (!modal || modal.hidden) return;
+
         const reservaId = modal.dataset.reservaId || "";
         if (!reservaId) return;
 
         const turno = ++secuenciaFicha;
+
         try {
             const datos = await finanzasReserva(reservaId);
             if (turno !== secuenciaFicha) return;
 
             limpiarNotaFicha();
+
             if (!datos?.es_grupo) {
                 etiquetaFicha(1, "Total reserva");
                 etiquetaFicha(2, "Abono");
@@ -462,10 +813,12 @@
                 "ficha-pago-saldo": datos.saldo_alojamiento,
                 "ficha-pago-servicios": datos.servicios_pendientes
             };
+
             Object.entries(valores).forEach(([id, valor]) => {
                 const el = document.getElementById(id);
                 if (el) el.textContent = dinero(valor);
             });
+
             etiquetaFicha(1, "Total grupo");
             etiquetaFicha(2, "Abono grupo");
             etiquetaFicha(3, "Saldo grupo");
@@ -475,7 +828,9 @@
             if (pagos) {
                 const nota = document.createElement("div");
                 nota.className = "haiku-ficha-finanzas-grupo-nota";
-                nota.textContent = `↳ Valores conjuntos · ${(datos.miembros || []).map(m => `CAB ${m.cabana}`).join(" · ")}`;
+                nota.textContent = `↳ Valores conjuntos · ${(datos.miembros || [])
+                    .map(m => `CAB ${m.cabana}`)
+                    .join(" · ")}`;
                 pagos.insertAdjacentElement("afterend", nota);
             }
         } catch (error) {
@@ -486,12 +841,17 @@
     function observarFicha() {
         const modal = document.getElementById("ficha-reserva-modal");
         if (!modal || modal.dataset.haikuPagoGrupoObservado === "1") return;
+
         modal.dataset.haikuPagoGrupoObservado = "1";
+
         new MutationObserver(() => {
             if (!modal.hidden && modal.dataset.reservaId) {
                 queueMicrotask(() => refrescarFichaFinanzas());
             }
-        }).observe(modal, { attributes:true, attributeFilter:["hidden","data-reserva-id"] });
+        }).observe(modal, {
+            attributes: true,
+            attributeFilter: ["hidden","data-reserva-id"]
+        });
     }
 
     function instalar() {
@@ -502,8 +862,11 @@
 
     window.addEventListener("haiku:auth-ready", () => setTimeout(instalar, 100));
     window.addEventListener("load", () => setTimeout(instalar, 180));
+
     document.addEventListener("click", evento => {
-        if (evento.target.closest?.('[data-seccion="pagos"]')) setTimeout(crearBoton, 80);
+        if (evento.target.closest?.('[data-seccion="pagos"]')) {
+            setTimeout(crearBoton, 80);
+        }
     });
 
     setTimeout(instalar, 220);
@@ -513,5 +876,5 @@
         refrescarFicha: refrescarFichaFinanzas
     });
 
-    console.info("HAIKU · Pago por titular / reserva conjunta V1 preparado.");
+    console.info("HAIKU · Pago por titular / múltiples abonos V2 preparado.");
 })();
