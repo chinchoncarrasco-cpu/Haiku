@@ -1,0 +1,346 @@
+/* ========================================
+   HAIKU · ASISTENTE FLOTANTE V1
+   Interfaz global fija. La IA se conecta en una etapa posterior.
+   ======================================== */
+
+.haiku-asistente-root {
+    position: fixed;
+    right: 22px;
+    bottom: 22px;
+    z-index: 90000;
+    font-family: inherit;
+}
+
+.haiku-asistente-root[hidden] {
+    display: none !important;
+}
+
+.haiku-asistente-boton {
+    position: relative;
+    width: 58px;
+    height: 58px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 1px solid rgba(255, 255, 255, .18);
+    border-radius: 50%;
+    background: #123627;
+    box-shadow: 0 10px 28px rgba(0, 0, 0, .24);
+    cursor: pointer;
+    transition: transform .16s ease, box-shadow .16s ease, background .16s ease;
+}
+
+.haiku-asistente-boton:hover {
+    transform: translateY(-2px);
+    background: #174732;
+    box-shadow: 0 13px 32px rgba(0, 0, 0, .29);
+}
+
+.haiku-asistente-boton:focus-visible,
+.haiku-asistente-cerrar:focus-visible,
+.haiku-asistente-adjuntar:focus-visible,
+.haiku-asistente-enviar:focus-visible,
+.haiku-asistente-quitar:focus-visible,
+.haiku-asistente-texto:focus-visible {
+    outline: 3px solid rgba(56, 138, 94, .28);
+    outline-offset: 2px;
+}
+
+/* Carita con audífonos hecha sólo con CSS. */
+.haiku-asistente-avatar {
+    position: relative;
+    width: 31px;
+    height: 31px;
+    border: 2px solid #eaf5ee;
+    border-radius: 48% 48% 45% 45%;
+    box-sizing: border-box;
+}
+
+.haiku-asistente-avatar::before,
+.haiku-asistente-avatar::after {
+    content: "";
+    position: absolute;
+    top: 9px;
+    width: 4px;
+    height: 4px;
+    border-radius: 50%;
+    background: #eaf5ee;
+}
+
+.haiku-asistente-avatar::before { left: 6px; }
+.haiku-asistente-avatar::after { right: 6px; }
+
+.haiku-asistente-sonrisa {
+    position: absolute;
+    left: 50%;
+    bottom: 5px;
+    width: 11px;
+    height: 5px;
+    transform: translateX(-50%);
+    border-bottom: 2px solid #eaf5ee;
+    border-radius: 0 0 12px 12px;
+}
+
+.haiku-asistente-audifonos {
+    position: absolute;
+    inset: -6px -7px auto;
+    height: 24px;
+    border: 3px solid #eaf5ee;
+    border-bottom: 0;
+    border-radius: 18px 18px 0 0;
+    pointer-events: none;
+}
+
+.haiku-asistente-audifonos::before,
+.haiku-asistente-audifonos::after {
+    content: "";
+    position: absolute;
+    top: 13px;
+    width: 6px;
+    height: 10px;
+    border-radius: 4px;
+    background: #eaf5ee;
+}
+
+.haiku-asistente-audifonos::before { left: -5px; }
+.haiku-asistente-audifonos::after { right: -5px; }
+
+.haiku-asistente-panel {
+    position: absolute;
+    right: 0;
+    bottom: 72px;
+    width: min(410px, calc(100vw - 34px));
+    max-height: min(660px, calc(100vh - 116px));
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    box-sizing: border-box;
+    border: 1px solid #d8dfda;
+    border-radius: 20px;
+    background: #fbfcfb;
+    color: #172019;
+    box-shadow: 0 22px 58px rgba(0, 0, 0, .26);
+    transform-origin: bottom right;
+}
+
+.haiku-asistente-panel[hidden] {
+    display: none !important;
+}
+
+.haiku-asistente-cabecera {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 17px 18px 14px;
+    border-bottom: 1px solid #e4e8e5;
+    background: #f7f9f7;
+}
+
+.haiku-asistente-titulo {
+    min-width: 0;
+}
+
+.haiku-asistente-titulo strong {
+    display: block;
+    font-size: .98rem;
+    line-height: 1.2;
+}
+
+.haiku-asistente-titulo span {
+    display: block;
+    margin-top: 3px;
+    color: #718078;
+    font-size: .71rem;
+}
+
+.haiku-asistente-cerrar {
+    width: 34px;
+    height: 34px;
+    flex: 0 0 auto;
+    border: 1px solid #d8dfda;
+    border-radius: 50%;
+    background: #fff;
+    color: #37423b;
+    cursor: pointer;
+    font: inherit;
+    font-size: 1.15rem;
+}
+
+.haiku-asistente-mensajes {
+    min-height: 190px;
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    overflow-y: auto;
+    padding: 16px;
+    background: #f4f7f5;
+}
+
+.haiku-asistente-mensaje {
+    max-width: 88%;
+    padding: 10px 12px;
+    border-radius: 14px;
+    font-size: .78rem;
+    line-height: 1.45;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+}
+
+.haiku-asistente-mensaje--asistente {
+    align-self: flex-start;
+    border: 1px solid #dbe4de;
+    border-bottom-left-radius: 5px;
+    background: #fff;
+    color: #334139;
+}
+
+.haiku-asistente-mensaje--usuario {
+    align-self: flex-end;
+    border-bottom-right-radius: 5px;
+    background: #1f6e4c;
+    color: #fff;
+}
+
+.haiku-asistente-adjuntos {
+    display: flex;
+    gap: 7px;
+    overflow-x: auto;
+    padding: 10px 14px 0;
+    background: #fff;
+}
+
+.haiku-asistente-adjuntos:empty {
+    display: none;
+}
+
+.haiku-asistente-adjunto {
+    position: relative;
+    width: 66px;
+    height: 58px;
+    flex: 0 0 auto;
+    overflow: hidden;
+    border: 1px solid #d8dfda;
+    border-radius: 10px;
+    background: #eef2ef;
+}
+
+.haiku-asistente-adjunto img {
+    width: 100%;
+    height: 100%;
+    display: block;
+    object-fit: cover;
+}
+
+.haiku-asistente-quitar {
+    position: absolute;
+    top: 3px;
+    right: 3px;
+    width: 21px;
+    height: 21px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: 0;
+    border-radius: 50%;
+    background: rgba(17, 29, 22, .86);
+    color: #fff;
+    cursor: pointer;
+    font: inherit;
+    font-size: .75rem;
+}
+
+.haiku-asistente-compositor {
+    padding: 12px 14px 14px;
+    border-top: 1px solid #e3e8e4;
+    background: #fff;
+}
+
+.haiku-asistente-texto {
+    width: 100%;
+    min-height: 74px;
+    max-height: 150px;
+    resize: vertical;
+    box-sizing: border-box;
+    padding: 11px 12px;
+    border: 1px solid #d3dbd6;
+    border-radius: 12px;
+    outline: 0;
+    background: #fbfcfb;
+    color: #172019;
+    font: inherit;
+    font-size: .79rem;
+    line-height: 1.42;
+}
+
+.haiku-asistente-texto:focus {
+    border-color: #6f9c82;
+}
+
+.haiku-asistente-acciones {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 9px;
+}
+
+.haiku-asistente-adjuntar,
+.haiku-asistente-enviar {
+    min-height: 38px;
+    padding: 8px 12px;
+    border-radius: 10px;
+    cursor: pointer;
+    font: inherit;
+    font-size: .75rem;
+    font-weight: 700;
+}
+
+.haiku-asistente-adjuntar {
+    border: 1px solid #d4dcd6;
+    background: #fff;
+    color: #3b4840;
+}
+
+.haiku-asistente-enviar {
+    border: 1px solid #1f6e4c;
+    background: #1f6e4c;
+    color: #fff;
+}
+
+.haiku-asistente-enviar:disabled {
+    opacity: .5;
+    cursor: not-allowed;
+}
+
+.haiku-asistente-aviso {
+    margin-top: 8px;
+    color: #87928b;
+    font-size: .66rem;
+    line-height: 1.35;
+}
+
+@media (max-width: 700px) {
+    .haiku-asistente-root {
+        right: 14px;
+        bottom: 14px;
+    }
+
+    .haiku-asistente-boton {
+        width: 54px;
+        height: 54px;
+    }
+
+    .haiku-asistente-panel {
+        right: 0;
+        bottom: 66px;
+        width: calc(100vw - 28px);
+        max-height: calc(100vh - 102px);
+        border-radius: 17px;
+    }
+
+    .haiku-asistente-mensajes {
+        min-height: 150px;
+    }
+}
