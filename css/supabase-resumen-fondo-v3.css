@@ -12,7 +12,7 @@ body:has(#seccion-resumen.activa) {
             rgba(244, 246, 248, 0.62),
             rgba(244, 246, 248, 0.76)
         ),
-        url("../assets/img/resumen-fondo-haiku-v1.jpeg");
+        url("../Haiku_fondo_2880x3840.jpg");
     background-repeat: no-repeat;
     background-position: center 44%;
     background-size: cover;
