@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HAIKU · Supabase</title>
+    <title>Acceso interno</title>
     <link rel="icon" href="data:,">
     <style>
         html, body {
@@ -36,7 +36,7 @@
 <body>
     <div class="haiku-loader">
         <div>
-            <strong>HAIKU</strong>
+            <strong>ACCESO INTERNO</strong>
             <span>Preparando conexión segura…</span>
         </div>
     </div>
@@ -109,6 +109,7 @@
 
                 const scriptsSupabaseBase = [
                     `<script src="js/supabase-client.js?v=${version}"><` + '/script>',
+                    `<script src="js/supabase-confidencialidad-v1.js?v=${version}"><` + '/script>',
                     `<script src="js/supabase-auth.js?v=${version}"><` + '/script>',
                     `<script src="js/supabase-edicion-pre.js?v=${version}"><` + '/script>',
                     `<script src="js/supabase-nueva-reserva-fullday-v1.js?v=${version}"><` + '/script>',
@@ -194,7 +195,7 @@
                 document.body.innerHTML = `
                     <div class="haiku-loader">
                         <div>
-                            <strong>No fue posible iniciar HAIKU</strong>
+                            <strong>No fue posible iniciar el sistema</strong>
                             <span>
                                 Recarga la página. Si continúa, revisa la consola.
                             </span>
