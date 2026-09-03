@@ -1,7 +1,8 @@
 /* ========================================
-   HAIKU · ACCIONES SUPERIORES PC V2
+   HAIKU · ACCIONES SUPERIORES PC V3
    Pagos: Añadir pago · Ajustar cargo · Nueva reserva · Campana
    Calendario: Bloquear fechas · Nueva reserva · Campana
+   Historial: Actualizar · Nueva reserva · Campana
    No modifica tablet/móvil.
    ======================================== */
 
@@ -10,6 +11,7 @@
     #seccion-pagos .haiku-anadir-pago-boton,
     #seccion-pagos .haiku-ajuste-cargo-boton,
     #seccion-calendario #activar-bloqueo-calendario,
+    #seccion-historial .historial-supa-refresh,
     .sidebar-fila-superior .boton-nueva-reserva,
     .sidebar-fila-superior .boton-notificaciones {
         position: fixed !important;
@@ -75,15 +77,30 @@
         white-space: nowrap;
     }
 
+    /* HISTORIAL */
+    #seccion-historial .historial-supa-refresh {
+        right: 210px !important;
+        width: 118px !important;
+        min-width: 118px !important;
+        min-height: 38px !important;
+        padding: 0 14px !important;
+        display: inline-flex !important;
+        align-items: center;
+        justify-content: center;
+        white-space: nowrap;
+    }
+
     /* Al quedar las acciones fuera del flujo, las cabeceras quedan limpias. */
     #seccion-pagos .cabecera,
-    #seccion-calendario .cabecera {
+    #seccion-calendario .cabecera,
+    #seccion-historial .historial-supa-header {
         justify-content: flex-start !important;
         align-items: flex-start !important;
     }
 
     #seccion-pagos .cabecera > div:first-child,
-    #seccion-calendario .cabecera > div:first-child {
+    #seccion-calendario .cabecera > div:first-child,
+    #seccion-historial .historial-supa-header > div:first-child {
         margin-right: 0 !important;
     }
 }
