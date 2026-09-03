@@ -5639,7 +5639,8 @@ const notaAseo = notasCabana.length
             <div class="aseo-resumen-cabecera">
 
             <div class="aseo-resumen-numero">
-            CAB ${numeroCabana}${nombreHuesped ? ` · ${nombreHuesped}` : ""}
+                <strong>CAB ${numeroCabana}</strong>
+                <span>· ${nombreHuesped || "Sin titular"}</span>
             </div>
 
             <select
