@@ -1,6 +1,6 @@
 /* ========================================
-   HAIKU · ASISTENTE FLOTANTE V1
-   Interfaz global fija. La IA se conecta en una etapa posterior.
+   HAIKU · ASISTENTE FLOTANTE V2
+   Interfaz global + vista previa segura de reservas.
    ======================================== */
 
 .haiku-asistente-root {
@@ -109,8 +109,8 @@
     position: absolute;
     right: 0;
     bottom: 72px;
-    width: min(410px, calc(100vw - 34px));
-    max-height: min(660px, calc(100vh - 116px));
+    width: min(430px, calc(100vw - 34px));
+    max-height: min(720px, calc(100vh - 116px));
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -203,6 +203,224 @@
     color: #fff;
 }
 
+.haiku-asistente-mensaje--procesando {
+    position: relative;
+    padding-left: 30px;
+    color: #506158;
+}
+
+.haiku-asistente-mensaje--procesando::before {
+    content: "";
+    position: absolute;
+    left: 11px;
+    top: 50%;
+    width: 9px;
+    height: 9px;
+    margin-top: -5px;
+    border: 2px solid #b8c9bf;
+    border-top-color: #1f6e4c;
+    border-radius: 50%;
+    animation: haiku-asistente-giro .75s linear infinite;
+}
+
+@keyframes haiku-asistente-giro {
+    to { transform: rotate(360deg); }
+}
+
+/* Vista previa estructurada devuelta por la IA. */
+.haiku-asistente-preview {
+    width: 100%;
+    align-self: stretch;
+    box-sizing: border-box;
+    padding: 13px;
+    border: 1px solid #b8d3c3;
+    border-radius: 15px;
+    background: #fff;
+    box-shadow: 0 4px 14px rgba(28, 61, 42, .07);
+}
+
+.haiku-asistente-preview-cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 10px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #e5ebe7;
+}
+
+.haiku-asistente-preview-cabecera > div {
+    min-width: 0;
+}
+
+.haiku-asistente-preview-cabecera > div > span {
+    display: block;
+    margin-bottom: 4px;
+    color: #24704e;
+    font-size: .58rem;
+    font-weight: 800;
+    letter-spacing: .08em;
+}
+
+.haiku-asistente-preview-cabecera > div > strong {
+    display: block;
+    overflow-wrap: anywhere;
+    color: #17251d;
+    font-size: .91rem;
+    line-height: 1.25;
+}
+
+.haiku-asistente-confianza {
+    flex: 0 0 auto;
+    padding: 4px 7px;
+    border-radius: 999px;
+    font-size: .58rem;
+    font-weight: 800;
+    white-space: nowrap;
+}
+
+.haiku-asistente-confianza--alta {
+    background: #e3f4e9;
+    color: #1c6b42;
+}
+
+.haiku-asistente-confianza--media {
+    background: #fff2cf;
+    color: #805f08;
+}
+
+.haiku-asistente-confianza--baja {
+    background: #fde6e3;
+    color: #9a3f34;
+}
+
+.haiku-asistente-preview-resumen {
+    margin: 10px 0;
+    color: #46534c;
+    font-size: .72rem;
+    line-height: 1.45;
+}
+
+.haiku-asistente-preview-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 7px;
+}
+
+.haiku-asistente-preview-dato {
+    min-width: 0;
+    padding: 7px 8px;
+    border: 1px solid #e3e9e5;
+    border-radius: 9px;
+    background: #f8faf8;
+}
+
+.haiku-asistente-preview-dato > span {
+    display: block;
+    margin-bottom: 3px;
+    color: #7d8982;
+    font-size: .56rem;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.haiku-asistente-preview-dato > strong {
+    display: block;
+    overflow-wrap: anywhere;
+    color: #243129;
+    font-size: .69rem;
+    font-weight: 750;
+    line-height: 1.35;
+}
+
+.haiku-asistente-preview-observacion,
+.haiku-asistente-preview-pago,
+.haiku-asistente-preview-lista {
+    margin-top: 9px;
+    padding-top: 9px;
+    border-top: 1px solid #e5ebe7;
+}
+
+.haiku-asistente-preview-observacion > span,
+.haiku-asistente-preview-pago > strong,
+.haiku-asistente-preview-lista > strong {
+    display: block;
+    margin-bottom: 7px;
+    color: #425048;
+    font-size: .65rem;
+    font-weight: 800;
+}
+
+.haiku-asistente-preview-observacion p {
+    margin: 0;
+    color: #59665f;
+    font-size: .68rem;
+    line-height: 1.45;
+}
+
+.haiku-asistente-preview-pago {
+    padding: 9px;
+    border: 1px solid #d7e7dd;
+    border-radius: 10px;
+    background: #f4faf6;
+}
+
+.haiku-asistente-preview-pago > strong {
+    color: #226343;
+}
+
+.haiku-asistente-preview-lista ul {
+    display: grid;
+    gap: 4px;
+    margin: 0;
+    padding: 0 0 0 17px;
+    color: #58645d;
+    font-size: .67rem;
+    line-height: 1.4;
+}
+
+.haiku-asistente-preview-lista--faltantes {
+    color: #7b641d;
+}
+
+.haiku-asistente-preview-lista--alerta {
+    margin-top: 9px;
+    padding: 9px 10px;
+    border: 1px solid #efd7b2;
+    border-radius: 10px;
+    background: #fff9ef;
+}
+
+.haiku-asistente-preview-lista--alerta > strong,
+.haiku-asistente-preview-lista--alerta ul {
+    color: #785822;
+}
+
+.haiku-asistente-preview-pie {
+    display: grid;
+    gap: 8px;
+    margin-top: 11px;
+    padding-top: 10px;
+    border-top: 1px solid #dfe7e2;
+}
+
+.haiku-asistente-preview-pie > span {
+    color: #47715a;
+    font-size: .64rem;
+    line-height: 1.4;
+}
+
+.haiku-asistente-preview-pie button {
+    min-height: 34px;
+    border: 1px solid #d5ddd8;
+    border-radius: 9px;
+    background: #eef2ef;
+    color: #87918b;
+    font: inherit;
+    font-size: .66rem;
+    font-weight: 750;
+    cursor: not-allowed;
+}
+
 .haiku-asistente-adjuntos {
     display: flex;
     gap: 7px;
@@ -278,6 +496,11 @@
     border-color: #6f9c82;
 }
 
+.haiku-asistente-texto:disabled {
+    background: #f3f5f3;
+    color: #7e8882;
+}
+
 .haiku-asistente-acciones {
     display: flex;
     align-items: center;
@@ -309,6 +532,7 @@
     color: #fff;
 }
 
+.haiku-asistente-adjuntar:disabled,
 .haiku-asistente-enviar:disabled {
     opacity: .5;
     cursor: not-allowed;
@@ -319,6 +543,12 @@
     color: #87928b;
     font-size: .66rem;
     line-height: 1.35;
+}
+
+@media (prefers-reduced-motion: reduce) {
+    .haiku-asistente-mensaje--procesando::before {
+        animation: none;
+    }
 }
 
 @media (max-width: 700px) {
@@ -342,5 +572,9 @@
 
     .haiku-asistente-mensajes {
         min-height: 150px;
+    }
+
+    .haiku-asistente-preview-grid {
+        grid-template-columns: 1fr;
     }
 }
