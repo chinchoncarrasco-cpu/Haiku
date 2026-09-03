@@ -1,0 +1,216 @@
+/* ========================================
+   HAIKU · BLOQUEO VISUAL DE PRIVACIDAD V1
+   Capa independiente del login de Supabase.
+   ======================================== */
+
+.haiku-privacidad-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 999998;
+    display: grid;
+    place-items: center;
+    padding: 22px;
+    box-sizing: border-box;
+    overflow: auto;
+    background:
+        radial-gradient(circle at 50% 18%, rgba(52, 101, 74, .18), transparent 32%),
+        #0c100e;
+    color: #f4f6f4;
+    isolation: isolate;
+}
+
+.haiku-privacidad-overlay[hidden] {
+    display: none !important;
+}
+
+/* Durante los primeros 5 s sólo se ve el fondo oscuro. */
+.haiku-privacidad-overlay[data-modo="cortina"] .haiku-privacidad-card {
+    display: none;
+}
+
+.haiku-privacidad-card {
+    width: min(430px, 100%);
+    padding: 28px;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, .11);
+    border-radius: 22px;
+    background: rgba(26, 31, 28, .98);
+    box-shadow: 0 28px 90px rgba(0, 0, 0, .52);
+}
+
+.haiku-privacidad-marca {
+    display: block;
+    margin-bottom: 8px;
+    color: #9ebba7;
+    font-size: .69rem;
+    font-weight: 800;
+    letter-spacing: .17em;
+}
+
+.haiku-privacidad-card h2 {
+    margin: 0;
+    color: #f6f8f6;
+    font-size: 1.55rem;
+    line-height: 1.12;
+}
+
+.haiku-privacidad-card > p {
+    margin: 9px 0 20px;
+    color: #b8c0bb;
+    font-size: .86rem;
+    line-height: 1.5;
+}
+
+.haiku-privacidad-form {
+    display: grid;
+    gap: 13px;
+}
+
+.haiku-privacidad-form[hidden] {
+    display: none !important;
+}
+
+.haiku-privacidad-campo {
+    display: grid;
+    gap: 6px;
+}
+
+.haiku-privacidad-campo > span {
+    color: #d5dbd7;
+    font-size: .76rem;
+    font-weight: 700;
+}
+
+.haiku-privacidad-input {
+    width: 100%;
+    min-height: 52px;
+    padding: 9px 14px;
+    box-sizing: border-box;
+    border: 1px solid #465048;
+    border-radius: 12px;
+    outline: 0;
+    background: #111512;
+    color: #fff;
+    font: inherit;
+    font-size: 1.35rem;
+    font-weight: 750;
+    letter-spacing: .28em;
+    text-align: center;
+    caret-color: #8db79a;
+}
+
+.haiku-privacidad-input:focus {
+    border-color: #69917a;
+    box-shadow: 0 0 0 3px rgba(105, 145, 122, .18);
+}
+
+.haiku-privacidad-input::placeholder {
+    color: #566159;
+    letter-spacing: .16em;
+}
+
+.haiku-privacidad-submit {
+    min-height: 44px;
+    margin-top: 3px;
+    padding: 10px 14px;
+    border: 0;
+    border-radius: 11px;
+    background: #357c59;
+    color: #fff;
+    font: inherit;
+    font-size: .84rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+.haiku-privacidad-submit:disabled {
+    opacity: .56;
+    cursor: wait;
+}
+
+.haiku-privacidad-error,
+.haiku-privacidad-info {
+    min-height: 18px;
+    margin-top: 10px;
+    font-size: .76rem;
+    line-height: 1.4;
+}
+
+.haiku-privacidad-error {
+    color: #ffaaa4;
+}
+
+.haiku-privacidad-info {
+    color: #a7c5af;
+}
+
+.haiku-privacidad-intentos {
+    margin-top: 18px;
+    padding-top: 14px;
+    border-top: 1px solid rgba(255, 255, 255, .09);
+}
+
+.haiku-privacidad-intentos[hidden] {
+    display: none !important;
+}
+
+.haiku-privacidad-intentos strong {
+    display: block;
+    margin-bottom: 8px;
+    color: #cbd4ce;
+    font-size: .7rem;
+    letter-spacing: .06em;
+}
+
+.haiku-privacidad-intentos-lista {
+    display: grid;
+    gap: 5px;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.haiku-privacidad-intentos-lista li {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+    color: #9fa9a2;
+    font-size: .7rem;
+}
+
+.haiku-privacidad-intentos-lista time {
+    color: #758078;
+    white-space: nowrap;
+}
+
+.haiku-privacidad-alerta {
+    margin: 0 0 14px;
+    padding: 10px 11px;
+    border: 1px solid rgba(205, 83, 72, .34);
+    border-radius: 11px;
+    background: rgba(133, 45, 38, .15);
+    color: #ffc2bc;
+    font-size: .76rem;
+    line-height: 1.45;
+}
+
+/* Evita scroll e interacción accidental del documento tras el overlay. */
+html.haiku-privacidad-bloqueada,
+html.haiku-privacidad-bloqueada body {
+    overflow: hidden !important;
+}
+
+@media (max-width: 600px) {
+    .haiku-privacidad-overlay {
+        padding: 14px;
+    }
+
+    .haiku-privacidad-card {
+        padding: 23px 18px;
+        border-radius: 18px;
+    }
+
+    .haiku-privacidad-card h2 {
+        font-size: 1.35rem;
+    }
+}
