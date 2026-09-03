@@ -1,0 +1,114 @@
+/* =====================================================
+   HAIKU · NUEVA RESERVA MÚLTIPLE · V1
+   Extensión visual aislada del flujo Nueva reserva.
+===================================================== */
+
+#reserva-paso-cabana .reserva-cabana-opcion.seleccionada {
+    box-shadow: 0 0 0 1px rgba(47, 120, 82, .22);
+}
+
+#reserva-paso-cabana .reserva-multiple-ocupacion {
+    margin-top: 6px;
+    margin-bottom: 8px;
+}
+
+#reserva-paso-cabana .reserva-multiple-tarifas {
+    margin-top: 6px;
+    margin-bottom: 10px;
+}
+
+#reserva-paso-detalles .reserva-multiple-resumen {
+    display: grid;
+    gap: 10px;
+}
+
+#reserva-paso-detalles .reserva-multiple-detalle-lista {
+    display: grid;
+    gap: 6px;
+    width: 100%;
+}
+
+#reserva-paso-detalles .reserva-multiple-detalle-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding: 9px 10px;
+    border: 1px solid rgba(38, 50, 43, .10);
+    border-radius: 10px;
+    background: rgba(255, 255, 255, .70);
+}
+
+#reserva-paso-detalles .reserva-multiple-detalle-fila > div {
+    display: grid;
+    gap: 2px;
+    min-width: 0;
+}
+
+#reserva-paso-detalles .reserva-multiple-detalle-fila span {
+    font-size: .78rem;
+    color: var(--texto-suave, #758078);
+}
+
+#reserva-paso-detalles .reserva-multiple-detalle-fila > strong {
+    flex: 0 0 auto;
+    white-space: nowrap;
+}
+
+#reserva-paso-detalles .reserva-multiple-total-grupo {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+    padding-top: 9px;
+    border-top: 1px solid rgba(38, 50, 43, .12);
+}
+
+#reserva-paso-detalles .reserva-multiple-total-grupo span {
+    color: var(--texto-suave, #758078);
+    font-size: .78rem;
+}
+
+#reserva-paso-detalles .reserva-multiple-total-grupo strong {
+    font-size: 1rem;
+    color: #216b48;
+}
+
+#reserva-paso-detalles .reserva-multiple-acompanantes-grupo {
+    display: grid;
+    gap: 8px;
+    margin-top: 10px;
+    padding: 11px;
+    border: 1px solid rgba(38, 50, 43, .11);
+    border-radius: 12px;
+    background: rgba(247, 249, 248, .72);
+}
+
+#reserva-paso-detalles .reserva-multiple-acompanantes-titulo {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+#reserva-paso-detalles .reserva-multiple-acompanantes-titulo span,
+#reserva-paso-detalles .reserva-multiple-acompanantes-grupo > small {
+    color: var(--texto-suave, #758078);
+    font-size: .76rem;
+}
+
+@media (max-width: 700px) {
+    #reserva-paso-detalles .reserva-multiple-detalle-fila {
+        align-items: flex-start;
+    }
+
+    #reserva-paso-detalles .reserva-multiple-detalle-fila > div {
+        max-width: 70%;
+    }
+
+    #reserva-paso-detalles .reserva-multiple-acompanantes-titulo {
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 2px;
+    }
+}
