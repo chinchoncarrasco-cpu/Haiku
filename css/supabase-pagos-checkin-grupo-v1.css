@@ -1,0 +1,13 @@
+/* HAIKU · SALDO CHECK-IN · RESERVA CONJUNTA V1 */
+#seccion-pagos .haiku-checkin-grupo-v1{border-color:rgba(47,118,83,.22);background:linear-gradient(180deg,rgba(244,250,247,.72),rgba(255,255,255,.96))}
+#seccion-pagos .haiku-checkin-grupo-identidad{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+#seccion-pagos .haiku-checkin-grupo-identidad strong{color:#173f2e}
+#seccion-pagos .haiku-checkin-grupo-vinculo{margin:8px 0 12px;padding:7px 10px;border-radius:8px;background:rgba(47,118,83,.07);color:#4f6359;font-size:11px}
+#seccion-pagos .haiku-saldo-grupo-formulario{margin-top:14px}
+#seccion-pagos .haiku-checkin-grupo-servicios{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:12px;padding:10px 12px;border-top:1px solid rgba(47,118,83,.12);font-size:11px;color:#53645b}
+#seccion-pagos .haiku-checkin-grupo-servicios strong{color:#173f2e;font-size:13px}
+#seccion-pagos .haiku-checkin-grupo-servicios small{width:100%;color:#758179}
+@media(max-width:700px){
+  #seccion-pagos .haiku-checkin-grupo-identidad{align-items:flex-start;flex-direction:column;gap:2px}
+  #seccion-pagos .haiku-checkin-grupo-vinculo{font-size:10px}
+}
