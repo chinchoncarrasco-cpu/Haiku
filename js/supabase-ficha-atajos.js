@@ -30,17 +30,12 @@
         "ficha-pago-servicios": {
             destino: "servicios",
             fecha: "salida",
-            titulo: "Ir a Cobros Check-out"
+            titulo: "Ir a Cobros Check-out del día de salida"
         }
     });
 
     const cacheEstadias = new Map();
     let navegando = false;
-
-    function montoDesdeTexto(texto) {
-        const limpio = String(texto || "").replace(/[^0-9]/g, "");
-        return Number(limpio || 0);
-    }
 
     function prepararAtajos() {
         Object.entries(CONFIG).forEach(([id, config]) => {
@@ -48,8 +43,11 @@
             const cuadro = valor?.parentElement;
             if (!valor || !cuadro) return;
 
-            const esServicios = id === "ficha-pago-servicios";
-            const habilitado = !esServicios || montoDesdeTexto(valor.textContent) > 0;
+            // Todos los cuadros financieros funcionan como navegación.
+            // Servicios se mantiene activo incluso cuando marca $0, porque
+            // también sirve para revisar pagos ya realizados o el estado
+            // completo del Check-out en la fecha de salida.
+            const habilitado = true;
 
             cuadro.classList.toggle("haiku-ficha-atajo", habilitado);
             cuadro.classList.toggle("haiku-ficha-atajo-inactivo", !habilitado);
@@ -123,8 +121,10 @@
             }
 
             if (destino === "servicios") {
-                if (typeof cargarCobrosCheckout === "function") {
-                    cargarCobrosCheckout();
+                if (typeof window.haikuCargarCheckoutSupabase === "function") {
+                    await window.haikuCargarCheckoutSupabase();
+                } else if (typeof cargarCobrosCheckout === "function") {
+                    await Promise.resolve(cargarCobrosCheckout());
                 }
             }
         } catch (error) {
