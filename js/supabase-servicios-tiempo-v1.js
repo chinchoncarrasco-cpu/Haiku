@@ -93,6 +93,12 @@
         return listaServicios().find(s => String(s?.id || "") === String(id || ""));
     }
 
+    function fijarTexto(elemento, texto) {
+        const oculto = !texto;
+        if (elemento.textContent !== texto) elemento.textContent = texto;
+        if (elemento.hidden !== oculto) elemento.hidden = oculto;
+    }
+
     function aplicarNotificaciones() {
         document.querySelectorAll("#notificaciones-contenido .notificacion-reserva[data-servicio-id]")
             .forEach(item => {
@@ -106,9 +112,7 @@
                     item.appendChild(etiqueta);
                 }
 
-                const texto = textoTiempo(servicio);
-                etiqueta.textContent = texto;
-                etiqueta.hidden = !texto;
+                fijarTexto(etiqueta, textoTiempo(servicio));
             });
     }
 
@@ -127,8 +131,7 @@
                     ? (["cancelado", "cancelada", "no_show"].includes(estado) ? "Cancelada" : "Completada")
                     : textoTiempo(servicio);
 
-                badge.textContent = texto;
-                badge.hidden = !texto;
+                fijarTexto(badge, texto);
             });
     }
 
