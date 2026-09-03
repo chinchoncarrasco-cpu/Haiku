@@ -222,6 +222,7 @@ body:has(#revision-individual.activa[data-foto-cabana]) #revision-individual {
     #revision-individual.activa[data-foto-cabana] .revision-cabecera {
         min-height: 158px;
         padding: 17px 18px;
+        justify-content: flex-start !important;
         background-image:
             linear-gradient(
                 90deg,
