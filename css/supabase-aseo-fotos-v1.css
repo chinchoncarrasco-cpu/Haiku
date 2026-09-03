@@ -86,9 +86,9 @@
     background-position: center center !important;
     background-size: cover !important;
 
-    filter: blur(7px);
-    transform: scale(1.04);
-    opacity: .88;
+    filter: blur(2.5px) saturate(.96) contrast(.96);
+    transform: scale(1.025);
+    opacity: .98;
 }
 
 #seccion-aseo #aseo-resumen
@@ -104,8 +104,8 @@
         ),
         linear-gradient(
             145deg,
-            rgba(255, 255, 255, .66) 0%,
-            rgba(255, 255, 255, .80) 100%
+            rgba(255, 255, 255, .40) 0%,
+            rgba(255, 255, 255, .58) 100%
         );
 }
 
@@ -256,9 +256,9 @@ body:has(#aseo-express-individual.activa[data-foto-cabana])
 @media (max-width: 700px) {
     #seccion-aseo #aseo-resumen
     .aseo-resumen-cabana[data-aseo-express-cabana]::before {
-        filter: blur(6px);
-        transform: scale(1.05);
-        opacity: .86;
+        filter: blur(2px) saturate(.98) contrast(.97);
+        transform: scale(1.025);
+        opacity: .99;
     }
 
     #seccion-aseo #aseo-resumen
@@ -271,8 +271,8 @@ body:has(#aseo-express-individual.activa[data-foto-cabana])
             ),
             linear-gradient(
                 145deg,
-                rgba(255, 255, 255, .70) 0%,
-                rgba(255, 255, 255, .82) 100%
+                rgba(255, 255, 255, .36) 0%,
+                rgba(255, 255, 255, .56) 100%
             );
     }
 
