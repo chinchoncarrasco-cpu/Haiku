@@ -223,6 +223,7 @@ body:has(#revision-individual.activa[data-foto-cabana]) #revision-individual {
         min-height: 158px;
         padding: 17px 18px;
         justify-content: flex-start !important;
+        align-items: flex-start !important;
         background-image:
             linear-gradient(
                 90deg,
@@ -238,6 +239,8 @@ body:has(#revision-individual.activa[data-foto-cabana]) #revision-individual {
     #revision-individual.activa[data-foto-cabana] .revision-cabecera-info {
         flex-basis: 72%;
         max-width: 72%;
+        align-self: flex-start !important;
+        margin-left: 0 !important;
     }
 
     #revision-individual.activa[data-foto-cabana] #revision-nota-operativa:not(:empty) {
