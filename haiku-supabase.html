@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HAIKU · Supabase</title>
+    <title>Acceso interno</title>
     <link rel="icon" href="data:,">
     <style>
         html, body {
@@ -36,7 +36,7 @@
 <body>
     <div class="haiku-loader">
         <div>
-            <strong>HAIKU</strong>
+            <strong>ACCESO INTERNO</strong>
             <span>Preparando conexión segura…</span>
         </div>
     </div>
@@ -86,6 +86,66 @@
                 }
 
                 let html = await respuesta.text();
+
+                // Cortina de arranque: evita que document.write pinte la aplicación
+                // antes de que autenticación/privacidad hayan decidido qué mostrar.
+                const estiloArranquePrivado = `
+<style id="haiku-privacidad-arranque-style">
+    html.haiku-privacidad-arranque::before {
+        content: "";
+        position: fixed;
+        inset: 0;
+        z-index: 2147483647;
+        display: block;
+        background: #101511;
+        pointer-events: all;
+    }
+</style>`;
+
+                const scriptArranquePrivado =
+                    `<script>(function(){` +
+                    `var raiz=document.documentElement;` +
+                    `var terminado=false;` +
+                    `function liberar(){if(terminado)return;terminado=true;raiz.classList.remove('haiku-privacidad-arranque');}` +
+                    `function loginListo(){` +
+                        `var overlay=document.querySelector('.haiku-auth-overlay');` +
+                        `if(!overlay||overlay.hidden||window.haikuSesion)return false;` +
+                        `var estado=document.getElementById('haiku-auth-estado');` +
+                        `var texto=(estado&&estado.textContent||'').trim();` +
+                        `if(!texto)return false;` +
+                        `return !/comprobando\\s+sesión|validando\\s+acceso/i.test(texto);` +
+                    `}` +
+                    `function privacidadLista(){` +
+                        `try{` +
+                            `var api=window.HAIKU_PRIVACIDAD;` +
+                            `var estado=api&&typeof api.estado==='function'?api.estado():null;` +
+                            `return !!(estado&&(estado.modo!=='oculto'||estado.armado===true));` +
+                        `}catch(e){return false;}` +
+                    `}` +
+                    `function revisar(){` +
+                        `if(loginListo()||privacidadLista()){` +
+                            `requestAnimationFrame(function(){requestAnimationFrame(liberar);});` +
+                            `return;` +
+                        `}` +
+                        `setTimeout(revisar,16);` +
+                    `}` +
+                    `revisar();` +
+                    `})();<` + '/script>';
+
+                html = html.replace(
+                    '<html lang="es">',
+                    '<html lang="es" class="haiku-privacidad-arranque">'
+                );
+
+                html = html.replace(
+                    "</head>",
+                    `${estiloArranquePrivado}\n</head>`
+                );
+
+                html = html.replace(
+                    "<body>",
+                    `<body>\n${scriptArranquePrivado}`
+                );
 
                 html = html.replace(
                     'src="js/cabanas.js"',
@@ -192,7 +252,7 @@
                 document.body.innerHTML = `
                     <div class="haiku-loader">
                         <div>
-                            <strong>No fue posible iniciar HAIKU</strong>
+                            <strong>No fue posible iniciar</strong>
                             <span>
                                 Recarga la página. Si continúa, revisa la consola.
                             </span>
