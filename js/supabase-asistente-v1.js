@@ -1,7 +1,8 @@
 // ========================================
-// HAIKU · ASISTENTE FLOTANTE V8
+// HAIKU · ASISTENTE FLOTANTE V9
 // Texto + capturas -> Edge Function -> vista previa estructurada.
 // Reserva y abonos requieren confirmación humana y reutilizan RPC oficiales.
+// La lectura múltiple es sólo vista previa: no permite crear lotes todavía.
 // ========================================
 (() => {
     "use strict";
@@ -282,6 +283,11 @@
 
         const legado = preview?.pago;
         return legado?.detectado === true ? [legado] : [];
+    }
+
+    function reservasMultiplesDesdePreview(preview) {
+        if (!Array.isArray(preview?.reservas)) return [];
+        return preview.reservas.filter(item => item?.reserva && typeof item.reserva === "object");
     }
 
     function webpayDesdePago(p) {
@@ -784,7 +790,124 @@
         try { if (typeof generarCalendario === "function") generarCalendario(); } catch {}
     }
 
+    function renderizarPreviewMultiple(preview) {
+        ultimaPreview = preview;
+        const reservas = reservasMultiplesDesdePreview(preview);
+
+        const lote = document.createElement("article");
+        lote.className = "haiku-asistente-preview";
+
+        const cabecera = document.createElement("div");
+        cabecera.className = "haiku-asistente-preview-cabecera";
+        const titulo = document.createElement("div");
+        const marca = document.createElement("span");
+        marca.textContent = "MODO PRUEBA · NADA GUARDABLE";
+        const nombre = document.createElement("strong");
+        nombre.textContent = `${reservas.length} reservas detectadas`;
+        titulo.append(marca, nombre);
+
+        const confianza = document.createElement("span");
+        confianza.className = `haiku-asistente-confianza haiku-asistente-confianza--${preview?.confianza || "baja"}`;
+        confianza.textContent = `Confianza ${preview?.confianza || "baja"}`;
+        cabecera.append(titulo, confianza);
+        lote.appendChild(cabecera);
+
+        if (preview?.resumen) {
+            const resumen = document.createElement("p");
+            resumen.className = "haiku-asistente-preview-resumen";
+            resumen.textContent = preview.resumen;
+            lote.appendChild(resumen);
+        }
+
+        reservas.forEach((entrada, indice) => {
+            const r = entrada?.reserva || {};
+            const bloque = document.createElement("section");
+            bloque.className = "haiku-asistente-preview-observacion";
+
+            const encabezado = document.createElement("span");
+            encabezado.textContent = `RESERVA ${indice + 1} DE ${reservas.length}`;
+            const nombreReserva = document.createElement("p");
+            nombreReserva.textContent = `${r.titular_nombre || "Titular por revisar"}${r.cabana ? ` · CAB ${r.cabana}` : ""}`;
+            bloque.append(encabezado, nombreReserva);
+
+            if (entrada?.resumen) {
+                const resumenReserva = document.createElement("p");
+                resumenReserva.textContent = entrada.resumen;
+                bloque.appendChild(resumenReserva);
+            }
+
+            const datos = document.createElement("div");
+            datos.className = "haiku-asistente-preview-grid";
+            agregarDato(datos, "Tipo", etiquetaTipo(r.tipo_estadia));
+            agregarDato(datos, "Llegada", fechaVisible(r.fecha_llegada));
+            agregarDato(datos, "Salida", fechaVisible(r.fecha_salida));
+            agregarDato(datos, "Cabaña", r.cabana ? `CAB ${r.cabana}` : null);
+            agregarDato(datos, "Adultos", r.adultos);
+            agregarDato(datos, "Noches", r.noches);
+            agregarDato(datos, "ID Cloudbeds", r.cloudbeds_id);
+            agregarDato(datos, "Correo", r.correo);
+            agregarDato(datos, "Teléfono", r.telefono);
+            agregarDato(datos, "Fuente", r.fuente);
+            bloque.appendChild(datos);
+
+            const pagos = Array.isArray(entrada?.pagos)
+                ? entrada.pagos.filter(item => item && item.detectado !== false)
+                : [];
+            pagos.forEach((p, pagoIndice) => {
+                const pago = document.createElement("div");
+                pago.className = "haiku-asistente-preview-pago";
+                const tituloPago = document.createElement("strong");
+                tituloPago.textContent = pagos.length > 1
+                    ? `Pago ${pagoIndice + 1} de ${pagos.length}`
+                    : "Pago detectado";
+                const grid = document.createElement("div");
+                grid.className = "haiku-asistente-preview-grid";
+                agregarDato(grid, "Monto", moneda(p.monto, p.moneda));
+                agregarDato(grid, "Medio", p.medio);
+                agregarDato(grid, "Fecha", fechaVisible(p.fecha));
+                agregarDato(grid, "Glosa", p.glosa);
+                agregarDato(grid, "CodAut", p.codaut);
+                agregarDato(grid, "Folio", p.folio);
+                agregarDato(grid, "BOVTAR", p.bovtar);
+                pago.append(tituloPago, grid);
+                bloque.appendChild(pago);
+            });
+
+            if (Array.isArray(entrada?.acompanantes) && entrada.acompanantes.length) {
+                const nombres = entrada.acompanantes.map(item => {
+                    const n = item?.nombre || "Acompañante sin nombre";
+                    return item?.documento ? `${n} · ${item.documento}` : n;
+                });
+                agregarLista(bloque, "Acompañantes", nombres);
+            }
+
+            agregarLista(bloque, "Datos faltantes", entrada?.faltantes, "haiku-asistente-preview-lista--faltantes");
+            agregarLista(bloque, "Revisar", entrada?.advertencias, "haiku-asistente-preview-lista--alerta");
+            lote.appendChild(bloque);
+        });
+
+        const pie = document.createElement("div");
+        pie.className = "haiku-asistente-preview-pie";
+        const estado = document.createElement("span");
+        estado.textContent = "🔒 Modo lectura múltiple: ninguna reserva puede guardarse desde esta vista previa.";
+        const botonBloqueado = document.createElement("button");
+        botonBloqueado.type = "button";
+        botonBloqueado.disabled = true;
+        botonBloqueado.textContent = "Crear lote · próxima etapa";
+        pie.append(estado, botonBloqueado);
+        lote.appendChild(pie);
+
+        mensajes.appendChild(lote);
+        scrollFinal();
+        return lote;
+    }
+
     function renderizarPreview(preview) {
+        const reservasMultiples = reservasMultiplesDesdePreview(preview);
+        if (reservasMultiples.length > 1) {
+            return renderizarPreviewMultiple(preview);
+        }
+
         ultimaPreview = preview;
 
         const card = document.createElement("article");
@@ -1133,5 +1256,5 @@
     actualizarEnviar();
     mostrarSiCorresponde();
 
-    console.info("HAIKU · Asistente flotante V8 preparado.");
+    console.info("HAIKU · Asistente flotante V9 preparado.");
 })();
