@@ -267,7 +267,11 @@ Reglas:
 - Para Full Day usa fecha_llegada como la fecha única del Full Day y deja fecha_salida en null salvo que exista una salida explícita distinta.
 - Si una captura muestra un movimiento/pago claramente asociado al mismo huésped, extrae monto y sus metadatos. No confundas totales de reserva con pagos realizados.
 - Si varias capturas contienen información contradictoria, conserva el dato más explícito y describe el conflicto en advertencias.
-- La cabaña sólo debe informarse si es explícita o inequívoca. Si un código de habitación requiere interpretación, indícalo en advertencias.
+- La cabaña sólo debe informarse si es explícita o inequívoca.
+- En capturas de Cloudbeds, usa el campo "Asignado" para identificar la cabaña. Mapeo válido y cerrado: LC1=Cabaña 1, LC2=Cabaña 2, LC3=Cabaña 3, LC4=Cabaña 4, LC6=Cabaña 6, CD5=Cabaña 5, CD7=Cabaña 7, CD8=Cabaña 8, CD9=Cabaña 9, C10=Cabaña 10 y C11=Cabaña 11.
+- Cloudbeds puede añadir un sufijo entre paréntesis al código, por ejemplo LC6(1). Para identificar la cabaña ignora por completo ese sufijo: LC6(1)=Cabaña 6 y CD8(1)=Cabaña 8.
+- No infieras equivalencias para códigos distintos de ese listado. Si aparece un código desconocido o ilegible, usa cabana=null y agrégalo a advertencias.
+- Los códigos válidos anteriores se consideran una identificación inequívoca y no requieren advertencia sólo por aplicar este mapeo.
 - confianza="alta" sólo cuando identidad y fecha/tipo de estadía están claramente sustentados.
 - tipo_operacion="crear_reserva" sólo si la solicitud realmente pide preparar una nueva reserva; de lo contrario usa "desconocida".
 - resumen debe ser breve y útil para un recepcionista, sin afirmar que algo fue guardado.
