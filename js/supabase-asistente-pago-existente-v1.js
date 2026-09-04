@@ -193,10 +193,6 @@
         return bloque;
     }
 
-    function medioRpcPago(p) {
-        return pagoParaRpc(p)?.medio || null;
-    }
-
     function detectarDuplicados(candidato, pagos) {
         const existentes = Array.isArray(candidato?.pagos_recientes) ? candidato.pagos_recientes : [];
         const fuertes = [];
@@ -467,8 +463,8 @@
         const estado = agregarMensaje("asistente", "Analizando el pago y buscando su reserva…", "haiku-asistente-mensaje--procesando");
 
         try {
-            const { data, error } = await cliente.functions.invoke("haiku-asistente-reserva", {
-                body: { mensaje: texto, imagenes: [] }
+            const { data, error } = await cliente.functions.invoke("haiku-asistente-pago-existente", {
+                body: { mensaje: texto }
             });
             if (error) throw error;
             if (!data?.ok || !data?.preview) throw new Error(data?.error || "El asistente no devolvió una vista previa.");
