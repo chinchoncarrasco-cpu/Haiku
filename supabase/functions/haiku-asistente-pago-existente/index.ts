@@ -64,7 +64,7 @@ const esquemaEntrada = {
     confianza: { type: "string", enum: ["alta", "media", "baja"] },
     reserva: esquemaReservaReferencia,
     pagos: { type: "array", minItems: 1, maxItems: 10, items: esquemaPago },
-    acompanantes: { type: "array", maxItems: 0, items: { type: "object" } },
+    acompanantes: { type: "array", maxItems: 0, items: { type: "string" } },
     faltantes: { type: "array", maxItems: 20, items: { type: "string" } },
     advertencias: { type: "array", maxItems: 20, items: { type: "string" } },
   },
