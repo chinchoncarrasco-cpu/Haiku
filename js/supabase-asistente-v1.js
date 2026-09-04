@@ -290,6 +290,8 @@
             medioEtiqueta = "WebPay Crédito";
         }
 
+        if (!medioRpc) return null;
+
         const monto = Number(p.monto);
         const codaut = String(p.codaut || "").trim();
         const fecha = /^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))
