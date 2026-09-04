@@ -1,7 +1,7 @@
 // ========================================
-// HAIKU · ASISTENTE FLOTANTE V5
+// HAIKU · ASISTENTE FLOTANTE V6
 // Texto + capturas -> Edge Function -> vista previa estructurada.
-// Reserva y WebPay requieren confirmación humana y reutilizan RPC oficiales.
+// Reserva y abonos requieren confirmación humana y reutilizan RPC oficiales.
 // ========================================
 (() => {
     "use strict";
@@ -312,6 +312,34 @@
         };
     }
 
+    function transferenciaDesdePreview(preview) {
+        const p = preview?.pago || {};
+        if (p.detectado !== true) return null;
+
+        const medioTexto = normalizarClave(p.medio);
+        if (!medioTexto.includes("transferencia")) return null;
+
+        const monto = Number(p.monto);
+        const glosa = String(p.glosa || "").trim();
+        const fecha = /^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))
+            ? String(p.fecha)
+            : null;
+
+        return {
+            medioRpc: "transferencia",
+            medioEtiqueta: "Transferencia bancaria",
+            monto,
+            glosa,
+            fecha,
+            valido: Boolean(
+                Number.isFinite(monto) &&
+                monto > 0 &&
+                glosa &&
+                fecha
+            )
+        };
+    }
+
     function agregarDato(contenedor, etiqueta, valor) {
         if (valor === null || valor === undefined || valor === "") return;
         const fila = document.createElement("div");
@@ -357,10 +385,19 @@
 
         if (p.detectado === true) {
             const webpay = webpayDesdePreview(preview);
-            if (!webpay?.medioRpc) problemas.push("Por ahora el pago automático sólo admite WebPay Crédito o Débito explícito.");
-            if (!Number.isFinite(Number(p.monto)) || Number(p.monto) <= 0) problemas.push("Falta monto WebPay válido.");
-            if (!String(p.codaut || "").trim()) problemas.push("Falta COD.AUT del WebPay.");
-            if (!/^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))) problemas.push("Falta fecha válida del WebPay.");
+            const transferencia = transferenciaDesdePreview(preview);
+
+            if (!webpay && !transferencia) {
+                problemas.push("Por ahora el pago automático admite WebPay Crédito/Débito o Transferencia bancaria explícita.");
+            } else if (webpay) {
+                if (!Number.isFinite(Number(p.monto)) || Number(p.monto) <= 0) problemas.push("Falta monto WebPay válido.");
+                if (!String(p.codaut || "").trim()) problemas.push("Falta COD.AUT del WebPay.");
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))) problemas.push("Falta fecha válida del WebPay.");
+            } else if (transferencia) {
+                if (!Number.isFinite(Number(p.monto)) || Number(p.monto) <= 0) problemas.push("Falta monto de transferencia válido.");
+                if (!String(p.glosa || "").trim()) problemas.push("Falta Glosa de la transferencia.");
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))) problemas.push("Falta fecha válida de la transferencia.");
+            }
         }
 
         return problemas;
@@ -386,6 +423,7 @@
         const r = preview.reserva;
         const cabana = Number(r.cabana);
         const webpay = webpayDesdePreview(preview);
+        const transferencia = transferenciaDesdePreview(preview);
 
         const { data: disponibles, error: errorDisponibilidad } = await cliente.rpc(
             "haiku_cabanas_disponibles",
@@ -451,6 +489,53 @@
                 medio_pago: webpay.medioEtiqueta,
                 monto_pago: webpay.monto,
                 codaut: webpay.codaut
+            };
+        }
+
+        if (transferencia?.valido) {
+            if (!window.haikuTienePermiso?.("pagos.registrar")) {
+                throw new Error("Tu usuario no tiene permiso para registrar pagos.");
+            }
+            if (!window.haikuTienePermiso?.("pagos.verificar")) {
+                throw new Error("Tu usuario no tiene permiso para verificar pagos.");
+            }
+
+            const fechaPagoIso = new Date(`${transferencia.fecha}T12:00:00`).toISOString();
+            const { data, error } = await cliente.rpc(
+                "haiku_crear_reserva_con_transferencia",
+                {
+                    p_titular_nombre: r.titular_nombre,
+                    p_cabana_numero: cabana,
+                    p_fecha_ingreso: r.fecha_llegada,
+                    p_fecha_salida: r.fecha_salida,
+                    p_adultos: Math.max(0, Number(r.adultos ?? 1)),
+                    p_ninos: Math.max(0, Number(r.ninos ?? 0)),
+                    p_mascotas: Math.max(0, Number(r.mascotas ?? 0)),
+                    p_correo_contacto: r.correo || null,
+                    p_telefono_contacto: r.telefono || null,
+                    p_observaciones: r.observaciones || null,
+                    p_tarifas: {},
+                    p_acompanantes: nombresAcompanantes(preview),
+                    p_cloudbeds_id: String(r.cloudbeds_id).trim(),
+                    p_transferencia_monto: Math.round(transferencia.monto),
+                    p_transferencia_glosa: transferencia.glosa,
+                    p_transferencia_fecha_pago: fechaPagoIso
+                }
+            );
+
+            if (error) {
+                if (error?.code === "23505" || /cloudbeds_id|reservas_cloudbeds_id_uidx/i.test(error?.message || "")) {
+                    throw new Error("Esta reserva de Cloudbeds ya existe en Proyecto H.");
+                }
+                throw error;
+            }
+
+            return {
+                ...data,
+                pago_confirmado: true,
+                medio_pago: transferencia.medioEtiqueta,
+                monto_pago: transferencia.monto,
+                glosa: transferencia.glosa
             };
         }
 
@@ -598,9 +683,11 @@
 
         const problemas = problemasParaCrear(preview);
         const webpay = webpayDesdePreview(preview);
-        const requiereWebpay = p.detectado === true;
+        const transferencia = transferenciaDesdePreview(preview);
+        const pagoValido = Boolean(webpay?.valido || transferencia?.valido);
+        const requierePago = p.detectado === true;
         const tienePermisoReserva = window.haikuTienePermiso?.("reservas.crear") === true;
-        const tienePermisoPago = !requiereWebpay || (
+        const tienePermisoPago = !requierePago || (
             window.haikuTienePermiso?.("pagos.registrar") === true &&
             window.haikuTienePermiso?.("pagos.verificar") === true
         );
@@ -608,7 +695,7 @@
 
         botonCrear.disabled = !puedeCrear;
         botonCrear.textContent = puedeCrear
-            ? webpay?.valido
+            ? pagoValido
                 ? "Confirmar reserva + abono"
                 : "Confirmar y crear"
             : r.tipo_estadia === "full_day"
@@ -617,12 +704,12 @@
 
         if (problemas.length) botonCrear.title = problemas.join(" ");
         if (!tienePermisoReserva) botonCrear.title = "Tu usuario no tiene permiso para crear reservas.";
-        if (requiereWebpay && !tienePermisoPago) botonCrear.title = "Tu usuario no tiene permisos para registrar y verificar este WebPay.";
+        if (requierePago && !tienePermisoPago) botonCrear.title = "Tu usuario no tiene permisos para registrar y verificar este pago.";
 
         botonCrear.addEventListener("click", async () => {
             if (guardandoReserva || botonCrear.disabled) return;
 
-            const confirmacion = webpay?.valido
+            const confirmacion = pagoValido
                 ? "¿Confirmas crear 1 reserva y registrar 1 abono?"
                 : "¿Confirmas crear 1 reserva?";
 
@@ -632,7 +719,7 @@
             guardandoReserva = true;
             actualizarEnviar();
             botonCrear.disabled = true;
-            botonCrear.textContent = webpay?.valido
+            botonCrear.textContent = pagoValido
                 ? "Creando reserva + abono…"
                 : "Creando reserva…";
             estado.textContent = "Validando disponibilidad antes de guardar…";
@@ -646,7 +733,7 @@
                     const saldoTexto = Number.isFinite(Number(creada?.saldo_restante))
                         ? ` · saldo restante ${moneda(creada.saldo_restante, "CLP")}`
                         : "";
-                    estado.textContent = `✅ Reserva y WebPay guardados correctamente${creada?.codigo_haiku ? ` · ${creada.codigo_haiku}` : ""}${saldoTexto}.`;
+                    estado.textContent = `✅ Reserva y abono guardados correctamente${creada?.codigo_haiku ? ` · ${creada.codigo_haiku}` : ""}${saldoTexto}.`;
                     botonCrear.textContent = "Reserva + abono creados";
                     agregarMensaje(
                         "asistente",
@@ -838,5 +925,5 @@
     actualizarEnviar();
     mostrarSiCorresponde();
 
-    console.info("HAIKU · Asistente flotante V5 preparado.");
+    console.info("HAIKU · Asistente flotante V6 preparado.");
 })();
