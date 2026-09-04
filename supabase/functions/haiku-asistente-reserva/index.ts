@@ -157,6 +157,51 @@ function textoSalida(respuesta: any): string {
   return partes.join("\n").trim();
 }
 
+function numeroUso(valor: unknown): number {
+  const numero = Number(valor);
+  return Number.isFinite(numero) && numero > 0 ? numero : 0;
+}
+
+function usoRespuesta(respuesta: any, modelo: string) {
+  const usage = respuesta?.usage || {};
+  const inputTokens = numeroUso(usage?.input_tokens);
+  const cachedTokens = Math.min(
+    inputTokens,
+    numeroUso(usage?.input_tokens_details?.cached_tokens),
+  );
+  const outputTokens = numeroUso(usage?.output_tokens);
+  const reasoningTokens = numeroUso(usage?.output_tokens_details?.reasoning_tokens);
+  const totalTokens = numeroUso(usage?.total_tokens) || inputTokens + outputTokens;
+
+  // Tarifas públicas de GPT-5.4 mini en USD por millón de tokens.
+  // El costo se marca como estimado para no confundirlo con la facturación final.
+  const tarifas = /^gpt-5\.4-mini(?:$|-)/i.test(modelo)
+    ? { input: 0.75, cached_input: 0.075, output: 4.50 }
+    : null;
+
+  let costoUsdEstimado: number | null = null;
+  if (tarifas) {
+    const inputNoCacheado = Math.max(0, inputTokens - cachedTokens);
+    const costo = (
+      (inputNoCacheado * tarifas.input) +
+      (cachedTokens * tarifas.cached_input) +
+      (outputTokens * tarifas.output)
+    ) / 1_000_000;
+    costoUsdEstimado = Number(costo.toFixed(8));
+  }
+
+  return {
+    input_tokens: Math.round(inputTokens),
+    cached_input_tokens: Math.round(cachedTokens),
+    output_tokens: Math.round(outputTokens),
+    reasoning_tokens: Math.round(reasoningTokens),
+    total_tokens: Math.round(totalTokens),
+    costo_usd_estimado: costoUsdEstimado,
+    costo_estimado: costoUsdEstimado !== null,
+    tarifas_usd_millon: tarifas,
+  };
+}
+
 async function usuarioHaikuActivo(req: Request): Promise<boolean> {
   const authorization = req.headers.get("Authorization") || "";
   if (!authorization) return false;
@@ -343,11 +388,15 @@ Reglas:
     });
   }
 
+  const modeloReal = String(respuesta?.model || modelo);
+  const uso = usoRespuesta(respuesta, modeloReal);
+
   return respuestaJson(200, {
     ok: true,
     preview,
-    modelo: respuesta?.model || modelo,
+    modelo: modeloReal,
     response_id: respuesta?.id || null,
+    uso,
     guardado: false,
   });
 });
