@@ -1,5 +1,5 @@
 // ========================================
-// HAIKU · ASISTENTE FLOTANTE V6
+// HAIKU · ASISTENTE FLOTANTE V7
 // Texto + capturas -> Edge Function -> vista previa estructurada.
 // Reserva y abonos requieren confirmación humana y reutilizan RPC oficiales.
 // ========================================
@@ -274,9 +274,18 @@
             .trim();
     }
 
-    function webpayDesdePreview(preview) {
-        const p = preview?.pago || {};
-        if (p.detectado !== true) return null;
+    function pagosDesdePreview(preview) {
+        const lista = Array.isArray(preview?.pagos)
+            ? preview.pagos.filter(item => item && item.detectado !== false)
+            : [];
+        if (lista.length) return lista;
+
+        const legado = preview?.pago;
+        return legado?.detectado === true ? [legado] : [];
+    }
+
+    function webpayDesdePago(p) {
+        if (!p || p.detectado === false) return null;
 
         const medioTexto = normalizarClave(p.medio);
         let medioRpc = null;
@@ -305,7 +314,6 @@
             codaut,
             fecha,
             valido: Boolean(
-                medioRpc &&
                 Number.isFinite(monto) &&
                 monto > 0 &&
                 codaut &&
@@ -314,9 +322,8 @@
         };
     }
 
-    function transferenciaDesdePreview(preview) {
-        const p = preview?.pago || {};
-        if (p.detectado !== true) return null;
+    function transferenciaDesdePago(p) {
+        if (!p || p.detectado === false) return null;
 
         const medioTexto = normalizarClave(p.medio);
         if (!medioTexto.includes("transferencia")) return null;
@@ -372,7 +379,7 @@
 
     function problemasParaCrear(preview) {
         const r = preview?.reserva || {};
-        const p = preview?.pago || {};
+        const pagos = pagosDesdePreview(preview);
         const problemas = [];
 
         if (r.tipo_estadia !== "alojamiento") {
@@ -384,23 +391,25 @@
         if (!Number.isInteger(Number(r.cabana)) || Number(r.cabana) < 1) problemas.push("Falta cabaña válida.");
         if (!String(r.cloudbeds_id || "").trim()) problemas.push("Falta ID de reserva Cloudbeds.");
         if (preview?.confianza === "baja") problemas.push("La confianza de lectura es baja.");
+        if (pagos.length > 10) problemas.push("Se admiten como máximo 10 abonos por reserva.");
 
-        if (p.detectado === true) {
-            const webpay = webpayDesdePreview(preview);
-            const transferencia = transferenciaDesdePreview(preview);
+        pagos.forEach((p, indice) => {
+            const prefijo = pagos.length > 1 ? `Abono ${indice + 1}: ` : "";
+            const webpay = webpayDesdePago(p);
+            const transferencia = transferenciaDesdePago(p);
 
             if (!webpay && !transferencia) {
-                problemas.push("Por ahora el pago automático admite WebPay Crédito/Débito o Transferencia bancaria explícita.");
+                problemas.push(`${prefijo}por ahora el pago automático admite WebPay Crédito/Débito o Transferencia bancaria explícita.`);
             } else if (webpay) {
-                if (!Number.isFinite(Number(p.monto)) || Number(p.monto) <= 0) problemas.push("Falta monto WebPay válido.");
-                if (!String(p.codaut || "").trim()) problemas.push("Falta COD.AUT del WebPay.");
-                if (!/^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))) problemas.push("Falta fecha válida del WebPay.");
+                if (!Number.isFinite(Number(p.monto)) || Number(p.monto) <= 0) problemas.push(`${prefijo}falta monto WebPay válido.`);
+                if (!String(p.codaut || "").trim()) problemas.push(`${prefijo}falta COD.AUT del WebPay.`);
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))) problemas.push(`${prefijo}falta fecha válida del WebPay.`);
             } else if (transferencia) {
-                if (!Number.isFinite(Number(p.monto)) || Number(p.monto) <= 0) problemas.push("Falta monto de transferencia válido.");
-                if (!String(p.glosa || "").trim()) problemas.push("Falta Glosa de la transferencia.");
-                if (!/^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))) problemas.push("Falta fecha válida de la transferencia.");
+                if (!Number.isFinite(Number(p.monto)) || Number(p.monto) <= 0) problemas.push(`${prefijo}falta monto de transferencia válido.`);
+                if (!String(p.glosa || "").trim()) problemas.push(`${prefijo}falta Glosa de la transferencia.`);
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))) problemas.push(`${prefijo}falta fecha válida de la transferencia.`);
             }
-        }
+        });
 
         return problemas;
     }
@@ -410,6 +419,32 @@
         return preview.acompanantes
             .map(item => String(item?.nombre || "").trim())
             .filter(Boolean);
+    }
+
+    function pagoParaRpc(p) {
+        const webpay = webpayDesdePago(p);
+        if (webpay?.valido) {
+            return {
+                medio: webpay.medioRpc,
+                monto: Math.round(webpay.monto),
+                fecha_pago: new Date(`${webpay.fecha}T12:00:00`).toISOString(),
+                codaut: webpay.codaut,
+                glosa: null
+            };
+        }
+
+        const transferencia = transferenciaDesdePago(p);
+        if (transferencia?.valido) {
+            return {
+                medio: "transferencia",
+                monto: Math.round(transferencia.monto),
+                fecha_pago: new Date(`${transferencia.fecha}T12:00:00`).toISOString(),
+                codaut: null,
+                glosa: transferencia.glosa
+            };
+        }
+
+        return null;
     }
 
     async function crearReservaDesdePreview(preview) {
@@ -424,8 +459,7 @@
 
         const r = preview.reserva;
         const cabana = Number(r.cabana);
-        const webpay = webpayDesdePreview(preview);
-        const transferencia = transferenciaDesdePreview(preview);
+        const pagos = pagosDesdePreview(preview);
 
         const { data: disponibles, error: errorDisponibilidad } = await cliente.rpc(
             "haiku_cabanas_disponibles",
@@ -445,6 +479,58 @@
         if (!disponible) {
             throw new Error(`CAB ${cabana} ya no está disponible para ese rango.`);
         }
+
+        if (pagos.length > 1) {
+            if (!window.haikuTienePermiso?.("pagos.registrar")) {
+                throw new Error("Tu usuario no tiene permiso para registrar pagos.");
+            }
+            if (!window.haikuTienePermiso?.("pagos.verificar")) {
+                throw new Error("Tu usuario no tiene permiso para verificar pagos.");
+            }
+
+            const pagosRpc = pagos.map(pagoParaRpc);
+            if (pagosRpc.some(item => !item)) {
+                throw new Error("Uno de los abonos no tiene un formato automático válido.");
+            }
+
+            const { data, error } = await cliente.rpc(
+                "haiku_crear_reserva_con_abonos",
+                {
+                    p_titular_nombre: r.titular_nombre,
+                    p_cabana_numero: cabana,
+                    p_fecha_ingreso: r.fecha_llegada,
+                    p_fecha_salida: r.fecha_salida,
+                    p_adultos: Math.max(0, Number(r.adultos ?? 1)),
+                    p_ninos: Math.max(0, Number(r.ninos ?? 0)),
+                    p_mascotas: Math.max(0, Number(r.mascotas ?? 0)),
+                    p_correo_contacto: r.correo || null,
+                    p_telefono_contacto: r.telefono || null,
+                    p_observaciones: r.observaciones || null,
+                    p_tarifas: {},
+                    p_acompanantes: nombresAcompanantes(preview),
+                    p_cloudbeds_id: String(r.cloudbeds_id).trim(),
+                    p_pagos: pagosRpc
+                }
+            );
+
+            if (error) {
+                if (error?.code === "23505" || /cloudbeds_id|reservas_cloudbeds_id_uidx/i.test(error?.message || "")) {
+                    throw new Error("Esta reserva de Cloudbeds ya existe en Proyecto H.");
+                }
+                throw error;
+            }
+
+            return {
+                ...data,
+                pago_confirmado: true,
+                cantidad_pagos: pagos.length,
+                monto_pago: pagos.reduce((total, p) => total + Number(p?.monto || 0), 0)
+            };
+        }
+
+        const pagoUnico = pagos[0] || null;
+        const webpay = webpayDesdePago(pagoUnico);
+        const transferencia = transferenciaDesdePago(pagoUnico);
 
         if (webpay?.valido) {
             if (!window.haikuTienePermiso?.("pagos.registrar")) {
@@ -488,6 +574,7 @@
             return {
                 ...data,
                 pago_confirmado: true,
+                cantidad_pagos: 1,
                 medio_pago: webpay.medioEtiqueta,
                 monto_pago: webpay.monto,
                 codaut: webpay.codaut
@@ -535,6 +622,7 @@
             return {
                 ...data,
                 pago_confirmado: true,
+                cantidad_pagos: 1,
                 medio_pago: transferencia.medioEtiqueta,
                 monto_pago: transferencia.monto,
                 glosa: transferencia.glosa
@@ -646,12 +734,14 @@
             card.appendChild(obs);
         }
 
-        const p = preview?.pago || {};
-        if (p.detectado) {
+        const pagos = pagosDesdePreview(preview);
+        pagos.forEach((p, indice) => {
             const pago = document.createElement("div");
             pago.className = "haiku-asistente-preview-pago";
             const encabezado = document.createElement("strong");
-            encabezado.textContent = "Pago detectado";
+            encabezado.textContent = pagos.length > 1
+                ? `Pago ${indice + 1} de ${pagos.length}`
+                : "Pago detectado";
             const grid = document.createElement("div");
             grid.className = "haiku-asistente-preview-grid";
             agregarDato(grid, "Monto", moneda(p.monto, p.moneda));
@@ -663,7 +753,7 @@
             agregarDato(grid, "BOVTAR", p.bovtar);
             pago.append(encabezado, grid);
             card.appendChild(pago);
-        }
+        });
 
         if (Array.isArray(preview?.acompanantes) && preview.acompanantes.length) {
             const nombres = preview.acompanantes.map(item => {
@@ -684,10 +774,10 @@
         botonCrear.type = "button";
 
         const problemas = problemasParaCrear(preview);
-        const webpay = webpayDesdePreview(preview);
-        const transferencia = transferenciaDesdePreview(preview);
-        const pagoValido = Boolean(webpay?.valido || transferencia?.valido);
-        const requierePago = p.detectado === true;
+        const cantidadPagos = pagos.length;
+        const pagosValidos = pagos.every(p => webpayDesdePago(p)?.valido || transferenciaDesdePago(p)?.valido);
+        const pagoValido = cantidadPagos > 0 && pagosValidos;
+        const requierePago = cantidadPagos > 0;
         const tienePermisoReserva = window.haikuTienePermiso?.("reservas.crear") === true;
         const tienePermisoPago = !requierePago || (
             window.haikuTienePermiso?.("pagos.registrar") === true &&
@@ -698,7 +788,7 @@
         botonCrear.disabled = !puedeCrear;
         botonCrear.textContent = puedeCrear
             ? pagoValido
-                ? "Confirmar reserva + abono"
+                ? `Confirmar reserva + ${cantidadPagos} ${cantidadPagos === 1 ? "abono" : "abonos"}`
                 : "Confirmar y crear"
             : r.tipo_estadia === "full_day"
                 ? "Full Day · próxima etapa"
@@ -712,7 +802,7 @@
             if (guardandoReserva || botonCrear.disabled) return;
 
             const confirmacion = pagoValido
-                ? "¿Confirmas crear 1 reserva y registrar 1 abono?"
+                ? `¿Confirmas crear 1 reserva y registrar ${cantidadPagos} ${cantidadPagos === 1 ? "abono" : "abonos"}?`
                 : "¿Confirmas crear 1 reserva?";
 
             if (!window.confirm(confirmacion)) return;
@@ -722,7 +812,7 @@
             actualizarEnviar();
             botonCrear.disabled = true;
             botonCrear.textContent = pagoValido
-                ? "Creando reserva + abono…"
+                ? `Creando reserva + ${cantidadPagos} ${cantidadPagos === 1 ? "abono" : "abonos"}…`
                 : "Creando reserva…";
             estado.textContent = "Validando disponibilidad antes de guardar…";
 
@@ -731,15 +821,19 @@
                 await refrescarDespuesDeCrear();
 
                 if (creada?.pago_confirmado) {
-                    marca.textContent = "RESERVA + ABONO CREADOS";
+                    const cantidadGuardada = Math.max(1, Number(creada?.cantidad_pagos || cantidadPagos || 1));
+                    const palabraAbono = cantidadGuardada === 1 ? "abono" : "abonos";
+                    marca.textContent = cantidadGuardada === 1
+                        ? "RESERVA + ABONO CREADOS"
+                        : `RESERVA + ${cantidadGuardada} ABONOS CREADOS`;
                     const saldoTexto = Number.isFinite(Number(creada?.saldo_restante))
                         ? ` · saldo restante ${moneda(creada.saldo_restante, "CLP")}`
                         : "";
-                    estado.textContent = `✅ Reserva y abono guardados correctamente${creada?.codigo_haiku ? ` · ${creada.codigo_haiku}` : ""}${saldoTexto}.`;
-                    botonCrear.textContent = "Reserva + abono creados";
+                    estado.textContent = `✅ Reserva y ${cantidadGuardada} ${palabraAbono} guardados correctamente${creada?.codigo_haiku ? ` · ${creada.codigo_haiku}` : ""}${saldoTexto}.`;
+                    botonCrear.textContent = `Reserva + ${cantidadGuardada} ${palabraAbono} creados`;
                     agregarMensaje(
                         "asistente",
-                        `Reserva de ${r.titular_nombre} creada en CAB ${r.cabana} y abono ${moneda(creada.monto_pago, "CLP")} confirmado.`
+                        `Reserva de ${r.titular_nombre} creada en CAB ${r.cabana} y ${cantidadGuardada} ${palabraAbono} por ${moneda(creada.monto_pago, "CLP")} confirmados.`
                     );
                 } else {
                     marca.textContent = "RESERVA CREADA";
@@ -881,8 +975,6 @@
         const imagenes = imagenesDesdePortapapeles(evento);
         if (!imagenes.length) return;
 
-        // Una captura en el portapapeles se convierte en adjunto.
-        // Si sólo hay texto, el navegador conserva el pegado normal.
         evento.preventDefault();
         incorporarArchivos(imagenes);
     });
@@ -927,5 +1019,5 @@
     actualizarEnviar();
     mostrarSiCorresponde();
 
-    console.info("HAIKU · Asistente flotante V6 preparado.");
+    console.info("HAIKU · Asistente flotante V7 preparado.");
 })();
