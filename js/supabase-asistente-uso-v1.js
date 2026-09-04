@@ -249,21 +249,27 @@
         cliente = window.haikuSupabase;
         const functionsClient = cliente?.functions;
         if (!functionsClient || typeof functionsClient.invoke !== "function") return false;
-        if (functionsClient.__proyectoHUsoParcheado) {
+
+        // Supabase puede entregar una instancia nueva de FunctionsClient al acceder
+        // a cliente.functions. Por eso se parchea el prototipo y no sólo una instancia.
+        const prototipo = Object.getPrototypeOf(functionsClient);
+        if (!prototipo || typeof prototipo.invoke !== "function") return false;
+
+        if (prototipo.__proyectoHUsoParcheado) {
             parcheAplicado = true;
             return true;
         }
 
-        const invokeOriginal = functionsClient.invoke.bind(functionsClient);
-        functionsClient.invoke = async function(nombre, opciones) {
-            const resultado = await invokeOriginal(nombre, opciones);
+        const invokeOriginal = prototipo.invoke;
+        prototipo.invoke = async function(nombre, opciones) {
+            const resultado = await invokeOriginal.call(this, nombre, opciones);
             if (nombre === SLUG && resultado?.data?.ok && resultado.data?.uso) {
                 registrarUso(resultado.data);
             }
             return resultado;
         };
 
-        Object.defineProperty(functionsClient, "__proyectoHUsoParcheado", {
+        Object.defineProperty(prototipo, "__proyectoHUsoParcheado", {
             value: true,
             configurable: false,
             enumerable: false,
