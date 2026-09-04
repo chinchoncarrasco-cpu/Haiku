@@ -361,12 +361,16 @@
         const medioTexto = normalizarClave(p.medio);
         if (medioTexto.includes("webpay") || !medioTexto.includes("tarjeta")) return null;
 
+        const tieneDebito = medioTexto.includes("debito");
+        const tieneCredito = medioTexto.includes("credito");
+        if (tieneDebito && tieneCredito) return null;
+
         let medioRpc = null;
         let medioEtiqueta = null;
-        if (medioTexto.includes("debito")) {
+        if (tieneDebito) {
             medioRpc = "tarjeta_debito";
             medioEtiqueta = "Tarjeta Débito";
-        } else if (medioTexto.includes("credito")) {
+        } else if (tieneCredito) {
             medioRpc = "tarjeta_credito";
             medioEtiqueta = "Tarjeta Crédito";
         }
