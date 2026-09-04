@@ -1,7 +1,7 @@
 // ========================================
-// HAIKU · ASISTENTE FLOTANTE V2
+// HAIKU · ASISTENTE FLOTANTE V3
 // Texto + capturas -> Edge Function -> vista previa estructurada.
-// Esta fase NO crea ni modifica reservas.
+// La creación requiere confirmación humana y reutiliza la RPC oficial.
 // ========================================
 (() => {
     "use strict";
@@ -17,6 +17,7 @@
 
     const adjuntos = [];
     let procesando = false;
+    let guardandoReserva = false;
     let ultimaPreview = null;
 
     const root = document.createElement("div");
@@ -34,7 +35,7 @@
 
             <div class="haiku-asistente-mensajes" id="haiku-asistente-mensajes" aria-live="polite">
                 <div class="haiku-asistente-mensaje haiku-asistente-mensaje--asistente">
-                    Envíame capturas y dime qué necesitas hacer. Leeré los datos y te mostraré una vista previa antes de permitir cualquier cambio.
+                    Envíame capturas y dime qué necesitas hacer. Leeré los datos y te mostraré una vista previa antes de cualquier cambio.
                 </div>
             </div>
 
@@ -54,7 +55,7 @@
                 </div>
 
                 <div class="haiku-asistente-aviso">
-                    Vista previa segura: puedes adjuntar imágenes o pegar capturas con Ctrl+V dentro del cuadro de texto. En esta etapa el asistente puede leerlas, pero no puede crear ni modificar reservas.
+                    Vista previa segura: puedes adjuntar imágenes o pegar capturas con Ctrl+V. Una reserva sólo se crea después de pulsar “Confirmar y crear” y aceptar la confirmación final.
                 </div>
 
                 <input id="haiku-asistente-archivos" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden>
@@ -143,7 +144,7 @@
             quitar.textContent = "×";
             quitar.setAttribute("aria-label", `Quitar ${img.alt}`);
             quitar.addEventListener("click", () => {
-                if (procesando) return;
+                if (procesando || guardandoReserva) return;
                 const [eliminado] = adjuntos.splice(indice, 1);
                 if (eliminado) liberarAdjunto(eliminado);
                 renderizarAdjuntos();
@@ -164,9 +165,9 @@
 
     function actualizarEnviar() {
         const vacio = !campo.value.trim() && adjuntos.length === 0;
-        enviar.disabled = procesando || vacio;
-        adjuntar.disabled = procesando;
-        campo.disabled = procesando;
+        enviar.disabled = procesando || guardandoReserva || vacio;
+        adjuntar.disabled = procesando || guardandoReserva;
+        campo.disabled = procesando || guardandoReserva;
         enviar.textContent = procesando ? "Analizando…" : "Enviar";
     }
 
@@ -175,7 +176,7 @@
     }
 
     function incorporarArchivos(files) {
-        if (procesando) return;
+        if (procesando || guardandoReserva) return;
         let omitidos = 0;
 
         [...files].forEach(file => {
@@ -291,6 +292,106 @@
         contenedor.appendChild(bloque);
     }
 
+    function problemasParaCrear(preview) {
+        const r = preview?.reserva || {};
+        const problemas = [];
+
+        if (r.tipo_estadia !== "alojamiento") {
+            problemas.push("Por ahora el botón sólo crea reservas de alojamiento.");
+        }
+        if (!r.titular_nombre) problemas.push("Falta titular.");
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(r.fecha_llegada || ""))) problemas.push("Falta fecha de llegada válida.");
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(String(r.fecha_salida || ""))) problemas.push("Falta fecha de salida válida.");
+        if (!Number.isInteger(Number(r.cabana)) || Number(r.cabana) < 1) problemas.push("Falta cabaña válida.");
+        if (!String(r.cloudbeds_id || "").trim()) problemas.push("Falta ID de reserva Cloudbeds.");
+        if (preview?.confianza === "baja") problemas.push("La confianza de lectura es baja.");
+
+        return problemas;
+    }
+
+    function nombresAcompanantes(preview) {
+        if (!Array.isArray(preview?.acompanantes)) return [];
+        return preview.acompanantes
+            .map(item => String(item?.nombre || "").trim())
+            .filter(Boolean);
+    }
+
+    async function crearReservaDesdePreview(preview) {
+        if (!window.haikuTienePermiso?.("reservas.crear")) {
+            throw new Error("Tu usuario no tiene permiso para crear reservas.");
+        }
+
+        const problemas = problemasParaCrear(preview);
+        if (problemas.length) {
+            throw new Error(problemas.join(" "));
+        }
+
+        const r = preview.reserva;
+        const cabana = Number(r.cabana);
+
+        const { data: disponibles, error: errorDisponibilidad } = await cliente.rpc(
+            "haiku_cabanas_disponibles",
+            {
+                p_fecha_ingreso: r.fecha_llegada,
+                p_fecha_salida: r.fecha_salida,
+                p_tipo_estadia: "alojamiento"
+            }
+        );
+
+        if (errorDisponibilidad) throw errorDisponibilidad;
+
+        const disponible = (disponibles || []).some(
+            item => Number(item.numero) === cabana
+        );
+
+        if (!disponible) {
+            throw new Error(`CAB ${cabana} ya no está disponible para ese rango.`);
+        }
+
+        const { data, error } = await cliente.rpc(
+            "haiku_crear_reserva",
+            {
+                p_titular_nombre: r.titular_nombre,
+                p_cabana_numero: cabana,
+                p_fecha_ingreso: r.fecha_llegada,
+                p_fecha_salida: r.fecha_salida,
+                p_adultos: Math.max(0, Number(r.adultos ?? 1)),
+                p_ninos: Math.max(0, Number(r.ninos ?? 0)),
+                p_mascotas: Math.max(0, Number(r.mascotas ?? 0)),
+                p_correo_contacto: r.correo || null,
+                p_telefono_contacto: r.telefono || null,
+                p_rut: null,
+                p_observaciones: r.observaciones || null,
+                p_tarifas: {},
+                p_acompanantes: nombresAcompanantes(preview),
+                p_tipo_estadia: "alojamiento",
+                p_cloudbeds_id: String(r.cloudbeds_id).trim()
+            }
+        );
+
+        if (error) {
+            if (error?.code === "23505" || /cloudbeds_id|reservas_cloudbeds_id_uidx/i.test(error?.message || "")) {
+                throw new Error("Esta reserva de Cloudbeds ya existe en Proyecto H.");
+            }
+            throw error;
+        }
+
+        return data;
+    }
+
+    async function refrescarDespuesDeCrear() {
+        try {
+            if (typeof window.haikuSincronizarReservasSupabase === "function") {
+                await window.haikuSincronizarReservasSupabase();
+            }
+        } catch (error) {
+            console.warn("HAIKU · Asistente: reserva creada, pero falló sincronización visual:", error);
+        }
+
+        try { await window.HAIKU_OPERACION_RESUMEN_FIX_V1?.refrescar?.(); } catch {}
+        try { if (typeof generarCalendario === "function") generarCalendario(); } catch {}
+    }
+
     function renderizarPreview(preview) {
         ultimaPreview = preview;
 
@@ -331,6 +432,7 @@
         agregarDato(datos, "Mascotas", r.mascotas);
         agregarDato(datos, "Noches", r.noches);
         agregarDato(datos, "Documento", r.documento);
+        agregarDato(datos, "ID Cloudbeds", r.cloudbeds_id);
         agregarDato(datos, "Nacionalidad", r.nacionalidad);
         agregarDato(datos, "Correo", r.correo);
         agregarDato(datos, "Teléfono", r.telefono);
@@ -382,12 +484,77 @@
         const pie = document.createElement("div");
         pie.className = "haiku-asistente-preview-pie";
         const estado = document.createElement("span");
-        estado.textContent = "🔒 La IA sólo leyó los datos. Supabase no fue modificado.";
-        const botonFuturo = document.createElement("button");
-        botonFuturo.type = "button";
-        botonFuturo.disabled = true;
-        botonFuturo.textContent = "Crear reserva · próxima etapa";
-        pie.append(estado, botonFuturo);
+        estado.textContent = "🔒 Nada guardado todavía.";
+        const botonCrear = document.createElement("button");
+        botonCrear.type = "button";
+
+        const problemas = problemasParaCrear(preview);
+        const tienePermiso = window.haikuTienePermiso?.("reservas.crear") === true;
+        const puedeCrear = problemas.length === 0 && tienePermiso;
+
+        botonCrear.disabled = !puedeCrear;
+        botonCrear.textContent = puedeCrear
+            ? "Confirmar y crear"
+            : r.tipo_estadia === "full_day"
+                ? "Full Day · próxima etapa"
+                : "Crear reserva · revisar datos";
+        if (problemas.length) botonCrear.title = problemas.join(" ");
+        if (!tienePermiso) botonCrear.title = "Tu usuario no tiene permiso para crear reservas.";
+
+        botonCrear.addEventListener("click", async () => {
+            if (guardandoReserva || botonCrear.disabled) return;
+
+            const confirmacion = [
+                "CONFIRMAR CREACIÓN DE RESERVA",
+                "",
+                `${r.titular_nombre}`,
+                `CAB ${r.cabana}`,
+                `${fechaVisible(r.fecha_llegada)} → ${fechaVisible(r.fecha_salida)}`,
+                `${Number(r.adultos ?? 1)} adulto(s)`,
+                `ID Cloudbeds: ${r.cloudbeds_id}`,
+                "",
+                "Se usarán las tarifas catálogo configuradas en Proyecto H para cada noche.",
+                "La reserva se guardará sólo si la cabaña sigue disponible.",
+                "",
+                "¿Confirmas crearla?"
+            ].join("\n");
+
+            if (!window.confirm(confirmacion)) return;
+
+            const textoOriginal = botonCrear.textContent;
+            guardandoReserva = true;
+            actualizarEnviar();
+            botonCrear.disabled = true;
+            botonCrear.textContent = "Creando reserva…";
+            estado.textContent = "Validando disponibilidad antes de guardar…";
+
+            try {
+                const creada = await crearReservaDesdePreview(preview);
+                await refrescarDespuesDeCrear();
+
+                marca.textContent = "RESERVA CREADA";
+                estado.textContent = `✅ Reserva creada en Proyecto H${creada?.codigo_haiku ? ` · ${creada.codigo_haiku}` : ""}.`;
+                botonCrear.textContent = "Reserva creada";
+                botonCrear.disabled = true;
+                card.dataset.haikuReservaCreada = "1";
+
+                agregarMensaje(
+                    "asistente",
+                    `Reserva de ${r.titular_nombre} creada correctamente en CAB ${r.cabana}.`
+                );
+            } catch (error) {
+                console.error("HAIKU · Asistente no pudo crear reserva:", error);
+                estado.textContent = `⚠️ No se guardó la reserva: ${error?.message || "error desconocido"}`;
+                botonCrear.textContent = textoOriginal;
+                botonCrear.disabled = false;
+            } finally {
+                guardandoReserva = false;
+                actualizarEnviar();
+                scrollFinal();
+            }
+        });
+
+        pie.append(estado, botonCrear);
         card.appendChild(pie);
 
         mensajes.appendChild(card);
@@ -430,7 +597,7 @@
     }
 
     async function enviarMensaje() {
-        if (procesando) return;
+        if (procesando || guardandoReserva) return;
 
         const texto = campo.value.trim();
         if (!texto && adjuntos.length === 0) return;
@@ -493,12 +660,12 @@
     boton.addEventListener("click", alternarPanel);
     cerrar.addEventListener("click", cerrarPanel);
     adjuntar.addEventListener("click", () => {
-        if (!procesando) archivosInput.click();
+        if (!procesando && !guardandoReserva) archivosInput.click();
     });
     archivosInput.addEventListener("change", () => incorporarArchivos(archivosInput.files || []));
     campo.addEventListener("input", actualizarEnviar);
     campo.addEventListener("paste", evento => {
-        if (procesando) return;
+        if (procesando || guardandoReserva) return;
 
         const imagenes = imagenesDesdePortapapeles(evento);
         if (!imagenes.length) return;
@@ -537,7 +704,7 @@
         abrir: abrirPanel,
         cerrar: cerrarPanel,
         visible: () => !root.hidden,
-        procesando: () => procesando,
+        procesando: () => procesando || guardandoReserva,
         ultimaPreview: () => ultimaPreview,
         adjuntos: () => adjuntos.map(item => ({
             nombre: item.file.name,
@@ -549,5 +716,5 @@
     actualizarEnviar();
     mostrarSiCorresponde();
 
-    console.info("HAIKU · Asistente flotante V2 preparado.");
+    console.info("HAIKU · Asistente flotante V3 preparado.");
 })();
