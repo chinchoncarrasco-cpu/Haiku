@@ -1,5 +1,5 @@
 // ========================================
-// HAIKU · ASISTENTE FLOTANTE V10
+// HAIKU · ASISTENTE FLOTANTE V11
 // Texto + capturas -> Edge Function -> vista previa estructurada.
 // Reserva y abonos requieren confirmación humana y reutilizan RPC oficiales.
 // Los lotes de 2 a 11 reservas se crean de forma atómica.
@@ -253,11 +253,44 @@
     }
 
     function moneda(valor, monedaCodigo = "CLP") {
-        if (!Number.isFinite(Number(valor))) return "—";
+        if (valor === null || valor === undefined || valor === "" || !Number.isFinite(Number(valor))) return "—";
         if (monedaCodigo === "CLP") {
             return `$${Math.round(Number(valor)).toLocaleString("es-CL")}`;
         }
         return `${Number(valor).toLocaleString("es-CL")} ${monedaCodigo || ""}`.trim();
+    }
+
+    function enteroOpcional(valor) {
+        if (valor === null || valor === undefined || valor === "") return null;
+        const numero = Number(valor);
+        return Number.isInteger(numero) ? numero : NaN;
+    }
+
+    function tarifasDesdeReserva(r) {
+        const total = enteroOpcional(r?.monto_total);
+        const productos = enteroOpcional(r?.productos_adicionales);
+        const ingreso = String(r?.fecha_llegada || "");
+        const salida = String(r?.fecha_salida || "");
+
+        if (!Number.isInteger(total) || total <= 0) return {};
+        if (Number.isInteger(productos) && productos > 0) return {};
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(ingreso) || !/^\d{4}-\d{2}-\d{2}$/.test(salida)) return {};
+
+        const inicioMs = Date.parse(`${ingreso}T00:00:00Z`);
+        const salidaMs = Date.parse(`${salida}T00:00:00Z`);
+        const noches = Math.round((salidaMs - inicioMs) / 86400000);
+        if (!Number.isInteger(noches) || noches <= 0) return {};
+
+        const base = Math.floor(total / noches);
+        const resto = total - (base * noches);
+        if (base <= 0) return {};
+
+        const tarifas = {};
+        for (let i = 0; i < noches; i++) {
+            const fecha = new Date(inicioMs + (i * 86400000)).toISOString().slice(0, 10);
+            tarifas[fecha] = base + (i < resto ? 1 : 0);
+        }
+        return tarifas;
     }
 
     function etiquetaTipo(tipo) {
@@ -453,6 +486,43 @@
         contenedor.appendChild(bloque);
     }
 
+    function problemasFinancieros(r, pagos) {
+        const problemas = [];
+        const total = enteroOpcional(r?.monto_total);
+        const pagado = enteroOpcional(r?.monto_pagado);
+        const saldo = enteroOpcional(r?.saldo_pendiente);
+        const adicionales = enteroOpcional(r?.productos_adicionales);
+
+        if (Number.isNaN(total)) problemas.push("Monto Total de Cloudbeds inválido.");
+        if (Number.isNaN(pagado)) problemas.push("Monto pagado de Cloudbeds inválido.");
+        if (Number.isNaN(saldo)) problemas.push("Saldo pendiente de Cloudbeds inválido.");
+        if (Number.isNaN(adicionales)) problemas.push("Productos adicionales de Cloudbeds inválidos.");
+
+        if (Number.isInteger(total) && total <= 0) problemas.push("Monto Total de Cloudbeds debe ser mayor que cero.");
+        if (Number.isInteger(adicionales) && adicionales > 0) {
+            problemas.push("Cloudbeds incluye productos adicionales; revisar antes de usar el Monto Total como alojamiento.");
+        }
+
+        if (Number.isInteger(total) && Number.isInteger(pagado) && Number.isInteger(saldo) && total - pagado !== saldo) {
+            problemas.push("Monto Total, Monto pagado y Saldo pendiente de Cloudbeds no cuadran entre sí.");
+        }
+
+        const sumaPagos = pagos.reduce((suma, pago) => {
+            const monto = Number(pago?.monto);
+            return suma + (Number.isFinite(monto) && monto > 0 ? Math.round(monto) : 0);
+        }, 0);
+
+        if (Number.isInteger(pagado) && sumaPagos !== pagado) {
+            problemas.push(`Los abonos detectados suman ${moneda(sumaPagos, "CLP")}, pero Cloudbeds muestra Monto pagado ${moneda(pagado, "CLP")}.`);
+        }
+
+        if (Number.isInteger(total) && sumaPagos > total) {
+            problemas.push("Los abonos detectados superan el Monto Total de Cloudbeds.");
+        }
+
+        return problemas;
+    }
+
     function problemasParaCrear(preview) {
         const r = preview?.reserva || {};
         const pagos = pagosDesdePreview(preview);
@@ -468,6 +538,8 @@
         if (!String(r.cloudbeds_id || "").trim()) problemas.push("Falta ID de reserva Cloudbeds.");
         if (preview?.confianza === "baja") problemas.push("La confianza de lectura es baja.");
         if (pagos.length > 10) problemas.push("Se admiten como máximo 10 abonos por reserva.");
+
+        problemas.push(...problemasFinancieros(r, pagos));
 
         pagos.forEach((p, indice) => {
             const prefijo = pagos.length > 1 ? `Abono ${indice + 1}: ` : "";
@@ -641,7 +713,7 @@
             correo_contacto: r.correo || null,
             telefono_contacto: r.telefono || null,
             observaciones: r.observaciones || null,
-            tarifas: {},
+            tarifas: tarifasDesdeReserva(r),
             acompanantes: nombresAcompanantes(individual),
             cloudbeds_id: String(r.cloudbeds_id || "").trim(),
             pagos: pagosRpc
@@ -702,6 +774,7 @@
         const r = preview.reserva;
         const cabana = Number(r.cabana);
         const pagos = pagosDesdePreview(preview);
+        const tarifas = tarifasDesdeReserva(r);
 
         const { data: disponibles, error: errorDisponibilidad } = await cliente.rpc(
             "haiku_cabanas_disponibles",
@@ -755,7 +828,7 @@
                     p_correo_contacto: r.correo || null,
                     p_telefono_contacto: r.telefono || null,
                     p_observaciones: r.observaciones || null,
-                    p_tarifas: {},
+                    p_tarifas: tarifas,
                     p_acompanantes: nombresAcompanantes(preview),
                     p_cloudbeds_id: String(r.cloudbeds_id).trim(),
                     p_pagos: pagosRpc
@@ -799,7 +872,7 @@
                     p_correo_contacto: r.correo || null,
                     p_telefono_contacto: r.telefono || null,
                     p_observaciones: r.observaciones || null,
-                    p_tarifas: {},
+                    p_tarifas: tarifas,
                     p_acompanantes: nombresAcompanantes(preview),
                     p_cloudbeds_id: String(r.cloudbeds_id).trim(),
                     p_webpay_monto: Math.round(webpay.monto),
@@ -848,7 +921,7 @@
                     p_correo_contacto: r.correo || null,
                     p_telefono_contacto: r.telefono || null,
                     p_observaciones: r.observaciones || null,
-                    p_tarifas: {},
+                    p_tarifas: tarifas,
                     p_acompanantes: nombresAcompanantes(preview),
                     p_cloudbeds_id: String(r.cloudbeds_id).trim(),
                     p_transferencia_monto: Math.round(transferencia.monto),
@@ -888,7 +961,7 @@
                 p_telefono_contacto: r.telefono || null,
                 p_rut: null,
                 p_observaciones: r.observaciones || null,
-                p_tarifas: {},
+                p_tarifas: tarifas,
                 p_acompanantes: nombresAcompanantes(preview),
                 p_tipo_estadia: "alojamiento",
                 p_cloudbeds_id: String(r.cloudbeds_id).trim()
@@ -978,6 +1051,9 @@
             agregarDato(datos, "Correo", r.correo);
             agregarDato(datos, "Teléfono", r.telefono);
             agregarDato(datos, "Fuente", r.fuente);
+            agregarDato(datos, "Total Cloudbeds", r.monto_total === null || r.monto_total === undefined ? null : moneda(r.monto_total, "CLP"));
+            agregarDato(datos, "Pagado Cloudbeds", r.monto_pagado === null || r.monto_pagado === undefined ? null : moneda(r.monto_pagado, "CLP"));
+            agregarDato(datos, "Saldo Cloudbeds", r.saldo_pendiente === null || r.saldo_pendiente === undefined ? null : moneda(r.saldo_pendiente, "CLP"));
             bloque.appendChild(datos);
 
             const pagos = Array.isArray(entrada?.pagos)
@@ -1143,6 +1219,9 @@
         agregarDato(datos, "Teléfono", r.telefono);
         agregarDato(datos, "Fuente", r.fuente);
         agregarDato(datos, "Tarifa", r.plan_tarifa);
+        agregarDato(datos, "Total Cloudbeds", r.monto_total === null || r.monto_total === undefined ? null : moneda(r.monto_total, "CLP"));
+        agregarDato(datos, "Pagado Cloudbeds", r.monto_pagado === null || r.monto_pagado === undefined ? null : moneda(r.monto_pagado, "CLP"));
+        agregarDato(datos, "Saldo Cloudbeds", r.saldo_pendiente === null || r.saldo_pendiente === undefined ? null : moneda(r.saldo_pendiente, "CLP"));
         card.appendChild(datos);
 
         if (r.observaciones) {
@@ -1446,5 +1525,5 @@
     actualizarEnviar();
     mostrarSiCorresponde();
 
-    console.info("HAIKU · Asistente flotante V10 preparado.");
+    console.info("HAIKU · Asistente flotante V11 preparado.");
 })();
