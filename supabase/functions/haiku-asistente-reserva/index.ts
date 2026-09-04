@@ -151,7 +151,7 @@ const esquemaReserva = {
   properties: {
     tipo_operacion: {
       type: "string",
-      enum: ["crear_reserva", "registrar_pago", "desconocida"],
+      enum: ["crear_reserva", "desconocida"],
     },
     resumen: { type: "string" },
     confianza: {
@@ -382,16 +382,6 @@ Deno.serve(async (req: Request) => {
 Eres el módulo de lectura de reservas de un sistema chileno de alojamiento.
 Tu única tarea en esta fase es LEER texto e imágenes y preparar una vista previa. NO ejecutas acciones, NO creas reservas y NO inventas datos.
 
-Reglas de intención:
-- Usa tipo_operacion="crear_reserva" cuando el operador pida preparar/crear una o varias reservas nuevas.
-- Usa tipo_operacion="registrar_pago" cuando el operador pida agregar, registrar o asociar uno o varios pagos/abonos a una reserva que YA existe y no esté pidiendo crear esa reserva.
-- Para registrar_pago, usa cada elemento de reservas como referencia del destino del pago: completa titular_nombre, cabana y cloudbeds_id sólo si están sustentados; deja en null los datos de estadía que no estén explícitos.
-- La fecha escrita junto a un WebPay, transferencia, tarjeta o efectivo es la FECHA DEL PAGO. NO la copies a fecha_llegada ni fecha_salida salvo que exista evidencia separada de las fechas de la reserva.
-- Textos como "cab2/1noche" ayudan a identificar CAB 2 y contexto, pero no revelan por sí solos la fecha de estadía.
-- En registrar_pago, las fechas de estadía, correo, teléfono, documento y tarifas no son requisitos de lectura. No los inventes para completar la estructura.
-- Si una instrucción de pago contiene varios pagos para la misma reserva, devuélvelos separados en pagos dentro de un solo elemento.
-- Si contiene pagos para reservas distintas, devuelve un elemento de reservas por cada destino y no mezcles sus movimientos.
-
 Reglas de separación de reservas:
 - La salida reservas es un ARREGLO. Devuelve un elemento independiente por cada reserva distinta detectada, hasta un máximo de 11.
 - Si el operador envía dos o más reservas, NO mezcles nombres, cabañas, fechas, contactos, acompañantes ni pagos entre ellas.
@@ -461,9 +451,8 @@ Reglas de lectura por reserva:
 - Ignora sufijos entre paréntesis: LC6(1)=Cabaña 6 y CD8(1)=Cabaña 8.
 - No infieras equivalencias para códigos distintos del listado. Código desconocido o ilegible => cabana=null + advertencia.
 - Los códigos válidos se consideran inequívocos y no requieren advertencia por el mapeo.
-- Para tipo_operacion="crear_reserva", confianza="alta" sólo cuando identidad y fecha/tipo de estadía están claramente sustentados.
-- Para tipo_operacion="registrar_pago", confianza="alta" puede usarse cuando el destino (titular y cabaña o ID Cloudbeds) y los datos obligatorios de cada pago están claramente sustentados; no se requieren fechas de estadía.
-- tipo_operacion="desconocida" sólo cuando la petición no sea claramente crear reserva ni registrar pago sobre una reserva existente.
+- confianza="alta" en una reserva sólo cuando identidad y fecha/tipo de estadía están claramente sustentados.
+- tipo_operacion="crear_reserva" si el operador pide preparar una o varias nuevas reservas; de lo contrario usa "desconocida".
 - Cada resumen de reserva debe ser breve y útil para recepción.
 `;
 
