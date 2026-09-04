@@ -1,5 +1,5 @@
 // ========================================
-// HAIKU · ASISTENTE FLOTANTE V4
+// HAIKU · ASISTENTE FLOTANTE V5
 // Texto + capturas -> Edge Function -> vista previa estructurada.
 // Reserva y WebPay requieren confirmación humana y reutilizan RPC oficiales.
 // ========================================
@@ -622,39 +622,11 @@
         botonCrear.addEventListener("click", async () => {
             if (guardandoReserva || botonCrear.disabled) return;
 
-            const lineasConfirmacion = [
-                "CONFIRMAR CREACIÓN",
-                "",
-                `${r.titular_nombre}`,
-                `CAB ${r.cabana}`,
-                `${fechaVisible(r.fecha_llegada)} → ${fechaVisible(r.fecha_salida)}`,
-                `${Number(r.adultos ?? 1)} adulto(s)`,
-                `ID Cloudbeds: ${r.cloudbeds_id}`
-            ];
+            const confirmacion = webpay?.valido
+                ? "¿Confirmas crear 1 reserva y registrar 1 abono?"
+                : "¿Confirmas crear 1 reserva?";
 
-            if (webpay?.valido) {
-                lineasConfirmacion.push(
-                    "",
-                    `ABONO: ${moneda(webpay.monto, "CLP")}`,
-                    `Medio: ${webpay.medioEtiqueta}`,
-                    `Fecha pago: ${fechaVisible(webpay.fecha)}`,
-                    `COD.AUT: ${webpay.codaut}`,
-                    "",
-                    "La reserva y el abono se guardarán juntos en una sola operación."
-                );
-            }
-
-            lineasConfirmacion.push(
-                "",
-                "Se usarán las tarifas catálogo configuradas en Proyecto H para cada noche.",
-                "La cabaña volverá a validarse justo antes de guardar.",
-                "",
-                webpay?.valido
-                    ? "¿Confirmas crear la reserva y registrar este abono?"
-                    : "¿Confirmas crear la reserva?"
-            );
-
-            if (!window.confirm(lineasConfirmacion.join("\n"))) return;
+            if (!window.confirm(confirmacion)) return;
 
             const textoOriginal = botonCrear.textContent;
             guardandoReserva = true;
@@ -866,5 +838,5 @@
     actualizarEnviar();
     mostrarSiCorresponde();
 
-    console.info("HAIKU · Asistente flotante V4 preparado.");
+    console.info("HAIKU · Asistente flotante V5 preparado.");
 })();
