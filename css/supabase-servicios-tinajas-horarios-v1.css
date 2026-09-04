@@ -1,0 +1,274 @@
+/* ========================================
+   HAIKU · SERVICIOS · HORARIOS TINAJAS V1
+   ======================================== */
+
+#haiku-tinajas-horarios-v1 {
+    margin: 20px 18px 28px;
+    padding: 0;
+    overflow: hidden;
+}
+
+.haiku-tinajas-cabecera {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 18px;
+    padding: 24px 26px 20px;
+    border-bottom: 1px solid rgba(31, 66, 45, .13);
+}
+
+.haiku-tinajas-eyebrow {
+    margin: 0 0 5px;
+    color: #23754b;
+    font-size: 11px;
+    font-weight: 800;
+    letter-spacing: .16em;
+}
+
+.haiku-tinajas-cabecera h2 {
+    margin: 0;
+    color: #23352a;
+    font-size: clamp(20px, 2.1vw, 29px);
+    line-height: 1.12;
+}
+
+.haiku-tinajas-cabecera p:not(.haiku-tinajas-eyebrow) {
+    margin: 5px 0 0;
+    color: #687269;
+    font-size: 12px;
+}
+
+.haiku-tinajas-controles {
+    display: flex;
+    align-items: flex-end;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.haiku-tinajas-controles label {
+    display: grid;
+    gap: 4px;
+    color: #667068;
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+}
+
+#haiku-tinajas-fecha-v1,
+#haiku-tinajas-copiar-v1 {
+    min-height: 38px;
+    border: 1px solid #d8dfda;
+    border-radius: 9px;
+    background: #fff;
+    color: #203027;
+    font: inherit;
+}
+
+#haiku-tinajas-fecha-v1 {
+    padding: 0 10px;
+}
+
+#haiku-tinajas-copiar-v1 {
+    padding: 0 15px;
+    border-color: #255d3f;
+    background: #255d3f;
+    color: #fff;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+#haiku-tinajas-copiar-v1:hover {
+    filter: brightness(.96);
+}
+
+#haiku-tinajas-copiar-v1:disabled {
+    opacity: .58;
+    cursor: wait;
+}
+
+.haiku-tinajas-copia-estado {
+    align-self: center;
+    min-width: 145px;
+    color: #28734d;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.haiku-tinajas-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 16px;
+    padding: 18px 20px 22px;
+}
+
+.haiku-tinajas-tipo {
+    min-width: 0;
+    overflow: hidden;
+    border: 1px solid #dce4de;
+    border-radius: 14px;
+    background: #fbfcfb;
+}
+
+.haiku-tinajas-tipo > header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 13px 15px;
+    border-bottom: 1px solid #e3e9e5;
+    background: #f3f7f4;
+}
+
+.haiku-tinajas-tipo > header strong {
+    color: #1f4f35;
+    font-size: 13px;
+    letter-spacing: .05em;
+}
+
+.haiku-tinajas-tipo > header span {
+    color: #69746d;
+    font-size: 11px;
+}
+
+.haiku-tinajas-lista {
+    display: grid;
+}
+
+.haiku-tinajas-fila {
+    padding: 11px 14px;
+    border-bottom: 1px solid #e8ece9;
+}
+
+.haiku-tinajas-fila:last-child {
+    border-bottom: 0;
+}
+
+.haiku-tinajas-fila-top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.haiku-tinajas-hora {
+    color: #26332b;
+    font-size: 13px;
+}
+
+.haiku-tinajas-estado {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 72px;
+    min-height: 24px;
+    padding: 0 8px;
+    border-radius: 999px;
+    font-size: 9px;
+    font-weight: 850;
+    letter-spacing: .07em;
+}
+
+.haiku-tinajas-fila--libre .haiku-tinajas-estado {
+    background: #e4f3e8;
+    color: #22653f;
+}
+
+.haiku-tinajas-fila--tomada .haiku-tinajas-estado {
+    background: #f4ead0;
+    color: #775a1d;
+}
+
+.haiku-tinajas-fila--conflicto .haiku-tinajas-estado {
+    background: #f8dddd;
+    color: #8a3030;
+}
+
+.haiku-tinajas-fila--conflicto {
+    background: #fff8f8;
+}
+
+.haiku-tinajas-detalle-servicio {
+    margin-top: 8px;
+    padding-top: 8px;
+    border-top: 1px dashed #d9dfdb;
+}
+
+.haiku-tinajas-detalle-principal,
+.haiku-tinajas-detalle-secundario {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px 10px;
+    line-height: 1.35;
+}
+
+.haiku-tinajas-detalle-principal {
+    color: #344239;
+    font-size: 11px;
+}
+
+.haiku-tinajas-detalle-secundario {
+    margin-top: 4px;
+    color: #6d766f;
+    font-size: 10px;
+}
+
+.haiku-tinajas-cancelada-nota {
+    margin-top: 6px;
+    color: #7b837e;
+    font-size: 10px;
+    font-style: italic;
+}
+
+.haiku-tinajas-alertas {
+    margin: 0 20px 20px;
+    padding: 10px 12px;
+    border: 1px solid #ead6a9;
+    border-radius: 10px;
+    background: #fff9eb;
+    color: #735a22;
+    font-size: 11px;
+}
+
+.haiku-tinajas-alertas[hidden] {
+    display: none !important;
+}
+
+@media (max-width: 850px) {
+    #haiku-tinajas-horarios-v1 {
+        margin: 16px 10px 22px;
+    }
+
+    .haiku-tinajas-cabecera {
+        display: grid;
+        padding: 18px 16px 16px;
+    }
+
+    .haiku-tinajas-controles {
+        justify-content: stretch;
+    }
+
+    .haiku-tinajas-controles label {
+        flex: 1 1 150px;
+    }
+
+    #haiku-tinajas-fecha-v1 {
+        width: 100%;
+        box-sizing: border-box;
+    }
+
+    #haiku-tinajas-copiar-v1 {
+        flex: 1 1 180px;
+    }
+
+    .haiku-tinajas-copia-estado {
+        flex-basis: 100%;
+        min-width: 0;
+    }
+
+    .haiku-tinajas-grid {
+        grid-template-columns: 1fr;
+        padding: 14px;
+    }
+}
