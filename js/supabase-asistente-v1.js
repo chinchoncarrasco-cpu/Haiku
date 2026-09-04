@@ -1,5 +1,5 @@
 // ========================================
-// HAIKU · ASISTENTE FLOTANTE V7
+// HAIKU · ASISTENTE FLOTANTE V8
 // Texto + capturas -> Edge Function -> vista previa estructurada.
 // Reserva y abonos requieren confirmación humana y reutilizan RPC oficiales.
 // ========================================
@@ -349,6 +349,72 @@
         };
     }
 
+    function tarjetaDesdePago(p) {
+        if (!p || p.detectado === false) return null;
+
+        const medioTexto = normalizarClave(p.medio);
+        if (medioTexto.includes("webpay") || !medioTexto.includes("tarjeta")) return null;
+
+        let medioRpc = null;
+        let medioEtiqueta = null;
+        if (medioTexto.includes("debito")) {
+            medioRpc = "tarjeta_debito";
+            medioEtiqueta = "Tarjeta Débito";
+        } else if (medioTexto.includes("credito")) {
+            medioRpc = "tarjeta_credito";
+            medioEtiqueta = "Tarjeta Crédito";
+        }
+
+        if (!medioRpc) return null;
+
+        const monto = Number(p.monto);
+        const folio = String(p.folio || "").trim();
+        const bovtar = String(p.bovtar || "").trim();
+        const fecha = /^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))
+            ? String(p.fecha)
+            : null;
+
+        return {
+            medioRpc,
+            medioEtiqueta,
+            monto,
+            folio,
+            bovtar,
+            fecha,
+            valido: Boolean(
+                Number.isFinite(monto) &&
+                monto > 0 &&
+                folio &&
+                bovtar &&
+                fecha
+            )
+        };
+    }
+
+    function efectivoDesdePago(p) {
+        if (!p || p.detectado === false) return null;
+
+        const medioTexto = normalizarClave(p.medio);
+        if (!medioTexto.includes("efectivo")) return null;
+
+        const monto = Number(p.monto);
+        const fecha = /^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))
+            ? String(p.fecha)
+            : null;
+
+        return {
+            medioRpc: "efectivo",
+            medioEtiqueta: "Efectivo",
+            monto,
+            fecha,
+            valido: Boolean(
+                Number.isFinite(monto) &&
+                monto > 0 &&
+                fecha
+            )
+        };
+    }
+
     function agregarDato(contenedor, etiqueta, valor) {
         if (valor === null || valor === undefined || valor === "") return;
         const fila = document.createElement("div");
@@ -397,9 +463,11 @@
             const prefijo = pagos.length > 1 ? `Abono ${indice + 1}: ` : "";
             const webpay = webpayDesdePago(p);
             const transferencia = transferenciaDesdePago(p);
+            const tarjeta = tarjetaDesdePago(p);
+            const efectivo = efectivoDesdePago(p);
 
-            if (!webpay && !transferencia) {
-                problemas.push(`${prefijo}por ahora el pago automático admite WebPay Crédito/Débito o Transferencia bancaria explícita.`);
+            if (!webpay && !transferencia && !tarjeta && !efectivo) {
+                problemas.push(`${prefijo}medio de pago no admitido automáticamente.`);
             } else if (webpay) {
                 if (!Number.isFinite(Number(p.monto)) || Number(p.monto) <= 0) problemas.push(`${prefijo}falta monto WebPay válido.`);
                 if (!String(p.codaut || "").trim()) problemas.push(`${prefijo}falta COD.AUT del WebPay.`);
@@ -408,6 +476,14 @@
                 if (!Number.isFinite(Number(p.monto)) || Number(p.monto) <= 0) problemas.push(`${prefijo}falta monto de transferencia válido.`);
                 if (!String(p.glosa || "").trim()) problemas.push(`${prefijo}falta Glosa de la transferencia.`);
                 if (!/^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))) problemas.push(`${prefijo}falta fecha válida de la transferencia.`);
+            } else if (tarjeta) {
+                if (!Number.isFinite(Number(p.monto)) || Number(p.monto) <= 0) problemas.push(`${prefijo}falta monto de tarjeta válido.`);
+                if (!String(p.folio || "").trim()) problemas.push(`${prefijo}falta Folio de la tarjeta.`);
+                if (!String(p.bovtar || "").trim()) problemas.push(`${prefijo}falta BOVTAR de la tarjeta.`);
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))) problemas.push(`${prefijo}falta fecha válida del pago con tarjeta.`);
+            } else if (efectivo) {
+                if (!Number.isFinite(Number(p.monto)) || Number(p.monto) <= 0) problemas.push(`${prefijo}falta monto en efectivo válido.`);
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))) problemas.push(`${prefijo}falta fecha válida del pago en efectivo.`);
             }
         });
 
@@ -429,7 +505,9 @@
                 monto: Math.round(webpay.monto),
                 fecha_pago: new Date(`${webpay.fecha}T12:00:00`).toISOString(),
                 codaut: webpay.codaut,
-                glosa: null
+                glosa: null,
+                folio: null,
+                bovtar: null
             };
         }
 
@@ -440,7 +518,35 @@
                 monto: Math.round(transferencia.monto),
                 fecha_pago: new Date(`${transferencia.fecha}T12:00:00`).toISOString(),
                 codaut: null,
-                glosa: transferencia.glosa
+                glosa: transferencia.glosa,
+                folio: null,
+                bovtar: null
+            };
+        }
+
+        const tarjeta = tarjetaDesdePago(p);
+        if (tarjeta?.valido) {
+            return {
+                medio: tarjeta.medioRpc,
+                monto: Math.round(tarjeta.monto),
+                fecha_pago: new Date(`${tarjeta.fecha}T12:00:00`).toISOString(),
+                codaut: null,
+                glosa: null,
+                folio: tarjeta.folio,
+                bovtar: tarjeta.bovtar
+            };
+        }
+
+        const efectivo = efectivoDesdePago(p);
+        if (efectivo?.valido) {
+            return {
+                medio: "efectivo",
+                monto: Math.round(efectivo.monto),
+                fecha_pago: new Date(`${efectivo.fecha}T12:00:00`).toISOString(),
+                codaut: null,
+                glosa: null,
+                folio: null,
+                bovtar: null
             };
         }
 
@@ -480,7 +586,14 @@
             throw new Error(`CAB ${cabana} ya no está disponible para ese rango.`);
         }
 
-        if (pagos.length > 1) {
+        const pagoUnico = pagos[0] || null;
+        const webpay = webpayDesdePago(pagoUnico);
+        const transferencia = transferenciaDesdePago(pagoUnico);
+        const tarjeta = tarjetaDesdePago(pagoUnico);
+        const efectivo = efectivoDesdePago(pagoUnico);
+        const usarRpcAbonos = pagos.length > 1 || tarjeta?.valido || efectivo?.valido;
+
+        if (usarRpcAbonos) {
             if (!window.haikuTienePermiso?.("pagos.registrar")) {
                 throw new Error("Tu usuario no tiene permiso para registrar pagos.");
             }
@@ -527,10 +640,6 @@
                 monto_pago: pagos.reduce((total, p) => total + Number(p?.monto || 0), 0)
             };
         }
-
-        const pagoUnico = pagos[0] || null;
-        const webpay = webpayDesdePago(pagoUnico);
-        const transferencia = transferenciaDesdePago(pagoUnico);
 
         if (webpay?.valido) {
             if (!window.haikuTienePermiso?.("pagos.registrar")) {
@@ -775,7 +884,12 @@
 
         const problemas = problemasParaCrear(preview);
         const cantidadPagos = pagos.length;
-        const pagosValidos = pagos.every(p => webpayDesdePago(p)?.valido || transferenciaDesdePago(p)?.valido);
+        const pagosValidos = pagos.every(p =>
+            webpayDesdePago(p)?.valido ||
+            transferenciaDesdePago(p)?.valido ||
+            tarjetaDesdePago(p)?.valido ||
+            efectivoDesdePago(p)?.valido
+        );
         const pagoValido = cantidadPagos > 0 && pagosValidos;
         const requierePago = cantidadPagos > 0;
         const tienePermisoReserva = window.haikuTienePermiso?.("reservas.crear") === true;
@@ -1019,5 +1133,5 @@
     actualizarEnviar();
     mostrarSiCorresponde();
 
-    console.info("HAIKU · Asistente flotante V7 preparado.");
+    console.info("HAIKU · Asistente flotante V8 preparado.");
 })();
