@@ -63,6 +63,10 @@ const esquemaReservaDatos = {
     fuente: { type: ["string", "null"] },
     plan_tarifa: { type: ["string", "null"] },
     observaciones: { type: ["string", "null"] },
+    monto_total: { type: ["integer", "null"], minimum: 0 },
+    monto_pagado: { type: ["integer", "null"], minimum: 0 },
+    saldo_pendiente: { type: ["integer", "null"], minimum: 0 },
+    productos_adicionales: { type: ["integer", "null"], minimum: 0 },
   },
   required: [
     "tipo_estadia",
@@ -82,6 +86,10 @@ const esquemaReservaDatos = {
     "fuente",
     "plan_tarifa",
     "observaciones",
+    "monto_total",
+    "monto_pagado",
+    "saldo_pendiente",
+    "productos_adicionales",
   ],
 };
 
@@ -242,6 +250,10 @@ function reservaLegacyBloqueada(cantidad: number) {
     fuente: null,
     plan_tarifa: null,
     observaciones: "Modo lectura múltiple. Creación de lote deshabilitada.",
+    monto_total: null,
+    monto_pagado: null,
+    saldo_pendiente: null,
+    productos_adicionales: null,
   };
 }
 
@@ -392,12 +404,14 @@ Reglas de lectura por reserva:
 - Ejemplo de tarjeta real: "2-9-2026 Aneti Dupont//Bovtar:719223-Folio:000234//credito//myr// PENDIENTE 50% RESTANTE // PENDIENTE BOVE Y MANAGER cab6/2noches $147.794" => fecha=2026-09-02, medio="Tarjeta Crédito", monto=147794, moneda="CLP", folio="000234", bovtar="719223" y asociar a CAB 6/Aneti.
 - Si el monto de un pago explícito escrito por el operador difiere del saldo pendiente visible en Cloudbeds, conserva el monto explícito como monto del pago y agrega una advertencia sobre la diferencia; NO reemplaces el pago por el saldo pendiente.
 - Cuando Cloudbeds tenga desplegado el resumen bajo "Saldo pendiente", úsalo como evidencia financiera prioritaria. Puede mostrar Subtotal, Productos adicionales, IVA, Monto Total, Monto pagado, Saldo pendiente y Depósito Sugerido.
+- Devuelve en reserva.monto_total el valor de "Monto Total", en reserva.monto_pagado el valor de "Monto pagado", en reserva.saldo_pendiente el valor de "Saldo pendiente" y en reserva.productos_adicionales el valor de "Productos adicionales". Si un campo no está visible, devuelve null; no lo inventes.
 - En ese resumen, "Monto Total" es el total final de la reserva; "Monto pagado" es el total acumulado que Cloudbeds reconoce como pagado; "Saldo pendiente" es lo que aún queda por pagar.
 - "Subtotal", "IVA", "Productos adicionales" y "Depósito Sugerido" NO son movimientos de pago y nunca deben convertirse por sí solos en elementos de pagos.
 - Si Monto Total, Monto pagado y Saldo pendiente están visibles, comprueba la coherencia aritmética: normalmente Monto Total - Monto pagado = Saldo pendiente. Si no coincide, agrega advertencia y no inventes una explicación.
 - "Monto pagado" es un TOTAL ACUMULADO, no necesariamente una transacción individual. Si el operador entrega movimientos explícitos con fecha/medio/referencia, esos movimientos son los elementos de pagos y Monto pagado sólo sirve para comprobar que su suma sea coherente.
 - Si la suma de los movimientos explícitos coincide con Monto pagado, considéralo una validación fuerte y no agregues un pago adicional por Monto pagado.
 - Si Monto pagado es mayor que cero pero no existen movimientos explícitos suficientes para explicar ese total, puedes usarlo como evidencia de que hubo un abono acumulado, pero NO inventes medio, fecha, Glosa, COD.AUT, Folio ni BOVTAR; agrega advertencia indicando que falta el detalle del movimiento y evita duplicarlo con pagos inferidos por total-saldo.
+- Si Productos adicionales es mayor que cero, agrega advertencia explícita porque el Monto Total no debe tratarse automáticamente como alojamiento puro hasta que esos productos se revisen.
 - Ejemplo real Cloudbeds: Monto Total $296.146, Monto pagado $147.794 y Saldo pendiente $148.352 es coherente porque 296146 - 147794 = 148352. Si además el operador informa Tarjeta Crédito por $147.794 con Folio/BOVTAR, registra sólo ese movimiento y usa el resumen de Cloudbeds como verificación.
 - pagos es un ARREGLO dentro de CADA reserva. Si no existe ningún pago sustentado para esa reserva, devuelve pagos=[]. Si existe un pago, devuelve un elemento. Si existen dos o más abonos distintos, devuelve un elemento separado por cada abono, hasta un máximo de 10.
 - NUNCA consolides varios abonos en un solo elemento y NUNCA elijas sólo uno de ellos. Si el operador informa un abono de CLP 250000 y otro de CLP 50000 para la misma reserva, devuelve dos elementos distintos.
