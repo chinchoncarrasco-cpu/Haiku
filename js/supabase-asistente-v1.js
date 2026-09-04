@@ -1,8 +1,8 @@
 // ========================================
-// HAIKU · ASISTENTE FLOTANTE V9
+// HAIKU · ASISTENTE FLOTANTE V10
 // Texto + capturas -> Edge Function -> vista previa estructurada.
 // Reserva y abonos requieren confirmación humana y reutilizan RPC oficiales.
-// La lectura múltiple es sólo vista previa: no permite crear lotes todavía.
+// Los lotes de 2 a 11 reservas se crean de forma atómica.
 // ========================================
 (() => {
     "use strict";
@@ -563,6 +563,132 @@
         return null;
     }
 
+    function previewIndividualDesdeEntrada(entrada) {
+        return {
+            tipo_operacion: "crear_reserva",
+            confianza: entrada?.confianza || "baja",
+            reserva: entrada?.reserva || {},
+            pagos: Array.isArray(entrada?.pagos) ? entrada.pagos : [],
+            acompanantes: Array.isArray(entrada?.acompanantes) ? entrada.acompanantes : [],
+            faltantes: Array.isArray(entrada?.faltantes) ? entrada.faltantes : [],
+            advertencias: Array.isArray(entrada?.advertencias) ? entrada.advertencias : []
+        };
+    }
+
+    function problemasParaCrearLote(preview) {
+        const reservas = reservasMultiplesDesdePreview(preview);
+        const problemas = [];
+
+        if (reservas.length < 2 || reservas.length > 11) {
+            problemas.push("El lote debe contener entre 2 y 11 reservas.");
+            return problemas;
+        }
+
+        const ids = new Map();
+        reservas.forEach((entrada, indice) => {
+            const individual = previewIndividualDesdeEntrada(entrada);
+            const nombre = individual?.reserva?.titular_nombre || `Reserva ${indice + 1}`;
+            problemasParaCrear(individual).forEach(problema => {
+                problemas.push(`Reserva ${indice + 1} (${nombre}): ${problema}`);
+            });
+
+            const id = String(individual?.reserva?.cloudbeds_id || "").trim();
+            if (id) {
+                if (ids.has(id)) {
+                    problemas.push(`ID Cloudbeds repetido dentro del lote: ${id}.`);
+                } else {
+                    ids.set(id, indice);
+                }
+            }
+        });
+
+        for (let i = 0; i < reservas.length; i++) {
+            const a = reservas[i]?.reserva || {};
+            for (let j = i + 1; j < reservas.length; j++) {
+                const b = reservas[j]?.reserva || {};
+                if (Number(a.cabana) !== Number(b.cabana)) continue;
+                if (!/^\d{4}-\d{2}-\d{2}$/.test(String(a.fecha_llegada || "")) ||
+                    !/^\d{4}-\d{2}-\d{2}$/.test(String(a.fecha_salida || "")) ||
+                    !/^\d{4}-\d{2}-\d{2}$/.test(String(b.fecha_llegada || "")) ||
+                    !/^\d{4}-\d{2}-\d{2}$/.test(String(b.fecha_salida || ""))) continue;
+
+                if (a.fecha_llegada < b.fecha_salida && b.fecha_llegada < a.fecha_salida) {
+                    problemas.push(`CAB ${a.cabana} aparece ocupada por dos reservas del mismo lote en fechas superpuestas.`);
+                }
+            }
+        }
+
+        return [...new Set(problemas)];
+    }
+
+    function payloadReservaLote(entrada) {
+        const individual = previewIndividualDesdeEntrada(entrada);
+        const r = individual.reserva;
+        const pagos = pagosDesdePreview(individual);
+        const pagosRpc = pagos.map(pagoParaRpc);
+        if (pagosRpc.some(item => !item)) {
+            throw new Error(`La reserva de ${r.titular_nombre || "titular por revisar"} contiene un pago no válido.`);
+        }
+
+        return {
+            titular_nombre: r.titular_nombre,
+            cabana_numero: Number(r.cabana),
+            fecha_ingreso: r.fecha_llegada,
+            fecha_salida: r.fecha_salida,
+            adultos: Math.max(0, Number(r.adultos ?? 1)),
+            ninos: Math.max(0, Number(r.ninos ?? 0)),
+            mascotas: Math.max(0, Number(r.mascotas ?? 0)),
+            correo_contacto: r.correo || null,
+            telefono_contacto: r.telefono || null,
+            observaciones: r.observaciones || null,
+            tarifas: {},
+            acompanantes: nombresAcompanantes(individual),
+            cloudbeds_id: String(r.cloudbeds_id || "").trim(),
+            pagos: pagosRpc
+        };
+    }
+
+    async function crearLoteDesdePreview(preview) {
+        if (!window.haikuTienePermiso?.("reservas.crear")) {
+            throw new Error("Tu usuario no tiene permiso para crear reservas.");
+        }
+
+        const reservas = reservasMultiplesDesdePreview(preview);
+        const problemas = problemasParaCrearLote(preview);
+        if (problemas.length) {
+            throw new Error(problemas.join(" "));
+        }
+
+        const totalPagos = reservas.reduce(
+            (total, entrada) => total + (Array.isArray(entrada?.pagos) ? entrada.pagos.filter(p => p && p.detectado !== false).length : 0),
+            0
+        );
+
+        if (totalPagos > 0) {
+            if (!window.haikuTienePermiso?.("pagos.registrar")) {
+                throw new Error("Tu usuario no tiene permiso para registrar pagos.");
+            }
+            if (!window.haikuTienePermiso?.("pagos.verificar")) {
+                throw new Error("Tu usuario no tiene permiso para verificar pagos.");
+            }
+        }
+
+        const payload = reservas.map(payloadReservaLote);
+        const { data, error } = await cliente.rpc(
+            "haiku_crear_lote_reservas_asistente",
+            { p_reservas: payload }
+        );
+
+        if (error) {
+            if (error?.code === "23505" || /cloudbeds_id|reservas_cloudbeds_id_uidx/i.test(error?.message || "")) {
+                throw new Error("Al menos una de las reservas de Cloudbeds ya existe en Proyecto H. No se guardó ninguna reserva del lote.");
+            }
+            throw error;
+        }
+
+        return data;
+    }
+
     async function crearReservaDesdePreview(preview) {
         if (!window.haikuTienePermiso?.("reservas.crear")) {
             throw new Error("Tu usuario no tiene permiso para crear reservas.");
@@ -805,7 +931,7 @@
         cabecera.className = "haiku-asistente-preview-cabecera";
         const titulo = document.createElement("div");
         const marca = document.createElement("span");
-        marca.textContent = "MODO PRUEBA · NADA GUARDABLE";
+        marca.textContent = "VISTA PREVIA DE LOTE · NADA GUARDADO";
         const nombre = document.createElement("strong");
         nombre.textContent = `${reservas.length} reservas detectadas`;
         titulo.append(marca, nombre);
@@ -890,15 +1016,75 @@
             lote.appendChild(bloque);
         });
 
+        const totalPagos = reservas.reduce(
+            (total, entrada) => total + (Array.isArray(entrada?.pagos) ? entrada.pagos.filter(p => p && p.detectado !== false).length : 0),
+            0
+        );
+        const problemas = problemasParaCrearLote(preview);
+        const tienePermisoReserva = window.haikuTienePermiso?.("reservas.crear") === true;
+        const tienePermisoPago = totalPagos === 0 || (
+            window.haikuTienePermiso?.("pagos.registrar") === true &&
+            window.haikuTienePermiso?.("pagos.verificar") === true
+        );
+        const puedeCrear = problemas.length === 0 && tienePermisoReserva && tienePermisoPago;
+
         const pie = document.createElement("div");
         pie.className = "haiku-asistente-preview-pie";
         const estado = document.createElement("span");
-        estado.textContent = "🔒 Modo lectura múltiple: ninguna reserva puede guardarse desde esta vista previa.";
-        const botonBloqueado = document.createElement("button");
-        botonBloqueado.type = "button";
-        botonBloqueado.disabled = true;
-        botonBloqueado.textContent = "Crear lote · próxima etapa";
-        pie.append(estado, botonBloqueado);
+        estado.textContent = "🔒 Nada guardado todavía. El lote se guardará completo o no se guardará nada.";
+        const botonCrear = document.createElement("button");
+        botonCrear.type = "button";
+        botonCrear.disabled = !puedeCrear;
+        botonCrear.textContent = puedeCrear
+            ? `Confirmar ${reservas.length} reservas${totalPagos ? ` + ${totalPagos} ${totalPagos === 1 ? "abono" : "abonos"}` : ""}`
+            : "Crear lote · revisar datos";
+
+        if (problemas.length) botonCrear.title = problemas.join(" ");
+        if (!tienePermisoReserva) botonCrear.title = "Tu usuario no tiene permiso para crear reservas.";
+        if (totalPagos > 0 && !tienePermisoPago) botonCrear.title = "Tu usuario no tiene permisos para registrar y verificar los pagos del lote.";
+
+        botonCrear.addEventListener("click", async () => {
+            if (guardandoReserva || botonCrear.disabled) return;
+
+            const confirmacion = `¿Confirmas crear ${reservas.length} reservas${totalPagos ? ` y registrar ${totalPagos} ${totalPagos === 1 ? "abono" : "abonos"}` : ""}?`;
+            if (!window.confirm(confirmacion)) return;
+
+            const textoOriginal = botonCrear.textContent;
+            guardandoReserva = true;
+            actualizarEnviar();
+            botonCrear.disabled = true;
+            botonCrear.textContent = `Creando ${reservas.length} reservas…`;
+            estado.textContent = "Validando y guardando el lote completo…";
+
+            try {
+                const resultado = await crearLoteDesdePreview(preview);
+                await refrescarDespuesDeCrear();
+
+                const cantidadReservas = Number(resultado?.cantidad_reservas || reservas.length);
+                const cantidadPagos = Number(resultado?.cantidad_pagos || totalPagos);
+                marca.textContent = "LOTE CREADO";
+                estado.textContent = `✅ ${cantidadReservas} reservas${cantidadPagos ? ` y ${cantidadPagos} ${cantidadPagos === 1 ? "abono" : "abonos"}` : ""} guardados correctamente.`;
+                botonCrear.textContent = `${cantidadReservas} reservas creadas`;
+                botonCrear.disabled = true;
+                lote.dataset.haikuLoteCreado = "1";
+
+                agregarMensaje(
+                    "asistente",
+                    `Lote creado correctamente: ${cantidadReservas} reservas${cantidadPagos ? ` y ${cantidadPagos} ${cantidadPagos === 1 ? "abono" : "abonos"}` : ""}.`
+                );
+            } catch (error) {
+                console.error("HAIKU · Asistente no pudo crear lote:", error);
+                estado.textContent = `⚠️ No se guardó ninguna reserva del lote: ${error?.message || "error desconocido"}`;
+                botonCrear.textContent = textoOriginal;
+                botonCrear.disabled = !puedeCrear;
+            } finally {
+                guardandoReserva = false;
+                actualizarEnviar();
+                scrollFinal();
+            }
+        });
+
+        pie.append(estado, botonCrear);
         lote.appendChild(pie);
 
         mensajes.appendChild(lote);
@@ -1260,5 +1446,5 @@
     actualizarEnviar();
     mostrarSiCorresponde();
 
-    console.info("HAIKU · Asistente flotante V9 preparado.");
+    console.info("HAIKU · Asistente flotante V10 preparado.");
 })();
