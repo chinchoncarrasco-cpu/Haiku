@@ -259,8 +259,6 @@ function agregarCompatibilidadReservaLegacy(preview: any) {
     return;
   }
 
-  // Barrera de seguridad para navegadores con frontend antiguo: si hay un lote,
-  // los campos legacy quedan deliberadamente no creables.
   preview.reserva = reservaLegacyBloqueada(reservas.length);
   preview.pagos = [];
   preview.acompanantes = [];
@@ -397,6 +395,9 @@ Reglas de lectura por reserva:
   * Transferencia bancaria: referencia=Glosa. Completa glosa y deja codaut, folio y bovtar en null salvo evidencia explícita separada.
   * Tarjeta crédito o débito presencial, cuando NO sea WebPay: referencias=Folio y BOVTAR. Completa folio y bovtar; deja codaut y glosa en null salvo evidencia explícita separada.
   * Efectivo: no requiere referencia. Usa glosa=null, codaut=null, folio=null y bovtar=null.
+- Para pagos con tarjeta presencial, conserva el subtipo exacto cuando esté explícito: si la fuente dice "Crédito", devuelve medio="Tarjeta Crédito presencial"; si dice "Débito", devuelve medio="Tarjeta Débito presencial".
+- No devuelvas "Tarjeta crédito o débito presencial" cuando la evidencia ya distingue Crédito o Débito. Usa esa forma ambigua sólo si la fuente realmente no permite saber cuál es y, en ese caso, agrega una advertencia indicando que el subtipo debe revisarse antes de guardar.
+- La presencia de Folio + BOVTAR identifica una tarjeta presencial frente a WebPay; COD.AUT identifica WebPay. Si además se ve explícitamente Crédito o Débito, conserva ese subtipo sin volver a hacerlo ambiguo.
 - Para transferencias bancarias, Glosa es la referencia COMPLETA, no sólo el nombre del emisor. Si aparece "número inicial + Transf de + nombre", conserva todo en glosa.
 - Conserva exactamente la glosa, incluidos ceros iniciales. Ejemplo: "0170274954 Transf de PAULETTE MARIA KATH" debe devolverse íntegramente.
 - No uses texto operativo como "DG", "cab6/2noches", nombres, comentarios o descripciones como glosa sólo porque aparezca junto al pago.
