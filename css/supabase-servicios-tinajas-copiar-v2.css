@@ -1,0 +1,45 @@
+/* ========================================
+   HAIKU · SERVICIOS · COPIAR TINAJAS V2
+   ======================================== */
+
+.haiku-tinajas-boton-copiar-v2 {
+    min-height: 38px;
+    padding: 0 14px;
+    border-radius: 9px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    transition: filter .15s ease, background .15s ease, border-color .15s ease;
+}
+
+.haiku-tinajas-boton-copiar-v2--secundario {
+    border: 1px solid #b8c9bf;
+    background: #fff;
+    color: #255d3f;
+}
+
+.haiku-tinajas-boton-copiar-v2--secundario:hover {
+    background: #f2f7f4;
+    border-color: #8fa99a;
+}
+
+.haiku-tinajas-boton-copiar-v2--principal {
+    border-color: #255d3f !important;
+    background: #255d3f !important;
+    color: #fff !important;
+}
+
+.haiku-tinajas-boton-copiar-v2:hover {
+    filter: brightness(.97);
+}
+
+.haiku-tinajas-boton-copiar-v2:disabled {
+    opacity: .58;
+    cursor: wait;
+}
+
+@media (max-width: 850px) {
+    .haiku-tinajas-boton-copiar-v2 {
+        flex: 1 1 130px;
+    }
+}
