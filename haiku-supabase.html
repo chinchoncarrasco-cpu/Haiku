@@ -87,6 +87,12 @@
 
                 let html = await respuesta.text();
 
+                // Título genérico de la pestaña para no revelar el nombre del proyecto.
+                html = html.replace(
+                    /<title>\s*Haiku\s*<\/title>/i,
+                    '<title>Panel interno</title>'
+                );
+
                 // Cortina de arranque: evita que document.write pinte la aplicación
                 // antes de que autenticación/privacidad hayan decidido qué mostrar.
                 const estiloArranquePrivado = `
