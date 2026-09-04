@@ -17,7 +17,21 @@
     const mensajes = document.getElementById("haiku-asistente-mensajes");
 
     if (!cliente || !root || !campo || !enviar || !mensajes) {
-        console.info("HAIKU · Pago existente V1 no se instaló porque el asistente aún no está disponible.");
+        const principal = document.querySelector('script[data-haiku-asistente-v1]');
+        const srcActual = document.currentScript?.src || "";
+        if (principal && srcActual && principal.dataset.haikuPagoExistenteEspera !== "1") {
+            principal.dataset.haikuPagoExistenteEspera = "1";
+            principal.addEventListener("load", () => {
+                if (window.HAIKU_ASISTENTE_PAGO_EXISTENTE_V1) return;
+                const retry = document.createElement("script");
+                retry.src = `${srcActual}${srcActual.includes("?") ? "&" : "?"}afterAssistant=${Date.now()}`;
+                retry.async = false;
+                document.head.appendChild(retry);
+            }, { once: true });
+            console.info("HAIKU · Pago existente V1 esperará la carga del asistente principal.");
+        } else {
+            console.info("HAIKU · Pago existente V1 no se instaló porque el asistente aún no está disponible.");
+        }
         return;
     }
 
@@ -363,7 +377,7 @@
 
         if (candidatos.length > 1) {
             renderCandidatosAmbiguos(card, candidatos);
-            estado.textContent = "🔒 Hay más de una reserva posible. Agrega fechas o ID Cloudbeds para precisar.";
+            estado.textContent = "🔒 Hay más de una reserva posible. Agrega el ID Cloudbeds para precisar.";
             boton.textContent = "Registrar abono · destino ambiguo";
             return;
         }
