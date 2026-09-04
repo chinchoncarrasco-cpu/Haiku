@@ -223,7 +223,31 @@
 
 .haiku-asistente-preview-pie { display: grid; gap: 8px; margin-top: 11px; padding-top: 10px; border-top: 1px solid #dfe7e2; }
 .haiku-asistente-preview-pie > span { color: #47715a; font-size: .64rem; line-height: 1.4; }
-.haiku-asistente-preview-pie button { min-height: 34px; border: 1px solid #d5ddd8; border-radius: 9px; background: #eef2ef; color: #87918b; font: inherit; font-size: .66rem; font-weight: 750; cursor: not-allowed; }
+.haiku-asistente-preview-pie button {
+    min-height: 34px;
+    border: 1px solid #d5ddd8;
+    border-radius: 9px;
+    background: #eef2ef;
+    color: #87918b;
+    font: inherit;
+    font-size: .66rem;
+    font-weight: 750;
+    transition: background .15s ease, border-color .15s ease, color .15s ease;
+}
+.haiku-asistente-preview-pie button:not(:disabled) {
+    border-color: #1f6e4c;
+    background: #1f6e4c;
+    color: #fff;
+    cursor: pointer;
+}
+.haiku-asistente-preview-pie button:not(:disabled):hover {
+    background: #174f39;
+    border-color: #174f39;
+}
+.haiku-asistente-preview-pie button:disabled {
+    cursor: not-allowed;
+    opacity: .76;
+}
 
 .haiku-asistente-adjuntos { display: flex; gap: 7px; overflow-x: auto; padding: 10px 14px 0; background: #fff; }
 .haiku-asistente-adjuntos:empty { display: none; }
