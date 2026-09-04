@@ -266,6 +266,7 @@
     }
 
     function agregarDato(contenedor, etiqueta, valor) {
+        if (valor === null || valor === undefined || valor === "") return;
         const fila = document.createElement("div");
         fila.className = "haiku-asistente-preview-dato";
         const small = document.createElement("span");
