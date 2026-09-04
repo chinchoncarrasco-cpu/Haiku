@@ -1,7 +1,7 @@
 // ========================================
-// HAIKU · ASISTENTE FLOTANTE V3
+// HAIKU · ASISTENTE FLOTANTE V4
 // Texto + capturas -> Edge Function -> vista previa estructurada.
-// La creación requiere confirmación humana y reutiliza la RPC oficial.
+// Reserva y WebPay requieren confirmación humana y reutilizan RPC oficiales.
 // ========================================
 (() => {
     "use strict";
@@ -55,7 +55,7 @@
                 </div>
 
                 <div class="haiku-asistente-aviso">
-                    Vista previa segura: puedes adjuntar imágenes o pegar capturas con Ctrl+V. Una reserva sólo se crea después de pulsar “Confirmar y crear” y aceptar la confirmación final.
+                    Vista previa segura: puedes adjuntar imágenes o pegar capturas con Ctrl+V. Una reserva sólo se crea después de pulsar “Confirmar” y aceptar la confirmación final.
                 </div>
 
                 <input id="haiku-asistente-archivos" type="file" accept="image/png,image/jpeg,image/webp" multiple hidden>
@@ -265,6 +265,53 @@
         return "Por confirmar";
     }
 
+    function normalizarClave(texto) {
+        return String(texto || "")
+            .normalize("NFD")
+            .replace(/[\u0300-\u036f]/g, "")
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, " ")
+            .trim();
+    }
+
+    function webpayDesdePreview(preview) {
+        const p = preview?.pago || {};
+        if (p.detectado !== true) return null;
+
+        const medioTexto = normalizarClave(p.medio);
+        let medioRpc = null;
+        let medioEtiqueta = null;
+
+        if (medioTexto.includes("webpay") && medioTexto.includes("debito")) {
+            medioRpc = "webpay_debito";
+            medioEtiqueta = "WebPay Débito";
+        } else if (medioTexto.includes("webpay") && medioTexto.includes("credito")) {
+            medioRpc = "webpay_credito";
+            medioEtiqueta = "WebPay Crédito";
+        }
+
+        const monto = Number(p.monto);
+        const codaut = String(p.codaut || "").trim();
+        const fecha = /^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))
+            ? String(p.fecha)
+            : null;
+
+        return {
+            medioRpc,
+            medioEtiqueta,
+            monto,
+            codaut,
+            fecha,
+            valido: Boolean(
+                medioRpc &&
+                Number.isFinite(monto) &&
+                monto > 0 &&
+                codaut &&
+                fecha
+            )
+        };
+    }
+
     function agregarDato(contenedor, etiqueta, valor) {
         if (valor === null || valor === undefined || valor === "") return;
         const fila = document.createElement("div");
@@ -295,6 +342,7 @@
 
     function problemasParaCrear(preview) {
         const r = preview?.reserva || {};
+        const p = preview?.pago || {};
         const problemas = [];
 
         if (r.tipo_estadia !== "alojamiento") {
@@ -306,6 +354,14 @@
         if (!Number.isInteger(Number(r.cabana)) || Number(r.cabana) < 1) problemas.push("Falta cabaña válida.");
         if (!String(r.cloudbeds_id || "").trim()) problemas.push("Falta ID de reserva Cloudbeds.");
         if (preview?.confianza === "baja") problemas.push("La confianza de lectura es baja.");
+
+        if (p.detectado === true) {
+            const webpay = webpayDesdePreview(preview);
+            if (!webpay?.medioRpc) problemas.push("Por ahora el pago automático sólo admite WebPay Crédito o Débito explícito.");
+            if (!Number.isFinite(Number(p.monto)) || Number(p.monto) <= 0) problemas.push("Falta monto WebPay válido.");
+            if (!String(p.codaut || "").trim()) problemas.push("Falta COD.AUT del WebPay.");
+            if (!/^\d{4}-\d{2}-\d{2}$/.test(String(p.fecha || ""))) problemas.push("Falta fecha válida del WebPay.");
+        }
 
         return problemas;
     }
@@ -329,6 +385,7 @@
 
         const r = preview.reserva;
         const cabana = Number(r.cabana);
+        const webpay = webpayDesdePreview(preview);
 
         const { data: disponibles, error: errorDisponibilidad } = await cliente.rpc(
             "haiku_cabanas_disponibles",
@@ -347,6 +404,54 @@
 
         if (!disponible) {
             throw new Error(`CAB ${cabana} ya no está disponible para ese rango.`);
+        }
+
+        if (webpay?.valido) {
+            if (!window.haikuTienePermiso?.("pagos.registrar")) {
+                throw new Error("Tu usuario no tiene permiso para registrar pagos.");
+            }
+            if (!window.haikuTienePermiso?.("pagos.verificar")) {
+                throw new Error("Tu usuario no tiene permiso para verificar pagos.");
+            }
+
+            const fechaPagoIso = new Date(`${webpay.fecha}T12:00:00`).toISOString();
+            const { data, error } = await cliente.rpc(
+                "haiku_crear_reserva_con_webpay",
+                {
+                    p_titular_nombre: r.titular_nombre,
+                    p_cabana_numero: cabana,
+                    p_fecha_ingreso: r.fecha_llegada,
+                    p_fecha_salida: r.fecha_salida,
+                    p_adultos: Math.max(0, Number(r.adultos ?? 1)),
+                    p_ninos: Math.max(0, Number(r.ninos ?? 0)),
+                    p_mascotas: Math.max(0, Number(r.mascotas ?? 0)),
+                    p_correo_contacto: r.correo || null,
+                    p_telefono_contacto: r.telefono || null,
+                    p_observaciones: r.observaciones || null,
+                    p_tarifas: {},
+                    p_acompanantes: nombresAcompanantes(preview),
+                    p_cloudbeds_id: String(r.cloudbeds_id).trim(),
+                    p_webpay_monto: Math.round(webpay.monto),
+                    p_webpay_medio: webpay.medioRpc,
+                    p_webpay_codaut: webpay.codaut,
+                    p_webpay_fecha_pago: fechaPagoIso
+                }
+            );
+
+            if (error) {
+                if (error?.code === "23505" || /cloudbeds_id|reservas_cloudbeds_id_uidx/i.test(error?.message || "")) {
+                    throw new Error("Esta reserva de Cloudbeds ya existe en Proyecto H.");
+                }
+                throw error;
+            }
+
+            return {
+                ...data,
+                pago_confirmado: true,
+                medio_pago: webpay.medioEtiqueta,
+                monto_pago: webpay.monto,
+                codaut: webpay.codaut
+            };
         }
 
         const { data, error } = await cliente.rpc(
@@ -390,6 +495,8 @@
         }
 
         try { await window.HAIKU_OPERACION_RESUMEN_FIX_V1?.refrescar?.(); } catch {}
+        try { if (typeof window.cargarAbonosPagos === "function") await window.cargarAbonosPagos(); } catch {}
+        try { if (typeof window.cargarSaldosCheckin === "function") await window.cargarSaldosCheckin(); } catch {}
         try { if (typeof generarCalendario === "function") generarCalendario(); } catch {}
     }
 
@@ -490,62 +597,104 @@
         botonCrear.type = "button";
 
         const problemas = problemasParaCrear(preview);
-        const tienePermiso = window.haikuTienePermiso?.("reservas.crear") === true;
-        const puedeCrear = problemas.length === 0 && tienePermiso;
+        const webpay = webpayDesdePreview(preview);
+        const requiereWebpay = p.detectado === true;
+        const tienePermisoReserva = window.haikuTienePermiso?.("reservas.crear") === true;
+        const tienePermisoPago = !requiereWebpay || (
+            window.haikuTienePermiso?.("pagos.registrar") === true &&
+            window.haikuTienePermiso?.("pagos.verificar") === true
+        );
+        const puedeCrear = problemas.length === 0 && tienePermisoReserva && tienePermisoPago;
 
         botonCrear.disabled = !puedeCrear;
         botonCrear.textContent = puedeCrear
-            ? "Confirmar y crear"
+            ? webpay?.valido
+                ? "Confirmar reserva + abono"
+                : "Confirmar y crear"
             : r.tipo_estadia === "full_day"
                 ? "Full Day · próxima etapa"
                 : "Crear reserva · revisar datos";
+
         if (problemas.length) botonCrear.title = problemas.join(" ");
-        if (!tienePermiso) botonCrear.title = "Tu usuario no tiene permiso para crear reservas.";
+        if (!tienePermisoReserva) botonCrear.title = "Tu usuario no tiene permiso para crear reservas.";
+        if (requiereWebpay && !tienePermisoPago) botonCrear.title = "Tu usuario no tiene permisos para registrar y verificar este WebPay.";
 
         botonCrear.addEventListener("click", async () => {
             if (guardandoReserva || botonCrear.disabled) return;
 
-            const confirmacion = [
-                "CONFIRMAR CREACIÓN DE RESERVA",
+            const lineasConfirmacion = [
+                "CONFIRMAR CREACIÓN",
                 "",
                 `${r.titular_nombre}`,
                 `CAB ${r.cabana}`,
                 `${fechaVisible(r.fecha_llegada)} → ${fechaVisible(r.fecha_salida)}`,
                 `${Number(r.adultos ?? 1)} adulto(s)`,
-                `ID Cloudbeds: ${r.cloudbeds_id}`,
+                `ID Cloudbeds: ${r.cloudbeds_id}`
+            ];
+
+            if (webpay?.valido) {
+                lineasConfirmacion.push(
+                    "",
+                    `ABONO: ${moneda(webpay.monto, "CLP")}`,
+                    `Medio: ${webpay.medioEtiqueta}`,
+                    `Fecha pago: ${fechaVisible(webpay.fecha)}`,
+                    `COD.AUT: ${webpay.codaut}`,
+                    "",
+                    "La reserva y el abono se guardarán juntos en una sola operación."
+                );
+            }
+
+            lineasConfirmacion.push(
                 "",
                 "Se usarán las tarifas catálogo configuradas en Proyecto H para cada noche.",
-                "La reserva se guardará sólo si la cabaña sigue disponible.",
+                "La cabaña volverá a validarse justo antes de guardar.",
                 "",
-                "¿Confirmas crearla?"
-            ].join("\n");
+                webpay?.valido
+                    ? "¿Confirmas crear la reserva y registrar este abono?"
+                    : "¿Confirmas crear la reserva?"
+            );
 
-            if (!window.confirm(confirmacion)) return;
+            if (!window.confirm(lineasConfirmacion.join("\n"))) return;
 
             const textoOriginal = botonCrear.textContent;
             guardandoReserva = true;
             actualizarEnviar();
             botonCrear.disabled = true;
-            botonCrear.textContent = "Creando reserva…";
+            botonCrear.textContent = webpay?.valido
+                ? "Creando reserva + abono…"
+                : "Creando reserva…";
             estado.textContent = "Validando disponibilidad antes de guardar…";
 
             try {
                 const creada = await crearReservaDesdePreview(preview);
                 await refrescarDespuesDeCrear();
 
-                marca.textContent = "RESERVA CREADA";
-                estado.textContent = `✅ Reserva creada en Proyecto H${creada?.codigo_haiku ? ` · ${creada.codigo_haiku}` : ""}.`;
-                botonCrear.textContent = "Reserva creada";
+                if (creada?.pago_confirmado) {
+                    marca.textContent = "RESERVA + ABONO CREADOS";
+                    const saldoTexto = Number.isFinite(Number(creada?.saldo_restante))
+                        ? ` · saldo restante ${moneda(creada.saldo_restante, "CLP")}`
+                        : "";
+                    estado.textContent = `✅ Reserva y WebPay guardados correctamente${creada?.codigo_haiku ? ` · ${creada.codigo_haiku}` : ""}${saldoTexto}.`;
+                    botonCrear.textContent = "Reserva + abono creados";
+                    agregarMensaje(
+                        "asistente",
+                        `Reserva de ${r.titular_nombre} creada en CAB ${r.cabana} y abono ${moneda(creada.monto_pago, "CLP")} confirmado.`
+                    );
+                } else {
+                    marca.textContent = "RESERVA CREADA";
+                    estado.textContent = `✅ Reserva creada en Proyecto H${creada?.codigo_haiku ? ` · ${creada.codigo_haiku}` : ""}.`;
+                    botonCrear.textContent = "Reserva creada";
+                    agregarMensaje(
+                        "asistente",
+                        `Reserva de ${r.titular_nombre} creada correctamente en CAB ${r.cabana}.`
+                    );
+                }
+
                 botonCrear.disabled = true;
                 card.dataset.haikuReservaCreada = "1";
-
-                agregarMensaje(
-                    "asistente",
-                    `Reserva de ${r.titular_nombre} creada correctamente en CAB ${r.cabana}.`
-                );
             } catch (error) {
                 console.error("HAIKU · Asistente no pudo crear reserva:", error);
-                estado.textContent = `⚠️ No se guardó la reserva: ${error?.message || "error desconocido"}`;
+                estado.textContent = `⚠️ No se guardó la operación: ${error?.message || "error desconocido"}`;
                 botonCrear.textContent = textoOriginal;
                 botonCrear.disabled = false;
             } finally {
@@ -717,5 +866,5 @@
     actualizarEnviar();
     mostrarSiCorresponde();
 
-    console.info("HAIKU · Asistente flotante V3 preparado.");
+    console.info("HAIKU · Asistente flotante V4 preparado.");
 })();
