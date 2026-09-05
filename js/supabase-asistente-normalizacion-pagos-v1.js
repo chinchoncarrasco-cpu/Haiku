@@ -78,8 +78,6 @@
         const tieneGlosa = Boolean(glosa);
         const tiposReferencia = [tieneCodaut, tieneTarjeta, tieneGlosa].filter(Boolean).length;
 
-        // Dos familias de referencias distintas en el MISMO pago son una
-        // contradiccion real. No elegimos una por intuicion.
         if (tiposReferencia > 1) {
             pago.medio = "Referencia incompatible · revisar";
             agregarUnico(
@@ -472,7 +470,6 @@
 
         observador.observe(mensajes, { childList: true });
 
-        // Corte de seguridad: nunca dejamos el observador esperando de forma indefinida.
         window.setTimeout(() => {
             if (!observador) return;
             observador.disconnect();
@@ -490,6 +487,18 @@
         normalizarPreview,
         problemasPreview
     });
+
+    // El override del operador se carga DESPUÉS del normalizador para que
+    // pueda apoyarse en sus reglas duras sin tocar el motor principal.
+    if (!window.HAIKU_ASISTENTE_OVERRIDES_OPERADOR_V1 &&
+        !document.querySelector('script[data-haku-overrides-operador-v1]')) {
+        const scriptOverride = document.createElement("script");
+        scriptOverride.dataset.hakuOverridesOperadorV1 = "1";
+        const version = new URL(document.currentScript?.src || location.href).searchParams.get("v") || Date.now();
+        scriptOverride.src = `js/supabase-asistente-overrides-operador-v1.js?v=${encodeURIComponent(version)}`;
+        scriptOverride.async = false;
+        document.head.appendChild(scriptOverride);
+    }
 
     console.info("HAKU · Normalizacion deterministica de pagos V1 preparada.");
 })();
