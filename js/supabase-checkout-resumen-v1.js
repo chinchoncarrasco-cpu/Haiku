@@ -50,8 +50,8 @@
 
     function aplicarFila(estadia, fecha) {
         const numero = String(estadia?.cabanas?.numero || "");
-        const reservaId = String(estadia?.reserva_id || "");
-        if (!numero || !reservaId) return false;
+        const reservaIdSalida = String(estadia?.reserva_id || "");
+        if (!numero || !reservaIdSalida) return false;
 
         let datosDia = null;
         try {
@@ -63,27 +63,50 @@
         const cabana = datosDia?.cabanas?.[numero];
         if (!cabana) return false;
 
-        // No pintar una salida anterior sobre una nueva reserva que entró en
-        // la misma CAB el mismo día (SALE / INGRESA).
-        if (String(cabana.reservaId || "") !== reservaId) return false;
+        const reservaIdVisible = String(cabana.reservaId || "");
+        const mismaReserva = reservaIdVisible === reservaIdSalida;
+        const saleIngresa = cabana.estado === "sale-ingresa";
+
+        // Si la fila ya representa otra reserva, sólo podemos proyectar la
+        // salida anterior cuando el propio estado operativo confirma que ese
+        // día es SALE / INGRESA. Así no pintamos salidas antiguas en una CAB
+        // que ya pertenece a una reserva completamente distinta.
+        if (!mismaReserva && !saleIngresa) return false;
 
         const hora = horaChile(estadia.checkout_realizado_en);
-
-        // En la fecha de salida, el checkout real domina visualmente al
-        // check-in anterior de la misma estadía.
-        cabana.checkinRealizado = false;
         cabana.checkoutRealizado = true;
         if (!cabana.checkout && hora) cabana.checkout = hora;
+
+        // Si la fila todavía representa a la reserva que salió, su check-in
+        // anterior ya no debe ganar el color. En SALE / INGRESA, en cambio,
+        // checkinRealizado pertenece al huésped que entra y se conserva.
+        if (mismaReserva) {
+            cabana.checkinRealizado = false;
+        }
 
         const fila = document.querySelector(`tr[data-cabana="${numero}"]`);
         if (!fila) return false;
 
+        const nuevoHuespedYaIngreso =
+            !mismaReserva &&
+            saleIngresa &&
+            cabana.checkinRealizado === true;
+
         fila.classList.remove(
+            "cabana-checkout",
             "cabana-checkin",
             "cabana-libre",
             "cabana-ingresa"
         );
-        fila.classList.add("cabana-checkout");
+
+        // En SALE / INGRESA: checkout del huésped anterior = azul hasta que
+        // el nuevo huésped haga check-in. Desde ese momento prima verde.
+        if (nuevoHuespedYaIngreso) {
+            fila.classList.add("cabana-checkin");
+        } else {
+            fila.classList.add("cabana-checkout");
+        }
+
         fila.dataset.haikuCheckoutSupabase = "1";
 
         const inputCheckout = fila.querySelector('[data-campo="checkout"]');
