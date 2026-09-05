@@ -89,9 +89,31 @@
         console.log("HAIKU · Aseo -> Revisión Supabase Sync V1 activo.");
     }
 
+    function cargarSyncResumenAseo() {
+        if (
+            window.HAIKU_ASEO_RESUMEN_SYNC_V1 ||
+            document.querySelector('script[data-haiku-aseo-resumen-sync-v1]')
+        ) {
+            return;
+        }
+
+        const script = document.createElement("script");
+        script.src = `js/supabase-aseo-resumen-sync-v1.js?v=${Date.now()}`;
+        script.dataset.haikuAseoResumenSyncV1 = "1";
+        script.async = false;
+        script.onerror = () => {
+            console.error("HAIKU · No fue posible cargar Aseo Resumen Sync V1.");
+        };
+        document.head.appendChild(script);
+    }
+
     if (document.readyState === "loading") {
-        document.addEventListener("DOMContentLoaded", instalar, { once: true });
+        document.addEventListener("DOMContentLoaded", () => {
+            instalar();
+            cargarSyncResumenAseo();
+        }, { once: true });
     } else {
         instalar();
+        cargarSyncResumenAseo();
     }
 })();
