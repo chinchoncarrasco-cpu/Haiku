@@ -120,7 +120,7 @@
         if (!ids.length) return [];
         const { data, error } = await cliente
             .from("pagos")
-            .select("id,reserva_id,monto,medio_pago,folio,codigo_autorizacion,referencia_externa,fecha_pago,verificado_por,verificado_en,estado")
+            .select("id,reserva_id,monto,medio_pago,folio,codigo_autorizacion,bove,referencia_externa,fecha_pago,verificado_por,verificado_en,estado")
             .in("reserva_id", ids)
             .eq("tipo_movimiento", "pago")
             .eq("etapa_operativa", "saldo")
@@ -167,6 +167,7 @@
             : "Sin revisión registrada";
         const extras = [];
         if (pago.referencia_externa) extras.push(`Glosa: ${escapar(pago.referencia_externa)}`);
+        if (pago.bove) extras.push(`BOVTAR: ${escapar(pago.bove)}`);
         if (pago.folio) extras.push(`Folio: ${escapar(pago.folio)}`);
         if (pago.codigo_autorizacion) extras.push(`CodAut: ${escapar(pago.codigo_autorizacion)}`);
 
@@ -186,14 +187,28 @@
     }
 
     function requisitosMedio(medioDB) {
-        if (medioDB === "transferencia") return { glosa: true, folio: false, codAut: false };
-        if (["webpay_credito", "webpay_debito"].includes(medioDB)) return { glosa: false, folio: false, codAut: true };
-        if (["tarjeta_credito", "tarjeta_debito"].includes(medioDB)) return { glosa: false, folio: true, codAut: true };
-        return { glosa: false, folio: false, codAut: false };
+        if (medioDB === "transferencia") {
+            return { glosa: true, folio: false, bovtar: false, codAut: false };
+        }
+        if (["webpay_credito", "webpay_debito"].includes(medioDB)) {
+            return { glosa: false, folio: false, bovtar: false, codAut: true };
+        }
+        if (["tarjeta_credito", "tarjeta_debito"].includes(medioDB)) {
+            return { glosa: false, folio: true, bovtar: true, codAut: false };
+        }
+        return { glosa: false, folio: false, bovtar: false, codAut: false };
     }
 
     function borradorInicial(saldo) {
-        return { monto: Number(saldo || 0), medio: "", glosa: "", folio: "", codAut: "", manager: false };
+        return {
+            monto: Number(saldo || 0),
+            medio: "",
+            glosa: "",
+            folio: "",
+            bovtar: "",
+            codAut: "",
+            manager: false
+        };
     }
 
     function leerFormulario(tarjeta) {
@@ -202,6 +217,7 @@
             medio: tarjeta.querySelector("[data-haiku-saldo-medio]")?.value || "",
             glosa: tarjeta.querySelector("[data-haiku-saldo-glosa]")?.value.trim() || "",
             folio: tarjeta.querySelector("[data-haiku-saldo-folio]")?.value.trim() || "",
+            bovtar: tarjeta.querySelector("[data-haiku-saldo-bovtar]")?.value.trim() || "",
             codAut: tarjeta.querySelector("[data-haiku-saldo-codaut]")?.value.trim() || "",
             manager: tarjeta.querySelector("[data-haiku-saldo-manager]")?.checked === true
         };
@@ -215,7 +231,12 @@
     function actualizarCamposPorMedio(tarjeta) {
         const medioUI = tarjeta.querySelector("[data-haiku-saldo-medio]")?.value || "";
         const req = requisitosMedio(MEDIOS[medioUI] || "");
-        [["glosa", req.glosa], ["folio", req.folio], ["codaut", req.codAut]].forEach(([campo, visible]) => {
+        [
+            ["glosa", req.glosa],
+            ["folio", req.folio],
+            ["bovtar", req.bovtar],
+            ["codaut", req.codAut]
+        ].forEach(([campo, visible]) => {
             const fila = tarjeta.querySelector(`[data-haiku-campo-${campo}]`);
             const input = tarjeta.querySelector(`[data-haiku-saldo-${campo}]`);
             if (fila) fila.hidden = !visible;
@@ -233,6 +254,7 @@
                 <div class="haiku-saldo-datos-dinamicos">
                     <label data-haiku-campo-glosa hidden><span>Glosa</span><input type="text" data-haiku-saldo-glosa value="${escapar(borrador.glosa)}" placeholder="Pegar glosa bancaria"></label>
                     <label data-haiku-campo-folio hidden><span>Folio</span><input type="text" data-haiku-saldo-folio value="${escapar(borrador.folio)}" placeholder="Rellenar"></label>
+                    <label data-haiku-campo-bovtar hidden><span>BOVTAR</span><input type="text" data-haiku-saldo-bovtar value="${escapar(borrador.bovtar)}" placeholder="Rellenar"></label>
                     <label data-haiku-campo-codaut hidden><span>CodAut</span><input type="text" data-haiku-saldo-codaut value="${escapar(borrador.codAut)}" placeholder="Rellenar"></label>
                     <label class="haiku-saldo-manager"><span>Manager</span><span class="haiku-saldo-check-wrap"><input type="checkbox" data-haiku-saldo-manager ${borrador.manager ? "checked" : ""}>Revisado</span></label>
                 </div>
@@ -372,7 +394,14 @@
 
     document.addEventListener("input", evento => {
         const tarjeta = evento.target.closest?.(".haiku-saldo-v5[data-reserva-id]");
-        if (tarjeta && evento.target.matches("[data-haiku-saldo-monto],[data-haiku-saldo-glosa],[data-haiku-saldo-folio],[data-haiku-saldo-codaut]")) guardarBorrador(tarjeta);
+        if (
+            tarjeta &&
+            evento.target.matches(
+                "[data-haiku-saldo-monto],[data-haiku-saldo-glosa],[data-haiku-saldo-folio],[data-haiku-saldo-bovtar],[data-haiku-saldo-codaut]"
+            )
+        ) {
+            guardarBorrador(tarjeta);
+        }
     }, true);
 
     document.addEventListener("change", evento => {
@@ -401,8 +430,9 @@
         if (d.monto <= 0) return alert("Ingresa el monto de este pago.");
         if (!medioDB) return alert("Selecciona el medio de pago.");
         if (req.glosa && !d.glosa) return alert("Transferencia requiere Glosa.");
-        if (req.folio && !d.folio) return alert("Este medio requiere Folio.");
-        if (req.codAut && !d.codAut) return alert("Este medio requiere CodAut.");
+        if (req.folio && !d.folio) return alert("Tarjeta requiere Folio.");
+        if (req.bovtar && !d.bovtar) return alert("Tarjeta requiere BOVTAR.");
+        if (req.codAut && !d.codAut) return alert("WebPay requiere CodAut.");
         if (!d.manager) return alert("Manager debe revisar el pago antes de registrarlo.");
         if (!window.haikuTienePermiso?.("pagos.registrar")) return alert("Tu usuario no tiene permiso para registrar pagos.");
         if (!window.haikuTienePermiso?.("pagos.verificar")) return alert("Tu usuario no tiene permiso para validar pagos como Manager.");
@@ -412,12 +442,13 @@
         boton.disabled = true;
         boton.textContent = "Registrando…";
         try {
-            const { data, error } = await cliente.rpc("haiku_registrar_pago_checkin", {
+            const { data, error } = await cliente.rpc("haiku_registrar_pago_checkin_v2", {
                 p_reserva_id: reservaId,
                 p_monto: d.monto,
                 p_medio_pago: medioDB,
                 p_glosa: d.glosa || null,
                 p_folio: d.folio || null,
+                p_bovtar: d.bovtar || null,
                 p_codigo_autorizacion: d.codAut || null,
                 p_manager_revisado: true
             });
