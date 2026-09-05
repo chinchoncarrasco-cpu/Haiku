@@ -104,19 +104,19 @@
     console.info("HAIKU · Guard de ficha visual preparado.");
 })();
 
-// Extensión aislada: conecta el botón manual "Hospedado" de la ficha
-// con la autoridad real de check-in en Supabase. Si esta extensión falla,
-// el guard visual anterior continúa funcionando sin cambios.
+// Extensión aislada: conecta los estados manuales persistentes de la ficha
+// con la autoridad real de Supabase. Si esta extensión falla, el guard visual
+// anterior continúa funcionando sin cambios.
 (() => {
-    if (window.HAIKU_FICHA_HOSPEDADO_V1) return;
+    if (window.HAIKU_FICHA_ESTADOS_MANUALES_V2) return;
     if (document.querySelector('script[data-haiku-ficha-hospedado-v1]')) return;
 
     const script = document.createElement("script");
-    script.src = "js/supabase-ficha-hospedado-v1.js?v=1";
+    script.src = "js/supabase-ficha-hospedado-v1.js?v=2";
     script.async = false;
     script.dataset.haikuFichaHospedadoV1 = "1";
     script.onerror = () => {
-        console.error("HAIKU · No fue posible cargar Hospedado manual Supabase V1.");
+        console.error("HAIKU · No fue posible cargar estados manuales Supabase V2.");
     };
     document.head.appendChild(script);
 })();
