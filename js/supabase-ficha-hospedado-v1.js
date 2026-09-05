@@ -69,8 +69,6 @@
             return f === ingreso;
         }
 
-        // Incluimos la fecha de salida para poder operar una reserva desde
-        // el día en que efectivamente abandona la cabaña.
         return f >= ingreso && f <= salida;
     }
 
@@ -129,9 +127,6 @@
             });
         } catch (_) {}
 
-        // SALE / INGRESA puede mostrar la reserva entrante en la fila, pero la
-        // hora de salida pertenece a la reserva anterior. Limpiamos también el
-        // dato operativo de CAB + fecha de salida cuando se revierte el checkout.
         try {
             if (cabana && salida && typeof obtenerDatosDia === "function") {
                 const diaSalida = obtenerDatosDia(salida);
@@ -149,12 +144,17 @@
     async function refrescarInterfaz() {
         try { await window.haikuSincronizarReservasSupabase?.(); } catch (_) {}
         try { await window.HAIKU_OPERACION_RESUMEN_FIX_V1?.refrescar?.(); } catch (_) {}
-        try { await window.HAIKU_CHECKOUT_RESUMEN_V1?.refrescar?.(); } catch (_) {}
+
+        // Primero reconstruimos la fila con los datos frescos.
         try {
             if (typeof cargarCabanasDia === "function") {
                 cargarCabanasDia(fechaSeleccionada);
             }
         } catch (_) {}
+
+        // Después aplicamos la jerarquía final de colores y checkout.
+        try { await window.HAIKU_CHECKOUT_RESUMEN_V2?.refrescar?.(); } catch (_) {}
+
         try {
             if (typeof generarCalendario === "function") {
                 generarCalendario();
@@ -170,6 +170,10 @@
                 generarResumenOperativo(fechaSeleccionada);
             }
         } catch (_) {}
+
+        // Los resúmenes auxiliares pueden tocar la fila; reafirmamos sólo los
+        // colores operativos al final, sin volver a consultar ni reconstruir.
+        try { window.HAIKU_CHECKOUT_RESUMEN_V2?.aplicarColores?.(); } catch (_) {}
     }
 
     function pedirConfirmacionReversion(estadoElegido, estadia) {
