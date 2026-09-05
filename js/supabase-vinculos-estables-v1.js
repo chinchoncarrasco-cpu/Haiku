@@ -211,7 +211,6 @@
                 const esPanel = el.classList.contains("calendario-panel-reserva");
                 const texto = String(el.textContent || "").trim();
 
-                // En barras partidas entre semanas, evitamos dejar una flecha sola.
                 if (!esPanel && !texto) return;
 
                 const zona = esPanel ? "panel-calendario" : "calendario";
@@ -340,34 +339,24 @@
                 const modalCorrecto = modal && !modal.hidden &&
                     String(modal.dataset.reservaId || "") === reservaId;
 
-                const decoracionMultitramoLista = !esMultitramo ||
-                    Boolean(document.getElementById("haiku-ficha-cambio-cabana"));
-
-                if (modalCorrecto && decoracionMultitramoLista) {
+                if (modalCorrecto) {
                     aplicarContextoFicha(reservaId, estadia, miToken);
                     pintarMarcaFicha(reservaId, miToken);
 
-                    // El módulo antiguo hace un segundo pase 320 ms después.
-                    // Este único pase final, acotado, deja el tramo correcto como autoridad visual.
                     if (esMultitramo) {
-                        setTimeout(() => {
-                            if (miToken !== tokenFicha) return;
-                            aplicarContextoFicha(reservaId, estadia, miToken);
-                            pintarMarcaFicha(reservaId, miToken);
-                        }, 380);
+                        [380, 900].forEach(demora => {
+                            setTimeout(() => {
+                                if (miToken !== tokenFicha) return;
+                                aplicarContextoFicha(reservaId, estadia, miToken);
+                                pintarMarcaFicha(reservaId, miToken);
+                            }, demora);
+                        });
                     }
                     return;
                 }
 
                 if (performance.now() - inicioEspera < 5000) {
                     requestAnimationFrame(esperarFichaLista);
-                    return;
-                }
-
-                // Fail-safe: si el panel auxiliar no llegó, corregimos sólo si la ficha real sí abrió.
-                if (modalCorrecto) {
-                    aplicarContextoFicha(reservaId, estadia, miToken);
-                    pintarMarcaFicha(reservaId, miToken);
                 }
             };
 
@@ -393,7 +382,6 @@
         });
     }
 
-    // Capturamos CAB/fecha antes de que Ficha V2 use stopImmediatePropagation.
     window.addEventListener("click", evento => {
         const boton = evento.target.closest?.("[data-ficha-cabana]");
         if (!boton || !window.haikuSesion) return;
