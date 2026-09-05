@@ -13,6 +13,7 @@
     let renderizando = false;
     let guardandoPago = false;
     let guardandoBove = false;
+    let guardandoEdicionPago = false;
     let timerRender = null;
 
     const MEDIOS = Object.freeze({
@@ -160,6 +161,47 @@
         return mapa;
     }
 
+    function requisitosMedio(medioDB) {
+        if (medioDB === "transferencia") {
+            return { glosa: true, folio: false, bovtar: false, codAut: false };
+        }
+        if (["webpay_credito", "webpay_debito"].includes(medioDB)) {
+            return { glosa: false, folio: false, bovtar: false, codAut: true };
+        }
+        if (["tarjeta_credito", "tarjeta_debito"].includes(medioDB)) {
+            return { glosa: false, folio: true, bovtar: true, codAut: false };
+        }
+        return { glosa: false, folio: false, bovtar: false, codAut: false };
+    }
+
+    function htmlEditorPago(pago) {
+        const medioUI = MEDIOS_UI[pago.medio_pago] || "";
+        return `
+            <div class="haiku-pago-editor" data-haiku-pago-editor hidden>
+                <div class="haiku-pago-editor-grid">
+                    <label>
+                        <span>Medio de pago</span>
+                        <select data-haiku-editar-pago-medio>${opcionesMedio(medioUI)}</select>
+                    </label>
+                    <div class="haiku-pago-editor-monto">
+                        <span>Monto registrado</span>
+                        <strong>${dinero(pago.monto)}</strong>
+                        <small>El monto no se modifica.</small>
+                    </div>
+                </div>
+                <div class="haiku-pago-editor-datos">
+                    <label data-haiku-editar-campo-glosa hidden><span>Glosa</span><input type="text" data-haiku-editar-pago-glosa value="${escapar(pago.referencia_externa || "")}" placeholder="Pegar glosa bancaria"></label>
+                    <label data-haiku-editar-campo-folio hidden><span>Folio</span><input type="text" data-haiku-editar-pago-folio value="${escapar(pago.folio || "")}" placeholder="Rellenar"></label>
+                    <label data-haiku-editar-campo-bovtar hidden><span>BOVTAR</span><input type="text" data-haiku-editar-pago-bovtar value="${escapar(pago.bove || "")}" placeholder="Rellenar"></label>
+                    <label data-haiku-editar-campo-codaut hidden><span>CodAut</span><input type="text" data-haiku-editar-pago-codaut value="${escapar(pago.codigo_autorizacion || "")}" placeholder="Rellenar"></label>
+                </div>
+                <div class="haiku-pago-editor-acciones">
+                    <button type="button" class="haiku-pago-editor-cancelar" data-haiku-editar-pago-cancelar>Cancelar</button>
+                    <button type="button" class="haiku-pago-editor-guardar" data-haiku-editar-pago-guardar>Guardar corrección</button>
+                </div>
+            </div>`;
+    }
+
     function htmlPagoConfirmado(pago, usuarios) {
         const medio = MEDIOS_UI[pago.medio_pago] || pago.medio_pago || "Sin medio";
         const revisor = pago.verificado_por
@@ -172,31 +214,46 @@
         if (pago.codigo_autorizacion) extras.push(`CodAut: ${escapar(pago.codigo_autorizacion)}`);
 
         return `
-            <div class="haiku-saldo-pago-confirmado">
+            <div class="haiku-saldo-pago-confirmado" data-haiku-pago-id="${pago.id}">
                 <div class="haiku-saldo-pago-principal">
                     <strong>${dinero(pago.monto)}</strong>
                     <span>${escapar(medio)}</span>
                     <span class="haiku-pago-ok">✓</span>
+                    <button type="button" class="haiku-pago-editar" data-haiku-pago-editar>Editar</button>
                 </div>
                 <div class="haiku-saldo-pago-meta">
                     ${extras.length ? `<span>${extras.join(" · ")}</span>` : ""}
                     <span>Manager: ${escapar(revisor)}</span>
                     ${pago.verificado_en || pago.fecha_pago ? `<span>${escapar(fechaHora(pago.verificado_en || pago.fecha_pago))}</span>` : ""}
                 </div>
+                ${htmlEditorPago(pago)}
             </div>`;
     }
 
-    function requisitosMedio(medioDB) {
-        if (medioDB === "transferencia") {
-            return { glosa: true, folio: false, bovtar: false, codAut: false };
-        }
-        if (["webpay_credito", "webpay_debito"].includes(medioDB)) {
-            return { glosa: false, folio: false, bovtar: false, codAut: true };
-        }
-        if (["tarjeta_credito", "tarjeta_debito"].includes(medioDB)) {
-            return { glosa: false, folio: true, bovtar: true, codAut: false };
-        }
-        return { glosa: false, folio: false, bovtar: false, codAut: false };
+    function actualizarCamposEditorPago(editor) {
+        const medioUI = editor?.querySelector("[data-haiku-editar-pago-medio]")?.value || "";
+        const req = requisitosMedio(MEDIOS[medioUI] || "");
+        [
+            ["glosa", req.glosa],
+            ["folio", req.folio],
+            ["bovtar", req.bovtar],
+            ["codaut", req.codAut]
+        ].forEach(([campo, visible]) => {
+            const fila = editor?.querySelector(`[data-haiku-editar-campo-${campo}]`);
+            const input = editor?.querySelector(`[data-haiku-editar-pago-${campo}]`);
+            if (fila) fila.hidden = !visible;
+            input?.toggleAttribute("required", visible);
+        });
+    }
+
+    function leerEditorPago(editor) {
+        return {
+            medio: editor?.querySelector("[data-haiku-editar-pago-medio]")?.value || "",
+            glosa: editor?.querySelector("[data-haiku-editar-pago-glosa]")?.value.trim() || "",
+            folio: editor?.querySelector("[data-haiku-editar-pago-folio]")?.value.trim() || "",
+            bovtar: editor?.querySelector("[data-haiku-editar-pago-bovtar]")?.value.trim() || "",
+            codAut: editor?.querySelector("[data-haiku-editar-pago-codaut]")?.value.trim() || ""
+        };
     }
 
     function borradorInicial(saldo) {
@@ -413,6 +470,90 @@
         }
     }, true);
 
+    document.addEventListener("change", evento => {
+        const select = evento.target.closest?.("[data-haiku-editar-pago-medio]");
+        if (!select) return;
+        actualizarCamposEditorPago(select.closest("[data-haiku-pago-editor]"));
+    }, true);
+
+    document.addEventListener("click", evento => {
+        const boton = evento.target.closest?.("[data-haiku-pago-editar]");
+        if (!boton) return;
+        evento.preventDefault();
+        const contenedor = boton.closest("[data-haiku-pago-id]");
+        const editor = contenedor?.querySelector("[data-haiku-pago-editor]");
+        if (!editor) return;
+        const abrir = editor.hidden;
+        document.querySelectorAll("[data-haiku-pago-editor]:not([hidden])").forEach(otro => {
+            if (otro !== editor) otro.hidden = true;
+        });
+        editor.hidden = !abrir;
+        boton.textContent = abrir ? "Cerrar" : "Editar";
+        if (abrir) actualizarCamposEditorPago(editor);
+    }, true);
+
+    document.addEventListener("click", evento => {
+        const boton = evento.target.closest?.("[data-haiku-editar-pago-cancelar]");
+        if (!boton) return;
+        evento.preventDefault();
+        const editor = boton.closest("[data-haiku-pago-editor]");
+        const contenedor = boton.closest("[data-haiku-pago-id]");
+        if (editor) editor.hidden = true;
+        const abrir = contenedor?.querySelector("[data-haiku-pago-editar]");
+        if (abrir) abrir.textContent = "Editar";
+    }, true);
+
+    document.addEventListener("click", async evento => {
+        const boton = evento.target.closest?.("[data-haiku-editar-pago-guardar]");
+        if (!boton || guardandoEdicionPago) return;
+        const contenedor = boton.closest("[data-haiku-pago-id]");
+        const editor = boton.closest("[data-haiku-pago-editor]");
+        const pagoId = contenedor?.dataset?.haikuPagoId || "";
+        if (!pagoId || !editor) return;
+
+        evento.preventDefault();
+        evento.stopPropagation();
+
+        const d = leerEditorPago(editor);
+        const medioDB = MEDIOS[d.medio] || "";
+        const req = requisitosMedio(medioDB);
+        if (!medioDB) return alert("Selecciona el medio de pago.");
+        if (req.glosa && !d.glosa) return alert("Transferencia requiere Glosa.");
+        if (req.folio && !d.folio) return alert("Tarjeta requiere Folio.");
+        if (req.bovtar && !d.bovtar) return alert("Tarjeta requiere BOVTAR.");
+        if (req.codAut && !d.codAut) return alert("WebPay requiere CodAut.");
+        if (!window.haikuTienePermiso?.("pagos.registrar") || !window.haikuTienePermiso?.("pagos.verificar")) {
+            return alert("Tu usuario no tiene permiso para editar pagos confirmados.");
+        }
+
+        guardandoEdicionPago = true;
+        const texto = boton.textContent;
+        boton.disabled = true;
+        boton.textContent = "Guardando…";
+        try {
+            const { data, error } = await cliente.rpc("haiku_editar_pago_confirmado_saldo", {
+                p_pago_id: pagoId,
+                p_medio_pago: medioDB,
+                p_glosa: d.glosa || null,
+                p_folio: d.folio || null,
+                p_bovtar: d.bovtar || null,
+                p_codigo_autorizacion: d.codAut || null
+            });
+            if (error) throw error;
+            console.info("HAIKU · Pago confirmado corregido:", data);
+            await cargarSaldosCheckinMixto();
+            await window.HAIKU_PAGOS_PENDIENTES_SUPABASE_V1?.refrescar(fechaActual());
+            await window.haikuSincronizarReservasSupabase?.();
+        } catch (error) {
+            console.error("HAIKU · No fue posible corregir pago confirmado:", error);
+            alert(error?.message || "No fue posible guardar la corrección.");
+        } finally {
+            guardandoEdicionPago = false;
+            boton.disabled = false;
+            boton.textContent = texto;
+        }
+    }, true);
+
     document.addEventListener("click", async evento => {
         const boton = evento.target.closest?.(".haiku-saldo-v5 [data-haiku-saldo-registrar]");
         if (!boton || guardandoPago) return;
@@ -543,6 +684,20 @@
         .haiku-saldo-pagos-lista { display:grid; gap:7px; margin-top:8px; } .haiku-saldo-pago-confirmado { border:1px solid #dbe9df; background:#f5fbf7; border-radius:9px; padding:9px 10px; }
         .haiku-saldo-pago-principal { display:flex; gap:8px; align-items:center; flex-wrap:wrap; } .haiku-saldo-pago-principal strong { font-size:13px; } .haiku-saldo-pago-principal span { font-size:12px; }
         .haiku-pago-ok { margin-left:auto; color:#18834c; font-weight:800; } .haiku-saldo-pago-meta { margin-top:5px; display:grid; gap:2px; color:#6e786f; font-size:10px; }
+        .haiku-pago-editar { border:1px solid #bfd8c7; background:#fff; color:#285b43; border-radius:7px; padding:4px 8px; font-size:10px; font-weight:700; cursor:pointer; }
+        .haiku-pago-editor { margin-top:9px; padding-top:9px; border-top:1px solid #dbe9df; }
+        .haiku-pago-editor[hidden] { display:none !important; }
+        .haiku-pago-editor-grid,.haiku-pago-editor-datos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:8px; }
+        .haiku-pago-editor-grid label,.haiku-pago-editor-datos label { display:grid; gap:4px; font-size:10px; color:#58645d; }
+        .haiku-pago-editor-grid select,.haiku-pago-editor-datos input { width:100%; min-width:0; box-sizing:border-box; }
+        .haiku-pago-editor-datos { margin-top:8px; }
+        .haiku-pago-editor-monto { border:1px solid #dce6df; border-radius:8px; padding:7px 9px; display:grid; gap:2px; background:#fbfdfb; }
+        .haiku-pago-editor-monto span,.haiku-pago-editor-monto small { font-size:9px; color:#738078; } .haiku-pago-editor-monto strong { font-size:13px; color:#26352d; }
+        .haiku-pago-editor-acciones { margin-top:8px; display:flex; justify-content:flex-end; gap:7px; }
+        .haiku-pago-editor-acciones button { min-height:32px; border-radius:8px; padding:0 10px; font-size:10px; font-weight:700; cursor:pointer; }
+        .haiku-pago-editor-cancelar { border:1px solid #d7dfda; background:#fff; color:#536159; }
+        .haiku-pago-editor-guardar { border:0; background:#255f43; color:#fff; }
+        .haiku-pago-editor-guardar:disabled { opacity:.6; cursor:wait; }
         .haiku-saldo-formulario { margin-top:12px; border-top:1px solid #e2e6e3; padding-top:12px; }
         .haiku-saldo-form-grid,.haiku-saldo-datos-dinamicos { display:grid; grid-template-columns:repeat(2,minmax(0,1fr)); gap:9px; }
         .haiku-saldo-form-grid label,.haiku-saldo-datos-dinamicos label { display:grid; gap:5px; font-size:11px; color:#58645d; }
@@ -563,7 +718,7 @@
         .haiku-checkin-servicios-bove strong { color:#1d6942; font-size:11px; }
         .haiku-checkin-servicios-bove small,.haiku-checkin-servicios-pendiente { color:#68736c; font-size:10px; }
         .haiku-checkin-servicios-ok { border-color:#c6e4cf; background:#f6fbf7; }
-        @media (max-width:650px) { .haiku-saldo-form-grid,.haiku-saldo-datos-dinamicos { grid-template-columns:1fr; } .haiku-bove-fila { flex-direction:column; } .haiku-bove-fila button { min-height:38px; } }
+        @media (max-width:650px) { .haiku-saldo-form-grid,.haiku-saldo-datos-dinamicos,.haiku-pago-editor-grid,.haiku-pago-editor-datos { grid-template-columns:1fr; } .haiku-bove-fila { flex-direction:column; } .haiku-bove-fila button { min-height:38px; } }
     `;
     document.head.appendChild(estilo);
 
