@@ -129,6 +129,9 @@
                 generarResumenOperativo(fechaSeleccionada);
             }
         } catch (_) {}
+        try {
+            await window.HAIKU_CHECKOUT_RESUMEN_V1?.refrescar?.();
+        } catch (_) {}
     }
 
     async function ejecutarCambio(opcion, estadoElegido) {
