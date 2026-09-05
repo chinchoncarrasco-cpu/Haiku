@@ -48,11 +48,8 @@
         return modalGuardado;
     }
 
-    // Capturamos una referencia estable apenas se carga la interfaz.
     localizarModal();
 
-    // Este listener se carga ANTES del módulo de reactivación V2. Así podemos
-    // reparar la ficha antes de que V2 intente abrir una reserva cancelada.
     document.addEventListener("click", evento => {
         const resultado = evento.target?.closest?.(
             "[data-haiku-cancelada-supabase='1'][data-reserva-id]"
@@ -104,9 +101,7 @@
     console.info("HAIKU · Guard de ficha visual preparado.");
 })();
 
-// Extensión aislada: conecta los estados manuales persistentes de la ficha
-// con la autoridad real de Supabase. Si esta extensión falla, el guard visual
-// anterior continúa funcionando sin cambios.
+// Estados manuales reversibles.
 (() => {
     if (window.HAIKU_FICHA_ESTADOS_MANUALES_V3) return;
     if (document.querySelector('script[data-haiku-ficha-hospedado-v1]')) return;
@@ -117,6 +112,21 @@
     script.dataset.haikuFichaHospedadoV1 = "1";
     script.onerror = () => {
         console.error("HAIKU · No fue posible cargar estados manuales Supabase V3.");
+    };
+    document.head.appendChild(script);
+})();
+
+// Checkout y colores operativos del Resumen.
+(() => {
+    if (window.HAIKU_CHECKOUT_RESUMEN_V2) return;
+    if (document.querySelector('script[data-haiku-checkout-resumen-v2]')) return;
+
+    const script = document.createElement("script");
+    script.src = "js/supabase-checkout-resumen-v1.js?v=2";
+    script.async = false;
+    script.dataset.haikuCheckoutResumenV2 = "1";
+    script.onerror = () => {
+        console.error("HAIKU · No fue posible cargar Checkout/Resumen V2.");
     };
     document.head.appendChild(script);
 })();
