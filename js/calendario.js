@@ -1123,6 +1123,12 @@ if (claseColor) {
     document.body.appendChild(
         panel
     );
+
+    // El botón +N detiene la propagación del clic, así que la capa de
+    // vínculos no puede depender del listener global para detectar este panel.
+    // Refrescamos una sola vez, cuando el panel ya existe en el DOM.
+    window.HAIKU_VINCULOS_ESTABLES_V1
+        ?.refrescarCalendario?.();
 }
 
 // ========================================
