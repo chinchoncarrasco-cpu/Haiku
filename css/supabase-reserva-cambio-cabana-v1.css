@@ -1,0 +1,197 @@
+.haiku-agregar-otro-alojamiento {
+    margin-left: auto;
+    white-space: nowrap;
+}
+
+.haiku-cambio-cabana-tramos {
+    margin: 12px 0 18px;
+    padding: 14px 16px;
+    border: 1px solid #d8e1dc;
+    border-radius: 14px;
+    background: #f8fbf9;
+}
+
+.haiku-cambio-cabana-cabecera,
+.haiku-cambio-cabana-total,
+.haiku-cambio-cabana-fila {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 14px;
+}
+
+.haiku-cambio-cabana-cabecera small,
+.haiku-ficha-cambio-cabana small {
+    display: block;
+    margin-bottom: 3px;
+    color: #2f7a58;
+    font-size: 10px;
+    font-weight: 800;
+    letter-spacing: .12em;
+}
+
+.haiku-cambio-cabana-cabecera strong {
+    display: block;
+    color: #20352a;
+    font-size: 14px;
+}
+
+.haiku-cambio-cabana-cabecera > span {
+    padding: 5px 9px;
+    border-radius: 999px;
+    background: #e6f3eb;
+    color: #296a4d;
+    font-size: 11px;
+    font-weight: 700;
+}
+
+.haiku-cambio-cabana-lista {
+    display: grid;
+    gap: 8px;
+    margin-top: 12px;
+}
+
+.haiku-cambio-cabana-fila {
+    padding: 10px 12px;
+    border: 1px solid #e1e7e3;
+    border-radius: 10px;
+    background: #fff;
+}
+
+.haiku-cambio-cabana-fila > div:first-child {
+    min-width: 0;
+}
+
+.haiku-cambio-cabana-fila strong,
+.haiku-cambio-cabana-fila span {
+    display: block;
+}
+
+.haiku-cambio-cabana-fila span {
+    margin-top: 3px;
+    color: #6b756f;
+    font-size: 11px;
+}
+
+.haiku-cambio-cabana-fila-lateral {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.haiku-cambio-cabana-fila-lateral button {
+    border: 1px solid #d7ded9;
+    border-radius: 8px;
+    background: #fff;
+    padding: 6px 9px;
+    cursor: pointer;
+    font-size: 10px;
+}
+
+.haiku-cambio-cabana-total {
+    margin-top: 12px;
+    padding-top: 10px;
+    border-top: 1px solid #dfe6e1;
+    font-size: 12px;
+}
+
+.haiku-cambio-cabana-resumen {
+    display: grid;
+    gap: 12px;
+}
+
+.haiku-cambio-cabana-resumen-titulo strong,
+.haiku-cambio-cabana-resumen-titulo span {
+    display: block;
+}
+
+.haiku-cambio-cabana-resumen-titulo span {
+    margin-top: 3px;
+    color: #68726c;
+    font-size: 11px;
+}
+
+.haiku-cambio-cabana-resumen-lista {
+    display: grid;
+    gap: 7px;
+    width: 100%;
+}
+
+.haiku-cambio-cabana-resumen-lista > div {
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 10px;
+    border-radius: 9px;
+    background: #f5f8f6;
+}
+
+.haiku-cambio-cabana-resumen-lista span {
+    font-weight: 700;
+}
+
+.haiku-cambio-cabana-resumen-lista small {
+    color: #66716b;
+    text-align: right;
+}
+
+.haiku-ficha-cambio-cabana {
+    margin: 0 22px 14px;
+    padding: 11px 14px;
+    border: 1px solid #d9e4dd;
+    border-radius: 11px;
+    background: #f6faf7;
+}
+
+.haiku-ficha-cambio-cabana > div:first-child {
+    margin-bottom: 8px;
+}
+
+.haiku-ficha-cambio-cabana > div:first-child strong {
+    color: #254936;
+    font-size: 13px;
+}
+
+.haiku-ficha-cambio-cabana-tramos {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+}
+
+.haiku-ficha-cambio-cabana-tramos span {
+    padding: 5px 8px;
+    border-radius: 999px;
+    background: #e6f2ea;
+    color: #355746;
+    font-size: 10px;
+}
+
+#ficha-reserva-editar[data-haiku-cambio-cabana-guard="1"] {
+    opacity: .62;
+    cursor: not-allowed;
+}
+
+@media (max-width: 760px) {
+    .haiku-agregar-otro-alojamiento {
+        width: 100%;
+        margin-left: 0;
+        order: 2;
+    }
+
+    .haiku-cambio-cabana-cabecera,
+    .haiku-cambio-cabana-fila,
+    .haiku-cambio-cabana-total,
+    .haiku-cambio-cabana-resumen-lista > div {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
+    .haiku-cambio-cabana-fila-lateral {
+        width: 100%;
+        justify-content: space-between;
+    }
+
+    .haiku-cambio-cabana-resumen-lista small {
+        text-align: left;
+    }
+}
