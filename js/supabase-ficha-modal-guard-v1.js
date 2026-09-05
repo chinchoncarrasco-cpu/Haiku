@@ -120,3 +120,19 @@
     };
     document.head.appendChild(script);
 })();
+
+// Extensión aislada: refleja el checkout real de Supabase en el color operativo
+// del Resumen. No modifica estados comerciales ni la lógica de la ficha.
+(() => {
+    if (window.HAIKU_CHECKOUT_RESUMEN_V1) return;
+    if (document.querySelector('script[data-haiku-checkout-resumen-v1]')) return;
+
+    const script = document.createElement("script");
+    script.src = "js/supabase-checkout-resumen-v1.js?v=1";
+    script.async = false;
+    script.dataset.haikuCheckoutResumenV1 = "1";
+    script.onerror = () => {
+        console.error("HAIKU · No fue posible cargar puente visual Checked Out → Resumen.");
+    };
+    document.head.appendChild(script);
+})();
