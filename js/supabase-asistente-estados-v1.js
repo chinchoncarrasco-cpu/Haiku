@@ -428,5 +428,17 @@
         quitarVocativoHaku
     });
 
+    // Carga puntual y posterior al asistente principal. Mantiene la
+    // normalizacion de pagos aislada del motor de estados y de panel.html.
+    if (!window.HAIKU_ASISTENTE_NORMALIZACION_PAGOS_V1 &&
+        !document.querySelector('script[data-haku-normalizacion-pagos-v1]')) {
+        const normalizador = document.createElement("script");
+        normalizador.dataset.hakuNormalizacionPagosV1 = "1";
+        const version = new URL(document.currentScript?.src || location.href).searchParams.get("v") || Date.now();
+        normalizador.src = `js/supabase-asistente-normalizacion-pagos-v1.js?v=${encodeURIComponent(version)}`;
+        normalizador.async = false;
+        document.head.appendChild(normalizador);
+    }
+
     console.info("HAIKU · Asistente Estados V1 preparado · nombre visible: Haku.");
 })();
