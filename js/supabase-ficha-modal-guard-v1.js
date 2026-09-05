@@ -108,31 +108,15 @@
 // con la autoridad real de Supabase. Si esta extensión falla, el guard visual
 // anterior continúa funcionando sin cambios.
 (() => {
-    if (window.HAIKU_FICHA_ESTADOS_MANUALES_V2) return;
+    if (window.HAIKU_FICHA_ESTADOS_MANUALES_V3) return;
     if (document.querySelector('script[data-haiku-ficha-hospedado-v1]')) return;
 
     const script = document.createElement("script");
-    script.src = "js/supabase-ficha-hospedado-v1.js?v=2";
+    script.src = "js/supabase-ficha-hospedado-v1.js?v=3";
     script.async = false;
     script.dataset.haikuFichaHospedadoV1 = "1";
     script.onerror = () => {
-        console.error("HAIKU · No fue posible cargar estados manuales Supabase V2.");
-    };
-    document.head.appendChild(script);
-})();
-
-// Extensión aislada: refleja el checkout real de Supabase en el color operativo
-// del Resumen. No modifica estados comerciales ni la lógica de la ficha.
-(() => {
-    if (window.HAIKU_CHECKOUT_RESUMEN_V1) return;
-    if (document.querySelector('script[data-haiku-checkout-resumen-v1]')) return;
-
-    const script = document.createElement("script");
-    script.src = "js/supabase-checkout-resumen-v1.js?v=1";
-    script.async = false;
-    script.dataset.haikuCheckoutResumenV1 = "1";
-    script.onerror = () => {
-        console.error("HAIKU · No fue posible cargar puente visual Checked Out → Resumen.");
+        console.error("HAIKU · No fue posible cargar estados manuales Supabase V3.");
     };
     document.head.appendChild(script);
 })();
