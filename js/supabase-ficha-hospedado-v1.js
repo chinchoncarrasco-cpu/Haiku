@@ -1,14 +1,14 @@
 // ========================================
-// HAIKU · FICHA · ESTADOS MANUALES SUPABASE V2
-// Hospedado / Confirmada / Checked Out usan
-// la autoridad real de Supabase para la estadía abierta.
+// HAIKU · FICHA · ESTADOS MANUALES SUPABASE V3
+// Confirmada / Hospedado / Checked Out son reversibles.
+// La protección temporal de Checked Out vive en Supabase.
 // Sin observers, intervalos ni parches globales.
 // ========================================
 
 (() => {
     "use strict";
 
-    if (window.HAIKU_FICHA_ESTADOS_MANUALES_V2) return;
+    if (window.HAIKU_FICHA_ESTADOS_MANUALES_V3) return;
 
     const cliente = window.haikuSupabase;
     if (!cliente) return;
@@ -64,7 +64,14 @@
         const ingreso = String(estadia?.fecha_ingreso || "").slice(0, 10);
         const salida = String(estadia?.fecha_salida || "").slice(0, 10);
         if (!f || !ingreso || !salida) return false;
-        return f >= ingreso && f < salida;
+
+        if (String(estadia?.tipo_estadia || "") === "fullday") {
+            return f === ingreso;
+        }
+
+        // Incluimos la fecha de salida para poder operar una reserva desde
+        // el día en que efectivamente abandona la cabaña.
+        return f >= ingreso && f <= salida;
     }
 
     async function resolverEstadia(reservaId, numeroCabana) {
@@ -106,9 +113,43 @@
         throw new Error("No fue posible determinar con seguridad qué estadía debe modificarse.");
     }
 
+    function limpiarCheckoutOperativo(estadia) {
+        const reservaId = String(estadia?.reserva_id || "");
+        const cabana = String(estadia?.cabana_numero || "");
+        const salida = String(estadia?.fecha_salida || "").slice(0, 10);
+
+        try {
+            Object.values(datosPorFecha || {}).forEach(dia => {
+                if (!dia?.cabanas) return;
+                Object.values(dia.cabanas).forEach(registro => {
+                    if (String(registro?.reservaId || "") !== reservaId) return;
+                    registro.checkout = "";
+                    registro.checkoutRealizado = false;
+                });
+            });
+        } catch (_) {}
+
+        // SALE / INGRESA puede mostrar la reserva entrante en la fila, pero la
+        // hora de salida pertenece a la reserva anterior. Limpiamos también el
+        // dato operativo de CAB + fecha de salida cuando se revierte el checkout.
+        try {
+            if (cabana && salida && typeof obtenerDatosDia === "function") {
+                const diaSalida = obtenerDatosDia(salida);
+                const registro = diaSalida?.cabanas?.[cabana];
+                if (registro) {
+                    registro.checkout = "";
+                    registro.checkoutRealizado = false;
+                }
+            }
+        } catch (_) {}
+
+        try { if (typeof guardarDatos === "function") guardarDatos(); } catch (_) {}
+    }
+
     async function refrescarInterfaz() {
         try { await window.haikuSincronizarReservasSupabase?.(); } catch (_) {}
         try { await window.HAIKU_OPERACION_RESUMEN_FIX_V1?.refrescar?.(); } catch (_) {}
+        try { await window.HAIKU_CHECKOUT_RESUMEN_V1?.refrescar?.(); } catch (_) {}
         try {
             if (typeof cargarCabanasDia === "function") {
                 cargarCabanasDia(fechaSeleccionada);
@@ -129,9 +170,28 @@
                 generarResumenOperativo(fechaSeleccionada);
             }
         } catch (_) {}
-        try {
-            await window.HAIKU_CHECKOUT_RESUMEN_V1?.refrescar?.();
-        } catch (_) {}
+    }
+
+    function pedirConfirmacionReversion(estadoElegido, estadia) {
+        const estadoDB = String(estadia?.estado_estadia || "").toLowerCase();
+        const tieneCheckin = Boolean(estadia?.checkin_realizado_en);
+        const tieneCheckout = Boolean(estadia?.checkout_realizado_en) || estadoDB === "checked_out";
+
+        if (estadoElegido === "confirmada" && (tieneCheckin || tieneCheckout)) {
+            return window.confirm(
+                "¿Volver esta estadía a Confirmada?\n\n" +
+                "Se limpiarán el Check-in y el Check-out registrados para esta estadía."
+            );
+        }
+
+        if (estadoElegido === "hospedado" && tieneCheckout) {
+            return window.confirm(
+                "¿Volver esta estadía a Hospedado?\n\n" +
+                "Se eliminará el Check-out registrado y la estadía volverá a quedar activa."
+            );
+        }
+
+        return true;
     }
 
     async function ejecutarCambio(opcion, estadoElegido) {
@@ -154,83 +214,47 @@
 
         try {
             const estadia = await resolverEstadia(reservaId, numeroCabana);
-            const estadoDB = String(estadia?.estado_estadia || "").toLowerCase();
-            const tieneCheckin = Boolean(estadia?.checkin_realizado_en);
-            const tieneCheckout = Boolean(estadia?.checkout_realizado_en) || estadoDB === "checked_out";
 
-            if (estadoElegido === "hospedado") {
-                if (tieneCheckout) {
-                    throw new Error("Esta estadía ya tiene Checked Out. No se puede volver a Hospedado desde este control.");
-                }
+            if (!pedirConfirmacionReversion(estadoElegido, estadia)) return;
 
-                if (!tieneCheckin && estadoDB !== "hospedada") {
-                    const { error } = await cliente.rpc("haiku_registrar_checkin", {
-                        p_estadia_id: estadia.id
-                    });
-                    if (error) throw error;
-                }
+            const mapaEstado = {
+                hospedado: "hospedada",
+                confirmada: "confirmada",
+                "checked-out": "checked_out"
+            };
+            const estadoDB = mapaEstado[estadoElegido];
+            if (!estadoDB) return;
 
-                await refrescarInterfaz();
-                pintarEstado("hospedado");
-                console.info("HAIKU · Estado manual guardado: Hospedado", reservaId, estadia.id);
-                return;
-            }
+            const actual = String(estadia?.estado_estadia || "").toLowerCase();
+            const yaEs = actual === estadoDB && (
+                estadoDB !== "checked_out" || Boolean(estadia?.checkout_realizado_en)
+            );
 
-            if (estadoElegido === "checked-out") {
-                if (tieneCheckout) {
-                    await refrescarInterfaz();
-                    pintarEstado("checked-out");
-                    return;
-                }
-
-                if (!tieneCheckin && estadoDB !== "hospedada") {
-                    throw new Error("Primero debes marcar esta estadía como Hospedado antes de registrar Checked Out.");
-                }
-
-                const { error } = await cliente.rpc("haiku_registrar_checkout", {
-                    p_estadia_id: estadia.id
+            if (!yaEs) {
+                const { error } = await cliente.rpc("haiku_cambiar_estado_estadia", {
+                    p_estadia_id: estadia.id,
+                    p_estado: estadoDB
                 });
                 if (error) throw error;
-
-                await refrescarInterfaz();
-                pintarEstado("checked-out");
-                console.info("HAIKU · Estado manual guardado: Checked Out", reservaId, estadia.id);
-                return;
             }
 
-            if (estadoElegido === "confirmada") {
-                if (tieneCheckout) {
-                    throw new Error("Esta estadía ya tiene Checked Out. No se puede volver directamente a Confirmada.");
-                }
-
-                if (!tieneCheckin && estadoDB === "confirmada") {
-                    await refrescarInterfaz();
-                    pintarEstado("confirmada");
-                    return;
-                }
-
-                if (tieneCheckin || estadoDB === "hospedada") {
-                    const confirmar = window.confirm(
-                        "¿Volver esta estadía a Confirmada?\n\n" +
-                        "Se anulará el check-in registrado para esta estadía."
-                    );
-                    if (!confirmar) return;
-                }
-
-                const { error } = await cliente.rpc("haiku_revertir_checkin", {
-                    p_estadia_id: estadia.id
-                });
-                if (error) throw error;
-
-                await refrescarInterfaz();
-                pintarEstado("confirmada");
-                console.info("HAIKU · Check-in revertido; estado Confirmada", reservaId, estadia.id);
+            if (estadoDB !== "checked_out") {
+                limpiarCheckoutOperativo(estadia);
             }
+
+            await refrescarInterfaz();
+            pintarEstado(estadoElegido);
+
+            console.info(
+                "HAIKU · Estado manual guardado:",
+                estadoDB,
+                reservaId,
+                estadia.id
+            );
         } catch (error) {
             console.error("HAIKU · No fue posible cambiar el estado manual:", error);
             alert(error?.message || "No fue posible cambiar el estado. La reserva no fue modificada.");
 
-            // Supabase es la autoridad. Si hubo error recuperamos el estado real.
             try { await refrescarInterfaz(); } catch (_) {}
         } finally {
             guardando = false;
@@ -248,8 +272,6 @@
             return;
         }
 
-        // Interceptamos sólo los estados que ahora tienen persistencia real,
-        // antes del handler legacy que antes sólo los pintaba/cerraba el menú.
         evento.preventDefault();
         evento.stopPropagation();
         evento.stopImmediatePropagation();
@@ -261,9 +283,9 @@
         cambiar: ejecutarCambio
     });
 
+    window.HAIKU_FICHA_ESTADOS_MANUALES_V3 = api;
     window.HAIKU_FICHA_ESTADOS_MANUALES_V2 = api;
-    // Alias histórico para no romper ninguna referencia previa.
     window.HAIKU_FICHA_HOSPEDADO_V1 = api;
 
-    console.info("HAIKU · Estados manuales de ficha conectados a Supabase V2.");
+    console.info("HAIKU · Estados manuales reversibles conectados a Supabase V3.");
 })();
