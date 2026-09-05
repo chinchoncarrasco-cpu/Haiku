@@ -1,0 +1,37 @@
+/* =====================================================
+   HAIKU · VÍNCULOS ESTABLES V1
+   Una sola marca visual para reservas vinculadas:
+   - reservas conjuntas (grupo_reserva_id)
+   - una reserva con 2+ estadías / cambio de cabaña
+   ===================================================== */
+
+/* Las marcas antiguas se ocultan para evitar carreras, duplicados y restos visuales. */
+.haiku-reserva-grupo-marca,
+.haiku-cambio-cabana-vinculo-marca {
+    display: none !important;
+}
+
+.haiku-vinculo-estable-marca {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+    margin-right: 3px;
+    color: #2f7852;
+    font-size: .72rem;
+    line-height: 1;
+    font-weight: 700;
+    vertical-align: middle;
+}
+
+.calendario-reserva-barra .haiku-vinculo-estable-marca,
+.calendario-panel-reserva .haiku-vinculo-estable-marca {
+    color: currentColor;
+    margin-right: 4px;
+    font-size: .82em;
+}
+
+.ficha-reserva-titulo .haiku-vinculo-estable-marca {
+    margin-right: 5px;
+    font-size: .72em;
+}
