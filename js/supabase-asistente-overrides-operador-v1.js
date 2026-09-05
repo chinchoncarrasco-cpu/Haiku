@@ -175,11 +175,21 @@
         const bloque = document.createElement("div");
         bloque.dataset.hakuOverrideOperador = "1";
         bloque.className = "haiku-asistente-preview-nota";
+        Object.assign(bloque.style, {
+            fontSize: "11px",
+            lineHeight: "1.35",
+            fontWeight: "400",
+            color: "#68736d",
+            background: "transparent",
+            border: "0",
+            padding: "3px 0",
+            margin: "5px 0 3px"
+        });
 
         const antes = Number.isFinite(Number(original.monto_total))
             ? ` Cloudbeds muestra $${Number(original.monto_total).toLocaleString("es-CL")}.`
             : "";
-        bloque.textContent = `✎ Ajuste indicado por operador: usar $${override.valor.toLocaleString("es-CL")} como total de alojamiento.${antes} La corrección del operador tendrá prioridad para esta creación.`;
+        bloque.textContent = `Nota: se usará $${override.valor.toLocaleString("es-CL")} como total indicado por el operador.${antes}`;
 
         const pie = card.querySelector(".haiku-asistente-preview-pie");
         pie ? card.insertBefore(bloque, pie) : card.appendChild(bloque);
