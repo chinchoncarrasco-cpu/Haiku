@@ -95,9 +95,13 @@
     font-size: 12px;
 }
 
+/* Resumen del paso Detalles: deliberadamente más compacto que el
+   resumen general para mantener la jerarquía visual suave de HAIKU. */
 .haiku-cambio-cabana-resumen {
     display: grid;
-    gap: 12px;
+    gap: 8px;
+    padding: 11px 12px !important;
+    border-radius: 12px;
 }
 
 .haiku-cambio-cabana-resumen-titulo strong,
@@ -105,34 +109,64 @@
     display: block;
 }
 
+.haiku-cambio-cabana-resumen-titulo strong {
+    color: #26362d;
+    font-size: 13px !important;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
 .haiku-cambio-cabana-resumen-titulo span {
-    margin-top: 3px;
-    color: #68726c;
-    font-size: 11px;
+    margin-top: 2px;
+    color: #78817c;
+    font-size: 10px !important;
+    line-height: 1.3;
 }
 
 .haiku-cambio-cabana-resumen-lista {
     display: grid;
-    gap: 7px;
+    gap: 4px;
     width: 100%;
 }
 
 .haiku-cambio-cabana-resumen-lista > div {
     display: flex;
+    align-items: center;
     justify-content: space-between;
-    gap: 12px;
-    padding: 8px 10px;
-    border-radius: 9px;
-    background: #f5f8f6;
+    gap: 10px;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: #f6f8f7;
 }
 
 .haiku-cambio-cabana-resumen-lista span {
+    color: #2b3831;
+    font-size: 12px !important;
     font-weight: 700;
+    line-height: 1.25;
 }
 
 .haiku-cambio-cabana-resumen-lista small {
-    color: #66716b;
+    color: #747d78;
+    font-size: 10px !important;
+    line-height: 1.25;
     text-align: right;
+    white-space: nowrap;
+}
+
+.haiku-cambio-cabana-resumen .reserva-detalles-total {
+    margin-top: 1px;
+    padding-top: 6px;
+}
+
+.haiku-cambio-cabana-resumen .reserva-detalles-total span {
+    font-size: 9px !important;
+    color: #7b847f;
+}
+
+.haiku-cambio-cabana-resumen .reserva-detalles-total strong {
+    font-size: 12px !important;
+    font-weight: 750;
 }
 
 .haiku-ficha-cambio-cabana {
@@ -180,10 +214,15 @@
 
     .haiku-cambio-cabana-cabecera,
     .haiku-cambio-cabana-fila,
-    .haiku-cambio-cabana-total,
+    .haiku-cambio-cabana-total {
+        align-items: flex-start;
+        flex-direction: column;
+    }
+
     .haiku-cambio-cabana-resumen-lista > div {
         align-items: flex-start;
         flex-direction: column;
+        gap: 3px;
     }
 
     .haiku-cambio-cabana-fila-lateral {
@@ -193,5 +232,6 @@
 
     .haiku-cambio-cabana-resumen-lista small {
         text-align: left;
+        white-space: normal;
     }
 }
