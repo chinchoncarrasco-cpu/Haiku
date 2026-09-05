@@ -186,6 +186,20 @@
 
             await cargarEstadosSupabase();
 
+            // El mismo evento Realtime que actualiza los estados del Calendario
+            // refresca también la hora/estado de checkout del Resumen. Reutiliza
+            // la autoridad existente y NO abre un segundo canal Realtime.
+            try {
+                await window.HAIKU_CHECKOUT_AUTORIDAD_V1?.sincronizar?.({
+                    regenerarCalendario: false
+                });
+            } catch (errorCheckout) {
+                console.warn(
+                    "HAIKU · Calendario estados V1: no fue posible refrescar checkout del Resumen:",
+                    errorCheckout
+                );
+            }
+
             if (redibujar) {
                 redibujarCalendario();
             } else {
