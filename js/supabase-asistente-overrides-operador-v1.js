@@ -286,5 +286,17 @@
         aplicarOverride
     });
 
+    // Historial local: se carga después de que Haku y sus extensiones ya
+    // existen. No toca Supabase; sólo conserva la conversación al hacer F5.
+    if (!window.HAIKU_ASISTENTE_HISTORIAL_V1 &&
+        !document.querySelector('script[data-haku-historial-v1]')) {
+        const scriptHistorial = document.createElement("script");
+        scriptHistorial.dataset.hakuHistorialV1 = "1";
+        const version = new URL(document.currentScript?.src || location.href).searchParams.get("v") || Date.now();
+        scriptHistorial.src = `js/supabase-asistente-historial-v1.js?v=${encodeURIComponent(version)}`;
+        scriptHistorial.async = false;
+        document.head.appendChild(scriptHistorial);
+    }
+
     console.info("HAKU · Overrides explícitos del operador V1 preparado.");
 })();
