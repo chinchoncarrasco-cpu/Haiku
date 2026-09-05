@@ -121,10 +121,10 @@
         if (!ids.length) return [];
         const { data, error } = await cliente
             .from("pagos")
-            .select("id,reserva_id,monto,medio_pago,folio,codigo_autorizacion,bove,referencia_externa,fecha_pago,verificado_por,verificado_en,estado")
+            .select("id,reserva_id,monto,medio_pago,folio,codigo_autorizacion,bove,referencia_externa,fecha_pago,verificado_por,verificado_en,estado,observaciones")
             .in("reserva_id", ids)
             .eq("tipo_movimiento", "pago")
-            .eq("etapa_operativa", "saldo")
+            .in("etapa_operativa", ["saldo", "abono"])
             .eq("estado", "confirmado")
             .order("fecha_pago", { ascending: true });
         if (error) throw error;
@@ -207,6 +207,7 @@
         const revisor = pago.verificado_por
             ? (usuarios.get(pago.verificado_por) || "Usuario HAIKU")
             : "Sin revisión registrada";
+        const registradoPorHaku = /asistente\s+haiku/i.test(String(pago.observaciones || ""));
         const extras = [];
         if (pago.referencia_externa) extras.push(`Glosa: ${escapar(pago.referencia_externa)}`);
         if (pago.bove) extras.push(`BOVTAR: ${escapar(pago.bove)}`);
@@ -223,6 +224,7 @@
                 </div>
                 <div class="haiku-saldo-pago-meta">
                     ${extras.length ? `<span>${extras.join(" · ")}</span>` : ""}
+                    ${registradoPorHaku ? `<span>Registrado por: Asistente Haku</span>` : ""}
                     <span>Manager: ${escapar(revisor)}</span>
                     ${pago.verificado_en || pago.fecha_pago ? `<span>${escapar(fechaHora(pago.verificado_en || pago.fecha_pago))}</span>` : ""}
                 </div>
