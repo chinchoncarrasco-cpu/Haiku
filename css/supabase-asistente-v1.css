@@ -46,64 +46,16 @@
     outline-offset: 2px;
 }
 
-/* Carita con audífonos hecha sólo con CSS. */
+/* Avatar visual de Haku. El botón conserva su tamaño y comportamiento. */
 .haiku-asistente-avatar {
-    position: relative;
-    width: 31px;
-    height: 31px;
-    border: 2px solid #eaf5ee;
-    border-radius: 48% 48% 45% 45%;
-    box-sizing: border-box;
-}
-
-.haiku-asistente-avatar::before,
-.haiku-asistente-avatar::after {
-    content: "";
-    position: absolute;
-    top: 9px;
-    width: 4px;
-    height: 4px;
+    display: block;
+    width: 100%;
+    height: 100%;
     border-radius: 50%;
-    background: #eaf5ee;
-}
-
-.haiku-asistente-avatar::before { left: 6px; }
-.haiku-asistente-avatar::after { right: 6px; }
-
-.haiku-asistente-sonrisa {
-    position: absolute;
-    left: 50%;
-    bottom: 5px;
-    width: 11px;
-    height: 5px;
-    transform: translateX(-50%);
-    border-bottom: 2px solid #eaf5ee;
-    border-radius: 0 0 12px 12px;
-}
-
-.haiku-asistente-audifonos {
-    position: absolute;
-    inset: -6px -7px auto;
-    height: 24px;
-    border: 3px solid #eaf5ee;
-    border-bottom: 0;
-    border-radius: 18px 18px 0 0;
+    object-fit: cover;
+    object-position: center;
     pointer-events: none;
 }
-
-.haiku-asistente-audifonos::before,
-.haiku-asistente-audifonos::after {
-    content: "";
-    position: absolute;
-    top: 13px;
-    width: 6px;
-    height: 10px;
-    border-radius: 4px;
-    background: #eaf5ee;
-}
-
-.haiku-asistente-audifonos::before { left: -5px; }
-.haiku-asistente-audifonos::after { right: -5px; }
 
 .haiku-asistente-panel {
     position: absolute;
@@ -282,10 +234,6 @@
     position: absolute;
     inset: -6px;
     border-radius: 50%;
-}
-
-.haiku-asistente-avatar {
-    transform: scale(.52);
 }
 
 .haiku-asistente-panel {

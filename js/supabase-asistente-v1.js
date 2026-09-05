@@ -64,10 +64,7 @@
         </section>
 
         <button type="button" class="haiku-asistente-boton" id="haiku-asistente-boton" aria-label="Abrir asistente" aria-expanded="false">
-            <span class="haiku-asistente-avatar" aria-hidden="true">
-                <span class="haiku-asistente-audifonos"></span>
-                <span class="haiku-asistente-sonrisa"></span>
-            </span>
+            <img class="haiku-asistente-avatar" src="assets/img/avatar-haku.png" alt="" aria-hidden="true">
         </button>
     `;
     document.body.appendChild(root);
