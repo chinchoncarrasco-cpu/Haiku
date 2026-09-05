@@ -216,6 +216,11 @@ dibujarReservasCalendario();
 // conservamos visualmente el rango seleccionado.
 pintarRangoBloqueoCalendario();
 
+// Las sincronizaciones vuelven a construir todas las barras del calendario.
+// Refrescamos sus vínculos una vez, cuando ese DOM ya quedó completo.
+window.HAIKU_VINCULOS_ESTABLES_V1
+    ?.refrescarCalendario?.();
+
 }
 
 // ========================================
