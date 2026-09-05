@@ -1,7 +1,8 @@
 // ========================================
 // HAIKU · ASISTENTE · ESTADOS DE RESERVA V1
 // Texto -> vista previa -> confirmación -> check-in por lote.
-// V1 limitada a cambiar alojamientos a HOSPEDADO por fecha de ingreso.
+// V1 limitada a cambiar alojamientos a HOSPEDADO por fecha de ingreso,
+// con filtro opcional por lista explícita de cabañas.
 // Sin observers, intervalos, parches de clientes ni prototipos globales.
 // ========================================
 (() => {
@@ -52,7 +53,7 @@
 
         const accion = /\b(cambia|cambiar|cambie|pon|poner|pasa|pasar|marca|marcar|deja|dejar)\b/.test(t);
         const hospedado = /\bhospedad[oa]s?\b|\bhospedar\b/.test(t);
-        const objetivo = /\breservas?\b|\bingres(?:a|an|aban|aron|o|os)\b|\bcheck[ -]?in\b/.test(t);
+        const objetivo = /\breservas?\b|\bcabanas?\b|\bcabs?\b|\bingres(?:a|an|aban|aron|o|os)\b|\bcheck[ -]?in\b/.test(t);
 
         return accion && hospedado && objetivo;
     }
@@ -101,6 +102,24 @@
         if (/\bayer\b/.test(t)) return desplazarDias(hoy, -1);
         if (/\bhoy\b/.test(t)) return hoy;
         return null;
+    }
+
+    function mencionaFiltroCabanas(texto) {
+        return /\b(?:cabanas?|cabs?)\b/.test(normalizar(texto));
+    }
+
+    function cabanasDesdeTexto(texto) {
+        const t = normalizar(texto);
+        const match = t.match(
+            /\b(?:cabanas?|cabs?)\b\s*[:,#-]?\s*(.+?)(?=\s+\b(?:de|del|para|como|a)\b|$)/
+        );
+        if (!match) return [];
+
+        const numeros = (match[1].match(/\b(?:1[01]|[1-9])\b/g) || [])
+            .map(Number)
+            .filter(numero => numero >= 1 && numero <= 11);
+
+        return [...new Set(numeros)].sort((a, b) => a - b);
     }
 
     function fechaVisible(valor) {
@@ -172,9 +191,10 @@
         try { if (typeof generarResumenOperativo === "function") generarResumenOperativo(fechaSeleccionada); } catch {}
     }
 
-    function renderizarVista(fecha, filas) {
+    function renderizarVista(fecha, filas, cabanasSolicitadas = []) {
         const aptas = filas.filter(f => f?.apta === true);
         const omitidas = filas.filter(f => f?.apta !== true);
+        const filtroCabanas = Array.isArray(cabanasSolicitadas) && cabanasSolicitadas.length > 0;
 
         const card = document.createElement("div");
         card.className = "haiku-asistente-preview";
@@ -195,7 +215,11 @@
 
         const resumen = document.createElement("p");
         resumen.className = "haiku-asistente-preview-resumen";
-        resumen.textContent = `${filas.length} reserva${filas.length === 1 ? "" : "s"} encontrada${filas.length === 1 ? "" : "s"} con ingreso ${fechaVisible(fecha)}. ${aptas.length} puede${aptas.length === 1 ? "" : "n"} pasar a Hospedado.`;
+        if (filtroCabanas) {
+            resumen.textContent = `Fecha de ingreso ${fechaVisible(fecha)} · Cabañas solicitadas: ${cabanasSolicitadas.map(n => `CAB ${n}`).join(", ")}. ${aptas.length} puede${aptas.length === 1 ? "" : "n"} pasar a Hospedado.`;
+        } else {
+            resumen.textContent = `${filas.length} reserva${filas.length === 1 ? "" : "s"} encontrada${filas.length === 1 ? "" : "s"} con ingreso ${fechaVisible(fecha)}. ${aptas.length} puede${aptas.length === 1 ? "" : "n"} pasar a Hospedado.`;
+        }
         card.appendChild(resumen);
 
         aptas.forEach((fila, i) => {
@@ -282,6 +306,8 @@
     async function procesar(texto) {
         if (ocupado) return;
         const fecha = fechaDesdeTexto(texto);
+        const filtroCabanas = mencionaFiltroCabanas(texto);
+        const cabanasSolicitadas = filtroCabanas ? cabanasDesdeTexto(texto) : [];
 
         campo.value = "";
         limpiarAdjuntosViaInterfaz();
@@ -292,16 +318,48 @@
             return;
         }
 
+        if (filtroCabanas && !cabanasSolicitadas.length) {
+            agregarMensaje("asistente", "Mencionaste cabañas, pero no pude identificar sus números. Indícalas entre CAB 1 y CAB 11.");
+            return;
+        }
+
         ocupado = true;
-        const espera = agregarMensaje("asistente", `Buscando reservas con ingreso ${fechaVisible(fecha)}…`);
+        const espera = agregarMensaje(
+            "asistente",
+            filtroCabanas
+                ? `Buscando ${cabanasSolicitadas.map(n => `CAB ${n}`).join(", ")} con ingreso ${fechaVisible(fecha)}…`
+                : `Buscando reservas con ingreso ${fechaVisible(fecha)}…`
+        );
+
         try {
-            const filas = await buscar(fecha);
+            const encontradas = await buscar(fecha);
+            let filas = encontradas;
+
+            if (filtroCabanas) {
+                const solicitadas = new Set(cabanasSolicitadas.map(Number));
+                const filtradas = encontradas.filter(fila => solicitadas.has(Number(fila?.cabana_numero)));
+                const presentes = new Set(filtradas.map(fila => Number(fila?.cabana_numero)));
+                const faltantes = cabanasSolicitadas
+                    .filter(numero => !presentes.has(Number(numero)))
+                    .map(numero => ({
+                        cabana_numero: Number(numero),
+                        titular_nombre: "Sin reserva encontrada",
+                        apta: false,
+                        motivo: `No encontré una reserva con ingreso ${fechaVisible(fecha)} en esta cabaña`
+                    }));
+
+                filas = [...filtradas, ...faltantes]
+                    .sort((a, b) => Number(a?.cabana_numero || 99) - Number(b?.cabana_numero || 99));
+            }
+
             espera.remove();
+
             if (!filas.length) {
                 agregarMensaje("asistente", `No encontré reservas con ingreso ${fechaVisible(fecha)}.`);
                 return;
             }
-            renderizarVista(fecha, filas);
+
+            renderizarVista(fecha, filas, cabanasSolicitadas);
         } catch (error) {
             console.error("HAIKU · Error preparando cambio a Hospedado:", error);
             espera.textContent = error?.message || "No fue posible revisar las reservas.";
@@ -330,7 +388,8 @@
 
     window.HAIKU_ASISTENTE_ESTADOS_V1 = Object.freeze({
         esComandoHospedar,
-        fechaDesdeTexto
+        fechaDesdeTexto,
+        cabanasDesdeTexto
     });
 
     console.info("HAIKU · Asistente Estados V1 preparado.");
