@@ -36,10 +36,45 @@
         return;
     }
 
+    function quitarVocativoHaku(texto) {
+        const original = String(texto || "");
+        const conPuntuacion = /^\s*(?:asistente\s+)?haku\s*[,;:!¡¿?\-–—]+\s*/i;
+        const conComando = /^\s*(?:asistente\s+)?haku\s+(?=(?:marca|marcar|agrega|agregar|crea|crear|revisa|revisar|cambia|cambiar|pon|poner|pasa|pasar|deja|dejar|registra|registrar|asocia|asociar|busca|buscar|muestra|mostrar|lee|leer)\b)/i;
+        return original.replace(conPuntuacion, "").replace(conComando, "").trimStart();
+    }
+
+    function aplicarIdentidadHaku() {
+        const titulo = root.querySelector(".haiku-asistente-titulo strong");
+        const subtitulo = root.querySelector(".haiku-asistente-titulo span");
+        const panel = document.getElementById("haiku-asistente-panel");
+        const abrir = document.getElementById("haiku-asistente-boton");
+        const cerrar = document.getElementById("haiku-asistente-cerrar");
+        const saludo = mensajes.querySelector(".haiku-asistente-mensaje--asistente");
+
+        if (titulo) titulo.textContent = "Haku";
+        if (subtitulo) subtitulo.textContent = "Asistente operativo · capturas, reservas y tareas";
+        panel?.setAttribute("aria-label", "Haku · Asistente operativo");
+        abrir?.setAttribute("aria-label", "Abrir Haku");
+        cerrar?.setAttribute("aria-label", "Cerrar Haku");
+        campo.placeholder = "Ej: Haku, marca las reservas de hoy como Hospedado.";
+
+        if (saludo && mensajes.children.length === 1) {
+            saludo.textContent = "Hola, soy Haku. Envíame capturas o dime qué necesitas hacer; siempre te mostraré una vista previa antes de cualquier cambio.";
+        }
+
+        window.HAIKU_ASISTENTE_IDENTIDAD = Object.freeze({
+            nombre: "Haku",
+            quitarVocativo: quitarVocativoHaku
+        });
+        window.haikuQuitarVocativoAsistente = quitarVocativoHaku;
+    }
+
+    aplicarIdentidadHaku();
+
     let ocupado = false;
 
     function normalizar(texto) {
-        return String(texto || "")
+        return quitarVocativoHaku(texto)
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "")
             .toLowerCase()
@@ -389,8 +424,9 @@
     window.HAIKU_ASISTENTE_ESTADOS_V1 = Object.freeze({
         esComandoHospedar,
         fechaDesdeTexto,
-        cabanasDesdeTexto
+        cabanasDesdeTexto,
+        quitarVocativoHaku
     });
 
-    console.info("HAIKU · Asistente Estados V1 preparado.");
+    console.info("HAIKU · Asistente Estados V1 preparado · nombre visible: Haku.");
 })();
