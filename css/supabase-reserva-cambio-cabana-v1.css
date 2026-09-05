@@ -3,11 +3,13 @@
     white-space: nowrap;
 }
 
+/* Estado temporal mientras se van agregando alojamientos.
+   Debe sentirse tan compacto como el resumen final. */
 .haiku-cambio-cabana-tramos {
-    margin: 12px 0 18px;
-    padding: 14px 16px;
+    margin: 8px 0 12px;
+    padding: 10px 12px;
     border: 1px solid #d8e1dc;
-    border-radius: 14px;
+    border-radius: 12px;
     background: #f8fbf9;
 }
 
@@ -17,15 +19,15 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 14px;
+    gap: 10px;
 }
 
 .haiku-cambio-cabana-cabecera small,
 .haiku-ficha-cambio-cabana small {
     display: block;
-    margin-bottom: 3px;
+    margin-bottom: 2px;
     color: #2f7a58;
-    font-size: 10px;
+    font-size: 9px;
     font-weight: 800;
     letter-spacing: .12em;
 }
@@ -33,28 +35,30 @@
 .haiku-cambio-cabana-cabecera strong {
     display: block;
     color: #20352a;
-    font-size: 14px;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
 }
 
 .haiku-cambio-cabana-cabecera > span {
-    padding: 5px 9px;
+    padding: 3px 7px;
     border-radius: 999px;
     background: #e6f3eb;
     color: #296a4d;
-    font-size: 11px;
+    font-size: 9px;
     font-weight: 700;
 }
 
 .haiku-cambio-cabana-lista {
     display: grid;
-    gap: 8px;
-    margin-top: 12px;
+    gap: 5px;
+    margin-top: 8px;
 }
 
 .haiku-cambio-cabana-fila {
-    padding: 10px 12px;
+    padding: 7px 9px;
     border: 1px solid #e1e7e3;
-    border-radius: 10px;
+    border-radius: 9px;
     background: #fff;
 }
 
@@ -67,32 +71,54 @@
     display: block;
 }
 
+.haiku-cambio-cabana-fila > div:first-child > strong {
+    color: #2b3831;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
 .haiku-cambio-cabana-fila span {
-    margin-top: 3px;
-    color: #6b756f;
-    font-size: 11px;
+    margin-top: 2px;
+    color: #747d78;
+    font-size: 9.5px;
+    line-height: 1.25;
 }
 
 .haiku-cambio-cabana-fila-lateral {
     display: flex;
     align-items: center;
-    gap: 10px;
+    gap: 8px;
+}
+
+.haiku-cambio-cabana-fila-lateral > strong {
+    color: #2f3b34;
+    font-size: 12px;
+    font-weight: 700;
+    line-height: 1.2;
 }
 
 .haiku-cambio-cabana-fila-lateral button {
     border: 1px solid #d7ded9;
-    border-radius: 8px;
+    border-radius: 7px;
     background: #fff;
-    padding: 6px 9px;
+    padding: 4px 7px;
     cursor: pointer;
-    font-size: 10px;
+    font-size: 9px;
 }
 
 .haiku-cambio-cabana-total {
-    margin-top: 12px;
-    padding-top: 10px;
+    margin-top: 8px;
+    padding-top: 7px;
     border-top: 1px solid #dfe6e1;
-    font-size: 12px;
+    color: #65706a;
+    font-size: 10px;
+}
+
+.haiku-cambio-cabana-total strong {
+    color: #2f3b34;
+    font-size: 11px;
+    font-weight: 700;
 }
 
 /* Resumen del paso Detalles: deliberadamente más compacto que el
