@@ -1,17 +1,15 @@
 // ========================================
-// HAKU · OVERRIDES EXPLICITOS DEL OPERADOR V1
-// Permite que una correccion textual, clara y deliberada del operador
-// prevalezca sobre valores financieros leidos desde una captura.
+// HAKU · OVERRIDES EXPLÍCITOS DEL OPERADOR V1
+// Una corrección textual clara del operador puede prevalecer sobre un valor
+// financiero leído desde una captura, sin debilitar las demás protecciones.
 //
-// Alcance V1 (conservador):
-// - Sólo monto total de alojamiento.
-// - Requiere frase explicita asociada a "total" / "valor total".
-// - Si existe 1 pago explicito y su monto coincide con el total corregido,
-//   armoniza Monto pagado y Saldo a 0 para que la validacion refleje la
-//   instruccion humana, preservando los valores originales en metadatos.
-// - No altera disponibilidad, fechas, cabaña, Cloudbeds ID ni referencias
-//   del medio de pago.
-// - No guarda nada por sí solo.
+// V1 conservadora:
+// - sólo "monto total" / "valor total" del alojamiento;
+// - exige una frase explícita asociada al total;
+// - conserva los valores Cloudbeds originales en metadatos;
+// - no altera cabaña, fechas, ID Cloudbeds, disponibilidad ni referencias
+//   del medio de pago;
+// - no guarda nada por sí sola.
 // ========================================
 (() => {
     "use strict";
@@ -27,10 +25,8 @@
         return;
     }
 
-    let instruccionPendiente = "";
-
-    function clave(texto) {
-        return String(texto || "")
+    function clave(valor) {
+        return String(valor || "")
             .normalize("NFD")
             .replace(/[\u0300-\u036f]/g, "")
             .toLowerCase()
@@ -38,7 +34,7 @@
             .trim();
     }
 
-    function montoDesdeTextoToken(token) {
+    function montoDesdeToken(token) {
         const limpio = String(token || "")
             .replace(/clp/ig, "")
             .replace(/\$/g, "")
@@ -50,12 +46,9 @@
     }
 
     function extraerOverrideTotal(textoOriginal) {
-        const original = String(textoOriginal || "");
-        const t = clave(original);
-        if (!t) return null;
+        const original = String(textoOriginal || "").trim();
+        if (!original) return null;
 
-        // Exige intención explícita sobre el TOTAL, para no confundir el
-        // monto de un pago con el valor de alojamiento.
         const patrones = [
             /(?:valor\s+total(?:\s+de\s+la\s+reserva)?|total\s+(?:real|final|correcto|de\s+la\s+reserva)|la\s+reserva\s+(?:es|queda\s+en)|usa(?:r)?\s+(?:como\s+)?total)\s*(?:es|:|=|queda\s+en|de)?\s*(?:clp\s*)?\$?\s*([0-9][0-9. ,]{2,})/i,
             /(?:aunque|aun\s+que|sé\s+que|se\s+que).*?(?:aparece|dice|muestra).*?\$?\s*[0-9][0-9. ,]{2,}.*?(?:pero|sin\s+embargo).*?(?:total|valor).*?(?:es|queda\s+en)?\s*(?:clp\s*)?\$?\s*([0-9][0-9. ,]{2,})/i
@@ -64,37 +57,47 @@
         for (const patron of patrones) {
             const m = original.match(patron);
             if (!m) continue;
-            const monto = montoDesdeTextoToken(m[1]);
-            if (!monto) continue;
+            const valor = montoDesdeToken(m[1]);
+            if (!valor) continue;
 
-            const mencionaRazon = /\b(descuento|promocion|promo|ajuste|cortesia|convenio|precio\s+especial|tarifa\s+especial)\b/i.test(original);
+            const tieneRazon = /\b(descuento|promocion|promo|ajuste|cortesia|convenio|precio\s+especial|tarifa\s+especial)\b/i.test(original);
             return {
                 campo: "monto_total",
-                valor: monto,
-                razon: mencionaRazon ? "Ajuste indicado por operador" : "Total indicado explícitamente por operador",
-                texto_original: original.trim()
+                valor,
+                razon: tieneRazon ? "Ajuste indicado por operador" : "Total indicado explícitamente por operador",
+                texto_original: original
             };
         }
 
         return null;
     }
 
+    function pagosDeEntrada(entrada) {
+        return Array.isArray(entrada?.pagos)
+            ? entrada.pagos.filter(p => p && p.detectado !== false)
+            : [];
+    }
+
     function pagosDesdePreview(preview) {
-        if (Array.isArray(preview?.pagos)) {
-            return preview.pagos.filter(p => p && p.detectado !== false);
-        }
-        if (preview?.pago?.detectado === true) return [preview.pago];
-        return [];
+        if (Array.isArray(preview?.pagos)) return preview.pagos.filter(p => p && p.detectado !== false);
+        return preview?.pago?.detectado === true ? [preview.pago] : [];
+    }
+
+    function esAdvertenciaFinancieraReemplazada(item) {
+        const t = clave(item);
+        return (
+            (t.includes("monto total") && (t.includes("monto pagado") || t.includes("saldo"))) ||
+            t.includes("discrepancia") ||
+            t.includes("no cuadra") ||
+            t.includes("no coincide")
+        );
     }
 
     function aplicarOverrideAEntrada(entrada, override) {
         if (!entrada?.reserva || !override) return false;
 
         const r = entrada.reserva;
-        const pagos = Array.isArray(entrada.pagos)
-            ? entrada.pagos.filter(p => p && p.detectado !== false)
-            : [];
-
+        const pagos = pagosDeEntrada(entrada);
         const original = {
             monto_total: r.monto_total ?? null,
             monto_pagado: r.monto_pagado ?? null,
@@ -116,30 +119,15 @@
             return suma + (Number.isFinite(n) && n > 0 ? Math.round(n) : 0);
         }, 0);
 
-        // Si los pagos explícitos respaldan exactamente el total corregido,
-        // usamos esa cifra como pagado operativo y saldo 0. Esto evita que
-        // un valor pre-descuento de la captura bloquee una instrucción clara.
+        // Si el/los pagos explícitos suman exactamente el total indicado por
+        // el operador, armonizamos la lectura financiera operativa.
         if (pagos.length > 0 && sumaPagos === override.valor) {
             r.monto_pagado = override.valor;
             r.saldo_pendiente = 0;
         }
 
         entrada.advertencias = (Array.isArray(entrada.advertencias) ? entrada.advertencias : [])
-            .filter(item => {
-                const x = clave(item);
-                return !(
-                    x.includes("monto total") &&
-                    (x.includes("monto pagado") || x.includes("saldo"))
-                ) && !(
-                    x.includes("no cuadra") ||
-                    x.includes("discrepancia") ||
-                    x.includes("no coincide")
-                );
-            });
-
-        entrada.advertencias.unshift(
-            `${override.razon}: se usará ${override.valor.toLocaleString("es-CL")} CLP como total de alojamiento en lugar del valor visible en la captura.`
-        );
+            .filter(item => !esAdvertenciaFinancieraReemplazada(item));
 
         return true;
     }
@@ -151,83 +139,70 @@
             ? preview.reservas.filter(x => x?.reserva)
             : [];
 
-        let aplicado = false;
-
         if (reservas.length === 1) {
-            aplicado = aplicarOverrideAEntrada(reservas[0], override) || aplicado;
             const unica = reservas[0];
+            if (!aplicarOverrideAEntrada(unica, override)) return false;
             preview.reserva = unica.reserva;
             preview.pagos = Array.isArray(unica.pagos) ? unica.pagos : preview.pagos;
-            preview.advertencias = Array.isArray(unica.advertencias) ? unica.advertencias : preview.advertencias;
-        } else if (!reservas.length && preview.reserva) {
-            aplicado = aplicarOverrideAEntrada({
-                reserva: preview.reserva,
-                pagos: pagosDesdePreview(preview),
-                advertencias: preview.advertencias || []
-            }, override) || aplicado;
+            preview.advertencias = Array.isArray(unica.advertencias) ? unica.advertencias : [];
+            if (preview.pagos?.length === 1) preview.pago = preview.pagos[0];
+            return true;
+        }
 
+        if (!reservas.length && preview.reserva) {
             const temp = {
                 reserva: preview.reserva,
                 pagos: pagosDesdePreview(preview),
                 advertencias: Array.isArray(preview.advertencias) ? preview.advertencias : []
             };
-            // reaplicamos sobre la misma referencia para recuperar advertencias filtradas
-            aplicarOverrideAEntrada(temp, override);
+            if (!aplicarOverrideAEntrada(temp, override)) return false;
+            preview.reserva = temp.reserva;
+            preview.pagos = temp.pagos;
             preview.advertencias = temp.advertencias;
+            if (temp.pagos.length === 1) preview.pago = temp.pagos[0];
+            return true;
         }
 
-        return aplicado;
+        // En lotes de varias reservas no adivinamos a cuál pertenece el total.
+        return false;
     }
 
-    function actualizarDatoPorEtiqueta(card, etiquetaBuscada, valor) {
-        const objetivo = clave(etiquetaBuscada);
-        [...card.querySelectorAll(".haiku-asistente-preview-dato")].forEach(fila => {
-            const etiqueta = clave(fila.querySelector("span")?.textContent);
-            if (etiqueta !== objetivo) return;
-            const strong = fila.querySelector("strong");
-            if (strong) strong.textContent = valor;
-        });
-    }
-
-    function limpiarAlertasFinancierasViejas(card) {
-        [...card.querySelectorAll(".haiku-asistente-preview-lista--alerta")].forEach(bloque => {
-            [...bloque.querySelectorAll("li")].forEach(li => {
-                const t = clave(li.textContent);
-                if (
-                    (t.includes("monto total") && (t.includes("monto pagado") || t.includes("saldo"))) ||
-                    t.includes("discrepancia") ||
-                    t.includes("no cuadra") ||
-                    t.includes("no coincide")
-                ) li.remove();
-            });
-            if (!bloque.querySelector("li")) bloque.remove();
-        });
-    }
-
-    function mostrarAjusteOperador(card, override) {
-        if (!card || !override) return;
+    function agregarDatoAjuste(card, override, preview) {
+        const r = preview?.reserva || {};
+        const original = r?._override_operador?.original_cloudbeds || {};
         if (card.querySelector("[data-haku-override-operador]")) return;
 
         const bloque = document.createElement("div");
         bloque.dataset.hakuOverrideOperador = "1";
         bloque.className = "haiku-asistente-preview-nota";
-        bloque.textContent = `✎ Ajuste indicado por operador: total de alojamiento ${override.valor.toLocaleString("es-CL")} CLP. El valor visible de Cloudbeds queda sólo como referencia.`;
+
+        const antes = Number.isFinite(Number(original.monto_total))
+            ? ` Cloudbeds muestra $${Number(original.monto_total).toLocaleString("es-CL")}.`
+            : "";
+        bloque.textContent = `✎ Ajuste indicado por operador: usar $${override.valor.toLocaleString("es-CL")} como total de alojamiento.${antes} La corrección del operador tendrá prioridad para esta creación.`;
 
         const pie = card.querySelector(".haiku-asistente-preview-pie");
         pie ? card.insertBefore(bloque, pie) : card.appendChild(bloque);
     }
 
+    function limpiarAlertasViejas(card) {
+        [...card.querySelectorAll(".haiku-asistente-preview-lista--alerta")].forEach(bloque => {
+            [...bloque.querySelectorAll("li")].forEach(li => {
+                if (esAdvertenciaFinancieraReemplazada(li.textContent)) li.remove();
+            });
+            if (!bloque.querySelector("li")) bloque.remove();
+        });
+    }
+
     function actualizarBoton(card, preview) {
-        // Reutiliza el validador determinístico de pagos instalado antes.
         const normalizador = window.HAIKU_ASISTENTE_NORMALIZACION_PAGOS_V1;
         const boton = card.querySelector(".haiku-asistente-preview-pie button");
         if (!normalizador || !boton) return;
 
         const problemas = normalizador.problemasPreview(preview);
-        const tieneReserva = window.haikuTienePermiso?.("reservas.crear") === true;
         const pagos = pagosDesdePreview(preview);
-        const requierePago = pagos.length > 0;
-        const tienePago = !requierePago || (
+        const tieneReserva = window.haikuTienePermiso?.("reservas.crear") === true;
+        const tienePago = pagos.length === 0 || (
             window.haikuTienePermiso?.("pagos.registrar") === true &&
             window.haikuTienePermiso?.("pagos.verificar") === true
         );
@@ -235,6 +210,8 @@
 
         boton.disabled = !puede;
         if (problemas.length) boton.title = problemas.join(" ");
+        else if (!tieneReserva) boton.title = "Tu usuario no tiene permiso para crear reservas.";
+        else if (!tienePago) boton.title = "Tu usuario no tiene permisos para registrar y verificar pagos.";
         else boton.removeAttribute("title");
 
         if (puede) {
@@ -248,8 +225,6 @@
         const textoActual = String(campo.value || "").trim();
         const override = extraerOverrideTotal(textoActual);
         if (!override) return;
-
-        instruccionPendiente = textoActual;
 
         let observador = null;
         observador = new MutationObserver(mutations => {
@@ -268,22 +243,15 @@
             }
             if (!card) return;
 
+            // Siempre desconectamos antes de tocar la vista.
             observador.disconnect();
             observador = null;
 
             const preview = window.HAIKU_ASISTENTE?.ultimaPreview?.();
-            if (!preview) return;
+            if (!preview || !aplicarOverride(preview, override)) return;
 
-            const aplicado = aplicarOverride(preview, override);
-            if (!aplicado) return;
-
-            actualizarDatoPorEtiqueta(card, "Total Cloudbeds", `$${override.valor.toLocaleString("es-CL")}`);
-            if (pagosDesdePreview(preview).reduce((s, p) => s + Number(p?.monto || 0), 0) === override.valor) {
-                actualizarDatoPorEtiqueta(card, "Pagado Cloudbeds", `$${override.valor.toLocaleString("es-CL")}`);
-                actualizarDatoPorEtiqueta(card, "Saldo Cloudbeds", "$0");
-            }
-            limpiarAlertasFinancierasViejas(card);
-            mostrarAjusteOperador(card, override);
+            limpiarAlertasViejas(card);
+            agregarDatoAjuste(card, override, preview);
             actualizarBoton(card, preview);
 
             console.info("HAKU · Override explícito del operador aplicado al total financiero.");
